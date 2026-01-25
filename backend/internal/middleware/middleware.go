@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -47,19 +48,30 @@ func extractErrorInfo(err error) (int, string) {
 	return code, message
 }
 
-// sendErrorResponse sends the appropriate error response based on content type
+// sendErrorResponse sends an error response based on the client's Accept header
 func sendErrorResponse(c echo.Context, code int, message string) {
-	if c.Request().Header.Get("Content-Type") == "application/json" {
-		if err := c.JSON(code, map[string]any{
+	c.Logger().Errorf("HTTP %d: %s", code, message)
+
+	accept := c.Request().Header.Get("Accept")
+
+	// Simple check for JSON acceptance
+	if strings.Contains(accept, "application/json") ||
+		strings.Contains(accept, "*/*") ||
+		strings.Contains(accept, "text/json") {
+		// Return JSON response
+		err := c.JSON(code, map[string]any{
 			"error":   true,
 			"code":    code,
 			"message": message,
-		}); err != nil {
-			c.Logger().Error(err)
+		})
+		if err != nil {
+			c.Logger().Errorf("Failed to send JSON response: %v", err)
 		}
 	} else {
-		if err := c.String(code, message); err != nil {
-			c.Logger().Error(err)
+		// Return plain text response
+		err := c.String(code, fmt.Sprintf("Error %d: %s", code, message))
+		if err != nil {
+			c.Logger().Errorf("Failed to send text response: %v", err)
 		}
 	}
 }
