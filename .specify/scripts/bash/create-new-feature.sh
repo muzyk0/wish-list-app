@@ -67,7 +67,7 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
     exit 1
 fi
 
-# Function to find the repository root by searching for existing project markers
+# find_repo_root finds the repository root by walking up from the given directory until it finds a directory containing `.git` or `.specify`, echoes that path, and returns non-zero if none is found.
 find_repo_root() {
     local dir="$1"
     while [ "$dir" != "/" ]; do
@@ -80,7 +80,8 @@ find_repo_root() {
     return 1
 }
 
-# Function to get highest number from specs directory
+# get_highest_from_specs returns the highest leading numeric prefix from immediate subdirectory names of the given specs directory, or 0 if none.
+# Takes a single argument: the path to the specs directory to scan; echoes the highest leading number (parsed as base 10) or 0.
 get_highest_from_specs() {
     local specs_dir="$1"
     local highest=0
@@ -100,7 +101,7 @@ get_highest_from_specs() {
     echo "$highest"
 }
 
-# Function to get highest number from git branches
+# get_highest_from_branches finds and echoes the largest three-digit numeric prefix (interpreted in base 10) present on local or remote git branch names, emitting 0 if none or if git cannot list branches.
 get_highest_from_branches() {
     local highest=0
     
@@ -126,7 +127,7 @@ get_highest_from_branches() {
     echo "$highest"
 }
 
-# Function to check existing branches (local and remote) and return next available number
+# check_existing_branches determines the next available feature number by fetching remotes, comparing the highest numeric prefixes found in all git branches and in the given specs directory, and echoing the next number.
 check_existing_branches() {
     local specs_dir="$1"
 
@@ -149,7 +150,7 @@ check_existing_branches() {
     echo $((max_num + 1))
 }
 
-# Function to clean and format a branch name
+# clean_branch_name cleans and formats a branch name by lowercasing it, replacing non-alphanumeric characters with hyphens, collapsing consecutive hyphens, and removing leading or trailing hyphens.
 clean_branch_name() {
     local name="$1"
     echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//'
@@ -177,7 +178,7 @@ cd "$REPO_ROOT"
 SPECS_DIR="$REPO_ROOT/specs"
 mkdir -p "$SPECS_DIR"
 
-# Function to generate branch name with stop word filtering and length filtering
+# generate_branch_name generates a sanitized branch suffix from DESCRIPTION by filtering common stop words and short words, preserving uppercase acronyms, joining up to three (four if exactly four meaningful words) meaningful words with dashes, and falling back to a cleaned, truncated form if none are found.
 generate_branch_name() {
     local description="$1"
     
