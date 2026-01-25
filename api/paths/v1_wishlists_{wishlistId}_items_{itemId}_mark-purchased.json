@@ -1,0 +1,85 @@
+{
+  "post": {
+    "tags": ["GiftItems"],
+    "summary": "Mark gift item as purchased",
+    "description": "Mark a gift item as purchased by the wish list owner. This will notify the reservation holder via email.",
+    "operationId": "markGiftItemAsPurchased",
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "parameters": [
+      {
+        "name": "wishlistId",
+        "in": "path",
+        "required": true,
+        "description": "The ID of the wish list",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      {
+        "name": "itemId",
+        "in": "path",
+        "required": true,
+        "description": "The ID of the gift item",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "purchased_price": {
+                "type": "number",
+                "format": "float",
+                "description": "The actual price paid for the gift item",
+                "example": 89.99
+              }
+            },
+            "required": ["purchased_price"]
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Gift item marked as purchased successfully. Email notification sent to reservation holder.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/gift_item_response.json"
+            }
+          }
+        }
+      },
+      "401": {
+        "$ref": "../components/responses/unauthorized.json"
+      },
+      "403": {
+        "description": "Only the wish list owner can mark items as purchased",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      },
+      "404": {
+        "$ref": "../components/responses/not_found.json"
+      },
+      "500": {
+        "$ref": "../components/responses/internal_server_error.json"
+      }
+    }
+  }
+}

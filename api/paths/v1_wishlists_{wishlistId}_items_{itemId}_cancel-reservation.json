@@ -1,0 +1,91 @@
+{
+  "post": {
+    "summary": "Cancel a reservation for a gift item",
+    "tags": [
+      "Reservations"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "parameters": [
+      {
+        "name": "wishlistId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      {
+        "name": "itemId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "../components/schemas/cancel_authenticated_reservation.json"
+              },
+              {
+                "$ref": "../components/schemas/cancel_guest_reservation.json"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Reservation cancelled successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/reservation_response.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid input or no active reservation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized (if trying to cancel as authenticated user)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Gift item or wish list not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}

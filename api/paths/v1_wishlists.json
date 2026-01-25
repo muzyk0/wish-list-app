@@ -1,0 +1,99 @@
+{
+  "get": {
+    "summary": "Get all wish lists for the authenticated user",
+    "tags": [
+      "WishLists"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "List of user's wish lists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "../components/schemas/wish_list_response.json"
+                  }
+                },
+                "pagination": {
+                  "$ref": "../components/schemas/pagination.json"
+                }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "$ref": "../components/responses/Unauthorized.json"
+      }
+    }
+  },
+  "post": {
+    "summary": "Create a new wish list",
+    "tags": [
+      "WishLists"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../components/schemas/wish_list_create.json"
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "Wish list created successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/wish_list_response.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "$ref": "../components/responses/BadRequest.json"
+      },
+      "401": {
+        "$ref": "../components/responses/Unauthorized.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "wishlist_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri"
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "price": {
+      "type": "number"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "reserved_by_user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reserved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "purchased_by_user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "purchased_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "purchased_price": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "position": {
+      "type": "integer"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

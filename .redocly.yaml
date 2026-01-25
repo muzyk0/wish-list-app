@@ -1,0 +1,20 @@
+extends:
+  - recommended
+
+apis:
+  main@v1:
+    root: ./api/openapi.json
+
+rules:
+  no-unused-components: error
+  operation-4xx-response: error
+  spec: error
+
+features.openapi:
+  htmlTemplate: ./index.html
+  expandResponses: "200,201,400,401,404,500"
+  lazyRendering: true
+  nativeScrollbars: true
+  disableSearch: false
+  menuToggle: true
+  downloadButton: true

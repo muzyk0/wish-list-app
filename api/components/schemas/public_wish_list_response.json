@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "occasion": {
+      "type": "string"
+    },
+    "occasion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "template_id": {
+      "type": "string"
+    },
+    "view_count": {
+      "type": "integer"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "./public_gift_item_response.json"
+      }
+    },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

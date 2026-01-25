@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "required": [
+    "title"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Title of the wish list"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Description of the wish list"
+    },
+    "occasion": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Occasion type (e.g., Birthday, Wedding)"
+    },
+    "occasion_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the occasion"
+    },
+    "template_id": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Template ID for presentation"
+    },
+    "is_public": {
+      "type": "boolean",
+      "description": "Whether the wish list is publicly accessible",
+      "default": false
+    }
+  }
+}

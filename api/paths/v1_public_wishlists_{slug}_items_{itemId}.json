@@ -1,0 +1,49 @@
+{
+  "get": {
+    "summary": "Get a public gift item by wishlist slug and item ID",
+    "tags": [
+      "GiftItems"
+    ],
+    "parameters": [
+      {
+        "name": "slug",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "itemId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Public gift item details",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/public_gift_item_response.json"
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Gift item or wish list not found or not public",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}

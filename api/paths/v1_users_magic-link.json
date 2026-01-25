@@ -1,0 +1,33 @@
+{
+  "post": {
+    "summary": "Request a magic link for authentication",
+    "tags": [
+      "Users"
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../components/schemas/magic_link_request.json"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Magic link sent successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/success.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "$ref": "../components/responses/BadRequest.json"
+      }
+    }
+  }
+}

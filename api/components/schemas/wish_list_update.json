@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "occasion": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "occasion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "template_id": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "is_public": {
+      "type": "boolean",
+      "description": "Whether the wish list is publicly accessible"
+    }
+  }
+}

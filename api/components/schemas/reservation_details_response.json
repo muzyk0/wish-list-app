@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "gift_item": {
+      "$ref": "./gift_item_summary.json"
+    },
+    "wishlist": {
+      "$ref": "./wish_list_summary.json"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "fulfilled",
+        "expired"
+      ]
+    },
+    "reserved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

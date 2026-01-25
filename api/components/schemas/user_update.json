@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "last_name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "avatar_url": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}
