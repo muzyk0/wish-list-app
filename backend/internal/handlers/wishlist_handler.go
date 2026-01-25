@@ -454,6 +454,11 @@ func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 			"error": "Invalid request body",
 		})
 	}
+	if req.PurchasedPrice < 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Purchased price must be >= 0",
+		})
+	}
 
 	// Get user from context
 	userID, _, _, err := auth.GetUserFromContext(c)
