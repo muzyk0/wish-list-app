@@ -335,6 +335,14 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 	giftItemID := c.Param("id")
 
+	// Get user from context to verify ownership
+	userID, _, _, err := auth.GetUserFromContext(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "Unauthorized",
+		})
+	}
+
 	var req UpdateGiftItemRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -343,6 +351,28 @@ func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+
+	// Get the gift item to find which wishlist it belongs to
+	existingGiftItem, err := h.service.GetGiftItem(ctx, giftItemID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Gift item not found",
+		})
+	}
+
+	// Verify user owns the wishlist before updating gift item
+	wishlist, err := h.service.GetWishList(ctx, existingGiftItem.WishlistID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wishlist not found",
+		})
+	}
+	if wishlist.OwnerID != userID {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "You do not have permission to modify this wishlist",
+		})
+	}
+
 	giftItem, err := h.service.UpdateGiftItem(ctx, giftItemID, services.UpdateGiftItemInput{
 		Name:        req.Name,
 		Description: req.Description,
@@ -366,8 +396,38 @@ func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 func (h *WishListHandler) DeleteGiftItem(c echo.Context) error {
 	giftItemID := c.Param("id")
 
+	// Get user from context to verify ownership
+	userID, _, _, err := auth.GetUserFromContext(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "Unauthorized",
+		})
+	}
+
 	ctx := c.Request().Context()
-	err := h.service.DeleteGiftItem(ctx, giftItemID)
+
+	// Get the gift item to find which wishlist it belongs to
+	existingGiftItem, err := h.service.GetGiftItem(ctx, giftItemID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Gift item not found",
+		})
+	}
+
+	// Verify user owns the wishlist before deleting gift item
+	wishlist, err := h.service.GetWishList(ctx, existingGiftItem.WishlistID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wishlist not found",
+		})
+	}
+	if wishlist.OwnerID != userID {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "You do not have permission to modify this wishlist",
+		})
+	}
+
+	err = h.service.DeleteGiftItem(ctx, giftItemID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to delete gift item: %w", err).Error(),

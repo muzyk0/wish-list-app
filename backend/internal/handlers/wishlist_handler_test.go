@@ -448,6 +448,20 @@ func TestWishListHandler_DeleteGiftItem(t *testing.T) {
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, "gift-123").
+			Return(&services.GiftItemOutput{
+				ID:         "gift-123",
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: "user-123",
+			}, nil)
+
 		mockService.On("DeleteGiftItem", mock.Anything, "gift-123").
 			Return(nil)
 
@@ -456,6 +470,10 @@ func TestWishListHandler_DeleteGiftItem(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetParamNames("id")
 		c.SetParamValues("gift-123")
+		// Set user context
+		c.Set("user_id", "user-123")
+		c.Set("email", "test@example.com")
+		c.Set("user_type", "user")
 
 		err := handler.DeleteGiftItem(c)
 
@@ -470,19 +488,23 @@ func TestWishListHandler_DeleteGiftItem(t *testing.T) {
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
-		mockService.On("DeleteGiftItem", mock.Anything, "non-existent").
-			Return(assert.AnError)
+		mockService.On("GetGiftItem", mock.Anything, "non-existent").
+			Return(nil, assert.AnError)
 
 		req := httptest.NewRequest(http.MethodDelete, "/gift-items/non-existent", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("id")
 		c.SetParamValues("non-existent")
+		// Set user context
+		c.Set("user_id", "user-123")
+		c.Set("email", "test@example.com")
+		c.Set("user_type", "user")
 
 		err := handler.DeleteGiftItem(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Equal(t, http.StatusNotFound, rec.Code)
 
 		mockService.AssertExpectations(t)
 	})
@@ -644,14 +666,30 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		handler := NewWishListHandler(mockService)
 
 		giftItemID := "gift-123"
+		userID := "user-123"
 		reqBody := UpdateGiftItemRequest{
 			Name:        "Updated Gift",
 			Description: "Updated description",
 			Price:       99.99,
 		}
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: userID,
+			}, nil)
+
 		expectedGiftItem := &services.GiftItemOutput{
 			ID:          giftItemID,
+			WishlistID:  "wishlist-123",
 			Name:        reqBody.Name,
 			Description: reqBody.Description,
 			Price:       reqBody.Price,
@@ -660,8 +698,13 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		mockService.On("UpdateGiftItem", mock.Anything, giftItemID, mock.AnythingOfType("services.UpdateGiftItemInput")).
 			Return(expectedGiftItem, nil)
 
+		auth := AuthContext{
+			UserID:   userID,
+			Email:    "test@example.com",
+			UserType: "user",
+		}
 		c, rec := CreateTestContextWithParams(e, http.MethodPut, "/gift-items/"+giftItemID, reqBody,
-			[]string{"id"}, []string{giftItemID}, nil)
+			[]string{"id"}, []string{giftItemID}, &auth)
 
 		err := handler.UpdateGiftItem(c)
 
@@ -682,15 +725,35 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		handler := NewWishListHandler(mockService)
 
 		giftItemID := "gift-123"
+		userID := "user-123"
 		reqBody := UpdateGiftItemRequest{
 			Name: "Updated Gift",
 		}
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: userID,
+			}, nil)
+
 		mockService.On("UpdateGiftItem", mock.Anything, giftItemID, mock.AnythingOfType("services.UpdateGiftItemInput")).
 			Return((*services.GiftItemOutput)(nil), assert.AnError)
 
+		auth := AuthContext{
+			UserID:   userID,
+			Email:    "test@example.com",
+			UserType: "user",
+		}
 		c, rec := CreateTestContextWithParams(e, http.MethodPut, "/gift-items/"+giftItemID, reqBody,
-			[]string{"id"}, []string{giftItemID}, nil)
+			[]string{"id"}, []string{giftItemID}, &auth)
 
 		err := handler.UpdateGiftItem(c)
 

@@ -18,6 +18,7 @@ import (
 	"wish-list/internal/aws"
 	"wish-list/internal/cache"
 	"wish-list/internal/config"
+	"wish-list/internal/encryption"
 	"wish-list/internal/middleware"
 
 	"github.com/joho/godotenv"
@@ -100,12 +101,38 @@ func main() {
 	e.Use(middleware.TimeoutMiddleware(30 * time.Second))
 	e.Use(middleware.RateLimiterMiddleware())
 
+	// Initialize encryption service for PII protection (CR-004)
+	var encryptionService *encryption.Service
+	encryptionKey, err := encryption.GetOrCreateDataKey(context.Background())
+	if err != nil {
+		log.Printf("Warning: Failed to initialize encryption service: %v. PII will not be encrypted.", err)
+	} else {
+		encryptionService, err = encryption.NewService(encryptionKey)
+		if err != nil {
+			log.Printf("Warning: Failed to create encryption service: %v. PII will not be encrypted.", err)
+		} else {
+			log.Println("Encryption service initialized successfully for PII protection")
+		}
+	}
+
 	// Initialize repositories
-	userRepo := repositories.NewUserRepository(sqlxDB)
+	var userRepo repositories.UserRepositoryInterface
+	if encryptionService != nil {
+		userRepo = repositories.NewUserRepositoryWithEncryption(sqlxDB, encryptionService)
+	} else {
+		userRepo = repositories.NewUserRepository(sqlxDB)
+	}
+
 	wishListRepo := repositories.NewWishListRepository(sqlxDB)
 	giftItemRepo := repositories.NewGiftItemRepository(sqlxDB)
 	templateRepo := repositories.NewTemplateRepository(sqlxDB)
-	reservationRepo := repositories.NewReservationRepository(sqlxDB)
+
+	var reservationRepo repositories.ReservationRepositoryInterface
+	if encryptionService != nil {
+		reservationRepo = repositories.NewReservationRepositoryWithEncryption(sqlxDB, encryptionService)
+	} else {
+		reservationRepo = repositories.NewReservationRepository(sqlxDB)
+	}
 
 	// Initialize services
 	analyticsService := analytics.NewAnalyticsService(cfg.AnalyticsEnabled)

@@ -26,6 +26,8 @@ type Config struct {
 	RedisDB            int
 	CacheTTLMinutes    int
 	AnalyticsEnabled   bool
+	EncryptionDataKey  string
+	KMSKeyID           string
 }
 
 // Load loads the configuration from environment variables
@@ -62,6 +64,8 @@ func Load() *Config {
 		RedisDB:            getIntEnvOrDefault("REDIS_DB", 0),
 		CacheTTLMinutes:    getIntEnvOrDefault("CACHE_TTL_MINUTES", 15),
 		AnalyticsEnabled:   getBoolEnvOrDefault("ANALYTICS_ENABLED", true),
+		EncryptionDataKey:  getEnvOrDefault("ENCRYPTION_DATA_KEY", ""),
+		KMSKeyID:           getEnvOrDefault("KMS_KEY_ID", ""),
 	}
 }
 
