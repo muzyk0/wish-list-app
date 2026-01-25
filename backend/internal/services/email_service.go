@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"log"
-	"text/template"
 	"time"
 )
 
@@ -48,13 +48,14 @@ type GiftPurchasedConfirmationEmailData struct {
 
 func (s *EmailService) SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string) error {
 	subject := "Account inactivity notice - scheduled deletion"
-	body, err := s.buildAccountInactivityNotification(userName)
+	_, err := s.buildAccountInactivityNotification(userName)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
 	}
 
 	// In a real implementation, this would send the email via SMTP
-	fmt.Printf("Sending account inactivity notification to %s with subject '%s' and body:\n%s\n", recipientEmail, subject, body)
+	// Do not log PII (email addresses) or full body content
+	log.Printf("Email send simulated: subject=%q (recipient redacted)", subject)
 
 	return nil
 }
@@ -119,39 +120,42 @@ func (s *EmailService) buildAccountInactivityNotification(userName string) (stri
 
 func (s *EmailService) SendReservationCancellationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error {
 	subject := "Your reservation has been cancelled"
-	body, err := s.buildReservationCancellationEmail(giftItemName, wishlistTitle)
+	_, err := s.buildReservationCancellationEmail(giftItemName, wishlistTitle)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
 	}
 
 	// In a real implementation, this would send the email via SMTP
-	fmt.Printf("Sending email to %s with subject '%s' and body:\n%s\n", recipientEmail, subject, body)
+	// Do not log PII (email addresses) or full body content
+	log.Printf("Email send simulated: subject=%q (recipient redacted)", subject)
 
 	return nil
 }
 
 func (s *EmailService) SendReservationRemovedEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error {
 	subject := "Your reserved gift item has been removed"
-	body, err := s.buildReservationRemovedEmail(giftItemName, wishlistTitle)
+	_, err := s.buildReservationRemovedEmail(giftItemName, wishlistTitle)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
 	}
 
 	// In a real implementation, this would send the email via SMTP
-	fmt.Printf("Sending email to %s with subject '%s' and body:\n%s\n", recipientEmail, subject, body)
+	// Do not log PII (email addresses) or full body content
+	log.Printf("Email send simulated: subject=%q (recipient redacted)", subject)
 
 	return nil
 }
 
 func (s *EmailService) SendGiftPurchasedConfirmationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle, guestName string) error {
 	subject := "Gift Purchased - Thank you!"
-	body, err := s.buildGiftPurchasedConfirmationEmail(giftItemName, wishlistTitle, guestName)
+	_, err := s.buildGiftPurchasedConfirmationEmail(giftItemName, wishlistTitle, guestName)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
 	}
 
 	// In a real implementation, this would send the email via SMTP
-	fmt.Printf("Sending email to %s with subject '%s' and body:\n%s\n", recipientEmail, subject, body)
+	// Do not log PII (email addresses) or full body content
+	log.Printf("Email send simulated: subject=%q (recipient redacted)", subject)
 
 	return nil
 }

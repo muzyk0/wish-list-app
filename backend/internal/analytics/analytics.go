@@ -60,11 +60,11 @@ func (s *AnalyticsService) Track(ctx context.Context, event Event) error {
 	}
 
 	// In production, this would send to analytics service
-	// For now, we'll log it
-	log.Printf("[ANALYTICS] Event: %s, UserID: %s, Properties: %v, Time: %s",
+	// Note: Do not log Properties as they may contain PII
+	log.Printf("[ANALYTICS] Event: %s, UserID: %s, Time: %s",
 		event.EventType,
 		event.UserID,
-		event.Properties,
+		//event.Properties,
 		event.Timestamp.Format(time.RFC3339))
 
 	return nil

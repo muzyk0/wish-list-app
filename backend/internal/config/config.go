@@ -30,13 +30,26 @@ type Config struct {
 
 // Load loads the configuration from environment variables
 func Load() *Config {
+	serverEnv := getEnvOrDefault("SERVER_ENV", "development")
+	jwtSecret := getEnvOrDefault("JWT_SECRET", "")
+
+	// Require JWT_SECRET in non-development environments
+	if serverEnv != "development" && jwtSecret == "" {
+		panic("JWT_SECRET must be set in production environments")
+	}
+
+	// Use a dev-only default for JWT_SECRET if not set in development
+	if jwtSecret == "" {
+		jwtSecret = "dev-only-secret-change-in-production"
+	}
+
 	return &Config{
 		ServerHost:         getEnvOrDefault("SERVER_HOST", "localhost"),
 		ServerPort:         getIntEnvOrDefault("SERVER_PORT", 8080),
-		ServerEnv:          getEnvOrDefault("SERVER_ENV", "development"),
+		ServerEnv:          serverEnv,
 		DatabaseURL:        getEnvOrDefault("DATABASE_URL", "postgres://user:password@localhost:5432/wishlist_db?sslmode=disable"),
 		DatabaseMaxConns:   getIntEnvOrDefault("DATABASE_MAX_CONNECTIONS", 20),
-		JWTSecret:          getEnvOrDefault("JWT_SECRET", "your-super-secret-jwt-key-here"),
+		JWTSecret:          jwtSecret,
 		JWTExpiryHours:     getIntEnvOrDefault("JWT_EXPIRY_HOURS", 24),
 		AWSRegion:          getEnvOrDefault("AWS_REGION", "us-east-1"),
 		AWSAccessKeyID:     getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),

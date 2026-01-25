@@ -56,7 +56,7 @@ type User struct {
 	ID                 pgtype.UUID        `db:"id" json:"id"`
 	Email              string             `db:"email" json:"email"`
 	EncryptedEmail     pgtype.Text        `db:"encrypted_email" json:"-"` // PII encrypted
-	PasswordHash       pgtype.Text        `db:"password_hash" json:"password_hash"`
+	PasswordHash       pgtype.Text        `db:"password_hash" json:"-"`   // Never expose password hashes
 	FirstName          pgtype.Text        `db:"first_name" json:"first_name"`
 	EncryptedFirstName pgtype.Text        `db:"encrypted_first_name" json:"-"` // PII encrypted
 	LastName           pgtype.Text        `db:"last_name" json:"last_name"`

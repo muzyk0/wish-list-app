@@ -99,23 +99,27 @@ func GetOrCreateDataKey(ctx context.Context) ([]byte, error) {
 		}
 
 		// Generate new key if none exists
-		plaintextKey, encryptedKey, err := kmsClient.GenerateDataKey(ctx)
+		plaintextKey, _, err := kmsClient.GenerateDataKey(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate data key: %w", err)
 		}
 
-		// Log the encrypted key for storage (in production, store in secret manager)
-		fmt.Printf("Generated new data key. Store this encrypted key securely:\nENCRYPTED_DATA_KEY=%s\n", encryptedKey)
-
+		// Note: In production, store ENCRYPTED_DATA_KEY in secret manager
+		// The encrypted key should be persisted externally, not logged
 		return plaintextKey, nil
 	}
 
 	// Fallback: generate a random key (ONLY for development/testing)
-	fmt.Println("WARNING: No KMS_KEY_ID or ENCRYPTION_DATA_KEY found. Generating random key for development.")
+	serverEnv := os.Getenv("SERVER_ENV")
+	if serverEnv != "" && serverEnv != "development" {
+		return nil, fmt.Errorf("no encryption key configured: set ENCRYPTION_DATA_KEY or KMS_KEY_ID for %s environment", serverEnv)
+	}
+
+	// Development-only fallback
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {
 		return nil, fmt.Errorf("failed to generate random key: %w", err)
 	}
-	fmt.Printf("Generated random key (dev only): %s\n", base64.StdEncoding.EncodeToString(key))
+	// Do not log key material - development mode uses ephemeral key
 	return key, nil
 }

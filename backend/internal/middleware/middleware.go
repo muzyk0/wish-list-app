@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -79,16 +80,20 @@ func LoggerMiddleware() echo.MiddlewareFunc {
 		LogUserAgent: true,
 		LogRequestID: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			fmt.Printf(`{"time":"%s", "method":"%s", "uri":"%s", "status":%d, "latency":"%s", "ip":"%s", "user_agent":"%s", "request_id":"%s"}`+"\n",
-				time.Now().Format(time.RFC3339),
-				v.Method,
-				v.URI,
-				v.Status,
-				v.Latency,
-				v.RemoteIP,
-				v.UserAgent,
-				v.RequestID,
-			)
+			// Use JSON marshaling to prevent log injection
+			logEntry := map[string]any{
+				"time":       time.Now().Format(time.RFC3339),
+				"method":     v.Method,
+				"uri":        v.URI,
+				"status":     v.Status,
+				"latency":    v.Latency.String(),
+				"ip":         v.RemoteIP,
+				"user_agent": v.UserAgent,
+				"request_id": v.RequestID,
+			}
+			if data, err := json.Marshal(logEntry); err == nil {
+				fmt.Println(string(data))
+			}
 			return nil
 		},
 	})

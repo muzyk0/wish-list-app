@@ -68,6 +68,13 @@ func (h *WishListHandler) CreateWishList(c echo.Context) error {
 		})
 	}
 
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
 	// Get user from context
 	userID, _, _, err := auth.GetUserFromContext(c)
 	if err != nil {
@@ -203,6 +210,14 @@ func (h *WishListHandler) DeleteWishList(c echo.Context) error {
 func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 
+	// Get user from context to verify ownership
+	userID, _, _, err := auth.GetUserFromContext(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "Unauthorized",
+		})
+	}
+
 	var req CreateGiftItemRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -210,7 +225,28 @@ func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 		})
 	}
 
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
 	ctx := c.Request().Context()
+
+	// Verify user owns the wishlist before creating gift item
+	wishlist, err := h.service.GetWishList(ctx, wishListID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wishlist not found",
+		})
+	}
+	if wishlist.OwnerID != userID {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "You do not have permission to modify this wishlist",
+		})
+	}
+
 	giftItem, err := h.service.CreateGiftItem(ctx, wishListID, services.CreateGiftItemInput{
 		Name:        req.Name,
 		Description: req.Description,

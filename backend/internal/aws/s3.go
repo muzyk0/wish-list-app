@@ -62,7 +62,10 @@ func (s *S3Client) UploadFile(ctx context.Context, file multipart.File, fileName
 		return "", fmt.Errorf("failed to read file: %w", err)
 	}
 
-	key := fmt.Sprintf("uploads/%d/%s", time.Now().Unix(), fileName)
+	// Sanitize filename: use basename and replace spaces to prevent path traversal and collisions
+	safeName := filepath.Base(fileName)
+	safeName = strings.ReplaceAll(safeName, " ", "_")
+	key := fmt.Sprintf("uploads/%d/%s", time.Now().UnixNano(), safeName)
 
 	uploadParams := &s3.PutObjectInput{
 		Bucket:      aws.String(s.Bucket),
@@ -84,7 +87,10 @@ func (s *S3Client) UploadFile(ctx context.Context, file multipart.File, fileName
 
 // UploadBytes uploads byte data to S3
 func (s *S3Client) UploadBytes(ctx context.Context, data []byte, fileName, contentType string) (string, error) {
-	key := fmt.Sprintf("uploads/%d/%s", time.Now().Unix(), fileName)
+	// Sanitize filename: use basename and replace spaces to prevent path traversal and collisions
+	safeName := filepath.Base(fileName)
+	safeName = strings.ReplaceAll(safeName, " ", "_")
+	key := fmt.Sprintf("uploads/%d/%s", time.Now().UnixNano(), safeName)
 
 	uploadParams := &s3.PutObjectInput{
 		Bucket:      aws.String(s.Bucket),
