@@ -262,5 +262,5 @@ func setupRoutes(e *echo.Echo, userHandler *handlers.UserHandler, wishListHandle
 
 	// Guest reservation endpoints
 	guestReservationGroup := e.Group("/api/guest/reservations")
-	guestReservationGroup.GET("/", reservationHandler.GetGuestReservations)
+	guestReservationGroup.GET("", reservationHandler.GetGuestReservations)
 }
