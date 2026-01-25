@@ -86,7 +86,11 @@ func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 			"error": "Invalid request body",
 		})
 	}
-
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Validation failed",
+		})
+	}
 	ctx := c.Request().Context()
 
 	// Check if user is authenticated
