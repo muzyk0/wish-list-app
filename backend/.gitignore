@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.test
+bin/
 
 # Vendor
 vendor/

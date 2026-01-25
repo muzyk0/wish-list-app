@@ -13,16 +13,15 @@ import (
 	db "wish-list/internal/db/models"
 	"wish-list/internal/repositories"
 
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
-
 	"wish-list/internal/analytics"
 	"wish-list/internal/auth"
 	"wish-list/internal/aws"
 	"wish-list/internal/cache"
 	"wish-list/internal/config"
 	"wish-list/internal/middleware"
+
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 
 	"wish-list/internal/handlers"
 	"wish-list/internal/services"
@@ -43,13 +42,6 @@ func main() {
 
 	// Set custom validator
 	e.Validator = validation.NewValidator()
-
-	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		//AllowOrigins: []string{"http://localhost:8081/", "http://localhost:8081/"},
-		//AllowOrigins: []string{"http://localhost:8081/", "http://localhost:8081/"},
-		//AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
 
 	// Set custom error handler
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
