@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "description": "JWT access token"
+    },
+    "refresh_token": {
+      "type": "string",
+      "description": "JWT refresh token"
+    },
+    "user": {
+      "$ref": "./user_response.json"
+    }
+  }
+}

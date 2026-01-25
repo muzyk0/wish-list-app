@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "gift_item_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reserved_by_user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "guest_name": {
+      "type": "string"
+    },
+    "guest_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "reservation_token": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "fulfilled",
+        "expired"
+      ]
+    },
+    "reserved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cancelled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cancelled_reason": {
+      "type": "string"
+    }
+  }
+}

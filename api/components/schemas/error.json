@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "string",
+      "example": "Error message"
+    },
+    "code": {
+      "type": "string",
+      "example": "ERROR_CODE"
+    }
+  }
+}

@@ -1,0 +1,2254 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wish List Application API",
+    "description": "Complete API for the Wish List application including user authentication, wish list management, gift items, and reservations",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@wishlistapp.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.wishlistapp.com",
+      "description": "Production server"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User authentication and profile management"
+    },
+    {
+      "name": "WishLists",
+      "description": "Wish list creation and management"
+    },
+    {
+      "name": "GiftItems",
+      "description": "Gift item management within wish lists"
+    },
+    {
+      "name": "Reservations",
+      "description": "Gift item reservation management"
+    }
+  ],
+  "paths": {
+    "/v1/users/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_registration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "description": "User with email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/login": {
+      "post": {
+        "summary": "Authenticate user and return JWT token",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/login_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update current user profile",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/users/magic-link": {
+      "post": {
+        "summary": "Request a magic link for authentication",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/magic_link_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Magic link sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/success"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/users/verify-magic-link": {
+      "post": {
+        "summary": "Verify a magic link token and authenticate",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/magic_link_verify"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/login_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token expired or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists": {
+      "get": {
+        "summary": "Get all wish lists for the authenticated user",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user's wish lists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/wish_list_response"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new wish list",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/wish_list_create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Wish list created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/wish_list_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{id}": {
+      "get": {
+        "summary": "Get a specific wish list by ID",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wish list details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/wish_list_with_items_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a wish list",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/wish_list_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Wish list updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/wish_list_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a wish list",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Wish list deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/public/{slug}": {
+      "get": {
+        "summary": "Get a public wish list by slug",
+        "tags": [
+          "WishLists"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public wish list details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/public_wish_list_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Wish list not found or not public",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{id}/publish": {
+      "post": {
+        "summary": "Publish/Unpublish a wish list to make it public",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "is_public": {
+                    "type": "boolean",
+                    "description": "Whether to make the list public or private"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Wish list publication status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/wish_list_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{id}/share": {
+      "get": {
+        "summary": "Get sharing information for a wish list",
+        "tags": [
+          "WishLists"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sharing information for the wish list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "share_url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "share_code": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items": {
+      "get": {
+        "summary": "Get all gift items for a specific wish list",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of gift items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/gift_item_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new gift item to a wish list",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gift_item_create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Gift item added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gift_item_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items/{itemId}": {
+      "get": {
+        "summary": "Get a specific gift item",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gift item details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gift_item_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a gift item",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/gift_item_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gift item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gift_item_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a gift item",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Gift item deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items/{itemId}/upload-image": {
+      "post": {
+        "summary": "Upload an image for a gift item",
+        "tags": [
+          "GiftItems"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "image_url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/wishlists/{slug}/items/{itemId}": {
+      "get": {
+        "summary": "Get a public gift item by wishlist slug and item ID",
+        "tags": [
+          "GiftItems"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public gift item details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/public_gift_item_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found or not public",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items/{itemId}/reserve": {
+      "post": {
+        "summary": "Reserve a gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/authenticated_reservation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/guest_reservation"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gift item reserved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reservation_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or item already reserved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (if trying to reserve as authenticated user)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items/{itemId}/cancel-reservation": {
+      "post": {
+        "summary": "Cancel a reservation for a gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/cancel_authenticated_reservation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/cancel_guest_reservation"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reservation_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or no active reservation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (if trying to cancel as authenticated user)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/me/reservations": {
+      "get": {
+        "summary": "Get all reservations made by the authenticated user",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user's reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/reservation_details_response"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/guest/reservations": {
+      "get": {
+        "summary": "Get guest reservations using reservation token",
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Guest's reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/reservation_details_response"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No reservations found for the token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/wishlists/{slug}/items/{itemId}/reservation-status": {
+      "get": {
+        "summary": "Get reservation status for a public gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservation status for the gift item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reservation_status_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found or not public",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "user_registration": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "first_name",
+          "last_name"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8,
+            "description": "User's password"
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "User's first name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "User's last name"
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the user's avatar image"
+          }
+        }
+      },
+      "user_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "is_verified": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Error message"
+          },
+          "code": {
+            "type": "string",
+            "example": "ERROR_CODE"
+          }
+        }
+      },
+      "user_login": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "login_response": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT access token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "JWT refresh token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/user_response"
+          }
+        }
+      },
+      "user_update": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "magic_link_request": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "success": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "magic_link_verify": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Magic link token"
+          }
+        }
+      },
+      "wish_list_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "occasion": {
+            "type": "string"
+          },
+          "occasion_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "is_public": {
+            "type": "boolean"
+          },
+          "public_slug": {
+            "type": "string"
+          },
+          "view_count": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          }
+        }
+      },
+      "wish_list_create": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Title of the wish list"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Description of the wish list"
+          },
+          "occasion": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Occasion type (e.g., Birthday, Wedding)"
+          },
+          "occasion_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the occasion"
+          },
+          "template_id": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Template ID for presentation"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the wish list is publicly accessible",
+            "default": false
+          }
+        }
+      },
+      "gift_item_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "wishlist_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "price": {
+            "type": "number"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "reserved_by_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reserved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "purchased_by_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purchased_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "purchased_price": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "wish_list_with_items_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/wish_list_response"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/gift_item_response"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "wish_list_update": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "occasion": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "occasion_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "template_id": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the wish list is publicly accessible"
+          }
+        }
+      },
+      "public_gift_item_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "price": {
+            "type": "number"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "reservation_status": {
+            "type": "object",
+            "properties": {
+              "is_reserved": {
+                "type": "boolean"
+              },
+              "reserved_by_name": {
+                "type": "string"
+              },
+              "reserved_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "public_wish_list_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "occasion": {
+            "type": "string"
+          },
+          "occasion_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "view_count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/public_gift_item_response"
+            }
+          },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string"
+              },
+              "last_name": {
+                "type": "string"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "gift_item_create": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Name of the gift item"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the gift"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the gift item"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the gift item image"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Price of the gift item"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Priority level (0-10)"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Private notes from the list owner"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Display position in the list"
+          }
+        }
+      },
+      "gift_item_update": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the gift item image"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "notes": {
+            "type": "string",
+            "description": "Private notes from the list owner"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "authenticated_reservation": {
+        "type": "object",
+        "description": "Reservation request for authenticated users",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "ID of the authenticated user (derived from JWT)"
+          }
+        }
+      },
+      "guest_reservation": {
+        "type": "object",
+        "description": "Reservation request for unauthenticated guests",
+        "required": [
+          "guest_name",
+          "guest_email"
+        ],
+        "properties": {
+          "guest_name": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Name of the guest"
+          },
+          "guest_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the guest"
+          }
+        }
+      },
+      "reservation_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gift_item_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reserved_by_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guest_name": {
+            "type": "string"
+          },
+          "guest_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "reservation_token": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          },
+          "reserved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "cancel_authenticated_reservation": {
+        "type": "object",
+        "description": "Cancel reservation request for authenticated users",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "ID of the authenticated user (derived from JWT)"
+          }
+        }
+      },
+      "cancel_guest_reservation": {
+        "type": "object",
+        "description": "Cancel reservation request for unauthenticated guests",
+        "required": [
+          "reservation_token"
+        ],
+        "properties": {
+          "reservation_token": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Token associated with the reservation"
+          }
+        }
+      },
+      "gift_item_summary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      },
+      "wish_list_summary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "owner_first_name": {
+            "type": "string"
+          },
+          "owner_last_name": {
+            "type": "string"
+          }
+        }
+      },
+      "reservation_details_response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gift_item": {
+            "$ref": "#/components/schemas/gift_item_summary"
+          },
+          "wishlist": {
+            "$ref": "#/components/schemas/wish_list_summary"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          },
+          "reserved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "reservation_status_response": {
+        "type": "object",
+        "properties": {
+          "is_reserved": {
+            "type": "boolean"
+          },
+          "reserved_by_name": {
+            "type": "string"
+          },
+          "reserved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

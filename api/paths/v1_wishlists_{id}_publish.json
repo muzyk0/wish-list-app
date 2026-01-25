@@ -1,0 +1,68 @@
+{
+  "post": {
+    "summary": "Publish/Unpublish a wish list to make it public",
+    "tags": [
+      "WishLists"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "is_public": {
+                "type": "boolean",
+                "description": "Whether to make the list public or private"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Wish list publication status updated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/wish_list_response.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "$ref": "../components/responses/BadRequest.json"
+      },
+      "401": {
+        "$ref": "../components/responses/Unauthorized.json"
+      },
+      "404": {
+        "description": "Wish list not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/error.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}

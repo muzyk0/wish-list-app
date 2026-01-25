@@ -1,0 +1,620 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Reservation API",
+    "description": "API for managing gift item reservations in the Wish List application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.wishlistapp.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/v1/wishlists/{wishlistId}/items/{itemId}/reserve": {
+      "post": {
+        "summary": "Reserve a gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthenticatedReservation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GuestReservation"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gift item reserved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or item already reserved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (if trying to reserve as authenticated user)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wishlists/{wishlistId}/items/{itemId}/cancel-reservation": {
+      "post": {
+        "summary": "Cancel a reservation for a gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CancelAuthenticatedReservation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CancelGuestReservation"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or no active reservation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (if trying to cancel as authenticated user)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/me/reservations": {
+      "get": {
+        "summary": "Get all reservations made by the authenticated user",
+        "tags": [
+          "Reservations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user's reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReservationDetailsResponse"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/guest/reservations": {
+      "get": {
+        "summary": "Get guest reservations using reservation token",
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Guest's reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationDetailsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No reservations found for the token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/wishlists/{slug}/items/{itemId}/reservation-status": {
+      "get": {
+        "summary": "Get reservation status for a public gift item",
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservation status for the gift item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gift item or wish list not found or not public",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "AuthenticatedReservation": {
+        "type": "object",
+        "description": "Reservation request for authenticated users",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "ID of the authenticated user (derived from JWT)"
+          }
+        }
+      },
+      "GuestReservation": {
+        "type": "object",
+        "description": "Reservation request for unauthenticated guests",
+        "required": [
+          "guestName",
+          "guestEmail"
+        ],
+        "properties": {
+          "guestName": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Name of the guest"
+          },
+          "guestEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the guest"
+          }
+        }
+      },
+      "CancelAuthenticatedReservation": {
+        "type": "object",
+        "description": "Cancel reservation request for authenticated users",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "ID of the authenticated user (derived from JWT)"
+          }
+        }
+      },
+      "CancelGuestReservation": {
+        "type": "object",
+        "description": "Cancel reservation request for unauthenticated guests",
+        "required": [
+          "reservationToken"
+        ],
+        "properties": {
+          "reservationToken": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Token associated with the reservation"
+          }
+        }
+      },
+      "ReservationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "giftItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guestName": {
+            "type": "string"
+          },
+          "guestEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "reservationToken": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          },
+          "reservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledReason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "giftItem": {
+            "$ref": "#/components/schemas/GiftItemSummary"
+          },
+          "wishlist": {
+            "$ref": "#/components/schemas/WishListSummary"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          },
+          "reservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReservationStatusResponse": {
+        "type": "object",
+        "properties": {
+          "isReserved": {
+            "type": "boolean"
+          },
+          "reservedByName": {
+            "type": "string"
+          },
+          "reservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled",
+              "fulfilled",
+              "expired"
+            ]
+          }
+        }
+      },
+      "GiftItemSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      },
+      "WishListSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "ownerFirstName": {
+            "type": "string"
+          },
+          "ownerLastName": {
+            "type": "string"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Error message"
+          },
+          "code": {
+            "type": "string",
+            "example": "ERROR_CODE"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

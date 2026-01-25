@@ -1,0 +1,67 @@
+{
+  "get": {
+    "summary": "Get current user profile",
+    "tags": [
+      "Users"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "User profile retrieved",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user_response.json"
+            }
+          }
+        }
+      },
+      "401": {
+        "$ref": "../components/responses/Unauthorized.json"
+      }
+    }
+  },
+  "put": {
+    "summary": "Update current user profile",
+    "tags": [
+      "Users"
+    ],
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../components/schemas/user_update.json"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "User profile updated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user_response.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "$ref": "../components/responses/BadRequest.json"
+      },
+      "401": {
+        "$ref": "../components/responses/Unauthorized.json"
+      }
+    }
+  }
+}

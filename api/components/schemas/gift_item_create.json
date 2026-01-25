@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Name of the gift item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the gift"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the gift item"
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the gift item image"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Price of the gift item"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Priority level (0-10)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Private notes from the list owner"
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Display position in the list"
+    }
+  }
+}
