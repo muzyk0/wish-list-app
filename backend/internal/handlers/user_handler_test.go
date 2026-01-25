@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"wish-list/internal/analytics"
 	"wish-list/internal/auth"
 	"wish-list/internal/services"
 	"wish-list/internal/validation"
@@ -61,7 +62,8 @@ func TestUserHandler_Register(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Test input
 	reqBody := RegisterRequest{
@@ -117,7 +119,8 @@ func TestUserHandler_Login(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Test input
 	reqBody := LoginRequest{
@@ -168,7 +171,8 @@ func TestUserHandler_Register_BadRequest(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Invalid input - empty body (validation fails before service call)
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/register", http.NoBody)
@@ -194,7 +198,8 @@ func TestUserHandler_Login_BadRequest(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Invalid input - empty body (validation fails before service call)
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/login", http.NoBody)
@@ -220,7 +225,8 @@ func TestUserHandler_Register_Conflict(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Test input
 	reqBody := RegisterRequest{
@@ -261,7 +267,8 @@ func TestUserHandler_Login_Unauthorized(t *testing.T) {
 	// Create mock service
 	mockService := new(MockUserService)
 	tokenManager := auth.NewTokenManager("test-secret")
-	handler := NewUserHandler(mockService, tokenManager, nil)
+	analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 	// Test input
 	reqBody := LoginRequest{
@@ -298,7 +305,8 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		expectedUser := &services.UserOutput{
@@ -330,7 +338,8 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		// No auth context
 		c, rec := CreateTestContext(e, http.MethodGet, "/api/users/me", nil, nil)
@@ -347,7 +356,8 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*services.UserOutput)(nil), assert.AnError)
@@ -368,7 +378,8 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		reqBody := RegisterRequest{
@@ -413,7 +424,8 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		reqBody := RegisterRequest{
 			Email:    "updated@example.com",
@@ -435,7 +447,8 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 
@@ -458,7 +471,8 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
-		handler := NewUserHandler(mockService, tokenManager, nil)
+		analyticsService := analytics.NewAnalyticsService(false)
+	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		reqBody := RegisterRequest{

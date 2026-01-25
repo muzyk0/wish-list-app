@@ -115,11 +115,8 @@ func main() {
 	reservationService := services.NewReservationService(reservationRepo, giftItemRepo)
 	accountCleanupService := services.NewAccountCleanupService(userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
-	// Track analytics in handlers (in production, this would be passed to handlers)
-	_ = analyticsService
-
-	// Initialize handlers
-	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService)
+	// Initialize handlers with analytics integration
+	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 

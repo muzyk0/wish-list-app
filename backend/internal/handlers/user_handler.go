@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"wish-list/internal/analytics"
 	"wish-list/internal/auth"
 	"wish-list/internal/services"
 
@@ -12,13 +13,15 @@ type UserHandler struct {
 	service               services.UserServiceInterface
 	tokenManager          *auth.TokenManager
 	accountCleanupService *services.AccountCleanupService
+	analyticsService      *analytics.AnalyticsService
 }
 
-func NewUserHandler(service services.UserServiceInterface, tokenManager *auth.TokenManager, accountCleanupService *services.AccountCleanupService) *UserHandler {
+func NewUserHandler(service services.UserServiceInterface, tokenManager *auth.TokenManager, accountCleanupService *services.AccountCleanupService, analyticsService *analytics.AnalyticsService) *UserHandler {
 	return &UserHandler{
 		service:               service,
 		tokenManager:          tokenManager,
 		accountCleanupService: accountCleanupService,
+		analyticsService:      analyticsService,
 	}
 }
 
@@ -78,6 +81,9 @@ func (h *UserHandler) Register(c echo.Context) error {
 		})
 	}
 
+	// Track user registration analytics
+	_ = h.analyticsService.TrackUserRegistration(ctx, user.ID, user.Email)
+
 	response := AuthResponse{
 		User:  user,
 		Token: tokenString,
@@ -120,6 +126,9 @@ func (h *UserHandler) Login(c echo.Context) error {
 			"error": "Could not generate token",
 		})
 	}
+
+	// Track user login analytics
+	_ = h.analyticsService.TrackUserLogin(ctx, user.ID)
 
 	response := AuthResponse{
 		User:  user,
