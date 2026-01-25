@@ -1,0 +1,82 @@
+{
+  "header": {
+    "logo": "WishList"
+  },
+  "hero": {
+    "badge": "Curate. Share. Celebrate.",
+    "title": {
+      "line1": "Your wishes,",
+      "line2": "beautifully organized"
+    },
+    "subtitle": "Create stunning wishlists for any occasion. Share with friends and family. Never receive duplicate gifts again.",
+    "openApp": "Open Mobile App",
+    "accountAccess": "Account Access",
+    "trust": {
+      "free": "100% Free",
+      "secure": "Private & Secure",
+      "noDuplicates": "No Duplicates"
+    }
+  },
+  "featuredLists": {
+    "title": "Featured Wishlists",
+    "subtitle": "Discover beautifully curated wishlists from our community",
+    "items": "items",
+    "public": "Public",
+    "createHint": "Create your own wishlist in the",
+    "mobileApp": "mobile app",
+    "lists": {
+      "birthday": {
+        "title": "Sarah's Birthday Dreams",
+        "theme": "Birthday"
+      },
+      "babyShower": {
+        "title": "Baby Registry Essentials",
+        "theme": "Baby Shower"
+      },
+      "wedding": {
+        "title": "Wedding Gift Ideas",
+        "theme": "Wedding"
+      }
+    }
+  },
+  "announcement": {
+    "label": "Announcement",
+    "title": {
+      "line1": "Experience the Future of",
+      "line2": "Gift Giving"
+    },
+    "description": "Our mobile app brings an elevated experience to wishlist creation. Curate with precision, share with elegance, and ensure every gift is meaningful.",
+    "features": {
+      "reservations": {
+        "title": "Smart Reservations",
+        "description": "Prevent duplicate gifts automatically"
+      },
+      "themes": {
+        "title": "Beautiful Themes",
+        "description": "Curated designs for every occasion"
+      },
+      "privacy": {
+        "title": "Privacy Controls",
+        "description": "Choose who sees your wishes"
+      },
+      "guest": {
+        "title": "Guest Friendly",
+        "description": "Reserve items without an account"
+      }
+    },
+    "cta": "View Guest Reservations"
+  },
+  "footer": {
+    "description": {
+      "line1": "Public web interface for viewing wishlists.",
+      "line2": "Account management via mobile app."
+    },
+    "login": "Login",
+    "myReservations": "My Reservations",
+    "crafted": "Crafted with intention"
+  },
+  "theme": {
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
+  }
+}
