@@ -71,7 +71,6 @@ wish-list/
 - `make mobile` - Start the mobile development server
 - `make db-up` - Start the database with Docker
 - `make migrate-up` - Run database migrations
-- `make generate` - Generate code with sqlc (though now using sqlx)
 - `make test` - Run tests for all components
 - `make lint` - Run lint for all components
 - `make format` - Format all components with Biome

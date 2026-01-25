@@ -38,7 +38,6 @@ The application follows a microservices architecture with shared components:
 - **Custom components**: Business-specific components are in `frontend/src/components/[domain]/`
 
 ### Code Generation & Type Safety
-- **Database**: Use `make generate` to refresh database models for sqlx (manual updates needed)
 - **API clients**: Generated from OpenAPI specifications in `/contracts/`
 - **Type checking**: Run `npm run type-check` to verify TypeScript correctness
 - **Linting & formatting**: Use `make format` for consistent code style across all components
