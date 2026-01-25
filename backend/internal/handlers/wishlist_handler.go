@@ -349,6 +349,11 @@ func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 			"error": "Invalid request body",
 		})
 	}
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
 
 	ctx := c.Request().Context()
 
