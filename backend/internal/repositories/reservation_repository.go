@@ -83,6 +83,9 @@ func (r *ReservationRepository) encryptReservationPII(ctx context.Context, reser
 			return fmt.Errorf("failed to encrypt guest name: %w", err)
 		}
 		reservation.EncryptedGuestName = pgtype.Text{String: encrypted, Valid: true}
+		// Avoid persisting plaintext when encryption is enabled
+		reservation.GuestName = pgtype.Text{Valid: false}
+
 	}
 
 	// Encrypt guest email
@@ -92,6 +95,8 @@ func (r *ReservationRepository) encryptReservationPII(ctx context.Context, reser
 			return fmt.Errorf("failed to encrypt guest email: %w", err)
 		}
 		reservation.EncryptedGuestEmail = pgtype.Text{String: encrypted, Valid: true}
+		// Avoid persisting plaintext when encryption is enabled
+		reservation.GuestEmail = pgtype.Text{Valid: false}
 	}
 
 	return nil
