@@ -129,9 +129,9 @@ func main() {
 	// Initialize routes
 	setupRoutes(e, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
 
-	// --- ОРКЕСТРАЦИЯ ЗАПУСКА И ОСТАНОВКИ ---
+	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
 
-	// Канал для ошибок запуска сервера
+	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
 
 	port := fmt.Sprintf(":%d", cfg.ServerPort)
@@ -144,11 +144,11 @@ func main() {
 		}
 	}()
 
-	// Канал для системных сигналов
+	// Channel for system signals
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
-	// Блокировка до наступления одного из событий
+	// Block until one of the events occurs
 	select {
 	case err := <-serverErrors:
 		log.Fatalf("❌ Critical error, server failed to start: %v", err)
@@ -156,13 +156,13 @@ func main() {
 	case sig := <-stop:
 		log.Printf("🚦 Received signal (%v), starting graceful shutdown...", sig)
 
-		// Контекст на завершение (10 секунд)
+		// Shutdown context (10 seconds timeout)
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer shutdownCancel()
 
 		if err := e.Shutdown(shutdownCtx); err != nil {
 			log.Printf("⚠️ Server forced to shutdown: %v", err)
-			// Если не вышло плавно, закрываем принудительно
+			// If graceful shutdown failed, force close
 			if err := e.Close(); err != nil {
 				log.Printf("⚠️ Error closing server: %v", err)
 			}
