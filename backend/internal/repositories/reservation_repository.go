@@ -42,6 +42,7 @@ type ReservationDetail struct {
 	GiftItemName     pgtype.Text        `json:"gift_item_name"`
 	GiftItemImageURL pgtype.Text        `json:"gift_item_image_url"`
 	GiftItemPrice    pgtype.Numeric     `json:"gift_item_price"`
+	WishlistID       pgtype.UUID        `json:"wishlist_id"`
 	WishlistTitle    pgtype.Text        `json:"wishlist_title"`
 	OwnerFirstName   pgtype.Text        `json:"owner_first_name"`
 	OwnerLastName    pgtype.Text        `json:"owner_last_name"`
@@ -375,6 +376,7 @@ func (r *ReservationRepository) ListUserReservationsWithDetails(ctx context.Cont
 			gi.name as gift_item_name,
 			gi.image_url as gift_item_image_url,
 			gi.price as gift_item_price,
+			w.id as wishlist_id,
 			w.title as wishlist_title,
 			u.first_name as owner_first_name,
 			u.last_name as owner_last_name
@@ -415,6 +417,7 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 			gi.name as gift_item_name,
 			gi.image_url as gift_item_image_url,
 			gi.price as gift_item_price,
+			w.id as wishlist_id,
 			w.title as wishlist_title,
 			u.first_name as owner_first_name,
 			u.last_name as owner_last_name

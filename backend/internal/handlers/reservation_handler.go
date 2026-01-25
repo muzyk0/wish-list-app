@@ -349,7 +349,7 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 		}
 
 		listSummary := WishListSummary{
-			ID:    res.GiftItemID.String(), // This should be wishlist ID
+			ID:    res.WishlistID.String(),
 			Title: res.WishlistTitle.String,
 		}
 		if res.OwnerFirstName.Valid {
@@ -420,7 +420,7 @@ func (h *ReservationHandler) GetGuestReservations(c echo.Context) error {
 		}
 
 		listSummary := WishListSummary{
-			ID:    res.GiftItemID.String(), // This should be wishlist ID
+			ID:    res.WishlistID.String(),
 			Title: res.WishlistTitle.String,
 		}
 		if res.OwnerFirstName.Valid {
