@@ -31,8 +31,8 @@ This document describes the migration of the backend database layer from sqlc (S
 - Explicit field mapping using struct tags
 
 ### 3. Error Handling
-- All database errors are now properly wrapped using `fmt.Errorf` with `%w` verb
-- Consistent error messages with context
+- All database errors are now properly wrapped using `fmt.Errorf` with the `%w` verb
+- Consistent error messages with the context
 - Improved debugging capabilities
 
 ## Benefits of Migration
