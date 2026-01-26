@@ -33,22 +33,46 @@ type MockUserService struct {
 
 func (m *MockUserService) Register(ctx context.Context, input services.RegisterUserInput) (*services.UserOutput, error) {
 	args := m.Called(ctx, input)
-	return args.Get(0).(*services.UserOutput), args.Error(1)
+	v := args.Get(0)
+	if v != nil {
+		if result, ok := v.(*services.UserOutput); ok {
+			return result, args.Error(1)
+		}
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockUserService) Login(ctx context.Context, input services.LoginUserInput) (*services.UserOutput, error) {
 	args := m.Called(ctx, input)
-	return args.Get(0).(*services.UserOutput), args.Error(1)
+	v := args.Get(0)
+	if v != nil {
+		if result, ok := v.(*services.UserOutput); ok {
+			return result, args.Error(1)
+		}
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockUserService) GetUser(ctx context.Context, userID string) (*services.UserOutput, error) {
 	args := m.Called(ctx, userID)
-	return args.Get(0).(*services.UserOutput), args.Error(1)
+	v := args.Get(0)
+	if v != nil {
+		if result, ok := v.(*services.UserOutput); ok {
+			return result, args.Error(1)
+		}
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockUserService) UpdateUser(ctx context.Context, userID string, input services.RegisterUserInput) (*services.UserOutput, error) {
 	args := m.Called(ctx, userID, input)
-	return args.Get(0).(*services.UserOutput), args.Error(1)
+	v := args.Get(0)
+	if v != nil {
+		if result, ok := v.(*services.UserOutput); ok {
+			return result, args.Error(1)
+		}
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockUserService) DeleteUser(ctx context.Context, userID string) error {
