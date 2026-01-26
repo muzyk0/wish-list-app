@@ -406,27 +406,30 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
-		reqBody := RegisterRequest{
-			Email:     "updated@example.com",
-			Password:  "newpassword123",
-			FirstName: "Jane",
-			LastName:  "Smith",
+		email := "updated@example.com"
+		password := "newpassword123"
+		firstName := "Jane"
+		lastName := "Smith"
+		reqBody := UpdateProfileRequest{
+			Email:     &email,
+			Password:  &password,
+			FirstName: &firstName,
+			LastName:  &lastName,
 		}
 
 		expectedUser := &services.UserOutput{
 			ID:        authCtx.UserID,
-			Email:     reqBody.Email,
-			FirstName: reqBody.FirstName,
-			LastName:  reqBody.LastName,
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
 		}
 
-		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, services.RegisterUserInput{
-			Email:     reqBody.Email,
-			Password:  reqBody.Password,
-			FirstName: reqBody.FirstName,
-			LastName:  reqBody.LastName,
-			AvatarUrl: reqBody.AvatarUrl,
-		}).Return(expectedUser, nil)
+		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, mock.MatchedBy(func(input services.UpdateUserInput) bool {
+			return input.Email != nil && *input.Email == email &&
+				input.Password != nil && *input.Password == password &&
+				input.FirstName != nil && *input.FirstName == firstName &&
+				input.LastName != nil && *input.LastName == lastName
+		})).Return(expectedUser, nil)
 
 		c, rec := CreateTestContext(e, http.MethodPut, "/api/users/me", reqBody, &authCtx)
 
@@ -451,9 +454,11 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		analyticsService := analytics.NewAnalyticsService(false)
 	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
-		reqBody := RegisterRequest{
-			Email:    "updated@example.com",
-			Password: "newpassword123",
+		email := "updated@example.com"
+		password := "newpassword123"
+		reqBody := UpdateProfileRequest{
+			Email:    &email,
+			Password: &password,
 		}
 
 		// No auth context
@@ -499,14 +504,18 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
-		reqBody := RegisterRequest{
-			Email:     "updated@example.com",
-			Password:  "newpassword123",
-			FirstName: "Jane",
-			LastName:  "Smith",
+		email := "updated@example.com"
+		password := "newpassword123"
+		firstName := "Jane"
+		lastName := "Smith"
+		reqBody := UpdateProfileRequest{
+			Email:     &email,
+			Password:  &password,
+			FirstName: &firstName,
+			LastName:  &lastName,
 		}
 
-		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, mock.AnythingOfType("services.RegisterUserInput")).
+		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, mock.AnythingOfType("services.UpdateUserInput")).
 			Return((*services.UserOutput)(nil), assert.AnError)
 
 		c, rec := CreateTestContext(e, http.MethodPut, "/api/users/me", reqBody, &authCtx)
