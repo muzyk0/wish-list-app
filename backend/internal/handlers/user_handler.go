@@ -114,8 +114,11 @@ func (h *UserHandler) Login(c echo.Context) error {
 	})
 
 	if err != nil {
+		// Log the actual error server-side for debugging
+		c.Logger().Errorf("Login failed for email %s: %v", req.Email, err)
+		// Return generic message to avoid leaking information about user existence
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": err.Error(),
+			"error": "Invalid credentials",
 		})
 	}
 
