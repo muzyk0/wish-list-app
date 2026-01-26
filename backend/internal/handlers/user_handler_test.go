@@ -64,7 +64,7 @@ func (m *MockUserService) GetUser(ctx context.Context, userID string) (*services
 	return nil, args.Error(1)
 }
 
-func (m *MockUserService) UpdateUser(ctx context.Context, userID string, input services.RegisterUserInput) (*services.UserOutput, error) {
+func (m *MockUserService) UpdateUser(ctx context.Context, userID string, input services.UpdateUserInput) (*services.UserOutput, error) {
 	args := m.Called(ctx, userID, input)
 	v := args.Get(0)
 	if v != nil {

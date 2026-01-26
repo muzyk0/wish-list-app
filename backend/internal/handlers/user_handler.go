@@ -38,6 +38,14 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+type UpdateProfileRequest struct {
+	Email     *string `json:"email" validate:"omitempty,email"`
+	Password  *string `json:"password" validate:"omitempty,min=6"`
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	AvatarUrl *string `json:"avatar_url"`
+}
+
 type AuthResponse struct {
 	User  *services.UserOutput `json:"user"`
 	Token string               `json:"token"`
@@ -170,15 +178,22 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 		})
 	}
 
-	var req RegisterRequest
+	var req UpdateProfileRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Invalid request body",
 		})
 	}
 
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
 	ctx := c.Request().Context()
-	user, err := h.service.UpdateUser(ctx, userID, services.RegisterUserInput{
+	user, err := h.service.UpdateUser(ctx, userID, services.UpdateUserInput{
 		Email:     req.Email,
 		Password:  req.Password,
 		FirstName: req.FirstName,

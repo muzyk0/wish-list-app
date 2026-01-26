@@ -15,7 +15,7 @@ type UserServiceInterface interface {
 	Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error)
 	Login(ctx context.Context, input LoginUserInput) (*UserOutput, error)
 	GetUser(ctx context.Context, userID string) (*UserOutput, error)
-	UpdateUser(ctx context.Context, userID string, input RegisterUserInput) (*UserOutput, error)
+	UpdateUser(ctx context.Context, userID string, input UpdateUserInput) (*UserOutput, error)
 	DeleteUser(ctx context.Context, userID string) error
 }
 
@@ -40,6 +40,14 @@ type RegisterUserInput struct {
 type LoginUserInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type UpdateUserInput struct {
+	Email     *string `json:"email,omitempty"`
+	Password  *string `json:"password,omitempty"`
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	AvatarUrl *string `json:"avatar_url,omitempty"`
 }
 
 type UserOutput struct {
@@ -155,7 +163,7 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 	return output, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, userID string, input RegisterUserInput) (*UserOutput, error) {
+func (s *UserService) UpdateUser(ctx context.Context, userID string, input UpdateUserInput) (*UserOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return nil, errors.New("invalid user id")
@@ -167,31 +175,31 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, input Regis
 	}
 
 	// Update fields if provided
-	if input.Email != "" {
-		user.Email = input.Email
+	if input.Email != nil && *input.Email != "" {
+		user.Email = *input.Email
 	}
-	if input.FirstName != "" {
+	if input.FirstName != nil {
 		user.FirstName = pgtype.Text{
-			String: input.FirstName,
+			String: *input.FirstName,
 			Valid:  true,
 		}
 	}
-	if input.LastName != "" {
+	if input.LastName != nil {
 		user.LastName = pgtype.Text{
-			String: input.LastName,
+			String: *input.LastName,
 			Valid:  true,
 		}
 	}
-	if input.AvatarUrl != "" {
+	if input.AvatarUrl != nil {
 		user.AvatarUrl = pgtype.Text{
-			String: input.AvatarUrl,
+			String: *input.AvatarUrl,
 			Valid:  true,
 		}
 	}
 
 	// If password is provided, hash and update it
-	if input.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if input.Password != nil && *input.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*input.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, errors.New("failed to hash password")
 		}
