@@ -157,6 +157,13 @@ func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 		})
 	}
 
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
 	// Get user from context
 	userID, _, _, err := auth.GetUserFromContext(c)
 	if err != nil {

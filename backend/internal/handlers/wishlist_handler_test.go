@@ -261,7 +261,7 @@ func TestWishListHandler_GetWishListByPublicSlug(t *testing.T) {
 // T048a: Unit tests for wish list update/delete endpoints
 func TestWishListHandler_UpdateWishList(t *testing.T) {
 	t.Run("owner can update own wishlist", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -301,7 +301,7 @@ func TestWishListHandler_UpdateWishList(t *testing.T) {
 	})
 
 	t.Run("unauthorized update returns error", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -325,7 +325,7 @@ func TestWishListHandler_UpdateWishList(t *testing.T) {
 	})
 
 	t.Run("update with service error", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -833,7 +833,7 @@ func TestWishListHandler_GetTemplates(t *testing.T) {
 
 func TestWishListHandler_UpdateWishListTemplate(t *testing.T) {
 	t.Run("owner can update template for wishlist", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -872,7 +872,7 @@ func TestWishListHandler_UpdateWishListTemplate(t *testing.T) {
 	})
 
 	t.Run("update to non-existent template returns error", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -900,7 +900,7 @@ func TestWishListHandler_UpdateWishListTemplate(t *testing.T) {
 	})
 
 	t.Run("non-owner cannot change template", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
