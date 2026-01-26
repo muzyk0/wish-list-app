@@ -24,6 +24,7 @@ type ReservationRepositoryInterface interface {
 	UpdateStatusByToken(ctx context.Context, token pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*db.Reservation, error)
 	ListUserReservationsWithDetails(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	ListGuestReservationsWithDetails(ctx context.Context, token pgtype.UUID) ([]ReservationDetail, error)
+	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
 }
 
 type ReservationDetail struct {
@@ -441,4 +442,20 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 	}
 
 	return reservations, nil
+}
+
+func (r *ReservationRepository) CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM reservations
+		WHERE reserved_by_user_id = $1 AND status IN ('active', 'cancelled')
+	`
+
+	var count int
+	err := r.db.GetContext(ctx, &count, query, userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count user reservations: %w", err)
+	}
+
+	return count, nil
 }

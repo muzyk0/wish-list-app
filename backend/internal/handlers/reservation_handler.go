@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -316,11 +317,26 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+
+	// Get total count for accurate pagination
+	totalCount, err := h.service.CountUserReservations(ctx, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": fmt.Errorf("failed to count user reservations: %w", err).Error(),
+		})
+	}
+
 	reservations, err := h.service.GetUserReservations(ctx, userID, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to get user reservations: %w", err).Error(),
 		})
+	}
+
+	// Calculate total pages
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+	if totalPages == 0 {
+		totalPages = 1
 	}
 
 	response := struct {
@@ -329,10 +345,10 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 	}{
 		Data: []ReservationDetailsResponse{},
 		Pagination: map[string]interface{}{
-			"page":  page,
-			"limit": limit,
-			// Note: total and totalPages omitted as we only fetch paginated results
-			// To include accurate totals, a COUNT query would be needed
+			"page":       page,
+			"limit":      limit,
+			"total":      totalCount,
+			"totalPages": totalPages,
 		},
 	}
 

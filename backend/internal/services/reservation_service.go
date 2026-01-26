@@ -19,6 +19,7 @@ type ReservationServiceInterface interface {
 	GetUserReservations(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]repositories.ReservationDetail, error)
 	GetGuestReservations(ctx context.Context, token pgtype.UUID) ([]repositories.ReservationDetail, error)
 	GetReservationStatus(ctx context.Context, publicSlug, giftItemID string) (*ReservationStatusOutput, error)
+	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
 }
 
 type ReservationService struct {
@@ -204,6 +205,10 @@ func (s *ReservationService) GetUserReservations(ctx context.Context, userID pgt
 
 func (s *ReservationService) GetGuestReservations(ctx context.Context, token pgtype.UUID) ([]repositories.ReservationDetail, error) {
 	return s.repo.ListGuestReservationsWithDetails(ctx, token)
+}
+
+func (s *ReservationService) CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error) {
+	return s.repo.CountUserReservations(ctx, userID)
 }
 
 // Add a method to handle guest reservation with token-based authentication
