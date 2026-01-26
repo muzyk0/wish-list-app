@@ -236,7 +236,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 // T068a: Unit tests for guest reservation token generation and validation
 func TestReservationHandler_GuestReservationToken(t *testing.T) {
 	t.Run("guest reservation generates unique token", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
@@ -296,7 +296,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 	})
 
 	t.Run("guest reservation requires name and email", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 

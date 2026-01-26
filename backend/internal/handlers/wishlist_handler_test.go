@@ -661,7 +661,7 @@ func TestWishListHandler_UpdateWishList_AuthorizationChecks(t *testing.T) {
 // T051a: Additional authorization tests for gift item update/delete endpoints
 func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 	t.Run("update gift item with valid data", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
@@ -720,7 +720,7 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 	})
 
 	t.Run("update gift item with service error", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 

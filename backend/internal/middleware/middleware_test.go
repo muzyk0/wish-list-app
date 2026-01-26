@@ -68,7 +68,7 @@ func TestSendErrorResponse(t *testing.T) {
 
 	// Test JSON response
 	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -76,7 +76,7 @@ func TestSendErrorResponse(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Contains(t, rec.Body.String(), "Bad request")
-	assert.Contains(t, rec.Body.String(), "error")
+	assert.Contains(t, rec.Body.String(), "\"error\"")
 
 	// Test plain text response
 	req = httptest.NewRequest(http.MethodGet, "/", http.NoBody)
@@ -86,7 +86,7 @@ func TestSendErrorResponse(t *testing.T) {
 	sendErrorResponse(c, http.StatusInternalServerError, "Internal error")
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.Equal(t, "Internal error", rec.Body.String())
+	assert.Equal(t, "Error 500: Internal error", rec.Body.String())
 }
 
 func TestRequestIDMiddleware(t *testing.T) {
