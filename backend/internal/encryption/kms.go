@@ -98,14 +98,22 @@ func GetOrCreateDataKey(ctx context.Context) ([]byte, error) {
 			return plaintextKey, nil
 		}
 
-		// Generate new key if none exists
-		plaintextKey, _, err := kmsClient.GenerateDataKey(ctx)
+		// If no encrypted key is provided, check environment before generating
+		serverEnv := os.Getenv("SERVER_ENV")
+		if serverEnv != "" && serverEnv != "development" {
+			return nil, fmt.Errorf("KMS_KEY_ID is set but ENCRYPTED_DATA_KEY is not provided: in %s environment, you must provide and persist ENCRYPTED_DATA_KEY to prevent data loss", serverEnv)
+		}
+
+		// Development-only: Generate new key
+		plaintextKey, encryptedKey, err := kmsClient.GenerateDataKey(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate data key: %w", err)
 		}
 
-		// Note: In production, store ENCRYPTED_DATA_KEY in secret manager
-		// The encrypted key should be persisted externally, not logged
+		// Note: In development with KMS, the encrypted key must be persisted manually
+		// Store the encrypted key in ENCRYPTED_DATA_KEY environment variable or secret manager
+		// The encrypted key is not logged to prevent exposure
+		_ = encryptedKey // Explicitly discard to show it's intentional in dev mode
 		return plaintextKey, nil
 	}
 
