@@ -716,35 +716,28 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 
 	// If there were active reservations, send notifications to the reservation holders
 	if len(activeReservations) > 0 {
-		// Get the gift item details for the email
-		giftItem, err := s.giftItemRepo.GetByID(ctx, id)
+		// Get the wish list details using the gift item we fetched before deletion
+		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.WishlistID)
 		if err != nil {
-			// Log the error but continue with the deletion
-			fmt.Printf("Warning: failed to get gift item details for notification: %v\n", err)
+			// Log the error but continue with the notifications
+			fmt.Printf("Warning: failed to get wish list details for notification: %v\n", err)
 		} else {
-			// Get the wish list details
-			wishList, err := s.wishListRepo.GetByID(ctx, giftItem.WishlistID)
-			if err != nil {
-				// Log the error but continue with the notifications
-				fmt.Printf("Warning: failed to get wish list details for notification: %v\n", err)
-			} else {
-				// Send notification emails to all reservation holders
-				for _, reservation := range activeReservations {
-					var recipientEmail string
-					if reservation.GuestEmail.Valid {
-						recipientEmail = reservation.GuestEmail.String
-					} else if reservation.ReservedByUserID.Valid {
-						// For authenticated users, we would need to fetch their email
-						// For now, we'll skip sending to authenticated users in this implementation
-						continue
-					}
+			// Send notification emails to all reservation holders
+			for _, reservation := range activeReservations {
+				var recipientEmail string
+				if reservation.GuestEmail.Valid {
+					recipientEmail = reservation.GuestEmail.String
+				} else if reservation.ReservedByUserID.Valid {
+					// For authenticated users, we would need to fetch their email
+					// For now, we'll skip sending to authenticated users in this implementation
+					continue
+				}
 
-					if recipientEmail != "" {
-						err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItem.Name, wishList.Title)
-						if err != nil {
-							// Log the error but don't fail the deletion
-							fmt.Printf("Warning: failed to send reservation removal notification: %v\n", err)
-						}
+				if recipientEmail != "" {
+					err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItemForCache.Name, wishList.Title)
+					if err != nil {
+						// Log the error but don't fail the deletion
+						fmt.Printf("Warning: failed to send reservation removal notification: %v\n", err)
 					}
 				}
 			}
