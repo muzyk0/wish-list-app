@@ -420,25 +420,66 @@ func TestWishListHandler_DeleteWishList(t *testing.T) {
 // T051a: Unit tests for gift item update/delete endpoints
 func TestWishListHandler_UpdateGiftItem(t *testing.T) {
 	t.Run("valid update request", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
-		expectedGiftItem := &services.GiftItemOutput{
-			ID:    "gift-123",
+		handler := NewWishListHandler(mockService)
+
+		giftItemID := "gift-123"
+		userID := "user-123"
+
+		// Create request body
+		reqBody := UpdateGiftItemRequest{
 			Name:  "Updated Gift Name",
 			Price: 49.99,
 		}
 
-		mockService.On("UpdateGiftItem", mock.Anything, "gift-123", mock.AnythingOfType("services.UpdateGiftItemInput")).
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: userID,
+			}, nil)
+
+		expectedGiftItem := &services.GiftItemOutput{
+			ID:    giftItemID,
+			Name:  "Updated Gift Name",
+			Price: 49.99,
+		}
+
+		mockService.On("UpdateGiftItem", mock.Anything, giftItemID, mock.AnythingOfType("services.UpdateGiftItemInput")).
 			Return(expectedGiftItem, nil)
 
-		req := httptest.NewRequest(http.MethodPut, "/gift-items/gift-123", http.NoBody)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetParamNames("id")
-		c.SetParamValues("gift-123")
+		// Set up auth context
+		auth := AuthContext{
+			UserID:   userID,
+			Email:    "test@example.com",
+			UserType: "user",
+		}
+		c, rec := CreateTestContextWithParams(e, http.MethodPut, "/gift-items/"+giftItemID, reqBody,
+			[]string{"id"}, []string{giftItemID}, &auth)
 
-		// Full implementation requires request body binding
+		// Call handler
+		err := handler.UpdateGiftItem(c)
+		require.NoError(t, err)
+
+		// Assert response
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response services.GiftItemOutput
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Equal(t, expectedGiftItem.ID, response.ID)
+		assert.Equal(t, expectedGiftItem.Name, response.Name)
+		assert.Equal(t, expectedGiftItem.Price, response.Price)
+
+		mockService.AssertExpectations(t)
 	})
 }
 
