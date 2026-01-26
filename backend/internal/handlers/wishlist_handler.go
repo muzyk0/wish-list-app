@@ -328,6 +328,26 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+
+	// Check access to the wishlist before fetching items
+	wishList, err := h.service.GetWishList(ctx, wishListID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wishlist not found",
+		})
+	}
+
+	// Get user from context to check ownership
+	currentUserID, _, _, _ := auth.GetUserFromContext(c)
+
+	// Check if user has access to the wishlist
+	isOwner := currentUserID == wishList.OwnerID
+	if !isOwner && !wishList.IsPublic {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "Access denied",
+		})
+	}
+
 	giftItems, err := h.service.GetGiftItemsByWishList(ctx, wishListID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
