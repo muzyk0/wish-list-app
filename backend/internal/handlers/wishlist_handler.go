@@ -332,6 +332,21 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 		giftItems = []*services.GiftItemOutput{}
 	}
 
+	// Apply pagination
+	total := len(giftItems)
+	start := (page - 1) * limit
+	end := start + limit
+	if end > total {
+		end = total
+	}
+
+	// Handle out of bounds
+	if start > total {
+		start = total
+	}
+
+	pagedItems := giftItems[start:end]
+
 	type GetGiftItemsResponse struct {
 		Items []*services.GiftItemOutput `json:"items"`
 		Total int                        `json:"total"`
@@ -341,11 +356,11 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	}
 
 	response := GetGiftItemsResponse{
-		Items: giftItems,
-		Total: len(giftItems),
+		Items: pagedItems,
+		Total: total,
 		Page:  page,
 		Limit: limit,
-		Pages: (len(giftItems) + limit - 1) / limit,
+		Pages: (total + limit - 1) / limit,
 	}
 
 	return c.JSON(http.StatusOK, response)
