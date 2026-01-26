@@ -116,10 +116,10 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 	// Get user from context to check ownership
 	currentUserID, _, _, _ := auth.GetUserFromContext(c)
 
-	// If not the owner and not public, return unauthorized
+	// If not the owner and not public, return forbidden
 	isOwner := currentUserID == wishList.OwnerID
 	if !isOwner && !wishList.IsPublic {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
+		return c.JSON(http.StatusForbidden, map[string]string{
 			"error": "Access denied",
 		})
 	}
