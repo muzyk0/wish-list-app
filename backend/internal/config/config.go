@@ -19,7 +19,6 @@ type Config struct {
 	AWSAccessKeyID     string
 	AWSSecretAccessKey string
 	AWSS3BucketName    string
-	AWSS3Region        string
 	CorsAllowedOrigins []string
 	RedisAddr          string
 	RedisPassword      string
@@ -57,7 +56,6 @@ func Load() *Config {
 		AWSAccessKeyID:     getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),
 		AWSSecretAccessKey: getEnvOrDefault("AWS_SECRET_ACCESS_KEY", ""),
 		AWSS3BucketName:    getEnvOrDefault("AWS_S3_BUCKET_NAME", ""),
-		AWSS3Region:        getEnvOrDefault("AWS_S3_REGION", "us-east-1"),
 		CorsAllowedOrigins: getSliceEnvOrDefault("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://localhost:19006"}),
 		RedisAddr:          getEnvOrDefault("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:      getEnvOrDefault("REDIS_PASSWORD", ""),
