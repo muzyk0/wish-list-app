@@ -39,6 +39,7 @@ type Reservation struct {
 	CanceledAt          pgtype.Timestamptz `db:"canceled_at" json:"canceled_at"`
 	CancelReason        pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
 	NotificationSent    pgtype.Bool        `db:"notification_sent" json:"notification_sent"`
+	UpdatedAt           pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
 type Template struct {

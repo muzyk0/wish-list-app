@@ -146,7 +146,7 @@ func (r *ReservationRepository) Create(ctx context.Context, reservation db.Reser
 		) RETURNING
 			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
-			expires_at, canceled_at, cancel_reason, notification_sent
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var createdReservation db.Reservation
@@ -180,7 +180,7 @@ func (r *ReservationRepository) GetByID(ctx context.Context, id pgtype.UUID) (*d
 		SELECT
 			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
-			expires_at, canceled_at, cancel_reason, notification_sent
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE id = $1
 	`
@@ -208,7 +208,7 @@ func (r *ReservationRepository) GetByToken(ctx context.Context, token pgtype.UUI
 		SELECT
 			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
-			expires_at, canceled_at, cancel_reason, notification_sent
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE reservation_token = $1
 	`
@@ -236,7 +236,7 @@ func (r *ReservationRepository) GetByGiftItem(ctx context.Context, giftItemID pg
 		SELECT
 			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
-			expires_at, canceled_at, cancel_reason, notification_sent
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE gift_item_id = $1
 		ORDER BY reserved_at DESC
@@ -262,7 +262,7 @@ func (r *ReservationRepository) GetByGiftItem(ctx context.Context, giftItemID pg
 func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent
+			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE gift_item_id = $1 AND status = 'active'
 		LIMIT 1
@@ -283,7 +283,7 @@ func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Cont
 // GetReservationsByUser retrieves reservations made by a user
 func (r *ReservationRepository) GetReservationsByUser(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]*db.Reservation, error) {
 	query := `
-		SELECT r.id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.guest_email, r.reservation_token, r.status, r.reserved_at, r.expires_at, r.canceled_at, r.cancel_reason, r.notification_sent
+		SELECT r.id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.guest_email, r.reservation_token, r.status, r.reserved_at, r.expires_at, r.canceled_at, r.cancel_reason, r.notification_sent, r.updated_at
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
 		JOIN wishlists w ON gi.wishlist_id = w.id
@@ -311,7 +311,7 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 			updated_at = NOW()
 		WHERE id = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent
+			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var updatedReservation db.Reservation
@@ -342,7 +342,7 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 			updated_at = NOW()
 		WHERE reservation_token = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent
+			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var updatedReservation db.Reservation
