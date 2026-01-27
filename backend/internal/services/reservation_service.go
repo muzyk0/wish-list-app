@@ -81,9 +81,28 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 		return nil, errors.New("invalid gift item id")
 	}
 
-	giftItem, err := s.giftItemRepo.GetByID(ctx, giftItemID)
+	wishlistID := pgtype.UUID{}
+	if err := wishlistID.Scan(input.WishListID); err != nil {
+		return nil, errors.New("invalid wishlist id")
+	}
+
+	// Verify ownership: get all gift items for this wishlist and check if our item is among them
+	wishlistItems, err := s.giftItemRepo.GetByWishList(ctx, wishlistID)
 	if err != nil {
-		return nil, fmt.Errorf("gift item not found: %w", err)
+		return nil, fmt.Errorf("failed to verify wishlist ownership: %w", err)
+	}
+
+	// Check if the gift item belongs to this wishlist
+	var giftItem *db.GiftItem
+	for _, item := range wishlistItems {
+		if item.ID == giftItemID {
+			giftItem = item
+			break
+		}
+	}
+
+	if giftItem == nil {
+		return nil, errors.New("gift item not found in the specified wishlist")
 	}
 
 	// Handle reservation based on user type (authenticated vs guest)
@@ -149,15 +168,39 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 }
 
 func (s *ReservationService) CancelReservation(ctx context.Context, input CancelReservationInput) (*ReservationOutput, error) {
+	// Validate gift item belongs to the specified wishlist
+	giftItemID := pgtype.UUID{}
+	if err := giftItemID.Scan(input.GiftItemID); err != nil {
+		return nil, errors.New("invalid gift item id")
+	}
+
+	wishlistID := pgtype.UUID{}
+	if err := wishlistID.Scan(input.WishListID); err != nil {
+		return nil, errors.New("invalid wishlist id")
+	}
+
+	// Verify ownership: get all gift items for this wishlist and check if our item is among them
+	wishlistItems, err := s.giftItemRepo.GetByWishList(ctx, wishlistID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify wishlist ownership: %w", err)
+	}
+
+	// Check if the gift item belongs to this wishlist
+	itemFound := false
+	for _, item := range wishlistItems {
+		if item.ID == giftItemID {
+			itemFound = true
+			break
+		}
+	}
+
+	if !itemFound {
+		return nil, errors.New("gift item not found in the specified wishlist")
+	}
 
 	// Determine which reservation to cancel based on input
 	if input.UserID.Valid {
 		// Find reservation by user and gift item
-		giftItemID := pgtype.UUID{}
-		if err := giftItemID.Scan(input.GiftItemID); err != nil {
-			return nil, errors.New("invalid gift item id")
-		}
-
 		reservations, err := s.repo.GetByGiftItem(ctx, giftItemID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get reservations for gift item: %w", err)
@@ -254,6 +297,25 @@ func (s *ReservationService) GetReservationStatus(ctx context.Context, publicSlu
 	itemID := pgtype.UUID{}
 	if err := itemID.Scan(giftItemID); err != nil {
 		return nil, errors.New("invalid gift item id")
+	}
+
+	// Verify ownership: get all gift items for this public wishlist and check if our item is among them
+	publicWishlistItems, err := s.giftItemRepo.GetPublicWishListGiftItems(ctx, publicSlug)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get public wishlist items: %w", err)
+	}
+
+	// Check if the gift item belongs to this public wishlist
+	itemFound := false
+	for _, item := range publicWishlistItems {
+		if item.ID == itemID {
+			itemFound = true
+			break
+		}
+	}
+
+	if !itemFound {
+		return nil, errors.New("gift item not found in the specified public wishlist")
 	}
 
 	// Check if there's an active reservation for this gift item
@@ -369,12 +431,22 @@ func (s *ReservationService) mapToDbReservation(detail repositories.ReservationD
 }
 
 func (s *ReservationService) mapToOutput(reservation *db.Reservation) *ReservationOutput {
+	var guestName *string
+	if reservation.GuestName.Valid {
+		guestName = &reservation.GuestName.String
+	}
+
+	var guestEmail *string
+	if reservation.GuestEmail.Valid {
+		guestEmail = &reservation.GuestEmail.String
+	}
+
 	return &ReservationOutput{
 		ID:               reservation.ID,
 		GiftItemID:       reservation.GiftItemID,
 		ReservedByUserID: reservation.ReservedByUserID,
-		GuestName:        nil,
-		GuestEmail:       nil,
+		GuestName:        guestName,
+		GuestEmail:       guestEmail,
 		ReservationToken: reservation.ReservationToken,
 		Status:           reservation.Status,
 		ReservedAt:       reservation.ReservedAt,

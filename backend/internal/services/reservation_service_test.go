@@ -22,6 +22,11 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
+			{ID: giftItemID},
+		}, nil)
+
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
@@ -31,6 +36,7 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 		assert.Equal(t, "available", status.Status)
 
 		mockRepo.AssertExpectations(t)
+		mockGiftItemRepo.AssertExpectations(t)
 	})
 
 	t.Run("reserved gift item", func(t *testing.T) {
@@ -48,6 +54,11 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 			ReservationToken: token,
 			Status:           "active",
 		}
+
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
+			{ID: giftItemID},
+		}, nil)
 
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(activeReservation, nil)
 		mockRepo.On("ListGuestReservationsWithDetails", mock.Anything, token).Return([]repositories.ReservationDetail{}, nil)
@@ -100,6 +111,11 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 			},
 		}
 
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
+			{ID: giftItemID},
+		}, nil)
+
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(expiredReservation, nil)
 		mockRepo.On("UpdateStatus", mock.Anything, reservationID, "expired", mock.Anything, mock.Anything).
 			Return(&db.Reservation{Status: "expired"}, nil)
@@ -111,6 +127,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		assert.Equal(t, "available", status.Status)
 
 		mockRepo.AssertExpectations(t)
+		mockGiftItemRepo.AssertExpectations(t)
 	})
 
 	t.Run("non-expired reservation remains active", func(t *testing.T) {
@@ -134,6 +151,11 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 			},
 		}
 
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
+			{ID: giftItemID},
+		}, nil)
+
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(activeReservation, nil)
 		mockRepo.On("ListGuestReservationsWithDetails", mock.Anything, token).Return([]repositories.ReservationDetail{}, nil)
 
@@ -144,6 +166,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		assert.Equal(t, "active", status.Status)
 
 		mockRepo.AssertExpectations(t)
+		mockGiftItemRepo.AssertExpectations(t)
 	})
 
 	t.Run("reservation without expiry date stays active", func(t *testing.T) {
@@ -154,6 +177,11 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		token := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
+
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
+			{ID: giftItemID},
+		}, nil)
 
 		// Create reservation without expiry date
 		activeReservation := &db.Reservation{
@@ -174,6 +202,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		assert.Equal(t, "active", status.Status)
 
 		mockRepo.AssertExpectations(t)
+		mockGiftItemRepo.AssertExpectations(t)
 	})
 }
 
@@ -186,6 +215,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
 		// Create gift item
 		giftItem := &db.GiftItem{
@@ -199,13 +229,14 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 			Status:     "active",
 		}
 
-		mockGiftItemRepo.On("GetByID", mock.Anything, giftItemID).Return(giftItem, nil)
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(existingReservation, nil)
 
 		guestName := "Test User"
 		guestEmail := "test@example.com"
 		input := CreateReservationInput{
-			WishListID: "list-123",
+			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
 			UserID:     pgtype.UUID{Valid: false},
 			GuestName:  &guestName,
@@ -229,6 +260,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		userID := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
 		// Create gift item
 		giftItem := &db.GiftItem{
@@ -247,12 +279,13 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 			Status:           "active",
 		}
 
-		mockGiftItemRepo.On("GetByID", mock.Anything, giftItemID).Return(giftItem, nil)
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
 		mockGiftItemRepo.On("ReserveIfNotReserved", mock.Anything, giftItemID, userID).Return(reservedItem, nil)
 		mockRepo.On("Create", mock.Anything, mock.AnythingOfType("db.Reservation")).Return(createdReservation, nil)
 
 		input := CreateReservationInput{
-			WishListID: "list-123",
+			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
 			UserID:     userID,
 		}
@@ -284,6 +317,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
 		giftItem := &db.GiftItem{
 			ID: giftItemID,
@@ -295,14 +329,15 @@ func TestReservationService_CreateReservation(t *testing.T) {
 			Status:     "active",
 		}
 
-		mockGiftItemRepo.On("GetByID", mock.Anything, giftItemID).Return(giftItem, nil)
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
 		mockRepo.On("Create", mock.Anything, mock.AnythingOfType("db.Reservation")).Return(createdReservation, nil)
 
 		guestName := "Test Guest"
 		guestEmail := "guest@example.com"
 		input := CreateReservationInput{
-			WishListID: "list-123",
+			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
 			UserID:     pgtype.UUID{Valid: false},
 			GuestName:  &guestName,
@@ -326,17 +361,19 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
 		giftItem := &db.GiftItem{
 			ID: giftItemID,
 		}
 
-		mockGiftItemRepo.On("GetByID", mock.Anything, giftItemID).Return(giftItem, nil)
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
 		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
 
 		// Missing guest details
 		input := CreateReservationInput{
-			WishListID: "list-123",
+			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
 			UserID:     pgtype.UUID{Valid: false},
 			GuestName:  nil,
@@ -377,6 +414,12 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		token := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
+		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
+
+		giftItem := &db.GiftItem{
+			ID: giftItemID,
+		}
 
 		canceledReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
@@ -384,12 +427,14 @@ func TestReservationService_CancelReservation(t *testing.T) {
 			Status:           "cancelled",
 		}
 
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
 		mockRepo.On("UpdateStatusByToken", mock.Anything, token, "cancelled", mock.Anything, mock.Anything).
 			Return(canceledReservation, nil)
 
 		input := CancelReservationInput{
-			WishListID:       "list-123",
-			GiftItemID:       "item-456",
+			WishListID:       wishlistID.String(),
+			GiftItemID:       giftItemID.String(),
 			UserID:           pgtype.UUID{Valid: false},
 			ReservationToken: &token,
 		}
@@ -409,9 +454,19 @@ func TestReservationService_CancelReservation(t *testing.T) {
 
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
+		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
+		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
+
+		giftItem := &db.GiftItem{
+			ID: giftItemID,
+		}
+
+		// Mock ownership validation
+		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
+
 		input := CancelReservationInput{
-			WishListID:       "list-123",
-			GiftItemID:       "item-456",
+			WishListID:       wishlistID.String(),
+			GiftItemID:       giftItemID.String(),
 			UserID:           pgtype.UUID{Valid: false},
 			ReservationToken: nil,
 		}
@@ -420,5 +475,7 @@ func TestReservationService_CancelReservation(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "either user ID or reservation token must be provided")
+
+		mockGiftItemRepo.AssertExpectations(t)
 	})
 }
