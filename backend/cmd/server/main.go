@@ -164,6 +164,7 @@ func main() {
 	accountCleanupService := services.NewAccountCleanupService(userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
 	// Initialize handlers with analytics integration
+	healthHandler := handlers.NewHealthHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
@@ -172,7 +173,7 @@ func main() {
 	accountCleanupService.StartScheduledCleanup()
 
 	// Initialize routes
-	setupRoutes(e, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
+	setupRoutes(e, healthHandler, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
 
 	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
 
@@ -217,13 +218,9 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, userHandler *handlers.UserHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Health check endpoint
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"status": "healthy",
-		})
-	})
+	e.GET("/health", healthHandler.Health)
 
 	// User authentication endpoints
 	authGroup := e.Group("/api/auth")
