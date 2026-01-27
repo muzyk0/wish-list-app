@@ -537,6 +537,44 @@ func TestWishListHandler_DeleteGiftItem(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	t.Run("non-owner cannot delete gift item", func(t *testing.T) {
+		e := echo.New()
+		mockService := new(MockWishListService)
+		handler := NewWishListHandler(mockService)
+
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, "gift-123").
+			Return(&services.GiftItemOutput{
+				ID:         "gift-123",
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with different owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: "owner-999",
+			}, nil)
+
+		req := httptest.NewRequest(http.MethodDelete, "/gift-items/gift-123", http.NoBody)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("gift-123")
+		// Set user context
+		c.Set("user_id", "user-123")
+		c.Set("email", "test@example.com")
+		c.Set("user_type", "user")
+
+		err := handler.DeleteGiftItem(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusForbidden, rec.Code)
+
+		mockService.AssertNotCalled(t, "DeleteGiftItem", mock.Anything, mock.Anything)
+		mockService.AssertExpectations(t)
+	})
+
 	t.Run("gift item not found", func(t *testing.T) {
 		e := echo.New()
 		mockService := new(MockWishListService)
