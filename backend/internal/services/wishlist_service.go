@@ -19,7 +19,8 @@ import (
 
 // Sentinel errors
 var (
-	ErrWishListNotFound = errors.New("wishlist not found")
+	ErrWishListNotFound  = errors.New("wishlist not found")
+	ErrWishListForbidden = errors.New("not authorized to access this wishlist")
 )
 
 // WishListServiceInterface defines the interface for wishlist-related operations
@@ -177,15 +178,31 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 		publicSlug = pgtype.Text{Valid: false}
 	}
 
+	// Parse OccasionDate if provided
+	var occasionDate pgtype.Date
+	if input.OccasionDate != "" {
+		if parsedDate, err := time.Parse(time.RFC3339, input.OccasionDate); err == nil {
+			occasionDate = pgtype.Date{
+				Time:  parsedDate,
+				Valid: true,
+			}
+		} else {
+			occasionDate = pgtype.Date{Valid: false}
+		}
+	} else {
+		occasionDate = pgtype.Date{Valid: false}
+	}
+
 	// Create wishlist
 	wishList := db.WishList{
-		OwnerID:     ownerID,
-		Title:       input.Title,
-		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
-		Occasion:    pgtype.Text{String: input.Occasion, Valid: input.Occasion != ""},
-		TemplateID:  input.TemplateID,
-		IsPublic:    pgtype.Bool{Bool: input.IsPublic, Valid: true},
-		PublicSlug:  publicSlug,
+		OwnerID:      ownerID,
+		Title:        input.Title,
+		Description:  pgtype.Text{String: input.Description, Valid: input.Description != ""},
+		Occasion:     pgtype.Text{String: input.Occasion, Valid: input.Occasion != ""},
+		OccasionDate: occasionDate,
+		TemplateID:   input.TemplateID,
+		IsPublic:     pgtype.Bool{Bool: input.IsPublic, Valid: true},
+		PublicSlug:   publicSlug,
 	}
 
 	createdWishList, err := s.wishListRepo.Create(ctx, wishList)
@@ -194,17 +211,18 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 	}
 
 	output := &WishListOutput{
-		ID:          createdWishList.ID.String(),
-		OwnerID:     createdWishList.OwnerID.String(),
-		Title:       createdWishList.Title,
-		Description: createdWishList.Description.String,
-		Occasion:    createdWishList.Occasion.String,
-		TemplateID:  createdWishList.TemplateID,
-		IsPublic:    createdWishList.IsPublic.Bool,
-		PublicSlug:  createdWishList.PublicSlug.String,
-		ViewCount:   int64(createdWishList.ViewCount.Int32),
-		CreatedAt:   createdWishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   createdWishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:           createdWishList.ID.String(),
+		OwnerID:      createdWishList.OwnerID.String(),
+		Title:        createdWishList.Title,
+		Description:  createdWishList.Description.String,
+		Occasion:     createdWishList.Occasion.String,
+		OccasionDate: createdWishList.OccasionDate.Time.Format(time.RFC3339),
+		TemplateID:   createdWishList.TemplateID,
+		IsPublic:     createdWishList.IsPublic.Bool,
+		PublicSlug:   createdWishList.PublicSlug.String,
+		ViewCount:    int64(createdWishList.ViewCount.Int32),
+		CreatedAt:    createdWishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:    createdWishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	return output, nil
@@ -329,7 +347,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	}
 
 	if wishList.OwnerID != ownerID {
-		return nil, errors.New("not authorized to update this wishlist")
+		return nil, ErrWishListForbidden
 	}
 
 	// Update wishlist - only update fields that are provided in the input
@@ -442,7 +460,7 @@ func (s *WishListService) DeleteWishList(ctx context.Context, wishListID, userID
 	}
 
 	if wishList.OwnerID != ownerID {
-		return errors.New("not authorized to delete this wishlist")
+		return ErrWishListForbidden
 	}
 
 	// Check if there are any active reservations for gift items in this wishlist
@@ -582,34 +600,30 @@ func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*
 }
 
 func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID string) ([]*GiftItemOutput, error) {
-	// Debug logging
-	fmt.Printf("DEBUG: GetGiftItemsByWishList called with wishListID: %s\n", wishListID)
-
 	listID := pgtype.UUID{}
 	if err := listID.Scan(wishListID); err != nil {
-		fmt.Printf("DEBUG: Error scanning UUID: %v\n", err)
 		return nil, errors.New("invalid wishlist id")
 	}
 
-	fmt.Printf("DEBUG: Successfully scanned UUID: %s, Valid: %t\n", listID.String(), listID.Valid)
-
 	giftItems, err := s.giftItemRepo.GetByWishList(ctx, listID)
 	if err != nil {
-		fmt.Printf("DEBUG: Error from repository: %v\n", err)
 		return nil, fmt.Errorf("failed to get gift items from repository: %w", err)
 	}
 
-	fmt.Printf("DEBUG: Repository returned giftItems: %v, err: %v\n", giftItems, err)
-	fmt.Printf("DEBUG: Length of giftItems: %d\n", len(giftItems))
-
 	var outputs []*GiftItemOutput
 
-	for i, giftItem := range giftItems {
-		fmt.Printf("DEBUG: Processing gift item %d, item is nil: %t\n", i, giftItem == nil)
-
+	for _, giftItem := range giftItems {
 		if giftItem == nil {
-			fmt.Printf("DEBUG: Skipping nil gift item at index %d\n", i)
 			continue // Skip nil items to avoid panic
+		}
+
+		// Convert price to float64
+		var price float64
+		if giftItem.Price.Valid {
+			priceValue, err := giftItem.Price.Float64Value()
+			if err == nil && priceValue.Valid {
+				price = priceValue.Float64
+			}
 		}
 
 		output := &GiftItemOutput{
@@ -619,6 +633,7 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 			Description: giftItem.Description.String,
 			Link:        giftItem.Link.String,
 			ImageURL:    giftItem.ImageUrl.String,
+			Price:       price,
 			Priority:    int(giftItem.Priority.Int32),
 			Notes:       giftItem.Notes.String,
 			Position:    int(giftItem.Position.Int32),
@@ -628,7 +643,6 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 		outputs = append(outputs, output)
 	}
 
-	fmt.Printf("DEBUG: Returning outputs length: %d, error: %v\n", len(outputs), nil)
 	return outputs, nil
 }
 
@@ -698,6 +712,15 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 		}
 	}
 
+	// Convert price to float64
+	var price float64
+	if updated.Price.Valid {
+		priceValue, err := updated.Price.Float64Value()
+		if err == nil && priceValue.Valid {
+			price = priceValue.Float64
+		}
+	}
+
 	output := &GiftItemOutput{
 		ID:          updated.ID.String(),
 		WishlistID:  updated.WishlistID.String(),
@@ -705,6 +728,7 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 		Description: updated.Description.String,
 		Link:        updated.Link.String,
 		ImageURL:    updated.ImageUrl.String,
+		Price:       price,
 		Priority:    int(updated.Priority.Int32),
 		Notes:       updated.Notes.String,
 		Position:    int(updated.Position.Int32),

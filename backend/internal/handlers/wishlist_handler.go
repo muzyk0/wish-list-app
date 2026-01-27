@@ -191,6 +191,12 @@ func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 				"error": "wish list not found",
 			})
 		}
+		// Check if it's a forbidden error
+		if errors.Is(err, services.ErrWishListForbidden) {
+			return c.JSON(http.StatusForbidden, map[string]string{
+				"error": "forbidden",
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to update wish list: %w", err).Error(),
 		})
@@ -213,6 +219,12 @@ func (h *WishListHandler) DeleteWishList(c echo.Context) error {
 	ctx := c.Request().Context()
 	err = h.service.DeleteWishList(ctx, wishListID, userID)
 	if err != nil {
+		// Check if it's a forbidden error
+		if errors.Is(err, services.ErrWishListForbidden) {
+			return c.JSON(http.StatusForbidden, map[string]string{
+				"error": "forbidden",
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to delete wish list: %w", err).Error(),
 		})
