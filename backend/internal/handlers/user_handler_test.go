@@ -266,14 +266,14 @@ func TestUserHandler_Register_Conflict(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	// Setup expectations - return error
+	// Setup expectations - return duplicate user error
 	mockService.On("Register", mock.Anything, services.RegisterUserInput{
 		Email:     reqBody.Email,
 		Password:  reqBody.Password,
 		FirstName: reqBody.FirstName,
 		LastName:  reqBody.LastName,
 		AvatarUrl: reqBody.AvatarUrl,
-	}).Return((*services.UserOutput)(nil), assert.AnError)
+	}).Return((*services.UserOutput)(nil), services.ErrUserAlreadyExists)
 
 	// Call the handler
 	err := handler.Register(c)

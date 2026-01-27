@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"crypto/sha256"
+	"errors"
+	"fmt"
 	"net/http"
 	"wish-list/internal/analytics"
 	"wish-list/internal/auth"
@@ -76,8 +79,16 @@ func (h *UserHandler) Register(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(http.StatusConflict, map[string]string{
-			"error": err.Error(),
+		// Detect duplicate user error specifically
+		if errors.Is(err, services.ErrUserAlreadyExists) {
+			return c.JSON(http.StatusConflict, map[string]string{
+				"error": "User with this email already exists",
+			})
+		}
+		// Log detailed error server-side, return generic message to client
+		c.Logger().Errorf("Registration failed: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to create user account",
 		})
 	}
 
@@ -122,8 +133,9 @@ func (h *UserHandler) Login(c echo.Context) error {
 	})
 
 	if err != nil {
-		// Log the actual error server-side for debugging
-		c.Logger().Errorf("Login failed for email %s: %v", req.Email, err)
+		// Log the error server-side for debugging with redacted email (avoid PII in logs)
+		emailHash := fmt.Sprintf("%x", sha256.Sum256([]byte(req.Email)))[:16]
+		c.Logger().Errorf("Login failed for email_hash %s: %v", emailHash, err)
 		// Return generic message to avoid leaking information about user existence
 		return c.JSON(http.StatusUnauthorized, map[string]string{
 			"error": "Invalid credentials",

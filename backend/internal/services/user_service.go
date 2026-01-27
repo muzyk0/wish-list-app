@@ -10,6 +10,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Sentinel errors
+var (
+	ErrUserAlreadyExists = errors.New("user with this email already exists")
+)
+
 // UserServiceInterface defines the interface for user-related operations
 type UserServiceInterface interface {
 	Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error)
@@ -65,9 +70,16 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 	}
 
 	// Check if user already exists
-	existingUser, _ := s.repo.GetByEmail(ctx, input.Email)
+	existingUser, err := s.repo.GetByEmail(ctx, input.Email)
+	if err != nil {
+		// If error is "user not found", continue with registration
+		if err.Error() != "user not found" {
+			// Surface other database errors
+			return nil, err
+		}
+	}
 	if existingUser != nil {
-		return nil, errors.New("user with this email already exists")
+		return nil, ErrUserAlreadyExists
 	}
 
 	// Hash password

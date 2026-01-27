@@ -217,6 +217,7 @@ func TestRateLimiterMiddlewareHealthEndpoint(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+	c.SetPath("/health") // Set path so skipper sees the correct path
 
 	middleware := RateLimiterMiddleware()
 	handler := middleware(func(c echo.Context) error {

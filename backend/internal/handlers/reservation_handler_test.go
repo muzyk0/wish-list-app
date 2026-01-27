@@ -333,48 +333,81 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 	t.Run("invalid reservation token format", func(t *testing.T) {
 		// Test that invalid UUID format is rejected
 		e := setupTestEcho()
+		mockService := new(MockReservationService)
+		handler := NewReservationHandler(mockService)
+
 		invalidToken := "not-a-valid-uuid"
 		reqBody := CancelReservationRequest{
 			ReservationToken: &invalidToken,
 		}
 
 		jsonBody, _ := json.Marshal(reqBody)
-		req := httptest.NewRequest(http.MethodPost, "/wishlists/list-123/items/item-456/cancel", bytes.NewReader(jsonBody))
+		req := httptest.NewRequest(http.MethodDelete, "/api/reservations/wishlist/list-123/item/item-456", bytes.NewReader(jsonBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("wishlistId", "itemId")
 		c.SetParamValues("list-123", "item-456")
 
-		// Should reject invalid token format
+		// Invoke handler - should reject invalid token format
+		err := handler.CancelReservation(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		var response map[string]string
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Contains(t, response["error"], "UUID")
 	})
 
 	t.Run("reservation token uniqueness", func(t *testing.T) {
-		// Test that each guest reservation gets a unique token
-		// This would be tested at the service layer primarily
+		t.Skip("Token uniqueness is tested in the service layer")
 	})
 
 	t.Run("token-based reservation lookup", func(t *testing.T) {
 		// Test retrieving reservations by token
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
-		token := "123e4567-e89b-12d3-a456-426614174000"
+		handler := NewReservationHandler(mockService)
 
-		expectedReservations := []*services.ReservationOutput{
+		tokenStr := "123e4567-e89b-12d3-a456-426614174000"
+		tokenUUID := pgtype.UUID{}
+		err := tokenUUID.Scan(tokenStr)
+		require.NoError(t, err)
+
+		expectedReservations := []repositories.ReservationDetail{
 			{
-				ID:         pgtype.UUID{Valid: true},
-				GiftItemID: pgtype.UUID{Valid: true},
-				Status:     "active",
-				ReservationToken: pgtype.UUID{
-					Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
-					Valid: true,
-				},
+				ID:               pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
+				GiftItemID:       pgtype.UUID{Bytes: [16]byte{2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
+				Status:           "active",
+				ReservationToken: tokenUUID,
+				ReservedAt:       pgtype.Timestamptz{Time: time.Now(), Valid: true},
+				GiftItemName:     pgtype.Text{String: "Test Item", Valid: true},
+				WishlistID:       pgtype.UUID{Bytes: [16]byte{3, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
+				WishlistTitle:    pgtype.Text{String: "Test Wishlist", Valid: true},
 			},
 		}
 
-		mockService.On("GetGuestReservations", mock.Anything, token).
+		mockService.On("GetGuestReservations", mock.Anything, tokenUUID).
 			Return(expectedReservations, nil)
 
-		// Full test requires handler method for getting guest reservations
+		req := httptest.NewRequest(http.MethodGet, "/api/guest/reservations?token="+tokenStr, http.NoBody)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		err = handler.GetGuestReservations(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response []ReservationDetailsResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.Len(t, response, 1)
+		assert.Equal(t, "active", response[0].Status)
+		assert.Equal(t, "Test Item", response[0].GiftItem.Name)
+		assert.Equal(t, "Test Wishlist", response[0].Wishlist.Title)
+
+		mockService.AssertExpectations(t)
 	})
 }
 
