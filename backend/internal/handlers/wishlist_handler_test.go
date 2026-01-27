@@ -809,20 +809,24 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 // T048a: Additional authorization tests for wish list update/delete endpoints
 func TestWishListHandler_UpdateWishList_AuthorizationChecks(t *testing.T) {
 	t.Run("update non-existent wishlist returns not found", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewWishListHandler(mockService)
 
-		mockService.On("GetWishList", mock.Anything, "non-existent-id").
-			Return((*services.WishListOutput)(nil), assert.AnError)
+		title := "New Title"
+		reqBody := UpdateWishListRequest{
+			Title: &title,
+		}
 
-		req := httptest.NewRequest(http.MethodGet, "/wishlists/non-existent-id", http.NoBody)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetParamNames("id")
-		c.SetParamValues("non-existent-id")
+		authCtx := DefaultAuthContext()
 
-		err := handler.GetWishList(c)
+		mockService.On("UpdateWishList", mock.Anything, "non-existent-id", mock.Anything, mock.AnythingOfType("services.UpdateWishListInput")).
+			Return((*services.WishListOutput)(nil), services.ErrWishListNotFound)
+
+		c, rec := CreateTestContextWithParams(e, http.MethodPut, "/wishlists/non-existent-id", reqBody,
+			[]string{"id"}, []string{"non-existent-id"}, &authCtx)
+
+		err := handler.UpdateWishList(c)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, rec.Code)

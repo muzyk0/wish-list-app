@@ -17,6 +17,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// Sentinel errors
+var (
+	ErrWishListNotFound = errors.New("wishlist not found")
+)
+
 // WishListServiceInterface defines the interface for wishlist-related operations
 type WishListServiceInterface interface {
 	CreateWishList(ctx context.Context, userID string, input CreateWishListInput) (*WishListOutput, error)
@@ -315,7 +320,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	// Verify ownership
 	wishList, err := s.wishListRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get wishlist from repository: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrWishListNotFound, err)
 	}
 
 	ownerID := pgtype.UUID{}

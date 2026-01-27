@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -184,6 +185,12 @@ func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 	})
 
 	if err != nil {
+		// Check if it's a "not found" error
+		if errors.Is(err, services.ErrWishListNotFound) {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": "wish list not found",
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to update wish list: %w", err).Error(),
 		})
