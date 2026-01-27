@@ -27,12 +27,54 @@ setup: ## Set up the development environment
 .PHONY: db-up
 db-up: ## Start the database with Docker
 	@echo "Starting database with Docker..."
-	@cd database && docker-compose up -d
+	@cd database && docker-compose up -d postgres redis
 
 .PHONY: db-down
 db-down: ## Stop the database
 	@echo "Stopping database..."
 	@cd database && docker-compose down
+
+.PHONY: docker-up
+docker-up: ## Start all services (database + backend) with Docker
+	@echo "Starting all services with Docker..."
+	@cd database && docker-compose up -d
+
+.PHONY: docker-down
+docker-down: ## Stop all Docker services
+	@echo "Stopping all Docker services..."
+	@cd database && docker-compose down
+
+.PHONY: docker-build
+docker-build: ## Build the backend Docker image
+	@echo "Building backend Docker image..."
+	@cd database && docker-compose build backend
+
+.PHONY: docker-logs
+docker-logs: ## Show logs from all Docker services
+	@cd database && docker-compose logs -f
+
+.PHONY: docker-logs-backend
+docker-logs-backend: ## Show logs from backend service
+	@cd database && docker-compose logs -f backend
+
+.PHONY: docker-restart
+docker-restart: ## Restart all Docker services
+	@echo "Restarting all Docker services..."
+	@cd database && docker-compose restart
+
+.PHONY: docker-restart-backend
+docker-restart-backend: ## Restart backend service
+	@echo "Restarting backend service..."
+	@cd database && docker-compose restart backend
+
+.PHONY: docker-ps
+docker-ps: ## Show running Docker containers
+	@cd database && docker-compose ps
+
+.PHONY: docker-clean
+docker-clean: ## Remove all containers, volumes, and images
+	@echo "Cleaning up Docker resources..."
+	@cd database && docker-compose down -v --rmi all
 
 .PHONY: migrate-up
 migrate-up: ## Run database migrations
