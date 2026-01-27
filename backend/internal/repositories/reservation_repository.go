@@ -182,10 +182,10 @@ func (r *ReservationRepository) Create(ctx context.Context, reservation db.Reser
 	err := r.db.QueryRowxContext(ctx, query,
 		reservation.GiftItemID,
 		reservation.ReservedByUserID,
-		db.TextToString(reservation.GuestName),
-		db.TextToString(reservation.EncryptedGuestName),
-		db.TextToString(reservation.GuestEmail),
-		db.TextToString(reservation.EncryptedGuestEmail),
+		reservation.GuestName,
+		reservation.EncryptedGuestName,
+		reservation.GuestEmail,
+		reservation.EncryptedGuestEmail,
 		reservation.Status,
 		reservation.ReservedAt,
 		reservation.ExpiresAt,
@@ -366,7 +366,7 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 		reservationID,
 		status,
 		canceledAt,
-		db.TextToString(cancelReason),
+		cancelReason,
 	).StructScan(&updatedReservation)
 
 	if err != nil {
@@ -404,7 +404,7 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 		token,
 		status,
 		canceledAt,
-		db.TextToString(cancelReason),
+		cancelReason,
 	).StructScan(&updatedReservation)
 
 	if err != nil {

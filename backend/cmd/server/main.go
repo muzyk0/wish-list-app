@@ -105,6 +105,10 @@ func main() {
 	var encryptionService *encryption.Service
 	encryptionKey, encryptedKeyToStore, err := encryption.GetOrCreateDataKey(context.Background())
 	if err != nil {
+		// In production, encryption is required - fail fast
+		if cfg.ServerEnv != "development" {
+			log.Fatalf("FATAL: Failed to initialize encryption service in %s environment: %v. PII encryption is required.", cfg.ServerEnv, err)
+		}
 		log.Printf("Warning: Failed to initialize encryption service: %v. PII will not be encrypted.", err)
 	} else {
 		// If a new encrypted key was generated, instruct operator to persist it
@@ -122,6 +126,10 @@ func main() {
 
 		encryptionService, err = encryption.NewService(encryptionKey)
 		if err != nil {
+			// In production, encryption is required - fail fast
+			if cfg.ServerEnv != "development" {
+				log.Fatalf("FATAL: Failed to create encryption service in %s environment: %v. PII encryption is required.", cfg.ServerEnv, err)
+			}
 			log.Printf("Warning: Failed to create encryption service: %v. PII will not be encrypted.", err)
 		} else {
 			log.Println("Encryption service initialized successfully for PII protection")
