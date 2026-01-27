@@ -64,19 +64,21 @@ func (k *KMSClient) DecryptDataKey(ctx context.Context, encryptedKey string) ([]
 }
 
 // GetOrCreateDataKey retrieves the data key from environment or generates a new one
+// Returns (plaintextKey, encryptedKey, error) where encryptedKey is non-empty only when
+// a new key is generated via KMS and must be persisted by the caller.
 // For development, uses ENCRYPTION_DATA_KEY env var
 // For production, should use KMS to generate and store encrypted keys
-func GetOrCreateDataKey(ctx context.Context) ([]byte, error) {
+func GetOrCreateDataKey(ctx context.Context) ([]byte, string, error) {
 	// Try to get from environment variable first (development/testing)
 	if keyStr := os.Getenv("ENCRYPTION_DATA_KEY"); keyStr != "" {
 		key, err := base64.StdEncoding.DecodeString(keyStr)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode ENCRYPTION_DATA_KEY: %w", err)
+			return nil, "", fmt.Errorf("failed to decode ENCRYPTION_DATA_KEY: %w", err)
 		}
 		if len(key) != 32 {
-			return nil, fmt.Errorf("ENCRYPTION_DATA_KEY must be 32 bytes (got %d)", len(key))
+			return nil, "", fmt.Errorf("ENCRYPTION_DATA_KEY must be 32 bytes (got %d)", len(key))
 		}
-		return key, nil
+		return key, "", nil
 	}
 
 	// For production, use KMS
@@ -84,7 +86,7 @@ func GetOrCreateDataKey(ctx context.Context) ([]byte, error) {
 	if kmsKeyID != "" {
 		kmsClient, err := NewKMSClient(ctx, kmsKeyID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create KMS client: %w", err)
+			return nil, "", fmt.Errorf("failed to create KMS client: %w", err)
 		}
 
 		// Check if we have an encrypted data key stored
@@ -93,41 +95,38 @@ func GetOrCreateDataKey(ctx context.Context) ([]byte, error) {
 			// Decrypt existing key
 			plaintextKey, err := kmsClient.DecryptDataKey(ctx, encryptedDataKey)
 			if err != nil {
-				return nil, fmt.Errorf("failed to decrypt data key: %w", err)
+				return nil, "", fmt.Errorf("failed to decrypt data key: %w", err)
 			}
-			return plaintextKey, nil
+			return plaintextKey, "", nil
 		}
 
 		// If no encrypted key is provided, check environment before generating
 		serverEnv := os.Getenv("SERVER_ENV")
 		if serverEnv != "" && serverEnv != "development" {
-			return nil, fmt.Errorf("KMS_KEY_ID is set but ENCRYPTED_DATA_KEY is not provided: in %s environment, you must provide and persist ENCRYPTED_DATA_KEY to prevent data loss", serverEnv)
+			return nil, "", fmt.Errorf("KMS_KEY_ID is set but ENCRYPTED_DATA_KEY is not provided: in %s environment, you must provide and persist ENCRYPTED_DATA_KEY to prevent data loss", serverEnv)
 		}
 
-		// Development-only: Generate new key
+		// Development-only: Generate new key and return encrypted key for persistence
 		plaintextKey, encryptedKey, err := kmsClient.GenerateDataKey(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate data key: %w", err)
+			return nil, "", fmt.Errorf("failed to generate data key: %w", err)
 		}
 
-		// Note: In development with KMS, the encrypted key must be persisted manually
-		// Store the encrypted key in ENCRYPTED_DATA_KEY environment variable or secret manager
-		// The encrypted key is not logged to prevent exposure
-		_ = encryptedKey // Explicitly discard to show it's intentional in dev mode
-		return plaintextKey, nil
+		// Return both keys: caller must persist encryptedKey to ENCRYPTED_DATA_KEY
+		return plaintextKey, encryptedKey, nil
 	}
 
 	// Fallback: generate a random key (ONLY for development/testing)
 	serverEnv := os.Getenv("SERVER_ENV")
 	if serverEnv != "" && serverEnv != "development" {
-		return nil, fmt.Errorf("no encryption key configured: set ENCRYPTION_DATA_KEY or KMS_KEY_ID for %s environment", serverEnv)
+		return nil, "", fmt.Errorf("no encryption key configured: set ENCRYPTION_DATA_KEY or KMS_KEY_ID for %s environment", serverEnv)
 	}
 
 	// Development-only fallback
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {
-		return nil, fmt.Errorf("failed to generate random key: %w", err)
+		return nil, "", fmt.Errorf("failed to generate random key: %w", err)
 	}
 	// Do not log key material - development mode uses ephemeral key
-	return key, nil
+	return key, "", nil
 }

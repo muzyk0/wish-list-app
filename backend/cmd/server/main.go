@@ -103,10 +103,23 @@ func main() {
 
 	// Initialize encryption service for PII protection (CR-004)
 	var encryptionService *encryption.Service
-	encryptionKey, err := encryption.GetOrCreateDataKey(context.Background())
+	encryptionKey, encryptedKeyToStore, err := encryption.GetOrCreateDataKey(context.Background())
 	if err != nil {
 		log.Printf("Warning: Failed to initialize encryption service: %v. PII will not be encrypted.", err)
 	} else {
+		// If a new encrypted key was generated, instruct operator to persist it
+		if encryptedKeyToStore != "" {
+			fmt.Println("================================================================================")
+			fmt.Println("IMPORTANT: A new KMS data encryption key has been generated.")
+			fmt.Println("You MUST persist the following value to the ENCRYPTED_DATA_KEY environment")
+			fmt.Println("variable or secret manager to prevent data loss on restart:")
+			fmt.Println("")
+			fmt.Printf("ENCRYPTED_DATA_KEY=%s\n", encryptedKeyToStore)
+			fmt.Println("")
+			fmt.Println("Without persisting this value, encrypted data will be unrecoverable.")
+			fmt.Println("================================================================================")
+		}
+
 		encryptionService, err = encryption.NewService(encryptionKey)
 		if err != nil {
 			log.Printf("Warning: Failed to create encryption service: %v. PII will not be encrypted.", err)
