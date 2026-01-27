@@ -50,14 +50,14 @@ type CreateGiftItemRequest struct {
 }
 
 type UpdateGiftItemRequest struct {
-	Name        string  `json:"name" validate:"max=255"`
-	Description string  `json:"description"`
-	Link        string  `json:"link" validate:"omitempty,url"`
-	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
-	Price       float64 `json:"price" validate:"omitempty,min=0"`
-	Priority    int     `json:"priority" validate:"omitempty,min=0,max=10"`
-	Notes       string  `json:"notes"`
-	Position    int     `json:"position" validate:"omitempty,min=0"`
+	Name        *string  `json:"name" validate:"omitempty,max=255"`
+	Description *string  `json:"description"`
+	Link        *string  `json:"link" validate:"omitempty,url"`
+	ImageURL    *string  `json:"image_url" validate:"omitempty,url"`
+	Price       *float64 `json:"price" validate:"omitempty,min=0"`
+	Priority    *int     `json:"priority" validate:"omitempty,min=0,max=10"`
+	Notes       *string  `json:"notes"`
+	Position    *int     `json:"position" validate:"omitempty,min=0"`
 }
 
 func (h *WishListHandler) CreateWishList(c echo.Context) error {

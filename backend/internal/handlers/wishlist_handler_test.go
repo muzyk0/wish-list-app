@@ -15,6 +15,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Helper functions for creating pointers
+func stringPtr(s string) *string {
+	return &s
+}
+
+func float64Ptr(f float64) *float64 {
+	return &f
+}
+
+func intPtr(i int) *int {
+	return &i
+}
+
 // MarkAsPurchasedRequest is used for marking a gift item as purchased
 type MarkAsPurchasedRequest struct {
 	PurchasedPrice float64 `json:"purchased_price"`
@@ -429,8 +442,8 @@ func TestWishListHandler_UpdateGiftItem(t *testing.T) {
 
 		// Create request body
 		reqBody := UpdateGiftItemRequest{
-			Name:  "Updated Gift Name",
-			Price: 49.99,
+			Name:  stringPtr("Updated Gift Name"),
+			Price: float64Ptr(49.99),
 		}
 
 		// Mock GetGiftItem to return gift item with wishlist ID
@@ -709,9 +722,9 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		giftItemID := "gift-123"
 		userID := "user-123"
 		reqBody := UpdateGiftItemRequest{
-			Name:        "Updated Gift",
-			Description: "Updated description",
-			Price:       99.99,
+			Name:        stringPtr("Updated Gift"),
+			Description: stringPtr("Updated description"),
+			Price:       float64Ptr(99.99),
 		}
 
 		// Mock GetGiftItem to return gift item with wishlist ID
@@ -731,9 +744,9 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		expectedGiftItem := &services.GiftItemOutput{
 			ID:          giftItemID,
 			WishlistID:  "wishlist-123",
-			Name:        reqBody.Name,
-			Description: reqBody.Description,
-			Price:       reqBody.Price,
+			Name:        *reqBody.Name,
+			Description: *reqBody.Description,
+			Price:       *reqBody.Price,
 		}
 
 		mockService.On("UpdateGiftItem", mock.Anything, giftItemID, mock.AnythingOfType("services.UpdateGiftItemInput")).
@@ -768,7 +781,7 @@ func TestWishListHandler_UpdateGiftItem_AuthorizationChecks(t *testing.T) {
 		giftItemID := "gift-123"
 		userID := "user-123"
 		reqBody := UpdateGiftItemRequest{
-			Name: "Updated Gift",
+			Name: stringPtr("Updated Gift"),
 		}
 
 		// Mock GetGiftItem to return gift item with wishlist ID

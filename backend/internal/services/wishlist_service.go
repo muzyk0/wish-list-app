@@ -108,14 +108,14 @@ type CreateGiftItemInput struct {
 }
 
 type UpdateGiftItemInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Link        string  `json:"link"`
-	ImageURL    string  `json:"image_url"`
-	Price       float64 `json:"price"`
-	Priority    int     `json:"priority"`
-	Notes       string  `json:"notes"`
-	Position    int     `json:"position"`
+	Name        *string  `json:"name,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Link        *string  `json:"link,omitempty"`
+	ImageURL    *string  `json:"image_url,omitempty"`
+	Price       *float64 `json:"price,omitempty"`
+	Priority    *int     `json:"priority,omitempty"`
+	Notes       *string  `json:"notes,omitempty"`
+	Position    *int     `json:"position,omitempty"`
 }
 
 type GiftItemOutput struct {
@@ -628,12 +628,16 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 }
 
 func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string, input UpdateGiftItemInput) (*GiftItemOutput, error) {
-	// Validate int32 bounds for Priority and Position
-	if input.Priority < math.MinInt32 || input.Priority > math.MaxInt32 {
-		return nil, errors.New("priority value out of int32 range")
+	// Validate int32 bounds for Priority and Position if provided
+	if input.Priority != nil {
+		if *input.Priority < math.MinInt32 || *input.Priority > math.MaxInt32 {
+			return nil, errors.New("priority value out of int32 range")
+		}
 	}
-	if input.Position < math.MinInt32 || input.Position > math.MaxInt32 {
-		return nil, errors.New("position value out of int32 range")
+	if input.Position != nil {
+		if *input.Position < math.MinInt32 || *input.Position > math.MaxInt32 {
+			return nil, errors.New("position value out of int32 range")
+		}
 	}
 
 	id := pgtype.UUID{}
@@ -646,15 +650,34 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 		return nil, fmt.Errorf("failed to get gift item from repository: %w", err)
 	}
 
-	// Update gift item
+	// Update gift item - only update fields that are provided (non-nil)
 	updatedGiftItem := *giftItem
-	updatedGiftItem.Name = input.Name
-	updatedGiftItem.Description = pgtype.Text{String: input.Description, Valid: input.Description != ""}
-	updatedGiftItem.Link = pgtype.Text{String: input.Link, Valid: input.Link != ""}
-	updatedGiftItem.ImageUrl = pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""}
-	updatedGiftItem.Priority = pgtype.Int4{Int32: int32(input.Priority), Valid: true} //nolint:gosec // Bounds checking performed above, conversion is saf
-	updatedGiftItem.Notes = pgtype.Text{String: input.Notes, Valid: input.Notes != ""}
-	updatedGiftItem.Position = pgtype.Int4{Int32: int32(input.Position), Valid: true} //nolint:gosec // Bounds checking performed above, conversion is saf
+	if input.Name != nil {
+		updatedGiftItem.Name = *input.Name
+	}
+	if input.Description != nil {
+		updatedGiftItem.Description = pgtype.Text{String: *input.Description, Valid: *input.Description != ""}
+	}
+	if input.Link != nil {
+		updatedGiftItem.Link = pgtype.Text{String: *input.Link, Valid: *input.Link != ""}
+	}
+	if input.ImageURL != nil {
+		updatedGiftItem.ImageUrl = pgtype.Text{String: *input.ImageURL, Valid: *input.ImageURL != ""}
+	}
+	if input.Price != nil {
+		priceBig := new(big.Int)
+		priceBig.SetInt64(int64(*input.Price * 100)) // Convert to cents
+		updatedGiftItem.Price = pgtype.Numeric{Int: priceBig, Exp: -2, Valid: *input.Price > 0}
+	}
+	if input.Priority != nil {
+		updatedGiftItem.Priority = pgtype.Int4{Int32: int32(*input.Priority), Valid: true} //nolint:gosec // Bounds checking performed above, conversion is safe
+	}
+	if input.Notes != nil {
+		updatedGiftItem.Notes = pgtype.Text{String: *input.Notes, Valid: *input.Notes != ""}
+	}
+	if input.Position != nil {
+		updatedGiftItem.Position = pgtype.Int4{Int32: int32(*input.Position), Valid: true} //nolint:gosec // Bounds checking performed above, conversion is safe
+	}
 
 	updated, err := s.giftItemRepo.Update(ctx, updatedGiftItem)
 	if err != nil {
