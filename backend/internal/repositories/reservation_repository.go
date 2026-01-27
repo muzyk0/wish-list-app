@@ -40,7 +40,7 @@ type ReservationDetail struct {
 	ReservedAt          pgtype.Timestamptz `json:"reserved_at"`
 	ExpiresAt           pgtype.Timestamptz `json:"expires_at"`
 	CanceledAt          pgtype.Timestamptz `json:"canceled_at"`
-	CancelReason        pgtype.Text        `json:"cancel_reason"`
+	CancelReason        pgtype.Text        `json:"canceled_reason"`
 	NotificationSent    pgtype.Bool        `json:"notification_sent"`
 	GiftItemName        pgtype.Text        `json:"gift_item_name"`
 	GiftItemImageURL    pgtype.Text        `json:"gift_item_image_url"`
