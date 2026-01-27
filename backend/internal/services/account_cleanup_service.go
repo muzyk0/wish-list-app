@@ -18,6 +18,7 @@ type AccountCleanupService struct {
 	giftItemRepo    repositories.GiftItemRepositoryInterface
 	reservationRepo repositories.ReservationRepositoryInterface
 	emailService    EmailServiceInterface
+	ticker          *time.Ticker
 }
 
 // NewAccountCleanupService creates a new account cleanup service
@@ -263,29 +264,40 @@ func (s *AccountCleanupService) logAccountDeletion(userID, email, reason string,
 }
 
 // StartScheduledCleanup starts the scheduled cleanup job
-func (s *AccountCleanupService) StartScheduledCleanup() {
+func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 	// Run cleanup daily at 2 AM
-	ticker := time.NewTicker(24 * time.Hour)
+	s.ticker = time.NewTicker(24 * time.Hour)
 
 	go func() {
-		for range ticker.C {
-			ctx := context.Background()
+		for {
+			select {
+			case <-s.ticker.C:
+				log.Println("Running scheduled account cleanup check...")
 
-			log.Println("Running scheduled account cleanup check...")
+				// Check for inactive accounts and send warnings
+				if err := s.CheckInactiveAccounts(ctx); err != nil {
+					log.Printf("Error checking inactive accounts: %v", err)
+				}
 
-			// Check for inactive accounts and send warnings
-			if err := s.CheckInactiveAccounts(ctx); err != nil {
-				log.Printf("Error checking inactive accounts: %v", err)
+				// Delete accounts inactive for 24 months
+				if err := s.DeleteInactiveAccounts(ctx); err != nil {
+					log.Printf("Error deleting inactive accounts: %v", err)
+				}
+
+				log.Println("Scheduled account cleanup completed")
+			case <-ctx.Done():
+				log.Println("Account cleanup job stopped")
+				return
 			}
-
-			// Delete accounts inactive for 24 months
-			if err := s.DeleteInactiveAccounts(ctx); err != nil {
-				log.Printf("Error deleting inactive accounts: %v", err)
-			}
-
-			log.Println("Scheduled account cleanup completed")
 		}
 	}()
 
 	log.Println("Scheduled account cleanup job started (runs daily at current time)")
+}
+
+// Stop stops the scheduled cleanup job
+func (s *AccountCleanupService) Stop() {
+	if s.ticker != nil {
+		s.ticker.Stop()
+	}
 }

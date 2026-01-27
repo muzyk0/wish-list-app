@@ -89,7 +89,6 @@ The backend service uses environment variables for configuration. You can:
 
 - **Port**: 8080
 - **Health Check**: `http://localhost:8080/health`
-- **API Documentation**: Available at the `/docs` endpoint
 
 ### PostgreSQL Database
 

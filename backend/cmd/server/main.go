@@ -169,13 +169,17 @@ func main() {
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 
-	// Start scheduled account cleanup job
-	accountCleanupService.StartScheduledCleanup()
+	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
+
+	// Create application context for lifecycle management
+	appCtx, appCancel := context.WithCancel(context.Background())
+	defer appCancel()
+
+	// Start scheduled account cleanup job with application context
+	accountCleanupService.StartScheduledCleanup(appCtx)
 
 	// Initialize routes
 	setupRoutes(e, healthHandler, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
-
-	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
 
 	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
@@ -201,6 +205,11 @@ func main() {
 
 	case sig := <-stop:
 		log.Printf("🚦 Received signal (%v), starting graceful shutdown...", sig)
+
+		// Cancel application context to stop background jobs
+		log.Println("Stopping background services...")
+		appCancel()
+		accountCleanupService.Stop()
 
 		// Shutdown context (10 seconds timeout)
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
