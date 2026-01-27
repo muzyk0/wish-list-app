@@ -137,6 +137,11 @@ func (s *UserService) Login(ctx context.Context, input LoginUserInput) (*UserOut
 		return nil, errors.New("invalid email or password")
 	}
 
+	// Check if password hash is valid
+	if !user.PasswordHash.Valid {
+		return nil, errors.New("invalid email or password")
+	}
+
 	// Compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(input.Password)); err != nil {
 		return nil, errors.New("invalid email or password")
@@ -188,6 +193,11 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, input Updat
 
 	// Update fields if provided
 	if input.Email != nil && *input.Email != "" {
+		// Check if the new email is already used by another account
+		existingUser, err := s.repo.GetByEmail(ctx, *input.Email)
+		if err == nil && existingUser.ID != user.ID {
+			return nil, errors.New("email already in use by another account")
+		}
 		user.Email = *input.Email
 	}
 	if input.FirstName != nil {

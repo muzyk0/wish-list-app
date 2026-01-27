@@ -262,6 +262,30 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 		return nil, errors.New("invalid gift item id")
 	}
 
+	wishlistUUID := pgtype.UUID{}
+	if err := wishlistUUID.Scan(wishlistID); err != nil {
+		return nil, errors.New("invalid wishlist id")
+	}
+
+	// Verify ownership: get all gift items for this wishlist and check if our item is among them
+	wishlistItems, err := s.giftItemRepo.GetByWishList(ctx, wishlistUUID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify wishlist ownership: %w", err)
+	}
+
+	// Check if the gift item belongs to this wishlist
+	var giftItem *db.GiftItem
+	for _, item := range wishlistItems {
+		if item.ID == itemID {
+			giftItem = item
+			break
+		}
+	}
+
+	if giftItem == nil {
+		return nil, errors.New("gift item not found in the specified wishlist")
+	}
+
 	// Check if gift item is already reserved using atomic operation
 	activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, itemID)
 	if err != nil {

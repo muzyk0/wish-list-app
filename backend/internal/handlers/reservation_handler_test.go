@@ -414,7 +414,10 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 // Additional tests for reservation status checks
 func TestReservationHandler_GetReservationStatus(t *testing.T) {
 	t.Run("check status of available gift item", func(t *testing.T) {
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
+		handler := NewReservationHandler(mockService)
+
 		statusOutput := &services.ReservationStatusOutput{
 			IsReserved: false,
 			Status:     "available",
@@ -423,11 +426,29 @@ func TestReservationHandler_GetReservationStatus(t *testing.T) {
 		mockService.On("GetReservationStatus", mock.Anything, "public-slug", "item-123").
 			Return(statusOutput, nil)
 
-		// Test requires handler method implementation
+		c, rec := CreateTestContextWithParams(e, http.MethodGet, "/wishlists/:slug/items/:itemId/status", nil,
+			[]string{"slug", "itemId"}, []string{"public-slug", "item-123"}, nil)
+
+		err := handler.GetReservationStatus(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response ReservationStatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.False(t, response.IsReserved)
+		assert.Equal(t, "available", response.Status)
+		assert.Nil(t, response.ReservedByName)
+		assert.Nil(t, response.ReservedAt)
+
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("check status of reserved gift item", func(t *testing.T) {
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
+		handler := NewReservationHandler(mockService)
+
 		reservedBy := "Jane Doe"
 		reservedAt := time.Now()
 		statusOutput := &services.ReservationStatusOutput{
@@ -440,11 +461,30 @@ func TestReservationHandler_GetReservationStatus(t *testing.T) {
 		mockService.On("GetReservationStatus", mock.Anything, "public-slug", "item-123").
 			Return(statusOutput, nil)
 
-		// Test requires handler method implementation
+		c, rec := CreateTestContextWithParams(e, http.MethodGet, "/wishlists/:slug/items/:itemId/status", nil,
+			[]string{"slug", "itemId"}, []string{"public-slug", "item-123"}, nil)
+
+		err := handler.GetReservationStatus(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response ReservationStatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.True(t, response.IsReserved)
+		assert.Equal(t, "active", response.Status)
+		assert.NotNil(t, response.ReservedByName)
+		assert.Equal(t, "Jane Doe", *response.ReservedByName)
+		assert.NotNil(t, response.ReservedAt)
+
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("check status of purchased gift item", func(t *testing.T) {
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
+		handler := NewReservationHandler(mockService)
+
 		statusOutput := &services.ReservationStatusOutput{
 			IsReserved: true,
 			Status:     "purchased",
@@ -453,6 +493,19 @@ func TestReservationHandler_GetReservationStatus(t *testing.T) {
 		mockService.On("GetReservationStatus", mock.Anything, "public-slug", "item-123").
 			Return(statusOutput, nil)
 
-		// Test requires handler method implementation
+		c, rec := CreateTestContextWithParams(e, http.MethodGet, "/wishlists/:slug/items/:itemId/status", nil,
+			[]string{"slug", "itemId"}, []string{"public-slug", "item-123"}, nil)
+
+		err := handler.GetReservationStatus(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response ReservationStatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.True(t, response.IsReserved)
+		assert.Equal(t, "purchased", response.Status)
+
+		mockService.AssertExpectations(t)
 	})
 }
