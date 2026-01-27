@@ -28,25 +28,27 @@ type ReservationRepositoryInterface interface {
 }
 
 type ReservationDetail struct {
-	ID               pgtype.UUID        `json:"id"`
-	GiftItemID       pgtype.UUID        `json:"gift_item_id"`
-	ReservedByUserID pgtype.UUID        `json:"reserved_by_user_id"`
-	GuestName        pgtype.Text        `json:"guest_name"`
-	GuestEmail       pgtype.Text        `json:"guest_email"`
-	ReservationToken pgtype.UUID        `json:"reservation_token"`
-	Status           string             `json:"status"`
-	ReservedAt       pgtype.Timestamptz `json:"reserved_at"`
-	ExpiresAt        pgtype.Timestamptz `json:"expires_at"`
-	CanceledAt       pgtype.Timestamptz `json:"canceled_at"`
-	CancelReason     pgtype.Text        `json:"cancel_reason"`
-	NotificationSent pgtype.Bool        `json:"notification_sent"`
-	GiftItemName     pgtype.Text        `json:"gift_item_name"`
-	GiftItemImageURL pgtype.Text        `json:"gift_item_image_url"`
-	GiftItemPrice    pgtype.Numeric     `json:"gift_item_price"`
-	WishlistID       pgtype.UUID        `json:"wishlist_id"`
-	WishlistTitle    pgtype.Text        `json:"wishlist_title"`
-	OwnerFirstName   pgtype.Text        `json:"owner_first_name"`
-	OwnerLastName    pgtype.Text        `json:"owner_last_name"`
+	ID                  pgtype.UUID        `json:"id"`
+	GiftItemID          pgtype.UUID        `json:"gift_item_id"`
+	ReservedByUserID    pgtype.UUID        `json:"reserved_by_user_id"`
+	GuestName           pgtype.Text        `json:"guest_name"`
+	EncryptedGuestName  pgtype.Text        `json:"-" db:"encrypted_guest_name"` // PII encrypted
+	GuestEmail          pgtype.Text        `json:"guest_email"`
+	EncryptedGuestEmail pgtype.Text        `json:"-" db:"encrypted_guest_email"` // PII encrypted
+	ReservationToken    pgtype.UUID        `json:"reservation_token"`
+	Status              string             `json:"status"`
+	ReservedAt          pgtype.Timestamptz `json:"reserved_at"`
+	ExpiresAt           pgtype.Timestamptz `json:"expires_at"`
+	CanceledAt          pgtype.Timestamptz `json:"canceled_at"`
+	CancelReason        pgtype.Text        `json:"cancel_reason"`
+	NotificationSent    pgtype.Bool        `json:"notification_sent"`
+	GiftItemName        pgtype.Text        `json:"gift_item_name"`
+	GiftItemImageURL    pgtype.Text        `json:"gift_item_image_url"`
+	GiftItemPrice       pgtype.Numeric     `json:"gift_item_price"`
+	WishlistID          pgtype.UUID        `json:"wishlist_id"`
+	WishlistTitle       pgtype.Text        `json:"wishlist_title"`
+	OwnerFirstName      pgtype.Text        `json:"owner_first_name"`
+	OwnerLastName       pgtype.Text        `json:"owner_last_name"`
 }
 
 type ReservationRepository struct {
@@ -125,6 +127,33 @@ func (r *ReservationRepository) decryptReservationPII(ctx context.Context, reser
 			return fmt.Errorf("failed to decrypt guest email: %w", err)
 		}
 		reservation.GuestEmail = pgtype.Text{String: decrypted, Valid: true}
+	}
+
+	return nil
+}
+
+// decryptReservationDetailPII decrypts guest PII fields in the reservation detail struct
+func (r *ReservationRepository) decryptReservationDetailPII(ctx context.Context, detail *ReservationDetail) error {
+	if !r.encryptionEnabled || r.encryptionSvc == nil {
+		return nil
+	}
+
+	// Decrypt guest name
+	if detail.EncryptedGuestName.Valid {
+		decrypted, err := r.encryptionSvc.Decrypt(ctx, detail.EncryptedGuestName.String)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt guest name: %w", err)
+		}
+		detail.GuestName = pgtype.Text{String: decrypted, Valid: true}
+	}
+
+	// Decrypt guest email
+	if detail.EncryptedGuestEmail.Valid {
+		decrypted, err := r.encryptionSvc.Decrypt(ctx, detail.EncryptedGuestEmail.String)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt guest email: %w", err)
+		}
+		detail.GuestEmail = pgtype.Text{String: decrypted, Valid: true}
 	}
 
 	return nil
@@ -262,7 +291,9 @@ func (r *ReservationRepository) GetByGiftItem(ctx context.Context, giftItemID pg
 func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
+			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE gift_item_id = $1 AND status = 'active'
 		LIMIT 1
@@ -277,13 +308,20 @@ func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Cont
 		return nil, fmt.Errorf("failed to get active reservation for gift item: %w", err)
 	}
 
+	// Decrypt guest PII before returning
+	if err := r.decryptReservationPII(ctx, &reservation); err != nil {
+		return nil, fmt.Errorf("failed to decrypt reservation PII: %w", err)
+	}
+
 	return &reservation, nil
 }
 
 // GetReservationsByUser retrieves reservations made by a user
 func (r *ReservationRepository) GetReservationsByUser(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]*db.Reservation, error) {
 	query := `
-		SELECT r.id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.guest_email, r.reservation_token, r.status, r.reserved_at, r.expires_at, r.canceled_at, r.cancel_reason, r.notification_sent, r.updated_at
+		SELECT r.id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.encrypted_guest_name,
+			r.guest_email, r.encrypted_guest_email, r.reservation_token, r.status, r.reserved_at,
+			r.expires_at, r.canceled_at, r.cancel_reason, r.notification_sent, r.updated_at
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
 		JOIN wishlists w ON gi.wishlist_id = w.id
@@ -296,6 +334,13 @@ func (r *ReservationRepository) GetReservationsByUser(ctx context.Context, userI
 	err := r.db.SelectContext(ctx, &reservations, query, userID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get reservations by user: %w", err)
+	}
+
+	// Decrypt guest PII for all reservations
+	for _, reservation := range reservations {
+		if err := r.decryptReservationPII(ctx, reservation); err != nil {
+			return nil, fmt.Errorf("failed to decrypt reservation PII: %w", err)
+		}
 	}
 
 	return reservations, nil
@@ -311,7 +356,9 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 			updated_at = NOW()
 		WHERE id = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
+			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var updatedReservation db.Reservation
@@ -329,6 +376,11 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 		return nil, fmt.Errorf("failed to update reservation status: %w", err)
 	}
 
+	// Decrypt guest PII before returning
+	if err := r.decryptReservationPII(ctx, &updatedReservation); err != nil {
+		return nil, fmt.Errorf("failed to decrypt reservation PII: %w", err)
+	}
+
 	return &updatedReservation, nil
 }
 
@@ -342,7 +394,9 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 			updated_at = NOW()
 		WHERE reservation_token = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
+			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
+			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var updatedReservation db.Reservation
@@ -360,6 +414,11 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 		return nil, fmt.Errorf("failed to update reservation status by token: %w", err)
 	}
 
+	// Decrypt guest PII before returning
+	if err := r.decryptReservationPII(ctx, &updatedReservation); err != nil {
+		return nil, fmt.Errorf("failed to decrypt reservation PII: %w", err)
+	}
+
 	return &updatedReservation, nil
 }
 
@@ -371,7 +430,9 @@ func (r *ReservationRepository) ListUserReservationsWithDetails(ctx context.Cont
 			r.gift_item_id,
 			r.reserved_by_user_id,
 			r.guest_name,
+			r.encrypted_guest_name,
 			r.guest_email,
+			r.encrypted_guest_email,
 			r.reservation_token,
 			r.status,
 			r.reserved_at,
@@ -401,6 +462,13 @@ func (r *ReservationRepository) ListUserReservationsWithDetails(ctx context.Cont
 		return nil, fmt.Errorf("failed to list user reservations with details: %w", err)
 	}
 
+	// Decrypt guest PII for all reservations
+	for i := range reservations {
+		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
+			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
+		}
+	}
+
 	return reservations, nil
 }
 
@@ -412,7 +480,9 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 			r.gift_item_id,
 			r.reserved_by_user_id,
 			r.guest_name,
+			r.encrypted_guest_name,
 			r.guest_email,
+			r.encrypted_guest_email,
 			r.reservation_token,
 			r.status,
 			r.reserved_at,
@@ -439,6 +509,13 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 	err := r.db.SelectContext(ctx, &reservations, query, token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list guest reservations with details: %w", err)
+	}
+
+	// Decrypt guest PII for all reservations
+	for i := range reservations {
+		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
+			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
+		}
 	}
 
 	return reservations, nil
