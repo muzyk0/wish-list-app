@@ -530,6 +530,28 @@ func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+
+	// Get the gift item to find which wishlist it belongs to
+	existingGiftItem, err := h.service.GetGiftItem(ctx, giftItemID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Gift item not found",
+		})
+	}
+
+	// Verify user owns the wishlist before marking as purchased
+	wishlist, err := h.service.GetWishList(ctx, existingGiftItem.WishlistID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wishlist not found",
+		})
+	}
+	if wishlist.OwnerID != userID {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "You do not have permission to modify this wishlist",
+		})
+	}
+
 	giftItem, err := h.service.MarkGiftItemAsPurchased(ctx, giftItemID, userID, req.PurchasedPrice)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{

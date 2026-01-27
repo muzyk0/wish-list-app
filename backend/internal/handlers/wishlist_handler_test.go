@@ -585,6 +585,20 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 			PurchasedByUserID: authCtx.UserID,
 		}
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: authCtx.UserID,
+			}, nil)
+
 		mockService.On("MarkGiftItemAsPurchased", mock.Anything, giftItemID, authCtx.UserID, reqBody.PurchasedPrice).
 			Return(expectedGiftItem, nil)
 
@@ -646,6 +660,20 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 			PurchasedByUserID: authCtx.UserID,
 		}
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: authCtx.UserID,
+			}, nil)
+
 		mockService.On("MarkGiftItemAsPurchased", mock.Anything, giftItemID, authCtx.UserID, reqBody.PurchasedPrice).
 			Return(expectedGiftItem, nil)
 
@@ -672,6 +700,20 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 			PurchasedPrice: 29.99,
 		}
 
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with matching owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: authCtx.UserID,
+			}, nil)
+
 		mockService.On("MarkGiftItemAsPurchased", mock.Anything, giftItemID, authCtx.UserID, reqBody.PurchasedPrice).
 			Return((*services.GiftItemOutput)(nil), assert.AnError)
 
@@ -683,6 +725,45 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("non-owner cannot mark item as purchased", func(t *testing.T) {
+		e := echo.New()
+		mockService := new(MockWishListService)
+		handler := NewWishListHandler(mockService)
+
+		authCtx := DefaultAuthContext()
+		giftItemID := "gift-123"
+		differentUserID := "different-user-456"
+
+		reqBody := MarkAsPurchasedRequest{
+			PurchasedPrice: 29.99,
+		}
+
+		// Mock GetGiftItem to return gift item with wishlist ID
+		mockService.On("GetGiftItem", mock.Anything, giftItemID).
+			Return(&services.GiftItemOutput{
+				ID:         giftItemID,
+				WishlistID: "wishlist-123",
+			}, nil)
+
+		// Mock GetWishList to return wishlist with DIFFERENT owner
+		mockService.On("GetWishList", mock.Anything, "wishlist-123").
+			Return(&services.WishListOutput{
+				ID:      "wishlist-123",
+				OwnerID: differentUserID, // Different from authCtx.UserID
+			}, nil)
+
+		c, rec := CreateTestContextWithParams(e, http.MethodPost, "/gift-items/"+giftItemID+"/purchase", reqBody,
+			[]string{"id"}, []string{giftItemID}, &authCtx)
+
+		err := handler.MarkGiftItemAsPurchased(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusForbidden, rec.Code)
+
+		mockService.AssertNotCalled(t, "MarkGiftItemAsPurchased")
 		mockService.AssertExpectations(t)
 	})
 }
