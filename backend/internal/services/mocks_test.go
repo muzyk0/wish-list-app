@@ -184,3 +184,8 @@ func (m *MockReservationRepository) ListGuestReservationsWithDetails(ctx context
 	}
 	return args.Get(0).([]repositories.ReservationDetail), args.Error(1)
 }
+
+func (m *MockReservationRepository) CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error) {
+	args := m.Called(ctx, userID)
+	return args.Int(0), args.Error(1)
+}
