@@ -213,6 +213,98 @@ make clean                    # Clean build artifacts
 7. Use the Makefile for all common operations to maintain consistency
 8. Update task status in `/specs/001-wish-list-app/tasks.md` as you complete items
 
+## Backend Best Practices & Patterns
+
+### Error Handling
+- **Sentinel Errors**: Use sentinel errors for type-safe error handling instead of string matching
+  ```go
+  var (
+      ErrWishListNotFound  = errors.New("wishlist not found")
+      ErrWishListForbidden = errors.New("not authorized to access this wishlist")
+  )
+
+  // Check with errors.Is()
+  if errors.Is(err, services.ErrWishListNotFound) {
+      return c.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+  }
+  ```
+- **Never use string matching** like `strings.Contains(err.Error(), "not found")` - it's brittle and error-prone
+- **Wrap errors** with `fmt.Errorf("%w", err)` to preserve error types for `errors.Is()` checks
+
+### HTTP Status Codes
+- **401 Unauthorized**: Authentication required (missing or invalid token)
+- **403 Forbidden**: Authenticated but not authorized (ownership/permission check failed)
+- **404 Not Found**: Resource doesn't exist
+- **500 Internal Server Error**: Unexpected server errors only
+- **Important**: Authorization failures should return 403, NOT 500
+
+### Context Hierarchy & Lifecycle Management
+- **Use parent context hierarchy**: Pass application context to services instead of creating separate contexts
+  ```go
+  // In main.go
+  appCtx, appCancel := context.WithCancel(context.Background())
+  defer appCancel()
+
+  // Pass to services
+  accountCleanupService.StartScheduledCleanup(appCtx)
+  ```
+- **Single source of truth**: Application context controls all background goroutines
+- **Graceful shutdown**: Cancel parent context to stop all child goroutines automatically
+
+### Graceful Shutdown Pattern
+1. Create application context at startup
+2. Pass context to all background services
+3. Use `select` in goroutines to monitor context cancellation:
+   ```go
+   select {
+   case <-ticker.C:
+       // Do work
+   case <-ctx.Done():
+       log.Println("Shutting down...")
+       return
+   }
+   ```
+4. On shutdown signal, cancel context and stop tickers
+
+### Docker & Security
+- **Never hardcode credentials** in docker-compose.yml
+- **Use environment variable interpolation**:
+  ```yaml
+  DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@postgres:5432/db}
+  ```
+- **Multi-stage builds**: Use builder stage for compilation, minimal runtime stage
+- **Health checks**: Implement proper health checks for all services
+- **Non-root users**: Always run containers as non-root user for security
+
+### Database Testing
+- **Use sqlmock** for testing database interactions without real database:
+  ```go
+  mockDB, mock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+  sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+  ```
+- **Test both success and failure cases** (connection success, connection failure, timeouts)
+- **Verify expectations**: Always call `mock.ExpectationsWereMet()` at end of tests
+
+### Type Conversions & NULL Handling
+- **pgtype.Numeric to float64**: Always check `Valid` field and handle conversion errors
+  ```go
+  var price float64
+  if item.Price.Valid {
+      priceValue, err := item.Price.Float64Value()
+      if err == nil && priceValue.Valid {
+          price = priceValue.Float64
+      }
+  }
+  ```
+- **pgtype.Text**: Check `Valid` field before accessing `String`
+- **pgtype.UUID**: Use `Scan()` method for parsing string UUIDs
+- **pgtype.Date**: Parse RFC3339 strings using `time.Parse(time.RFC3339, dateString)`
+
+### Production Code Quality
+- **Remove debug statements**: Never leave `fmt.Printf` debug statements in production code
+- **Use structured logging**: Use proper logging library instead of fmt.Printf
+- **Clean code**: Remove commented-out code, TODOs, and temporary hacks before committing
+
 ## Important Notes
 
 - The application uses JWT-based authentication across all components
