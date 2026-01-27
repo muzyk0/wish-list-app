@@ -89,7 +89,7 @@ func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 	}
 	if err := c.Validate(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Validation failed",
+			"error": err.Error(),
 		})
 	}
 	ctx := c.Request().Context()
@@ -186,6 +186,12 @@ func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Invalid request body",
+		})
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
 		})
 	}
 

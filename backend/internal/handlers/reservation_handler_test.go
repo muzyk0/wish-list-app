@@ -72,7 +72,7 @@ func (m *MockReservationService) CountUserReservations(ctx context.Context, user
 // T062a: Unit tests for reservation cancellation endpoint (valid cancellation, unauthorized cancellation)
 func TestReservationHandler_CancelReservation(t *testing.T) {
 	t.Run("valid cancellation by authenticated user", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
@@ -124,7 +124,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 	})
 
 	t.Run("valid cancellation by guest with token", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
@@ -172,7 +172,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 	})
 
 	t.Run("unauthorized cancellation attempt", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
@@ -199,7 +199,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 	})
 
 	t.Run("cancel non-existent reservation", func(t *testing.T) {
-		e := echo.New()
+		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
@@ -332,7 +332,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 
 	t.Run("invalid reservation token format", func(t *testing.T) {
 		// Test that invalid UUID format is rejected
-		e := echo.New()
+		e := setupTestEcho()
 		invalidToken := "not-a-valid-uuid"
 		reqBody := CancelReservationRequest{
 			ReservationToken: &invalidToken,
