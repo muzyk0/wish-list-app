@@ -297,8 +297,109 @@ make clean                    # Clean build artifacts
   }
   ```
 - **pgtype.Text**: Check `Valid` field before accessing `String`
+  ```go
+  // WRONG - crashes if FirstName.Valid is false
+  userName := user.FirstName.String
+
+  // CORRECT - safe NULL handling
+  var userName string
+  if user.FirstName.Valid {
+      userName = user.FirstName.String
+  }
+  if user.LastName.Valid {
+      if userName != "" {
+          userName += " "
+      }
+      userName += user.LastName.String
+  }
+  ```
 - **pgtype.UUID**: Use `Scan()` method for parsing string UUIDs
 - **pgtype.Date**: Parse RFC3339 strings using `time.Parse(time.RFC3339, dateString)`
+- **Safe pattern for nullable fields**: Always check `.Valid` before accessing `.String`, `.Int32`, etc.
+
+### Transaction Safety & Atomicity
+- **Wrap related operations in transactions**: Use database transactions to ensure atomicity for multi-step operations
+  ```go
+  tx, err := s.db.BeginTxx(ctx, nil)
+  if err != nil {
+      return fmt.Errorf("failed to start transaction: %w", err)
+  }
+  defer tx.Rollback() // Auto-rollback on panic or early return
+
+  // Perform all operations within transaction
+  if err := repo.DeleteWithExecutor(ctx, tx, id); err != nil {
+      return err // Rollback happens automatically
+  }
+
+  // Commit only after all operations succeed
+  if err := tx.Commit(); err != nil {
+      return fmt.Errorf("failed to commit: %w", err)
+  }
+  ```
+- **Send notifications after commit**: Never send emails or external notifications inside a transaction
+  - Collect notification data during transaction
+  - Send notifications only after successful commit
+  - If notifications fail, don't rollback the transaction
+- **Return errors immediately**: Don't log and continue - return errors so transaction can rollback
+- **Use repository methods within transactions**: Pass transaction executor to repository methods
+
+### Repository Pattern & Architecture
+- **Never bypass repositories**: All database operations must go through repository layer
+  ```go
+  // WRONG - Service layer using raw SQL
+  _, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id = $1", id)
+
+  // CORRECT - Service layer using repository
+  if err := s.userRepo.DeleteWithExecutor(ctx, tx, id); err != nil {
+      return err
+  }
+  ```
+- **Executor Pattern for transactions**: Repositories accept `db.Executor` interface to work with both DB and Tx
+  ```go
+  // Executor interface in db package
+  type Executor interface {
+      ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+      QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row
+      GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+      SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+  }
+
+  // Repository implementation
+  func (r *UserRepository) Delete(ctx context.Context, id pgtype.UUID) error {
+      return r.DeleteWithExecutor(ctx, r.db, id)
+  }
+
+  func (r *UserRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
+      query := "DELETE FROM users WHERE id = $1"
+      result, err := executor.ExecContext(ctx, query, id)
+      // ... error handling
+  }
+  ```
+- **Benefits of Executor pattern**:
+  - Maintains clean separation of concerns
+  - Fully testable with mocks
+  - Works with or without transactions
+  - Single source of truth for database logic
+  - No layer violations (service → repository → database)
+
+### Logging Best Practices
+- **Conditional success logging**: Only log success when operations actually succeed
+  ```go
+  // WRONG - logs success even on failure
+  if err := sendEmail(); err != nil {
+      log.Printf("Failed: %v", err)
+  }
+  log.Printf("Success!") // Always executes!
+
+  // CORRECT - success only logged when err == nil
+  if err := sendEmail(); err != nil {
+      log.Printf("Failed: %v", err)
+  } else {
+      log.Printf("Success!")
+  }
+  ```
+- **Error context**: Include relevant IDs and context in error logs for debugging
+- **No PII in logs**: Never log emails, names, or other PII in plaintext (Constitution Requirement CR-004)
 
 ### Production Code Quality
 - **Remove debug statements**: Never leave `fmt.Printf` debug statements in production code
