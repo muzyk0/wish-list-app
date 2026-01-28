@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -157,7 +158,11 @@ func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID st
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+			log.Printf("tx rollback error: %v", rbErr)
+		}
+	}()
 
 	// For each wishlist, collect reservation data and delete
 	for _, wishList := range wishLists {

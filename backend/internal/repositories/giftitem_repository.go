@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -292,7 +293,11 @@ func (r *GiftItemRepository) ReserveIfNotReserved(ctx context.Context, giftItemI
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+			log.Printf("tx rollback error: %v", rbErr)
+		}
+	}()
 
 	// Lock the gift item row for update to prevent concurrent reservations
 	lockQuery := `
@@ -355,7 +360,11 @@ func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Conte
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+			log.Printf("tx rollback error: %v", rbErr)
+		}
+	}()
 
 	// First, get any active reservations for this gift item
 	getReservationsQuery := `
