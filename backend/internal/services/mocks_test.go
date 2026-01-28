@@ -52,6 +52,11 @@ func (m *MockGiftItemRepository) Delete(ctx context.Context, id pgtype.UUID) err
 	return args.Error(0)
 }
 
+func (m *MockGiftItemRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
+	args := m.Called(ctx, executor, id)
+	return args.Error(0)
+}
+
 func (m *MockGiftItemRepository) Reserve(ctx context.Context, giftItemID, userID pgtype.UUID) (*db.GiftItem, error) {
 	args := m.Called(ctx, giftItemID, userID)
 	if args.Get(0) == nil {

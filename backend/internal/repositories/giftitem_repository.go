@@ -19,6 +19,7 @@ type GiftItemRepositoryInterface interface {
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
 	Update(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
+	DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error
 	Reserve(ctx context.Context, giftItemID, userID pgtype.UUID) (*db.GiftItem, error)
 	Unreserve(ctx context.Context, giftItemID pgtype.UUID) (*db.GiftItem, error)
 	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error)
@@ -152,9 +153,14 @@ func (r *GiftItemRepository) Update(ctx context.Context, giftItem db.GiftItem) (
 
 // Delete removes a gift item by ID
 func (r *GiftItemRepository) Delete(ctx context.Context, id pgtype.UUID) error {
+	return r.DeleteWithExecutor(ctx, r.db, id)
+}
+
+// DeleteWithExecutor removes a gift item by ID using the provided executor (for transactions)
+func (r *GiftItemRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
 	query := `DELETE FROM gift_items WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := executor.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete gift item: %w", err)
 	}

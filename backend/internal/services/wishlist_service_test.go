@@ -62,6 +62,11 @@ func (m *MockWishListRepository) Delete(ctx context.Context, id pgtype.UUID) err
 	return args.Error(0)
 }
 
+func (m *MockWishListRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
+	args := m.Called(ctx, executor, id)
+	return args.Error(0)
+}
+
 func (m *MockWishListRepository) IncrementViewCount(ctx context.Context, id pgtype.UUID) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)

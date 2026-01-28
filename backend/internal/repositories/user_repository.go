@@ -19,6 +19,7 @@ type UserRepositoryInterface interface {
 	GetByEmail(ctx context.Context, email string) (*db.User, error)
 	Update(ctx context.Context, user db.User) (*db.User, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
+	DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error
 	List(ctx context.Context, limit, offset int) ([]*db.User, error)
 }
 
@@ -268,9 +269,14 @@ func (r *UserRepository) Update(ctx context.Context, user db.User) (*db.User, er
 
 // Delete removes a user by ID
 func (r *UserRepository) Delete(ctx context.Context, id pgtype.UUID) error {
+	return r.DeleteWithExecutor(ctx, r.db, id)
+}
+
+// DeleteWithExecutor removes a user by ID using the provided executor (for transactions)
+func (r *UserRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := executor.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}

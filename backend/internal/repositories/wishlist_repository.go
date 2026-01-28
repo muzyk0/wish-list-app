@@ -19,6 +19,7 @@ type WishListRepositoryInterface interface {
 	GetByPublicSlug(ctx context.Context, publicSlug string) (*db.WishList, error)
 	Update(ctx context.Context, wishList db.WishList) (*db.WishList, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
+	DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error
 	IncrementViewCount(ctx context.Context, id pgtype.UUID) error
 }
 
@@ -165,9 +166,14 @@ func (r *WishListRepository) Update(ctx context.Context, wishList db.WishList) (
 
 // Delete removes a wishlist by ID
 func (r *WishListRepository) Delete(ctx context.Context, id pgtype.UUID) error {
+	return r.DeleteWithExecutor(ctx, r.db, id)
+}
+
+// DeleteWithExecutor removes a wishlist by ID using the provided executor (for transactions)
+func (r *WishListRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
 	query := `DELETE FROM wishlists WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := executor.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete wishlist: %w", err)
 	}

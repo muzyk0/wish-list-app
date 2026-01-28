@@ -179,23 +179,20 @@ func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID st
 				}
 			}
 
-			// Delete gift item using transaction
-			_, err = tx.ExecContext(ctx, "DELETE FROM gift_items WHERE id = $1", giftItem.ID)
-			if err != nil {
+			// Delete gift item using repository with transaction
+			if err := s.giftItemRepo.DeleteWithExecutor(ctx, tx, giftItem.ID); err != nil {
 				return fmt.Errorf("failed to delete gift item %s: %w", giftItem.ID.String(), err)
 			}
 		}
 
-		// Delete wishlist using transaction
-		_, err = tx.ExecContext(ctx, "DELETE FROM wishlists WHERE id = $1", wishList.ID)
-		if err != nil {
+		// Delete wishlist using repository with transaction
+		if err := s.wishListRepo.DeleteWithExecutor(ctx, tx, wishList.ID); err != nil {
 			return fmt.Errorf("failed to delete wishlist %s: %w", wishList.ID.String(), err)
 		}
 	}
 
-	// Delete user account using transaction
-	_, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id = $1", id)
-	if err != nil {
+	// Delete user account using repository with transaction
+	if err := s.userRepo.DeleteWithExecutor(ctx, tx, id); err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
