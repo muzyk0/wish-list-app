@@ -13,6 +13,7 @@ import (
 
 // AccountCleanupService handles account inactivity tracking and deletion
 type AccountCleanupService struct {
+	db              *db.DB
 	userRepo        repositories.UserRepositoryInterface
 	wishListRepo    repositories.WishListRepositoryInterface
 	giftItemRepo    repositories.GiftItemRepositoryInterface
@@ -23,6 +24,7 @@ type AccountCleanupService struct {
 
 // NewAccountCleanupService creates a new account cleanup service
 func NewAccountCleanupService(
+	database *db.DB,
 	userRepo repositories.UserRepositoryInterface,
 	wishListRepo repositories.WishListRepositoryInterface,
 	giftItemRepo repositories.GiftItemRepositoryInterface,
@@ -30,6 +32,7 @@ func NewAccountCleanupService(
 	emailService EmailServiceInterface,
 ) *AccountCleanupService {
 	return &AccountCleanupService{
+		db:              database,
 		userRepo:        userRepo,
 		wishListRepo:    wishListRepo,
 		giftItemRepo:    giftItemRepo,
@@ -139,48 +142,74 @@ func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID st
 		return fmt.Errorf("failed to get user wishlists: %w", err)
 	}
 
-	// For each wishlist, notify reservation holders before deletion
+	// Collect reservation notifications (send only after successful commit)
+	type reservationNotification struct {
+		email        string
+		itemName     string
+		wishListName string
+	}
+	var notifications []reservationNotification
+
+	// Start transaction for atomic deletion
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// For each wishlist, collect reservation data and delete
 	for _, wishList := range wishLists {
 		// Get all gift items in this wishlist
 		giftItems, err := s.giftItemRepo.GetByWishList(ctx, wishList.ID)
 		if err != nil {
-			log.Printf("Warning: failed to get gift items for wishlist %s: %v", wishList.ID.String(), err)
-			continue
+			return fmt.Errorf("failed to get gift items for wishlist %s: %w", wishList.ID.String(), err)
 		}
 
-		// For each gift item, check for active reservations and notify
+		// For each gift item, check for active reservations
 		for _, giftItem := range giftItems {
 			reservation, err := s.reservationRepo.GetActiveReservationForGiftItem(ctx, giftItem.ID)
 			if err == nil && reservation != nil {
-				// Notify reservation holder
-				var recipientEmail string
-				if reservation.GuestEmail.Valid {
-					recipientEmail = reservation.GuestEmail.String
-				}
-
-				if recipientEmail != "" {
-					err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItem.Name, wishList.Title)
-					if err != nil {
-						log.Printf("Warning: failed to send deletion notification: %v", err)
-					}
+				// Collect notification data
+				if reservation.GuestEmail.Valid && reservation.GuestEmail.String != "" {
+					notifications = append(notifications, reservationNotification{
+						email:        reservation.GuestEmail.String,
+						itemName:     giftItem.Name,
+						wishListName: wishList.Title,
+					})
 				}
 			}
 
-			// Delete gift item (cascade will handle reservations)
-			if err := s.giftItemRepo.Delete(ctx, giftItem.ID); err != nil {
-				log.Printf("Warning: failed to delete gift item %s: %v", giftItem.ID.String(), err)
+			// Delete gift item using transaction
+			_, err = tx.ExecContext(ctx, "DELETE FROM gift_items WHERE id = $1", giftItem.ID)
+			if err != nil {
+				return fmt.Errorf("failed to delete gift item %s: %w", giftItem.ID.String(), err)
 			}
 		}
 
-		// Delete wishlist
-		if err := s.wishListRepo.Delete(ctx, wishList.ID); err != nil {
-			log.Printf("Warning: failed to delete wishlist %s: %v", wishList.ID.String(), err)
+		// Delete wishlist using transaction
+		_, err = tx.ExecContext(ctx, "DELETE FROM wishlists WHERE id = $1", wishList.ID)
+		if err != nil {
+			return fmt.Errorf("failed to delete wishlist %s: %w", wishList.ID.String(), err)
 		}
 	}
 
-	// Delete user account
-	if err := s.userRepo.Delete(ctx, id); err != nil {
+	// Delete user account using transaction
+	_, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id = $1", id)
+	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Transaction successful - now send notifications
+	for _, notif := range notifications {
+		err := s.emailService.SendReservationRemovedEmail(ctx, notif.email, notif.itemName, notif.wishListName)
+		if err != nil {
+			log.Printf("Warning: failed to send deletion notification to %s: %v", notif.email, err)
+		}
 	}
 
 	// Log the deletion for audit purposes
@@ -241,9 +270,15 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 		})
 	}
 
-	userName := user.FirstName.String
+	var userName string
+	if user.FirstName.Valid {
+		userName = user.FirstName.String
+	}
 	if user.LastName.Valid {
-		userName += " " + user.LastName.String
+		if userName != "" {
+			userName += " "
+		}
+		userName += user.LastName.String
 	}
 
 	return map[string]interface{}{

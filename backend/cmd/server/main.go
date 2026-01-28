@@ -163,7 +163,7 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, templateRepo, emailService, reservationRepo, redisCache)
 	reservationService := services.NewReservationService(reservationRepo, giftItemRepo)
-	accountCleanupService := services.NewAccountCleanupService(userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
+	accountCleanupService := services.NewAccountCleanupService(sqlxDB, userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
 	// Initialize handlers with analytics integration
 	healthHandler := handlers.NewHealthHandler(sqlxDB)
