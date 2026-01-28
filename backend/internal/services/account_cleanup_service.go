@@ -210,7 +210,10 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 
 	wishListsData := make([]map[string]interface{}, 0)
 	for _, wl := range wishLists {
-		giftItems, _ := s.giftItemRepo.GetByWishList(ctx, wl.ID)
+		giftItems, err := s.giftItemRepo.GetByWishList(ctx, wl.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get gift items for wishlist %s: %w", wl.ID.String(), err)
+		}
 
 		giftItemsData := make([]map[string]interface{}, 0)
 		for _, item := range giftItems {
