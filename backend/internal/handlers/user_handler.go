@@ -222,8 +222,10 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	})
 
 	if err != nil {
+		// Log detailed error server-side, return generic message to client
+		c.Logger().Errorf("Failed to update user profile: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
+			"error": "Internal server error",
 		})
 	}
 
@@ -242,8 +244,10 @@ func (h *UserHandler) DeleteAccount(c echo.Context) error {
 	ctx := c.Request().Context()
 	err = h.accountCleanupService.DeleteUserAccount(ctx, userID, "user_requested_deletion")
 	if err != nil {
+		// Log detailed error server-side, return generic message to client
+		c.Logger().Errorf("Failed to delete user account: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
+			"error": "Failed to delete account",
 		})
 	}
 
@@ -262,8 +266,10 @@ func (h *UserHandler) ExportUserData(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, err := h.accountCleanupService.ExportUserData(ctx, userID)
 	if err != nil {
+		// Log detailed error server-side, return generic message to client
+		c.Logger().Errorf("Failed to export user data: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
+			"error": "Unable to export user data",
 		})
 	}
 
