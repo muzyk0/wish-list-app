@@ -359,7 +359,7 @@ func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Conte
 
 	// First, get any active reservations for this gift item
 	getReservationsQuery := `
-		SELECT id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent
+		SELECT id, gift_item_id, reserved_by_user_id, guest_name, guest_email, reservation_token, status, reserved_at, expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
 		WHERE gift_item_id = $1 AND status = 'active'
 	`
