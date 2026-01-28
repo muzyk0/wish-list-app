@@ -67,8 +67,9 @@ func (s *AccountCleanupService) CheckInactiveAccounts(ctx context.Context) error
 		}
 		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName, InactivityWarning23Month); err != nil {
 			log.Printf("Failed to send 23-month warning to user %s: %v", user.ID.String(), err)
+		} else {
+			log.Printf("Sent 23-month inactivity warning to user %s", user.ID.String())
 		}
-		log.Printf("Sent 23-month inactivity warning to user %s", user.ID.String())
 	}
 
 	// Check for accounts 7 days before 24 months
@@ -92,8 +93,9 @@ func (s *AccountCleanupService) CheckInactiveAccounts(ctx context.Context) error
 		}
 		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName, InactivityWarningFinal); err != nil {
 			log.Printf("Failed to send 7-day final warning to user %s: %v", user.ID.String(), err)
+		} else {
+			log.Printf("Sent 7-day final warning to user %s", user.ID.String())
 		}
-		log.Printf("Sent 7-day final warning to user %s", user.ID.String())
 	}
 
 	return nil
