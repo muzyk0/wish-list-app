@@ -13,6 +13,7 @@ import (
 // Sentinel errors
 var (
 	ErrUserAlreadyExists = errors.New("user with this email already exists")
+	ErrUserNotFound      = errors.New("user not found")
 )
 
 // UserServiceInterface defines the interface for user-related operations
@@ -166,6 +167,10 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
+		// Check for user not found error from repository
+		if err.Error() == "user not found" {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 

@@ -384,7 +384,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
-		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*services.UserOutput)(nil), assert.AnError)
+		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*services.UserOutput)(nil), services.ErrUserNotFound)
 
 		c, rec := CreateTestContext(e, http.MethodGet, "/api/users/me", nil, &authCtx)
 
@@ -392,6 +392,26 @@ func TestUserHandler_GetProfile(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, rec.Code)
+
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("other errors return internal server error", func(t *testing.T) {
+		e := setupTestEcho()
+		mockService := new(MockUserService)
+		tokenManager := auth.NewTokenManager("test-secret")
+		analyticsService := analytics.NewAnalyticsService(false)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+
+		authCtx := DefaultAuthContext()
+		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*services.UserOutput)(nil), assert.AnError)
+
+		c, rec := CreateTestContext(e, http.MethodGet, "/api/users/me", nil, &authCtx)
+
+		err := handler.GetProfile(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 
 		mockService.AssertExpectations(t)
 	})

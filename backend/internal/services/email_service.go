@@ -25,7 +25,7 @@ type EmailServiceInterface interface {
 	SendReservationRemovedEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error
 	SendGiftPurchasedConfirmationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle, guestName string) error
 	SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string, notificationType InactivityNotificationType) error
-	ScheduleAccountCleanupNotifications() // Schedules periodic checks for inactive accounts
+	ScheduleAccountCleanupNotifications(ctx context.Context) // Schedules periodic checks for inactive accounts
 }
 
 type EmailService struct {
@@ -89,7 +89,7 @@ func (s *EmailService) SendAccountInactivityNotification(ctx context.Context, re
 	return nil
 }
 
-func (s *EmailService) ScheduleAccountCleanupNotifications() {
+func (s *EmailService) ScheduleAccountCleanupNotifications(ctx context.Context) {
 	// In a real implementation, this would schedule periodic checks for inactive accounts
 	// For example, it could run daily to check for accounts that will be deleted in 30 days
 	log.Println("Scheduling account cleanup notifications...")
@@ -105,6 +105,9 @@ func (s *EmailService) ScheduleAccountCleanupNotifications() {
 				// In a real implementation, this would query the database for accounts that are approaching
 				// the 2-year inactivity threshold and send notifications to their owners
 				log.Println("Checking for accounts approaching inactivity deletion...")
+			case <-ctx.Done():
+				log.Println("Stopping account cleanup notification scheduler...")
+				return
 			}
 		}
 	}()

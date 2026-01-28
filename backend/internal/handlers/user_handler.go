@@ -173,8 +173,16 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, err := h.service.GetUser(ctx, userID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "User not found",
+		// Check for user not found error specifically
+		if errors.Is(err, services.ErrUserNotFound) {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": "User not found",
+			})
+		}
+		// Other errors are internal server errors
+		c.Logger().Errorf("Failed to get user profile: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Internal server error",
 		})
 	}
 

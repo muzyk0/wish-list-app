@@ -82,7 +82,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			mockGiftItemRepo := new(MockGiftItemRepository)
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.On("Create", mock.Anything, mock.AnythingOfType("GiftItem")).Return(tt.mockReturn, tt.mockError)
+				mockGiftItemRepo.On("Create", mock.Anything, mock.AnythingOfType("db.GiftItem")).Return(tt.mockReturn, tt.mockError)
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
@@ -163,7 +163,7 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 			mockGiftItemRepo := new(MockGiftItemRepository)
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.On("GetByID", mock.Anything, mock.AnythingOfType("UUID")).Return(tt.mockReturn, tt.mockError)
+				mockGiftItemRepo.On("GetByID", mock.Anything, mock.AnythingOfType("pgtype.UUID")).Return(tt.mockReturn, tt.mockError)
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
