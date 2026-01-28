@@ -294,7 +294,7 @@ func (r *GiftItemRepository) ReserveIfNotReserved(ctx context.Context, giftItemI
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
-		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
 			log.Printf("tx rollback error: %v", rbErr)
 		}
 	}()
@@ -361,7 +361,7 @@ func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Conte
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
-		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
 			log.Printf("tx rollback error: %v", rbErr)
 		}
 	}()

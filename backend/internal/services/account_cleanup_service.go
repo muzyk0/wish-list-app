@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -159,7 +160,7 @@ func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID st
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer func() {
-		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
 			log.Printf("tx rollback error: %v", rbErr)
 		}
 	}()
@@ -353,5 +354,6 @@ func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 func (s *AccountCleanupService) Stop() {
 	if s.ticker != nil {
 		s.ticker.Stop()
+		s.ticker = nil
 	}
 }

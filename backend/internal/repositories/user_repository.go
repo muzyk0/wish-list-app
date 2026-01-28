@@ -139,13 +139,13 @@ func (r *UserRepository) Create(ctx context.Context, user db.User) (*db.User, er
 	var createdUser db.User
 	err := r.db.QueryRowxContext(ctx, query,
 		user.Email,
-		db.TextToString(user.PasswordHash),
-		db.TextToString(user.FirstName),
-		db.TextToString(user.LastName),
-		db.TextToString(user.AvatarUrl),
-		db.TextToString(user.EncryptedEmail),
-		db.TextToString(user.EncryptedFirstName),
-		db.TextToString(user.EncryptedLastName),
+		user.PasswordHash,
+		user.FirstName,
+		user.LastName,
+		user.AvatarUrl,
+		user.EncryptedEmail,
+		user.EncryptedFirstName,
+		user.EncryptedLastName,
 	).StructScan(&createdUser)
 
 	if err != nil {
@@ -243,12 +243,12 @@ func (r *UserRepository) Update(ctx context.Context, user db.User) (*db.User, er
 	var updatedUser db.User
 	err := r.db.QueryRowxContext(ctx, query,
 		user.Email,
-		db.TextToString(user.EncryptedEmail),
-		db.TextToString(user.FirstName),
-		db.TextToString(user.EncryptedFirstName),
-		db.TextToString(user.LastName),
-		db.TextToString(user.EncryptedLastName),
-		db.TextToString(user.AvatarUrl),
+		user.EncryptedEmail,
+		user.FirstName,
+		user.EncryptedFirstName,
+		user.LastName,
+		user.EncryptedLastName,
+		user.AvatarUrl,
 		user.ID,
 	).StructScan(&updatedUser)
 
