@@ -2,12 +2,12 @@ name: Backend CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop]
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches: [main, develop]
+    # Run on PRs to any branch (omit branches to run on all PRs)
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
@@ -25,12 +25,11 @@ jobs:
         with:
           go-version: '1.25'
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
-
       - name: Run golangci-lint
-        run: cd backend && golangci-lint run
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: backend
 
   test:
     name: Run Backend Tests
