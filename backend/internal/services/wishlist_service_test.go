@@ -214,7 +214,7 @@ func TestWishListService_GetWishList(t *testing.T) {
 			mockGiftItemRepo := new(MockGiftItemRepository)
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockWishListRepo.On("GetByID", mock.Anything, mock.AnythingOfType("UUID")).Return(tt.mockReturn, tt.mockError)
+				mockWishListRepo.On("GetByID", mock.Anything, mock.AnythingOfType("pgtype.UUID")).Return(tt.mockReturn, tt.mockError)
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
