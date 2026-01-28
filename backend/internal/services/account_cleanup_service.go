@@ -52,11 +52,17 @@ func (s *AccountCleanupService) CheckInactiveAccounts(ctx context.Context) error
 
 	for _, user := range inactiveUsers23 {
 		// Send 1-month warning
-		userName := user.FirstName.String
-		if user.LastName.Valid {
-			userName += " " + user.LastName.String
+		var userName string
+		if user.FirstName.Valid {
+			userName = user.FirstName.String
 		}
-		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName); err != nil {
+		if user.LastName.Valid {
+			if userName != "" {
+				userName += " "
+			}
+			userName += user.LastName.String
+		}
+		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName, InactivityWarning23Month); err != nil {
 			log.Printf("Failed to send 23-month warning to user %s: %v", user.ID.String(), err)
 		}
 		log.Printf("Sent 23-month inactivity warning to user %s", user.ID.String())
@@ -71,14 +77,20 @@ func (s *AccountCleanupService) CheckInactiveAccounts(ctx context.Context) error
 
 	for _, user := range inactiveUsers7Days {
 		// Send final 7-day warning
-		userName := user.FirstName.String
+		var userName string
+		if user.FirstName.Valid {
+			userName = user.FirstName.String
+		}
 		if user.LastName.Valid {
-			userName += " " + user.LastName.String
+			if userName != "" {
+				userName += " "
+			}
+			userName += user.LastName.String
 		}
-		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName); err != nil {
-			log.Printf("Failed to send 7-day warning to user %s: %v", user.ID.String(), err)
+		if err := s.emailService.SendAccountInactivityNotification(ctx, user.Email, userName, InactivityWarningFinal); err != nil {
+			log.Printf("Failed to send 7-day final warning to user %s: %v", user.ID.String(), err)
 		}
-		log.Printf("Sent 7-day inactivity warning to user %s", user.ID.String())
+		log.Printf("Sent 7-day final warning to user %s", user.ID.String())
 	}
 
 	return nil
@@ -254,10 +266,10 @@ func (s *AccountCleanupService) findInactiveUsersSince(ctx context.Context, sinc
 }
 
 // logAccountDeletion logs account deletion for audit purposes
+// Note: Email is not logged to comply with CR-004 (no plaintext PII in logs)
 func (s *AccountCleanupService) logAccountDeletion(userID, email, reason string, isAutomatic bool) {
-	log.Printf("[AUDIT] Account deleted: UserID=%s, Email=%s, Reason=%s, Automatic=%v, Timestamp=%s",
+	log.Printf("[AUDIT] Account deleted: UserID=%s, Reason=%s, Automatic=%v, Timestamp=%s",
 		userID,
-		email,
 		reason,
 		isAutomatic,
 		time.Now().Format(time.RFC3339))

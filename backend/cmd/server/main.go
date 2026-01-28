@@ -86,7 +86,7 @@ func main() {
 	} else {
 		defer func() {
 			log.Println("Closing Redis connection...")
-			if err := redisCache.(*cache.RedisCache).Close(); err != nil {
+			if err := redisCache.Close(); err != nil {
 				log.Printf("Error closing Redis: %v", err)
 			}
 		}()
@@ -103,7 +103,9 @@ func main() {
 
 	// Initialize encryption service for PII protection (CR-004)
 	var encryptionService *encryption.Service
-	encryptionKey, encryptedKeyToStore, err := encryption.GetOrCreateDataKey(context.Background())
+	encryptionCtx, encryptionCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer encryptionCancel()
+	encryptionKey, encryptedKeyToStore, err := encryption.GetOrCreateDataKey(encryptionCtx)
 	if err != nil {
 		// In production, encryption is required - fail fast
 		if cfg.ServerEnv != "development" {

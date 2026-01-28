@@ -330,7 +330,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		expectedUser := &services.UserOutput{
@@ -363,7 +363,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		// No auth context
 		c, rec := CreateTestContext(e, http.MethodGet, "/api/users/me", nil, nil)
@@ -381,7 +381,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*services.UserOutput)(nil), assert.AnError)
@@ -403,7 +403,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		email := "updated@example.com"
@@ -452,7 +452,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		email := "updated@example.com"
 		password := "newpassword123"
@@ -477,7 +477,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 
@@ -501,7 +501,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		mockService := new(MockUserService)
 		tokenManager := auth.NewTokenManager("test-secret")
 		analyticsService := analytics.NewAnalyticsService(false)
-	handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
+		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
 		email := "updated@example.com"

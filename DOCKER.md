@@ -68,7 +68,7 @@ The backend service uses environment variables for configuration. You can:
 3. **Use a .env file** in the database directory:
    ```bash
    cd database
-   cp ../.env.example .env
+   cp ../backend/.env.example .env
    # Edit .env with your values
    cd ..
    make docker-up

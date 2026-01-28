@@ -166,7 +166,7 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 				mockGiftItemRepo.On("GetByID", mock.Anything, mock.AnythingOfType("UUID")).Return(tt.mockReturn, tt.mockError)
 			}
 
-			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil,nil)
+			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
 
 			result, err := service.GetGiftItem(context.Background(), tt.giftItemID)
 

@@ -9,12 +9,22 @@ import (
 	"time"
 )
 
+// InactivityNotificationType represents the type of inactivity notification
+type InactivityNotificationType string
+
+const (
+	// InactivityWarning23Month is sent at 23 months of inactivity (30 days before deletion)
+	InactivityWarning23Month InactivityNotificationType = "23_month_warning"
+	// InactivityWarningFinal is sent at 7 days before deletion
+	InactivityWarningFinal InactivityNotificationType = "final_warning"
+)
+
 // EmailServiceInterface defines the interface for email operations
 type EmailServiceInterface interface {
 	SendReservationCancellationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error
 	SendReservationRemovedEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error
 	SendGiftPurchasedConfirmationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle, guestName string) error
-	SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string) error
+	SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string, notificationType InactivityNotificationType) error
 	ScheduleAccountCleanupNotifications() // Schedules periodic checks for inactive accounts
 }
 
@@ -37,7 +47,10 @@ type ReservationRemovedEmailData struct {
 }
 
 type AccountInactivityNotificationData struct {
-	UserName string
+	UserName          string
+	NotificationType  InactivityNotificationType
+	DaysUntilDeletion int
+	IsUrgent          bool
 }
 
 type GiftPurchasedConfirmationEmailData struct {
@@ -46,16 +59,32 @@ type GiftPurchasedConfirmationEmailData struct {
 	GuestName     string
 }
 
-func (s *EmailService) SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string) error {
-	subject := "Account inactivity notice - scheduled deletion"
-	_, err := s.buildAccountInactivityNotification(userName)
+func (s *EmailService) SendAccountInactivityNotification(ctx context.Context, recipientEmail, userName string, notificationType InactivityNotificationType) error {
+	var subject string
+	var daysUntilDeletion int
+	var isUrgent bool
+
+	switch notificationType {
+	case InactivityWarning23Month:
+		subject = "Account inactivity notice - scheduled deletion in 30 days"
+		daysUntilDeletion = 30
+		isUrgent = false
+	case InactivityWarningFinal:
+		subject = "URGENT: Account will be deleted in 7 days"
+		daysUntilDeletion = 7
+		isUrgent = true
+	default:
+		return fmt.Errorf("unknown notification type: %s", notificationType)
+	}
+
+	_, err := s.buildAccountInactivityNotification(userName, notificationType, daysUntilDeletion, isUrgent)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
 	}
 
 	// In a real implementation, this would send the email via SMTP
 	// Do not log PII (email addresses) or full body content
-	log.Printf("Email send simulated: subject=%q (recipient redacted)", subject)
+	log.Printf("Email send simulated: subject=%q type=%s (recipient redacted)", subject, notificationType)
 
 	return nil
 }
@@ -81,7 +110,7 @@ func (s *EmailService) ScheduleAccountCleanupNotifications() {
 	}()
 }
 
-func (s *EmailService) buildAccountInactivityNotification(userName string) (string, error) {
+func (s *EmailService) buildAccountInactivityNotification(userName string, notificationType InactivityNotificationType, daysUntilDeletion int, isUrgent bool) (string, error) {
 	tmpl := `
 		<!DOCTYPE html>
 		<html>
@@ -89,11 +118,23 @@ func (s *EmailService) buildAccountInactivityNotification(userName string) (stri
 			<title>Account inactivity notice</title>
 		</head>
 		<body>
+			{{if .IsUrgent}}
+			<h2 style="color: #d32f2f;">⚠️ URGENT: Account Deletion Warning</h2>
+			{{else}}
 			<h2>Account inactivity notice</h2>
+			{{end}}
 			<p>Hello {{.UserName}},</p>
-			<p>This is a courtesy notice that your wish list account has been inactive for an extended period.</p>
-			<p>Due to inactivity, your account and associated wish lists will be automatically deleted in 30 days if no activity is detected.</p>
-			<p>To prevent deletion, please log in to your account before this period ends.</p>
+			{{if .IsUrgent}}
+			<p><strong>This is your final warning.</strong> Your wish list account has been inactive for nearly 2 years.</p>
+			<p style="color: #d32f2f;"><strong>Your account and all associated wish lists will be permanently deleted in {{.DaysUntilDeletion}} days if no activity is detected.</strong></p>
+			<p>This is the last notification you will receive before deletion.</p>
+			{{else}}
+			<p>This is a courtesy notice that your wish list account has been inactive for an extended period (23 months).</p>
+			<p>Due to our data retention policy, your account and associated wish lists will be automatically deleted in {{.DaysUntilDeletion}} days if no activity is detected.</p>
+			<p>You will receive one more reminder 7 days before deletion.</p>
+			{{end}}
+			<p><strong>To prevent deletion, please log in to your account before this period ends.</strong></p>
+			<p>Any activity on your account (logging in, viewing wish lists, adding items, etc.) will reset the inactivity timer.</p>
 			<p>If you have any questions, please contact our support team.</p>
 			<p>Thank you for using our wish list service.</p>
 		</body>
@@ -107,7 +148,10 @@ func (s *EmailService) buildAccountInactivityNotification(userName string) (stri
 
 	var buf bytes.Buffer
 	data := AccountInactivityNotificationData{
-		UserName: userName,
+		UserName:          userName,
+		NotificationType:  notificationType,
+		DaysUntilDeletion: daysUntilDeletion,
+		IsUrgent:          isUrgent,
 	}
 
 	err = t.Execute(&buf, data)

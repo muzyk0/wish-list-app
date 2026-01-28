@@ -110,4 +110,3 @@ func TestHealthHandler_Health(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
-
