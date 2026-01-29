@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -21,6 +22,7 @@ type UserRepositoryInterface interface {
 	Delete(ctx context.Context, id pgtype.UUID) error
 	DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error
 	List(ctx context.Context, limit, offset int) ([]*db.User, error)
+	ListInactiveSince(ctx context.Context, since time.Time) ([]*db.User, error)
 }
 
 type UserRepository struct {
@@ -309,6 +311,34 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*db.Use
 	err := r.db.SelectContext(ctx, &users, query, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list users: %w", err)
+	}
+
+	// Decrypt PII for all users
+	for _, user := range users {
+		if err := r.decryptUserPII(ctx, user); err != nil {
+			return nil, fmt.Errorf("failed to decrypt user PII: %w", err)
+		}
+	}
+
+	return users, nil
+}
+
+// ListInactiveSince retrieves users who haven't been active since the given date
+func (r *UserRepository) ListInactiveSince(ctx context.Context, since time.Time) ([]*db.User, error) {
+	query := `
+		SELECT
+			id, email, encrypted_email, first_name, encrypted_first_name,
+			last_name, encrypted_last_name, avatar_url, is_verified,
+			created_at, updated_at, last_login_at, deactivated_at
+		FROM users
+		WHERE last_login_at < $1 OR (last_login_at IS NULL AND created_at < $1)
+		ORDER BY created_at DESC
+	`
+
+	var users []*db.User
+	err := r.db.SelectContext(ctx, &users, query, since)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list inactive users: %w", err)
 	}
 
 	// Decrypt PII for all users

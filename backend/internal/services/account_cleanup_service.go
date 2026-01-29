@@ -302,10 +302,11 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 
 // findInactiveUsersSince finds users who haven't been active since the given date
 func (s *AccountCleanupService) findInactiveUsersSince(ctx context.Context, since time.Time) ([]*db.User, error) {
-	// In production, this would query users where last_login_at < since
-	// For now, we return empty list as we don't have last_login_at field yet
-	// This is a placeholder for the actual implementation
-	return []*db.User{}, nil
+	users, err := s.userRepo.ListInactiveSince(ctx, since)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find inactive users: %w", err)
+	}
+	return users, nil
 }
 
 // logAccountDeletion logs account deletion for audit purposes
@@ -348,15 +349,12 @@ func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 	}()
 
 	log.Println("Scheduled account cleanup job started (runs daily at current time)")
+}
+
 // Stop stops the scheduled cleanup job
 func (s *AccountCleanupService) Stop() {
-	if s.stopCh != nil {
-		close(s.stopCh)
-		s.stopCh = nil
-	}
 	if s.ticker != nil {
 		s.ticker.Stop()
 		s.ticker = nil
 	}
-}
 }
