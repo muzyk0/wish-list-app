@@ -325,6 +325,8 @@ func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 	s.ticker = time.NewTicker(24 * time.Hour)
 
 	go func() {
+		defer s.ticker.Stop() // Automatic cleanup when goroutine exits
+
 		for {
 			select {
 			case <-s.ticker.C:
@@ -349,12 +351,4 @@ func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 	}()
 
 	log.Println("Scheduled account cleanup job started (runs daily at current time)")
-}
-
-// Stop stops the scheduled cleanup job
-func (s *AccountCleanupService) Stop() {
-	if s.ticker != nil {
-		s.ticker.Stop()
-		s.ticker = nil
-	}
 }

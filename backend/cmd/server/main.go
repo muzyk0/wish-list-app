@@ -211,7 +211,6 @@ func main() {
 		// Cancel application context to stop background jobs
 		log.Println("Stopping background services...")
 		appCancel()
-		accountCleanupService.Stop()
 
 		// Shutdown context (10 seconds timeout)
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
