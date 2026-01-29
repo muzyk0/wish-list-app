@@ -348,12 +348,15 @@ func (s *AccountCleanupService) StartScheduledCleanup(ctx context.Context) {
 	}()
 
 	log.Println("Scheduled account cleanup job started (runs daily at current time)")
-}
-
 // Stop stops the scheduled cleanup job
 func (s *AccountCleanupService) Stop() {
+	if s.stopCh != nil {
+		close(s.stopCh)
+		s.stopCh = nil
+	}
 	if s.ticker != nil {
 		s.ticker.Stop()
 		s.ticker = nil
 	}
+}
 }
