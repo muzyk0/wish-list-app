@@ -143,7 +143,7 @@ func TestWishListService_CreateWishList(t *testing.T) {
 			mockGiftItemRepo := new(MockGiftItemRepository)
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockWishListRepo.On("Create", mock.Anything, mock.AnythingOfType("WishList")).Return(tt.mockReturn, tt.mockError)
+				mockWishListRepo.On("Create", mock.Anything, mock.AnythingOfType("db.WishList")).Return(tt.mockReturn, tt.mockError)
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
