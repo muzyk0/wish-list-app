@@ -30,38 +30,55 @@ export default function RootLayout() {
           profile: '/(tabs)/profile',
         };
 
-        // Handle parameterized routes
+        // Handle parameterized routes with type-safe navigation
         if (path.startsWith('lists/') && path.includes('/edit')) {
-          const id = path.split('/')[1];
-          router.push(`/lists/${id}/edit` as any);
+          const match = path.match(/^lists\/([^\/]+)\/edit/);
+          if (match && match[1]) {
+            router.navigate({
+              pathname: '/lists/[id]/edit',
+              params: { id: match[1] },
+            });
+          }
           return;
         }
 
         if (path.startsWith('lists/')) {
-          const id = path.split('/')[1];
-          router.push(`/lists/${id}` as any);
+          const match = path.match(/^lists\/([^\/]+)/);
+          if (match && match[1]) {
+            router.navigate({
+              pathname: '/lists/[id]',
+              params: { id: match[1] },
+            });
+          }
           return;
         }
 
         if (path.startsWith('public/')) {
-          const slug = path.split('/')[1];
-          router.push(`/public/${slug}` as any);
+          const match = path.match(/^public\/([^\/]+)/);
+          if (match && match[1]) {
+            router.navigate({
+              pathname: '/public/[slug]',
+              params: { slug: match[1] },
+            });
+          }
           return;
         }
 
         if (path.startsWith('gift-items/') && path.includes('/edit')) {
           const match = path.match(/^gift-items\/([^\/]+)\/edit/);
           if (match && match[1]) {
-            const id = match[1];
-            router.push(`/gift-items/${id}/edit` as any);
+            router.navigate({
+              pathname: '/gift-items/[id]/edit',
+              params: { id: match[1] },
+            });
           }
           return;
         }
 
-        // Handle mapped routes
+        // Handle mapped routes (static routes)
         const targetRoute = routeMap[path];
         if (targetRoute) {
-          router.push(targetRoute as any);
+          router.push(targetRoute);
         }
       }
     };
