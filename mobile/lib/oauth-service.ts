@@ -21,11 +21,11 @@ const OAUTH_CONFIG = {
 };
 
 // Google OAuth discovery endpoint
-const googleDiscovery = AuthSession.discovery({
+const googleDiscovery: AuthSession.DiscoveryDocument = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
   tokenEndpoint: 'https://oauth2.googleapis.com/token',
   revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-});
+};
 
 // Google OAuth flow
 export const startGoogleOAuth = async (): Promise<{
@@ -112,10 +112,10 @@ export const startGoogleOAuth = async (): Promise<{
 };
 
 // Facebook OAuth discovery endpoint
-const facebookDiscovery = AuthSession.discovery({
+const facebookDiscovery: AuthSession.DiscoveryDocument = {
   authorizationEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
   tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
-});
+};
 
 // Facebook OAuth flow
 export const startFacebookOAuth = async (): Promise<{
