@@ -1,0 +1,10 @@
+properties:
+  isReserved:
+    type: boolean
+  reservedAt:
+    type: string
+  reservedByName:
+    type: string
+  status:
+    type: string
+type: object

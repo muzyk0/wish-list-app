@@ -1,0 +1,14 @@
+properties:
+  expiresAt:
+    type: string
+  giftItem:
+    $ref: ./internal_handlers.GiftItemSummary.yaml
+  id:
+    type: string
+  reservedAt:
+    type: string
+  status:
+    type: string
+  wishlist:
+    $ref: ./internal_handlers.WishListSummary.yaml
+type: object

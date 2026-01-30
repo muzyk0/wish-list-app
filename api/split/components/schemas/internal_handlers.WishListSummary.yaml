@@ -1,0 +1,10 @@
+properties:
+  id:
+    type: string
+  ownerFirstName:
+    type: string
+  ownerLastName:
+    type: string
+  title:
+    type: string
+type: object

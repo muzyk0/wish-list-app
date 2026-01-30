@@ -23,6 +23,19 @@ func NewS3Handler(s3Client *aws.S3Client) *S3Handler {
 	}
 }
 
+// UploadImage godoc
+// @Summary Upload an image to S3
+// @Description Upload an image file to S3 storage. The user must be authenticated.
+// @Tags S3 Upload
+// @Accept mpfd
+// @Produce json
+// @Param image formData file true "Image file to upload (max 10MB, only images allowed)"
+// @Success 200 {object} map[string]string "Image uploaded successfully, returns URL"
+// @Failure 400 {object} map[string]string "Invalid file or file too large"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /s3/upload [post]
 func (h *S3Handler) UploadImage(c echo.Context) error {
 	// Get user from context to ensure they're authenticated
 	_, _, _, err := auth.GetUserFromContext(c)

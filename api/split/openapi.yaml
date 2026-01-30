@@ -18,8 +18,32 @@ paths:
     $ref: paths/auth_login.yaml
   /auth/register:
     $ref: paths/auth_register.yaml
+  /gift-items/{id}:
+    $ref: paths/gift-items_{id}.yaml
+  /gift-items/{id}/purchase:
+    $ref: paths/gift-items_{id}_purchase.yaml
+  /health:
+    $ref: paths/health.yaml
   /protected/profile:
     $ref: paths/protected_profile.yaml
+  /public/wishlists/{slug}:
+    $ref: paths/public_wishlists_{slug}.yaml
+  /public/wishlists/{slug}/gift-items/{itemId}/reservation-status:
+    $ref: paths/public_wishlists_{slug}_gift-items_{itemId}_reservation-status.yaml
+  /reservations:
+    $ref: paths/reservations.yaml
+  /reservations/guest:
+    $ref: paths/reservations_guest.yaml
+  /s3/upload:
+    $ref: paths/s3_upload.yaml
+  /wishlists:
+    $ref: paths/wishlists.yaml
+  /wishlists/{id}:
+    $ref: paths/wishlists_{id}.yaml
+  /wishlists/{wishlistId}/gift-items:
+    $ref: paths/wishlists_{wishlistId}_gift-items.yaml
+  /wishlists/{wishlistId}/gift-items/{itemId}/reservation:
+    $ref: paths/wishlists_{wishlistId}_gift-items_{itemId}_reservation.yaml
 servers:
   - url: //localhost:8080/api
 components:

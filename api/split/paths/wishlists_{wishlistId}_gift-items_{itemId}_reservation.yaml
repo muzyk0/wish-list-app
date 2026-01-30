@@ -1,0 +1,122 @@
+delete:
+  description: >-
+    Cancel a reservation for a gift item. Can be done by authenticated users or
+    guests (with reservation token).
+  parameters:
+    - description: Wish List ID
+      in: path
+      name: wishlistId
+      required: true
+      schema:
+        type: string
+    - description: Gift Item ID
+      in: path
+      name: itemId
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: >-
+            ../components/schemas/internal_handlers.CancelReservationRequest.yaml
+    description: Cancellation information (required for guests)
+  responses:
+    '200':
+      description: Reservation canceled successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/internal_handlers.CreateReservationResponse.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized (guests need reservation token)
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Cancel a reservation for a gift item
+  tags:
+    - Reservations
+post:
+  description: >-
+    Create a reservation for a gift item. Can be done by authenticated users or
+    guests (with name and email).
+  parameters:
+    - description: Wish List ID
+      in: path
+      name: wishlistId
+      required: true
+      schema:
+        type: string
+    - description: Gift Item ID
+      in: path
+      name: itemId
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: >-
+            ../components/schemas/internal_handlers.CreateReservationRequest.yaml
+    description: Reservation information (required for guests)
+  responses:
+    '200':
+      description: Reservation created successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/internal_handlers.CreateReservationResponse.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized (guests need name and email)
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Create a reservation for a gift item
+  tags:
+    - Reservations

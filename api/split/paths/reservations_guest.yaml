@@ -1,0 +1,38 @@
+get:
+  description: Get all reservations made by a guest using their reservation token.
+  parameters:
+    - description: Reservation token
+      in: query
+      name: token
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: List of guest reservations retrieved successfully
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: >-
+                ../components/schemas/internal_handlers.ReservationDetailsResponse.yaml
+            type: array
+    '400':
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Get reservations made by a guest using a token
+  tags:
+    - Reservations

@@ -156,6 +156,404 @@
                 }
             }
         },
+        "/gift-items/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a gift item by its ID. If the parent wish list is private, the user must be the owner.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Get a gift item by ID",
+                "parameters": [
+                    {
+                        "description": "Gift Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gift item retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gift item not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a gift item by its ID. The user must be the owner of the parent wish list.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Update a gift item",
+                "parameters": [
+                    {
+                        "description": "Gift Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.UpdateGiftItemRequest"
+                            }
+                        }
+                    },
+                    "description": "Gift item update information",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Gift item updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gift item or wishlist not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a gift item by its ID. The user must be the owner of the parent wish list.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Delete a gift item",
+                "parameters": [
+                    {
+                        "description": "Gift Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Gift item deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gift item or wishlist not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gift-items/{id}/purchase": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a gift item as purchased with an optional purchased price. The user must be the owner of the parent wish list.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Mark a gift item as purchased",
+                "parameters": [
+                    {
+                        "description": "Gift Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.PurchaseRequest"
+                            }
+                        }
+                    },
+                    "description": "Purchase information",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Gift item marked as purchased successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gift item or wishlist not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Performs a health check of the application and its dependencies (database)",
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "Application is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Application is unhealthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/protected/profile": {
             "get": {
                 "security": [
@@ -307,6 +705,1085 @@
                     }
                 }
             }
+        },
+        "/public/wishlists/{slug}": {
+            "get": {
+                "description": "Get a public wish list by its public slug. The wish list must be marked as public.",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Get a public wish list by its slug",
+                "parameters": [
+                    {
+                        "description": "Public Slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Public wish list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wish list not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status": {
+            "get": {
+                "description": "Get the reservation status for a specific gift item in a public wish list.",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Get the reservation status for a gift item in a public wish list",
+                "parameters": [
+                    {
+                        "description": "Public wish list slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Gift Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation status retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.ReservationStatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all reservations made by the authenticated user with pagination.",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Get all reservations made by the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of user reservations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.UserReservationsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/guest": {
+            "get": {
+                "description": "Get all reservations made by a guest using their reservation token.",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Get reservations made by a guest using a token",
+                "parameters": [
+                    {
+                        "description": "Reservation token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of guest reservations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/internal_handlers.ReservationDetailsResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/s3/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload an image file to S3 storage. The user must be authenticated.",
+                "tags": [
+                    "S3 Upload"
+                ],
+                "summary": "Upload an image to S3",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "image": {
+                                        "description": "Image file to upload (max 10MB, only images allowed)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "image"
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Image uploaded successfully, returns URL",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid file or file too large",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all wish lists owned by the currently authenticated user",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Get all wish lists owned by the authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "List of wish lists retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new wish list for the authenticated user",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Create a new wish list",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.CreateWishListRequest"
+                            }
+                        }
+                    },
+                    "description": "Wish list creation information",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Wish list created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a wish list by its ID. If the wish list is private, the user must be the owner.",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Get a wish list by ID",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Wish list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wish list not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a wish list by its ID. The user must be the owner of the wish list.",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Update a wish list",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.UpdateWishListRequest"
+                            }
+                        }
+                    },
+                    "description": "Wish list update information",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wish list updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wish list not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a wish list by its ID. The user must be the owner of the wish list.",
+                "tags": [
+                    "Wish Lists"
+                ],
+                "summary": "Delete a wish list",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Wish list deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{wishlistId}/gift-items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all gift items in a wish list. If the wish list is private, the user must be the owner.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Get all gift items in a wish list",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of gift items retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.GetGiftItemsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new gift item in a wish list. The user must be the owner of the wish list.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Create a new gift item",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.CreateGiftItemRequest"
+                            }
+                        }
+                    },
+                    "description": "Gift item creation information",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Gift item created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{wishlistId}/gift-items/{itemId}/reservation": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Create a reservation for a gift item",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Gift Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.CreateReservationRequest"
+                            }
+                        }
+                    },
+                    "description": "Reservation information (required for guests)"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reservation created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.CreateReservationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (guests need name and email)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Cancel a reservation for a gift item",
+                "parameters": [
+                    {
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Gift Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.CancelReservationRequest"
+                            }
+                        }
+                    },
+                    "description": "Cancellation information (required for guests)"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reservation canceled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.CreateReservationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (guests need reservation token)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "servers": [
@@ -335,6 +1812,189 @@
                     }
                 }
             },
+            "internal_handlers.CancelReservationRequest": {
+                "type": "object",
+                "properties": {
+                    "reservationToken": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.CreateGiftItemRequest": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "maximum": 10,
+                        "minimum": 0
+                    }
+                }
+            },
+            "internal_handlers.CreateReservationRequest": {
+                "type": "object",
+                "properties": {
+                    "guestEmail": {
+                        "type": "string"
+                    },
+                    "guestName": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                }
+            },
+            "internal_handlers.CreateReservationResponse": {
+                "type": "object",
+                "properties": {
+                    "cancelReason": {
+                        "type": "string"
+                    },
+                    "canceledAt": {
+                        "type": "string"
+                    },
+                    "expiresAt": {
+                        "type": "string"
+                    },
+                    "giftItemId": {
+                        "type": "string"
+                    },
+                    "guestEmail": {
+                        "type": "string"
+                    },
+                    "guestName": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "notificationSent": {
+                        "type": "boolean"
+                    },
+                    "reservationToken": {
+                        "type": "string"
+                    },
+                    "reservedAt": {
+                        "type": "string"
+                    },
+                    "reservedByUserId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.CreateWishListRequest": {
+                "type": "object",
+                "required": [
+                    "title"
+                ],
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "is_public": {
+                        "type": "boolean"
+                    },
+                    "occasion": {
+                        "type": "string"
+                    },
+                    "occasion_date": {
+                        "type": "string"
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "default": "default"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                }
+            },
+            "internal_handlers.GetGiftItemsResponse": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                        }
+                    },
+                    "limit": {
+                        "type": "integer"
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "pages": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "internal_handlers.GiftItemSummary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.HealthResponse": {
+                "type": "object",
+                "properties": {
+                    "checks": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                }
+            },
             "internal_handlers.LoginRequest": {
                 "type": "object",
                 "required": [
@@ -348,6 +2008,14 @@
                     "password": {
                         "type": "string",
                         "minLength": 6
+                    }
+                }
+            },
+            "internal_handlers.PurchaseRequest": {
+                "type": "object",
+                "properties": {
+                    "purchased_price": {
+                        "type": "number"
                     }
                 }
             },
@@ -376,6 +2044,80 @@
                     }
                 }
             },
+            "internal_handlers.ReservationDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "expiresAt": {
+                        "type": "string"
+                    },
+                    "giftItem": {
+                        "$ref": "#/components/schemas/internal_handlers.GiftItemSummary"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "reservedAt": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "wishlist": {
+                        "$ref": "#/components/schemas/internal_handlers.WishListSummary"
+                    }
+                }
+            },
+            "internal_handlers.ReservationStatusResponse": {
+                "type": "object",
+                "properties": {
+                    "isReserved": {
+                        "type": "boolean"
+                    },
+                    "reservedAt": {
+                        "type": "string"
+                    },
+                    "reservedByName": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.UpdateGiftItemRequest": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "maximum": 10,
+                        "minimum": 0
+                    }
+                }
+            },
             "internal_handlers.UpdateProfileRequest": {
                 "type": "object",
                 "properties": {
@@ -397,6 +2139,115 @@
                     }
                 }
             },
+            "internal_handlers.UpdateWishListRequest": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "is_public": {
+                        "type": "boolean"
+                    },
+                    "occasion": {
+                        "type": "string"
+                    },
+                    "occasion_date": {
+                        "type": "string"
+                    },
+                    "template_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                }
+            },
+            "internal_handlers.UserReservationsResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/internal_handlers.ReservationDetailsResponse"
+                        }
+                    },
+                    "pagination": {}
+                }
+            },
+            "internal_handlers.WishListSummary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "ownerFirstName": {
+                        "type": "string"
+                    },
+                    "ownerLastName": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_services.GiftItemOutput": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "priority": {
+                        "type": "integer"
+                    },
+                    "purchased_at": {
+                        "type": "string"
+                    },
+                    "purchased_by_user_id": {
+                        "type": "string"
+                    },
+                    "purchased_price": {
+                        "type": "number"
+                    },
+                    "reserved_at": {
+                        "type": "string"
+                    },
+                    "reserved_by_user_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "wishlist_id": {
+                        "type": "string"
+                    }
+                }
+            },
             "wish-list_internal_services.UserOutput": {
                 "type": "object",
                 "properties": {
@@ -414,6 +2265,47 @@
                     },
                     "last_name": {
                         "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_services.WishListOutput": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "is_public": {
+                        "type": "boolean"
+                    },
+                    "occasion": {
+                        "type": "string"
+                    },
+                    "occasion_date": {
+                        "type": "string"
+                    },
+                    "owner_id": {
+                        "type": "string"
+                    },
+                    "public_slug": {
+                        "type": "string"
+                    },
+                    "template_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "view_count": {
+                        "type": "integer"
                     }
                 }
             }
