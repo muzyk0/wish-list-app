@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { ReservationButton } from '@/components/wish-list/ReservationButton';
 import { apiClient } from '@/lib/api';
-import type { GiftItem, WishList } from '@/lib/api/types';
+import type { PublicGiftItem, PublicWishList } from '@/lib/api/types';
 
 export default function PublicWishListScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -21,12 +21,10 @@ export default function PublicWishListScreen() {
     isError,
     refetch,
     isRefetching,
-  } = useQuery<WishList>({
+  } = useQuery<PublicWishList>({
     queryKey: ['public-wishlist', slug],
     queryFn: async () => {
-      const resp = await apiClient.getPublicWishList(slug as string);
-      // Normalize response: API returns 'items', component expects 'giftItems'
-      return { ...resp, giftItems: (resp as any).items ?? [] } as WishList;
+      return await apiClient.getPublicWishList(slug as string);
     },
     enabled: !!slug,
     retry: 1,
@@ -49,7 +47,7 @@ export default function PublicWishListScreen() {
     );
   }
 
-  const renderGiftItem = ({ item }: { item: GiftItem }) => {
+  const renderGiftItem = ({ item }: { item: PublicGiftItem }) => {
     const isReserved = !!item.reserved_by_user_id;
     const isPurchased = !!item.purchased_by_user_id;
 
@@ -83,8 +81,8 @@ export default function PublicWishListScreen() {
 
         <View style={styles.itemActions}>
           <ReservationButton
-            giftItemId={item.id}
-            wishlistId={wishList.id}
+            giftItemId={item.id ?? ''}
+            wishlistId={wishList.id ?? ''}
             isReserved={isReserved}
             onReservationSuccess={() => refetch()}
           />
@@ -106,9 +104,9 @@ export default function PublicWishListScreen() {
       </View>
 
       <FlatList
-        data={wishList.giftItems ?? []}
+        data={wishList.items ?? []}
         renderItem={renderGiftItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ?? ''}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
