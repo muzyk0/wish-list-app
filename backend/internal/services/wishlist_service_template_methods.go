@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -75,7 +76,7 @@ func (s *WishListService) UpdateWishListTemplate(ctx context.Context, wishListID
 
 	// Check if the user owns this wishlist
 	if existingWishList.OwnerID != userIDParsed {
-		return nil, fmt.Errorf("not authorized to update this wishlist")
+		return nil, errors.New("not authorized to update this wishlist")
 	}
 
 	// Verify the template exists

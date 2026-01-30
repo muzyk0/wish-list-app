@@ -41,7 +41,7 @@ func Load() *Config {
 
 	// Use a dev-only default for JWT_SECRET if not set in development
 	if jwtSecret == "" {
-		jwtSecret = "dev-only-secret-change-in-production"
+		jwtSecret = "dev-only-secret-change-in-production" // #nosec G101 -- dev-only default, not production secret
 	}
 
 	return &Config{

@@ -33,7 +33,7 @@ func SetAuthContext(c echo.Context, auth AuthContext) {
 }
 
 // CreateTestContext creates an Echo context with optional auth context
-func CreateTestContext(e *echo.Echo, method, path string, body interface{}, auth *AuthContext) (echo.Context, *httptest.ResponseRecorder) {
+func CreateTestContext(e *echo.Echo, method, path string, body any, auth *AuthContext) (echo.Context, *httptest.ResponseRecorder) {
 	var req *http.Request
 	if body != nil {
 		jsonBody, _ := json.Marshal(body)
@@ -54,7 +54,7 @@ func CreateTestContext(e *echo.Echo, method, path string, body interface{}, auth
 }
 
 // CreateTestContextWithParams creates an Echo context with params and optional auth context
-func CreateTestContextWithParams(e *echo.Echo, method, path string, body interface{}, paramNames, paramValues []string, auth *AuthContext) (echo.Context, *httptest.ResponseRecorder) {
+func CreateTestContextWithParams(e *echo.Echo, method, path string, body any, paramNames, paramValues []string, auth *AuthContext) (echo.Context, *httptest.ResponseRecorder) {
 	c, rec := CreateTestContext(e, method, path, body, auth)
 	c.SetParamNames(paramNames...)
 	c.SetParamValues(paramValues...)

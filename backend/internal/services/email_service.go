@@ -166,7 +166,7 @@ func (s *EmailService) buildAccountInactivityNotification(userName string, notif
 }
 
 func (s *EmailService) SendReservationCancellationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error {
-	subject := "Your reservation has been cancelled"
+	subject := "Your reservation has been canceled"
 	_, err := s.buildReservationCancellationEmail(giftItemName, wishlistTitle)
 	if err != nil {
 		return fmt.Errorf("failed to build email body: %w", err)
@@ -212,12 +212,12 @@ func (s *EmailService) buildReservationCancellationEmail(giftItemName, wishlistT
 		<!DOCTYPE html>
 		<html>
 		<head>
-			<title>Your reservation has been cancelled</title>
+			<title>Your reservation has been canceled</title>
 		</head>
 		<body>
-			<h2>Your reservation has been cancelled</h2>
+			<h2>Your reservation has been canceled</h2>
 			<p>Hello,</p>
-			<p>We wanted to inform you that your reservation for the gift item "{{.GiftItemName}}" from the wish list "{{.WishlistTitle}}" has been cancelled.</p>
+			<p>We wanted to inform you that your reservation for the gift item "{{.GiftItemName}}" from the wish list "{{.WishlistTitle}}" has been canceled.</p>
 			<p>If you believe this was done in error, please contact the wish list owner.</p>
 			<p>Thank you for using our wish list service.</p>
 		</body>

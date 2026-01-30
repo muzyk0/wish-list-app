@@ -85,10 +85,10 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 			ID:               pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
 			GiftItemID:       pgtype.UUID{Valid: true},
 			ReservedByUserID: userID,
-			Status:           "cancelled",
+			Status:           "canceled",
 			ReservedAt:       pgtype.Timestamptz{Time: time.Now(), Valid: true},
 			CanceledAt:       pgtype.Timestamptz{Time: time.Now(), Valid: true},
-			CancelReason:     pgtype.Text{String: "User cancelled reservation", Valid: true},
+			CancelReason:     pgtype.Text{String: "User canceled reservation", Valid: true},
 			NotificationSent: pgtype.Bool{Bool: false, Valid: true},
 		}
 
@@ -118,7 +118,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		var response CreateReservationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
-		assert.Equal(t, "cancelled", response.Status)
+		assert.Equal(t, "canceled", response.Status)
 
 		mockService.AssertExpectations(t)
 	})
@@ -128,7 +128,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
-		tokenStr := "123e4567-e89b-12d3-a456-426614174000"
+		tokenStr := "123e4567-e89b-12d3-a456-426614174000" // #nosec G101 -- test value, not a credential
 		req := CancelReservationRequest{
 			ReservationToken: &tokenStr,
 		}
@@ -136,14 +136,14 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		expectedReservation := &services.ReservationOutput{
 			ID:         pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
 			GiftItemID: pgtype.UUID{Valid: true},
-			Status:     "cancelled",
+			Status:     "canceled",
 			ReservationToken: pgtype.UUID{
 				Bytes: [16]byte{0x12, 0x3e, 0x45, 0x67, 0xe8, 0x9b, 0x12, 0xd3, 0xa4, 0x56, 0x42, 0x66, 0x14, 0x17, 0x40, 0x00},
 				Valid: true,
 			},
 			ReservedAt:       pgtype.Timestamptz{Time: time.Now(), Valid: true},
 			CanceledAt:       pgtype.Timestamptz{Time: time.Now(), Valid: true},
-			CancelReason:     pgtype.Text{String: "Guest cancelled reservation", Valid: true},
+			CancelReason:     pgtype.Text{String: "Guest canceled reservation", Valid: true},
 			NotificationSent: pgtype.Bool{Bool: false, Valid: true},
 		}
 
@@ -166,7 +166,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		var response CreateReservationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
-		assert.Equal(t, "cancelled", response.Status)
+		assert.Equal(t, "canceled", response.Status)
 
 		mockService.AssertExpectations(t)
 	})
@@ -203,7 +203,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
-		tokenStr := "123e4567-e89b-12d3-a456-426614174001"
+		tokenStr := "123e4567-e89b-12d3-a456-426614174001" // #nosec G101 -- test value, not a credential
 		req := CancelReservationRequest{
 			ReservationToken: &tokenStr,
 		}
@@ -336,7 +336,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
-		invalidToken := "not-a-valid-uuid"
+		invalidToken := "not-a-valid-uuid" // #nosec G101 -- test value, not a credential
 		reqBody := CancelReservationRequest{
 			ReservationToken: &invalidToken,
 		}
@@ -370,7 +370,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		mockService := new(MockReservationService)
 		handler := NewReservationHandler(mockService)
 
-		tokenStr := "123e4567-e89b-12d3-a456-426614174000"
+		tokenStr := "123e4567-e89b-12d3-a456-426614174000" // #nosec G101 -- test value, not a credential
 		tokenUUID := pgtype.UUID{}
 		err := tokenUUID.Scan(tokenStr)
 		require.NoError(t, err)

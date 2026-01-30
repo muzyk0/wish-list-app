@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -21,7 +22,7 @@ func NewValidator() *CustomValidator {
 }
 
 // Validate validates a struct
-func (cv *CustomValidator) Validate(i interface{}) error {
+func (cv *CustomValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
 		// Convert validation errors to user-friendly messages
 		return fmt.Errorf("validation failed: %s", formatValidationErrors(err))
@@ -31,12 +32,13 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 // formatValidationErrors formats validation errors into a readable string
 func formatValidationErrors(err error) string {
-	if validationErrors, ok := err.(validator.ValidationErrors); ok {
-		var errors []string
+	var validationErrors validator.ValidationErrors
+	if errors.As(err, &validationErrors) {
+		formattedErrors := make([]string, 0, len(validationErrors))
 		for _, e := range validationErrors {
-			errors = append(errors, formatFieldError(e))
+			formattedErrors = append(formattedErrors, formatFieldError(e))
 		}
-		return strings.Join(errors, "; ")
+		return strings.Join(formattedErrors, "; ")
 	}
 	return err.Error()
 }
@@ -47,17 +49,17 @@ func formatFieldError(e validator.FieldError) string {
 
 	switch e.Tag() {
 	case "required":
-		return fmt.Sprintf("%s is required", field)
+		return field + " is required"
 	case "email":
-		return fmt.Sprintf("%s must be a valid email address", field)
+		return field + " must be a valid email address"
 	case "min":
 		return fmt.Sprintf("%s must be at least %s characters long", field, e.Param())
 	case "max":
 		return fmt.Sprintf("%s must be at most %s characters long", field, e.Param())
 	case "url":
-		return fmt.Sprintf("%s must be a valid URL", field)
+		return field + " must be a valid URL"
 	case "uuid":
-		return fmt.Sprintf("%s must be a valid UUID", field)
+		return field + " must be a valid UUID"
 	default:
 		return fmt.Sprintf("%s failed validation on %s", field, e.Tag())
 	}

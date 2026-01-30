@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -373,13 +374,7 @@ func TestWishListRepository_EdgeCases(t *testing.T) {
 			}
 
 			// In real implementation, this would be enforced by foreign key
-			found := false
-			for _, valid := range validTemplates {
-				if wishList.TemplateID == valid {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(validTemplates, wishList.TemplateID)
 
 			if !found {
 				t.Errorf("template_id %q should reference valid template", templateID)

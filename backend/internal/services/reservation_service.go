@@ -128,43 +128,42 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 		}
 
 		return s.mapToOutput(createdReservation), nil
-	} else {
-		// For guest reservations, we need to check and create atomically
-		// First, check if there's an active reservation using a transaction
-		activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, giftItemID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to check existing reservation: %w", err)
-		}
-
-		if activeReservation != nil {
-			return nil, errors.New("gift item is already reserved")
-		}
-
-		// Create the guest reservation
-		if input.GuestName == nil || input.GuestEmail == nil {
-			return nil, errors.New("guest name and email are required for guest reservations")
-		}
-
-		// Attempt to create the reservation record atomically
-		reservation := repositories.ReservationDetail{
-			GiftItemID: giftItemID,
-			GuestName:  pgtype.Text{String: *input.GuestName, Valid: true},
-			GuestEmail: pgtype.Text{String: *input.GuestEmail, Valid: true},
-			Status:     "active",
-			ReservedAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
-			// Set expiration time for guest reservations (e.g., 30 days)
-			ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(30 * 24 * time.Hour), Valid: true},
-		}
-
-		dbReservation := s.mapToDbReservation(reservation)
-		createdReservation, err := s.repo.Create(ctx, *dbReservation)
-		if err != nil {
-			// Check if this is a uniqueness constraint violation (another transaction got there first)
-			return nil, fmt.Errorf("failed to create reservation: %w", err)
-		}
-
-		return s.mapToOutput(createdReservation), nil
 	}
+	// For guest reservations, we need to check and create atomically
+	// First, check if there's an active reservation using a transaction
+	activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, giftItemID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check existing reservation: %w", err)
+	}
+
+	if activeReservation != nil {
+		return nil, errors.New("gift item is already reserved")
+	}
+
+	// Create the guest reservation
+	if input.GuestName == nil || input.GuestEmail == nil {
+		return nil, errors.New("guest name and email are required for guest reservations")
+	}
+
+	// Attempt to create the reservation record atomically
+	reservation := repositories.ReservationDetail{
+		GiftItemID: giftItemID,
+		GuestName:  pgtype.Text{String: *input.GuestName, Valid: true},
+		GuestEmail: pgtype.Text{String: *input.GuestEmail, Valid: true},
+		Status:     "active",
+		ReservedAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		// Set expiration time for guest reservations (e.g., 30 days)
+		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(30 * 24 * time.Hour), Valid: true},
+	}
+
+	dbReservation := s.mapToDbReservation(reservation)
+	createdReservation, err := s.repo.Create(ctx, *dbReservation)
+	if err != nil {
+		// Check if this is a uniqueness constraint violation (another transaction got there first)
+		return nil, fmt.Errorf("failed to create reservation: %w", err)
+	}
+
+	return s.mapToOutput(createdReservation), nil
 }
 
 func (s *ReservationService) CancelReservation(ctx context.Context, input CancelReservationInput) (*ReservationOutput, error) {
@@ -221,7 +220,7 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 
 		// Update the reservation status
 		canceledAt := pgtype.Timestamptz{Time: time.Now(), Valid: true}
-		updatedReservation, err := s.repo.UpdateStatus(ctx, reservationToCancel.ID, "cancelled", canceledAt, pgtype.Text{String: "User cancelled reservation", Valid: true})
+		updatedReservation, err := s.repo.UpdateStatus(ctx, reservationToCancel.ID, "canceled", canceledAt, pgtype.Text{String: "User canceled reservation", Valid: true})
 		if err != nil {
 			return nil, fmt.Errorf("failed to cancel reservation: %w", err)
 		}
@@ -229,17 +228,16 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 		return s.mapToOutput(updatedReservation), nil
 	} else if input.ReservationToken != nil {
 		// Find reservation by token
-		updatedReservation, err := s.repo.UpdateStatusByToken(ctx, *input.ReservationToken, "cancelled",
+		updatedReservation, err := s.repo.UpdateStatusByToken(ctx, *input.ReservationToken, "canceled",
 			pgtype.Timestamptz{Time: time.Now(), Valid: true},
-			pgtype.Text{String: "Guest cancelled reservation", Valid: true})
+			pgtype.Text{String: "Guest canceled reservation", Valid: true})
 		if err != nil {
 			return nil, fmt.Errorf("failed to cancel reservation: %w", err)
 		}
 
 		return s.mapToOutput(updatedReservation), nil
-	} else {
-		return nil, errors.New("either user ID or reservation token must be provided")
 	}
+	return nil, errors.New("either user ID or reservation token must be provided")
 }
 
 func (s *ReservationService) GetUserReservations(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]repositories.ReservationDetail, error) {
@@ -254,8 +252,8 @@ func (s *ReservationService) CountUserReservations(ctx context.Context, userID p
 	return s.repo.CountUserReservations(ctx, userID)
 }
 
-// Add a method to handle guest reservation with token-based authentication
-func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftItemID, wishlistID string, guestName, guestEmail string) (*ReservationOutput, error) {
+// CreateGuestReservation handles guest reservation with token-based authentication
+func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftItemID, wishlistID, guestName, guestEmail string) (*ReservationOutput, error) {
 	// Validate gift item exists and belongs to the specified wishlist
 	itemID := pgtype.UUID{}
 	if err := itemID.Scan(giftItemID); err != nil {

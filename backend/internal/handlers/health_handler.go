@@ -16,9 +16,9 @@ type HealthHandler struct {
 }
 
 // NewHealthHandler creates a new health check handler
-func NewHealthHandler(db *db.DB) *HealthHandler {
+func NewHealthHandler(database *db.DB) *HealthHandler {
 	return &HealthHandler{
-		db: db,
+		db: database,
 	}
 }
 

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -155,25 +154,6 @@ func TestS3Integration_Delete(t *testing.T) {
 func TestS3Integration_PresignedURL(t *testing.T) {
 	t.Skip("Requires S3 mock - see aws/s3_test.go for validation tests")
 	// Test validates that presigned URLs are generated correctly
-}
-
-// Helper function to create a valid image file for testing
-func createTestImageFile(t *testing.T, filename string, size int) (io.Reader, string) {
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	part, err := writer.CreateFormFile("image", filename)
-	require.NoError(t, err)
-
-	// Create fake image data
-	imageData := make([]byte, size)
-	_, err = part.Write(imageData)
-	require.NoError(t, err)
-
-	err = writer.Close()
-	require.NoError(t, err)
-
-	return body, writer.FormDataContentType()
 }
 
 // Additional validation tests for image handling

@@ -12,6 +12,11 @@ import (
 	"wish-list/internal/encryption"
 )
 
+var (
+	// ErrNoActiveReservation indicates no active reservation was found for a gift item
+	ErrNoActiveReservation = errors.New("no active reservation found")
+)
+
 // ReservationRepositoryInterface defines the interface for reservation database operations
 type ReservationRepositoryInterface interface {
 	Create(ctx context.Context, reservation db.Reservation) (*db.Reservation, error)
@@ -88,7 +93,6 @@ func (r *ReservationRepository) encryptReservationPII(ctx context.Context, reser
 		reservation.EncryptedGuestName = pgtype.Text{String: encrypted, Valid: true}
 		// Avoid persisting plaintext when encryption is enabled
 		reservation.GuestName = pgtype.Text{Valid: false}
-
 	}
 
 	// Encrypt guest email
@@ -303,7 +307,7 @@ func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Cont
 	err := r.db.GetContext(ctx, &reservation, query, giftItemID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // No active reservation
+			return nil, ErrNoActiveReservation
 		}
 		return nil, fmt.Errorf("failed to get active reservation for gift item: %w", err)
 	}

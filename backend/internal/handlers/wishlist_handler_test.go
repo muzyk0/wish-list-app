@@ -24,10 +24,6 @@ func float64Ptr(f float64) *float64 {
 	return &f
 }
 
-func intPtr(i int) *int {
-	return &i
-}
-
 // MarkAsPurchasedRequest is used for marking a gift item as purchased
 type MarkAsPurchasedRequest struct {
 	PurchasedPrice float64 `json:"purchased_price"`
@@ -490,7 +486,7 @@ func TestWishListHandler_UpdateGiftItem(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, expectedGiftItem.ID, response.ID)
 		assert.Equal(t, expectedGiftItem.Name, response.Name)
-		assert.Equal(t, expectedGiftItem.Price, response.Price)
+		assert.InEpsilon(t, expectedGiftItem.Price, response.Price, 0.01)
 
 		mockService.AssertExpectations(t)
 	})
@@ -651,7 +647,7 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 		var response services.GiftItemOutput
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
-		assert.Equal(t, expectedGiftItem.PurchasedPrice, response.PurchasedPrice)
+		assert.InEpsilon(t, expectedGiftItem.PurchasedPrice, response.PurchasedPrice, 0.01)
 
 		mockService.AssertExpectations(t)
 	})

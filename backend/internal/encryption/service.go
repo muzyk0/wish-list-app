@@ -91,7 +91,7 @@ func (s *Service) Decrypt(ctx context.Context, ciphertext string) (string, error
 	// Decrypt
 	plaintext, err := s.gcm.Open(nil, nonce, ciphertextBytes, nil)
 	if err != nil {
-		return "", fmt.Errorf("%w: %v", ErrInvalidCiphertext, err)
+		return "", fmt.Errorf("%w", ErrInvalidCiphertext)
 	}
 
 	return string(plaintext), nil

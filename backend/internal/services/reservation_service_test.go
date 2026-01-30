@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReservationService_GetReservationStatus(t *testing.T) {
@@ -31,7 +32,7 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, status.IsReserved)
 		assert.Equal(t, "available", status.Status)
 
@@ -65,7 +66,7 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
 
@@ -80,7 +81,7 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", "invalid-uuid")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, status)
 
 		mockRepo.AssertNotCalled(t, "GetActiveReservationForGiftItem", mock.Anything, mock.Anything)
@@ -122,7 +123,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, status.IsReserved)
 		assert.Equal(t, "available", status.Status)
 
@@ -161,7 +162,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
 
@@ -197,7 +198,7 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
 
@@ -245,7 +246,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 
 		_, err := service.CreateReservation(context.Background(), input)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "already reserved")
 
 		mockRepo.AssertExpectations(t)
@@ -292,7 +293,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 
 		reservation, err := service.CreateReservation(context.Background(), input)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, reservation)
 		assert.Equal(t, "active", reservation.Status)
 
@@ -346,7 +347,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 
 		reservation, err := service.CreateReservation(context.Background(), input)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, reservation)
 		assert.Equal(t, "active", reservation.Status)
 
@@ -382,7 +383,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 
 		_, err := service.CreateReservation(context.Background(), input)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "guest name and email are required")
 	})
 
@@ -400,7 +401,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 
 		_, err := service.CreateReservation(context.Background(), input)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid gift item id")
 	})
 }
@@ -424,12 +425,12 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		canceledReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			ReservationToken: token,
-			Status:           "cancelled",
+			Status:           "canceled",
 		}
 
 		// Mock ownership validation
 		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockRepo.On("UpdateStatusByToken", mock.Anything, token, "cancelled", mock.Anything, mock.Anything).
+		mockRepo.On("UpdateStatusByToken", mock.Anything, token, "canceled", mock.Anything, mock.Anything).
 			Return(canceledReservation, nil)
 
 		input := CancelReservationInput{
@@ -441,9 +442,9 @@ func TestReservationService_CancelReservation(t *testing.T) {
 
 		reservation, err := service.CancelReservation(context.Background(), input)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, reservation)
-		assert.Equal(t, "cancelled", reservation.Status)
+		assert.Equal(t, "canceled", reservation.Status)
 
 		mockRepo.AssertExpectations(t)
 	})
@@ -473,7 +474,7 @@ func TestReservationService_CancelReservation(t *testing.T) {
 
 		_, err := service.CancelReservation(context.Background(), input)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "either user ID or reservation token must be provided")
 
 		mockGiftItemRepo.AssertExpectations(t)

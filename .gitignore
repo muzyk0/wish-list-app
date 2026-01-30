@@ -36,6 +36,7 @@ out/
 vendor/
 coverage.txt
 *.prof
+backend/server
 
 # Environment files
 .env*

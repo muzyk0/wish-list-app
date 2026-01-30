@@ -115,8 +115,9 @@ func TestGiftItemRepository_GetByWishList(t *testing.T) {
 
 		// Verify positions are sequential
 		for i, item := range giftItems {
-			if item.Position.Int32 != int32(i) {
-				t.Errorf("item %d: expected position %d, got %d", i, i, item.Position.Int32)
+			expectedPos := int32(i) // #nosec G115 -- loop index, always safe conversion
+			if item.Position.Int32 != expectedPos {
+				t.Errorf("item %d: expected position %d, got %d", i, expectedPos, item.Position.Int32)
 			}
 		}
 	})

@@ -3,6 +3,7 @@ package encryption
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"testing"
 )
 
@@ -31,7 +32,7 @@ func TestNewService(t *testing.T) {
 		}
 
 		_, err = NewService(key)
-		if err != ErrInvalidKeySize {
+		if !errors.Is(err, ErrInvalidKeySize) {
 			t.Fatalf("expected ErrInvalidKeySize, got %v", err)
 		}
 	})
@@ -44,7 +45,7 @@ func TestNewService(t *testing.T) {
 		}
 
 		_, err = NewService(key)
-		if err != ErrInvalidKeySize {
+		if !errors.Is(err, ErrInvalidKeySize) {
 			t.Fatalf("expected ErrInvalidKeySize, got %v", err)
 		}
 	})

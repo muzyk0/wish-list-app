@@ -128,7 +128,7 @@ func (s *AccountCleanupService) DeleteInactiveAccounts(ctx context.Context) erro
 }
 
 // DeleteUserAccount deletes a user account and all associated data
-func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID string, reason string) error {
+func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID, reason string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return fmt.Errorf("invalid user id: %w", err)
@@ -224,7 +224,7 @@ func (s *AccountCleanupService) DeleteUserAccount(ctx context.Context, userID st
 }
 
 // ExportUserData exports all user data for GDPR compliance
-func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID string) (map[string]interface{}, error) {
+func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID string) (map[string]any, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return nil, fmt.Errorf("invalid user id: %w", err)
@@ -242,16 +242,16 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 		return nil, fmt.Errorf("failed to get wishlists: %w", err)
 	}
 
-	wishListsData := make([]map[string]interface{}, 0)
+	wishListsData := make([]map[string]any, 0)
 	for _, wl := range wishLists {
 		giftItems, err := s.giftItemRepo.GetByWishList(ctx, wl.ID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get gift items for wishlist %s: %w", wl.ID.String(), err)
 		}
 
-		giftItemsData := make([]map[string]interface{}, 0)
+		giftItemsData := make([]map[string]any, 0)
 		for _, item := range giftItems {
-			giftItemsData = append(giftItemsData, map[string]interface{}{
+			giftItemsData = append(giftItemsData, map[string]any{
 				"id":          item.ID.String(),
 				"name":        item.Name,
 				"description": item.Description.String,
@@ -263,7 +263,7 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 			})
 		}
 
-		wishListsData = append(wishListsData, map[string]interface{}{
+		wishListsData = append(wishListsData, map[string]any{
 			"id":          wl.ID.String(),
 			"title":       wl.Title,
 			"description": wl.Description.String,
@@ -286,8 +286,8 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 		userName += user.LastName.String
 	}
 
-	return map[string]interface{}{
-		"user": map[string]interface{}{
+	return map[string]any{
+		"user": map[string]any{
 			"id":         user.ID.String(),
 			"email":      user.Email,
 			"name":       userName,
@@ -310,8 +310,8 @@ func (s *AccountCleanupService) findInactiveUsersSince(ctx context.Context, sinc
 }
 
 // logAccountDeletion logs account deletion for audit purposes
-// Note: Email is not logged to comply with CR-004 (no plaintext PII in logs)
-func (s *AccountCleanupService) logAccountDeletion(userID, email, reason string, isAutomatic bool) {
+// Note: Email parameter is intentionally unused to comply with CR-004 (no plaintext PII in logs)
+func (s *AccountCleanupService) logAccountDeletion(userID, _, reason string, isAutomatic bool) {
 	log.Printf("[AUDIT] Account deleted: UserID=%s, Reason=%s, Automatic=%v, Timestamp=%s",
 		userID,
 		reason,

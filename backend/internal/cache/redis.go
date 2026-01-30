@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,7 +17,7 @@ type RedisCache struct {
 }
 
 // NewRedisCache creates a new Redis cache instance
-func NewRedisCache(addr string, password string, db int, ttl time.Duration) (*RedisCache, error) {
+func NewRedisCache(addr, password string, db int, ttl time.Duration) (*RedisCache, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -38,10 +39,10 @@ func NewRedisCache(addr string, password string, db int, ttl time.Duration) (*Re
 }
 
 // Get retrieves a value from cache
-func (c *RedisCache) Get(ctx context.Context, key string, dest interface{}) error {
+func (c *RedisCache) Get(ctx context.Context, key string, dest any) error {
 	val, err := c.client.Get(ctx, key).Result()
-	if err == redis.Nil {
-		return fmt.Errorf("cache miss")
+	if errors.Is(err, redis.Nil) {
+		return errors.New("cache miss")
 	}
 	if err != nil {
 		return fmt.Errorf("failed to get from cache: %w", err)
@@ -55,7 +56,7 @@ func (c *RedisCache) Get(ctx context.Context, key string, dest interface{}) erro
 }
 
 // Set stores a value in cache
-func (c *RedisCache) Set(ctx context.Context, key string, value interface{}) error {
+func (c *RedisCache) Set(ctx context.Context, key string, value any) error {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("failed to marshal value: %w", err)
@@ -97,8 +98,8 @@ func (c *RedisCache) Close() error {
 
 // CacheInterface defines the caching operations
 type CacheInterface interface {
-	Get(ctx context.Context, key string, dest interface{}) error
-	Set(ctx context.Context, key string, value interface{}) error
+	Get(ctx context.Context, key string, dest any) error
+	Set(ctx context.Context, key string, value any) error
 	Delete(ctx context.Context, key string) error
 	DeletePattern(ctx context.Context, pattern string) error
 	Close() error

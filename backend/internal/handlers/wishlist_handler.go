@@ -381,10 +381,7 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	// Apply pagination
 	total := len(giftItems)
 	start := (page - 1) * limit
-	end := start + limit
-	if end > total {
-		end = total
-	}
+	end := min(start+limit, total)
 
 	// Handle out of bounds
 	if start > total {

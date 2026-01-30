@@ -338,7 +338,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	// Verify ownership
 	wishList, err := s.wishListRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrWishListNotFound, err)
+		return nil, fmt.Errorf("%w: %w", ErrWishListNotFound, err)
 	}
 
 	ownerID := pgtype.UUID{}
@@ -846,9 +846,6 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 				if reservation.GuestEmail.Valid {
 					recipientEmail = reservation.GuestEmail.String
 					guestName = reservation.GuestName.String
-				} else if reservation.ReservedByUserID.Valid {
-					// For authenticated users, we would need to fetch their email from user repository
-					// Skipping for now as per implementation
 				}
 
 				if recipientEmail != "" {
@@ -927,7 +924,7 @@ func generatePublicSlug(title string) string {
 }
 
 //// GetTemplates returns all available templates
-//func (s *WishListService) GetTemplates(ctx context.Context) ([]*TemplateOutput, error) {
+// func (s *WishListService) GetTemplates(ctx context.Context) ([]*TemplateOutput, error) {
 //	templates, err := s.templateRepo.GetAll(ctx)
 //	if err != nil {
 //		return nil, fmt.Errorf("failed to get templates from repository: %w", err)
@@ -952,7 +949,7 @@ func generatePublicSlug(title string) string {
 //}
 //
 //// GetDefaultTemplate returns the default template
-//func (s *WishListService) GetDefaultTemplate(ctx context.Context) (*TemplateOutput, error) {
+// func (s *WishListService) GetDefaultTemplate(ctx context.Context) (*TemplateOutput, error) {
 //	template, err := s.templateRepo.GetDefault(ctx)
 //	if err != nil {
 //		return nil, fmt.Errorf("failed to get default template from repository: %w", err)
@@ -973,7 +970,7 @@ func generatePublicSlug(title string) string {
 //}
 //
 //// UpdateWishListTemplate updates the template for a wish list
-//func (s *WishListService) UpdateWishListTemplate(ctx context.Context, wishListID, userID, templateID string) (*WishListOutput, error) {
+// func (s *WishListService) UpdateWishListTemplate(ctx context.Context, wishListID, userID, templateID string) (*WishListOutput, error) {
 //	// Parse UUIDs
 //	listID := pgtype.UUID{}
 //	if err := listID.Scan(wishListID); err != nil {

@@ -347,10 +347,10 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 
 	response := struct {
 		Data       []ReservationDetailsResponse `json:"data"`
-		Pagination interface{}                  `json:"pagination"`
+		Pagination any                          `json:"pagination"`
 	}{
 		Data: []ReservationDetailsResponse{},
-		Pagination: map[string]interface{}{
+		Pagination: map[string]any{
 			"page":       page,
 			"limit":      limit,
 			"total":      totalCount,
