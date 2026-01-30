@@ -1,5 +1,4 @@
 import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
 // Define OAuth configuration
@@ -20,6 +19,13 @@ const OAUTH_CONFIG = {
   // Backend API URL for OAuth callback
   backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080',
 };
+
+// Google OAuth discovery endpoint
+const googleDiscovery = AuthSession.discovery({
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+});
 
 // Google OAuth flow
 export const startGoogleOAuth = async (): Promise<{
@@ -61,29 +67,37 @@ export const startGoogleOAuth = async (): Promise<{
       preferLocalhost: true,
     });
 
-    // Define the authorization request
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20profile%20email&access_type=offline`;
+    // Create AuthRequest with PKCE enabled
+    const request = new AuthSession.AuthRequest({
+      clientId,
+      redirectUri,
+      scopes: ['openid', 'profile', 'email'],
+      usePKCE: true,
+      extraParams: {
+        access_type: 'offline', // Request refresh token
+      },
+    });
 
-    // Open the authorization session
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+    // Prompt for authorization
+    const result = await request.promptAsync(googleDiscovery);
 
     if (result.type === 'success') {
-      const redirectUrl = result.url;
-
-      // Extract the authorization code from the redirect URL
-      const urlParams = new URLSearchParams(redirectUrl.split('?')[1]);
-      const code = urlParams.get('code');
+      const { code } = result.params;
 
       if (code) {
         // In a real implementation, you would exchange the code for tokens
-        // For this demo, we'll just return the code
-        // In a real app, you would send this code to your backend to exchange for tokens
+        // The code is now extracted automatically by AuthRequest
         return { success: true, token: code };
       } else {
         return { success: false, error: 'Authorization code not received' };
       }
-    } else if (result.type === 'dismiss') {
+    } else if (result.type === 'dismiss' || result.type === 'cancel') {
       return { success: false, error: 'OAuth flow was cancelled' };
+    } else if (result.type === 'error') {
+      return {
+        success: false,
+        error: result.params?.error_description || 'OAuth flow failed',
+      };
     } else {
       return { success: false, error: 'OAuth flow failed' };
     }
@@ -96,6 +110,12 @@ export const startGoogleOAuth = async (): Promise<{
     };
   }
 };
+
+// Facebook OAuth discovery endpoint
+const facebookDiscovery = AuthSession.discovery({
+  authorizationEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
+  tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
+});
 
 // Facebook OAuth flow
 export const startFacebookOAuth = async (): Promise<{
@@ -129,27 +149,34 @@ export const startFacebookOAuth = async (): Promise<{
       preferLocalhost: true,
     });
 
-    // Define the authorization request
-    const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${facebookClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=email,public_profile`;
+    // Create AuthRequest with PKCE enabled
+    const request = new AuthSession.AuthRequest({
+      clientId: facebookClientId,
+      redirectUri,
+      scopes: ['email', 'public_profile'],
+      usePKCE: true,
+    });
 
-    // Open the authorization session
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+    // Prompt for authorization
+    const result = await request.promptAsync(facebookDiscovery);
 
     if (result.type === 'success') {
-      const redirectUrl = result.url;
-
-      // Extract the authorization code from the redirect URL
-      const urlParams = new URLSearchParams(redirectUrl.split('?')[1]);
-      const code = urlParams.get('code');
+      const { code } = result.params;
 
       if (code) {
         // In a real implementation, you would exchange the code for tokens
+        // The code is now extracted automatically by AuthRequest
         return { success: true, token: code };
       } else {
         return { success: false, error: 'Authorization code not received' };
       }
-    } else if (result.type === 'dismiss') {
+    } else if (result.type === 'dismiss' || result.type === 'cancel') {
       return { success: false, error: 'OAuth flow was cancelled' };
+    } else if (result.type === 'error') {
+      return {
+        success: false,
+        error: result.params?.error_description || 'OAuth flow failed',
+      };
     } else {
       return { success: false, error: 'OAuth flow failed' };
     }

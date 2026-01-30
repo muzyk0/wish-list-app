@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
@@ -17,6 +18,7 @@ import { apiClient } from '@/lib/api';
 
 export default function ProfileScreen() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { colors } = useTheme();
   const { isDark, toggleTheme } = useThemeContext();
 
@@ -96,7 +98,8 @@ export default function ProfileScreen() {
         {
           text: 'OK',
           onPress: () => {
-            // Navigation will be handled by auth state change
+            // Navigate to auth flow
+            router.replace('/auth/login');
           },
         },
       ]);
