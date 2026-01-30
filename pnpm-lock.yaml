@@ -15,6 +15,9 @@ importers:
       shadcn:
         specifier: ^3.6.3
         version: 3.6.3(@types/node@25.0.10)(hono@4.11.4)
+      swagger2openapi:
+        specifier: ^7.0.8
+        version: 7.0.8
 
 packages:
 

@@ -16,14 +16,20 @@ help: ## Show this help message
 .PHONY: setup
 setup: ## Set up the development environment
 	@echo "Setting up development environment..."
+	@echo "Installing root dependencies (OpenAPI tools)..."
+	@pnpm install
+	@echo "Installing backend dependencies..."
 	@cd backend && go mod tidy
+	@echo "Installing frontend dependencies..."
 	@cd frontend && pnpm install
+	@echo "Installing mobile dependencies..."
 	@cd mobile && pnpm install
 	@echo "Ensure golangci-lint is installed (recommended: install via package manager like brew)"
 	@if ! command -v golangci-lint >/dev/null 2>&1; then \
 		echo "golangci-lint not found. Install with: brew install golangci-lint"; \
 		exit 1; \
 	fi
+	@echo "✓ Development environment setup complete!"
 
 .PHONY: db-up
 db-up: ## Start the database with Docker
@@ -136,21 +142,13 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "✓ Swagger 2.0 generated"
 	@echo ""
 	@echo "Step 2/3: Converting to OpenAPI 3.0..."
-	@if ! command -v swagger2openapi >/dev/null 2>&1; then \
-		echo "Installing swagger2openapi..."; \
-		npm install -g swagger2openapi; \
-	fi
-	@swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
-	@swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
+	@pnpm exec swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
+	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 converted"
 	@echo ""
 	@echo "Step 3/3: Splitting into organized files..."
-	@if ! command -v redocly >/dev/null 2>&1; then \
-		echo "Installing Redocly CLI..."; \
-		npm install -g @redocly/cli; \
-	fi
 	@mkdir -p backend/docs/split
-	@redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@pnpm exec redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
 	@echo "✓ Split files created"
 	@echo ""
 	@echo "================================================"
@@ -183,12 +181,8 @@ swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 .PHONY: swagger-convert-v3
 swagger-convert-v3: ## Convert OpenAPI 2.0 to 3.0
 	@echo "Converting OpenAPI 2.0 to 3.0..."
-	@if ! command -v swagger2openapi >/dev/null 2>&1; then \
-		echo "Installing swagger2openapi..."; \
-		npm install -g swagger2openapi; \
-	fi
-	@swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
-	@swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
+	@pnpm exec swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
+	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 files generated: backend/docs/openapi3.{json,yaml}"
 
 .PHONY: test
@@ -254,30 +248,22 @@ build-frontend: ## Build frontend
 .PHONY: swagger-split
 swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 	@echo "Splitting OpenAPI 3.0 specification..."
-	@if ! command -v redocly >/dev/null 2>&1; then \
-		echo "Installing Redocly CLI..."; \
-		pnpm install -g @redocly/cli; \
-	fi
 	@if [ ! -f backend/docs/openapi3.yaml ]; then \
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi
 	@mkdir -p backend/docs/split
-	@redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@pnpm exec redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
 	@echo "✓ OpenAPI 3.0 specification split into backend/docs/split/"
 
 .PHONY: swagger-preview
 swagger-preview: ## Preview OpenAPI 3.0 specification in browser
 	@echo "Starting OpenAPI 3.0 documentation preview..."
-	@if ! command -v redocly >/dev/null 2>&1; then \
-		echo "Installing Redocly CLI..."; \
-		pnpm install -g @redocly/cli; \
-	fi
 	@if [ ! -f backend/docs/openapi3.yaml ]; then \
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi
-	@redocly preview-docs backend/docs/openapi3.yaml
+	@pnpm exec redocly preview-docs backend/docs/openapi3.yaml
 
 .PHONY: clean
 clean: ## Clean build artifacts
