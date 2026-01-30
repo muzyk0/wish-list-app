@@ -531,3 +531,54 @@ make clean                    # Clean build artifacts
 - The project enforces test-first approach (Constitution Requirement CR-002)
 - API contracts must be explicitly defined (Constitution Requirement CR-003)
 - Data privacy is enforced with encryption for PII (Constitution Requirement CR-004)
+
+## Conventional Commits
+
+This project follows the Conventional Commits specification for commit messages. This ensures consistent and readable commit history that can be used for automated changelog generation and semantic versioning.
+
+### Format
+
+Commit messages MUST follow this format:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+Common types include:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `build`: Changes that affect the build system or external dependencies
+- `ci`: Changes to CI configuration files and scripts
+- `chore`: Other changes that don't modify src or test files
+
+### Scope
+
+The scope is an optional part that provides additional contextual information about the change. It should be a noun describing a section of the codebase surrounded by parentheses:
+
+```
+feat(auth): add JWT refresh token rotation
+fix(api): resolve CORS issues in wishlist endpoints
+docs(readme): update installation instructions
+```
+
+### Breaking Changes
+
+Breaking changes MUST be indicated with an exclamation mark after the type/scope and optionally with a `BREAKING CHANGE` footer:
+
+```
+feat(api)!: change authentication header format
+
+BREAKING CHANGE: The Authorization header now expects "Bearer " prefix
+instead of "JWT ".
+```
