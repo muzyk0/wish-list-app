@@ -7,10 +7,9 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(word 1,$(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "OpenAPI Commands:"
-	@echo "  \033[36mopenapi-bundle\033[0m               Bundle OpenAPI specification from split files"
-	@echo "  \033[36mopenapi-validate\033[0m             Validate OpenAPI specification"
-	@echo "  \033[36mopenapi-preview\033[0m              Preview OpenAPI specification in browser"
-	@echo "  \033[36mopenapi-info\033[0m                 Show information about the OpenAPI specification"
+	@echo "  \033[36mswagger-generate\033[0m            Generate OpenAPI docs from Go annotations"
+	@echo "  \033[36mswagger-split\033[0m               Split generated OpenAPI into organized files"
+	@echo "  \033[36mswagger-preview\033[0m             Preview OpenAPI specification in browser"
 
 .PHONY: setup
 setup: ## Set up the development environment
@@ -191,32 +190,25 @@ build-frontend: ## Build frontend
 	@echo "Building frontend..."
 	@cd frontend && pnpm run build
 
-.PHONY: openapi-bundle
-openapi-bundle: ## Bundle OpenAPI specification from split files
-	@echo "Bundling OpenAPI specification..."
-	@pnpm install @redocly/cli || echo "Installing Redocly CLI..."
-	@redocly bundle api/openapi.json --output api/generated/openapi.json
-	@echo "OpenAPI specification bundled to api/generated/openapi.json"
+.PHONY: swagger-split
+swagger-split: ## Split generated OpenAPI spec into organized files
+	@echo "Splitting OpenAPI specification..."
+	@if ! command -v redocly >/dev/null 2>&1; then \
+		echo "Installing Redocly CLI..."; \
+		pnpm install -g @redocly/cli; \
+	fi
+	@mkdir -p backend/docs/split
+	@redocly split backend/docs/swagger.yaml --outDir=backend/docs/split
+	@echo "OpenAPI specification split into backend/docs/split/"
 
-.PHONY: openapi-validate
-openapi-validate: ## Validate OpenAPI specification
-	@echo "Validating OpenAPI specification..."
-	@redocly lint api/openapi.json
-
-.PHONY: openapi-preview
-openapi-preview: ## Preview OpenAPI specification in browser
+.PHONY: swagger-preview
+swagger-preview: ## Preview OpenAPI specification in browser
 	@echo "Starting OpenAPI documentation preview..."
-	@redocly preview-docs api/openapi.json
-
-.PHONY: openapi-info
-openapi-info: ## Show information about the OpenAPI specification
-	@echo "OpenAPI specification information:"
-	@echo "Main file: api/openapi.json"
-	@echo "Split files:"
-	@find api/ -name "*.json" | grep -v generated | wc -l | xargs -I {} echo "  Total JSON files (excluding generated): {}"
-	@echo "Path files: $$(find api/paths -name '*.json' | wc -l)"
-	@echo "Schema files: $$(find api/components/schemas -name '*.json' | wc -l)"
-	@echo "Response files: $$(find api/components/responses -name '*.json' | wc -l)"
+	@if ! command -v redocly >/dev/null 2>&1; then \
+		echo "Installing Redocly CLI..."; \
+		pnpm install -g @redocly/cli; \
+	fi
+	@redocly preview-docs backend/docs/swagger.yaml
 
 .PHONY: clean
 clean: ## Clean build artifacts
