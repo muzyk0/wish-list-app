@@ -52,13 +52,14 @@ const GiftItemCard = ({
           >
             {item.name}
           </Text>
-          {item.price && (
+          {item.price !== undefined && item.price !== null && (
             <Text
               variant="titleMedium"
               style={[styles.itemPrice, { color: colors.primary }]}
             >
               ${item.price.toFixed(2)}
             </Text>
+          )}
           )}
         </View>
 
