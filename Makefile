@@ -120,15 +120,28 @@ format-backend: ## Format backend with go fmt
 	@cd backend && go fmt ./...
 
 .PHONY: swagger-generate
-swagger-generate: ## Generate OpenAPI documentation from Go code annotations
-	@echo "Generating OpenAPI documentation..."
+swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
+	@echo "Generating OpenAPI 3.0 documentation..."
 	@if ! command -v swag >/dev/null 2>&1; then \
 		echo "Installing swag..."; \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
-	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
-	@echo "OpenAPI documentation generated at backend/docs/swagger.{json,yaml}"
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal --outputTypes json,yaml --ot go
+	@echo "Converting to OpenAPI 3.0..."
+	@$(MAKE) swagger-convert-v3
+	@echo "OpenAPI 3.0 documentation generated at backend/docs/openapi3.{json,yaml}"
 	@echo "Swagger UI available at http://localhost:8080/swagger/index.html"
+
+.PHONY: swagger-convert-v3
+swagger-convert-v3: ## Convert OpenAPI 2.0 to 3.0
+	@echo "Converting OpenAPI 2.0 to 3.0..."
+	@if ! command -v swagger2openapi >/dev/null 2>&1; then \
+		echo "Installing swagger2openapi..."; \
+		npm install -g swagger2openapi; \
+	fi
+	@swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
+	@swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
+	@echo "✓ OpenAPI 3.0 files generated: backend/docs/openapi3.{json,yaml}"
 
 .PHONY: test
 test: ## Run tests for all components
@@ -191,24 +204,32 @@ build-frontend: ## Build frontend
 	@cd frontend && pnpm run build
 
 .PHONY: swagger-split
-swagger-split: ## Split generated OpenAPI spec into organized files
-	@echo "Splitting OpenAPI specification..."
+swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
+	@echo "Splitting OpenAPI 3.0 specification..."
 	@if ! command -v redocly >/dev/null 2>&1; then \
 		echo "Installing Redocly CLI..."; \
 		pnpm install -g @redocly/cli; \
+	fi
+	@if [ ! -f backend/docs/openapi3.yaml ]; then \
+		echo "OpenAPI 3.0 not found. Generating..."; \
+		$(MAKE) swagger-convert-v3; \
 	fi
 	@mkdir -p backend/docs/split
-	@redocly split backend/docs/swagger.yaml --outDir=backend/docs/split
-	@echo "OpenAPI specification split into backend/docs/split/"
+	@redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@echo "✓ OpenAPI 3.0 specification split into backend/docs/split/"
 
 .PHONY: swagger-preview
-swagger-preview: ## Preview OpenAPI specification in browser
-	@echo "Starting OpenAPI documentation preview..."
+swagger-preview: ## Preview OpenAPI 3.0 specification in browser
+	@echo "Starting OpenAPI 3.0 documentation preview..."
 	@if ! command -v redocly >/dev/null 2>&1; then \
 		echo "Installing Redocly CLI..."; \
 		pnpm install -g @redocly/cli; \
 	fi
-	@redocly preview-docs backend/docs/swagger.yaml
+	@if [ ! -f backend/docs/openapi3.yaml ]; then \
+		echo "OpenAPI 3.0 not found. Generating..."; \
+		$(MAKE) swagger-convert-v3; \
+	fi
+	@redocly preview-docs backend/docs/openapi3.yaml
 
 .PHONY: clean
 clean: ## Clean build artifacts
