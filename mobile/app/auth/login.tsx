@@ -83,11 +83,21 @@ export default function LoginScreen() {
 
       if (result.success && result.token) {
         // Handle successful OAuth login
-        Alert.alert(
-          'Success',
-          `${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`,
-        );
-        router.push('/(tabs)'); // Navigate to main app
+        try {
+          // Store the token securely
+          await SecureStore.setItemAsync('auth_token', result.token);
+          Alert.alert(
+            'Success',
+            `${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`,
+          );
+          router.push('/(tabs)'); // Navigate to main app
+        } catch (error) {
+          console.error('Error storing OAuth token:', error);
+          Alert.alert(
+            'Error',
+            'Failed to save authentication. Please try again.',
+          );
+        }
       } else if (result.error) {
         Alert.alert('OAuth Error', result.error);
       }
