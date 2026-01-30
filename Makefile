@@ -6,9 +6,11 @@ help: ## Show this help message
 	@echo ""
 	@grep -E '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(word 1,$(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 	@echo ""
-	@echo "OpenAPI Commands:"
+	@echo "📚 Documentation Commands:"
+	@echo "  \033[36mdocs\033[0m                         Generate complete API docs (Swagger 2.0 → OpenAPI 3.0 → Split)"
 	@echo "  \033[36mswagger-generate\033[0m            Generate OpenAPI docs from Go annotations"
-	@echo "  \033[36mswagger-split\033[0m               Split generated OpenAPI into organized files"
+	@echo "  \033[36mswagger-convert-v3\033[0m          Convert Swagger 2.0 to OpenAPI 3.0"
+	@echo "  \033[36mswagger-split\033[0m               Split OpenAPI 3.0 into organized files"
 	@echo "  \033[36mswagger-preview\033[0m             Preview OpenAPI specification in browser"
 
 .PHONY: setup
@@ -119,6 +121,52 @@ format-backend: ## Format backend with go fmt
 	@echo "Formatting backend..."
 	@cd backend && go fmt ./...
 
+.PHONY: docs
+docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Split)
+	@echo "================================================"
+	@echo "📚 Generating Complete API Documentation"
+	@echo "================================================"
+	@echo ""
+	@echo "Step 1/3: Generating Swagger 2.0 from Go annotations..."
+	@if ! command -v swag >/dev/null 2>&1; then \
+		echo "Installing swag..."; \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
+	fi
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
+	@echo "✓ Swagger 2.0 generated"
+	@echo ""
+	@echo "Step 2/3: Converting to OpenAPI 3.0..."
+	@if ! command -v swagger2openapi >/dev/null 2>&1; then \
+		echo "Installing swagger2openapi..."; \
+		npm install -g swagger2openapi; \
+	fi
+	@swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
+	@swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
+	@echo "✓ OpenAPI 3.0 converted"
+	@echo ""
+	@echo "Step 3/3: Splitting into organized files..."
+	@if ! command -v redocly >/dev/null 2>&1; then \
+		echo "Installing Redocly CLI..."; \
+		npm install -g @redocly/cli; \
+	fi
+	@mkdir -p backend/docs/split
+	@redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@echo "✓ Split files created"
+	@echo ""
+	@echo "================================================"
+	@echo "✅ Documentation Complete!"
+	@echo "================================================"
+	@echo ""
+	@echo "📁 Generated files:"
+	@echo "  • backend/docs/swagger.{json,yaml}    (Swagger 2.0)"
+	@echo "  • backend/docs/openapi3.{json,yaml}   (OpenAPI 3.0)"
+	@echo "  • backend/docs/split/                 (Split files)"
+	@echo ""
+	@echo "🌐 View documentation:"
+	@echo "  • Swagger UI: http://localhost:8080/swagger/index.html"
+	@echo "  • Preview:    make swagger-preview"
+	@echo ""
+
 .PHONY: swagger-generate
 swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 	@echo "Generating OpenAPI 3.0 documentation..."
@@ -126,7 +174,7 @@ swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 		echo "Installing swag..."; \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
-	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal --outputTypes json,yaml --ot go
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
 	@echo "Converting to OpenAPI 3.0..."
 	@$(MAKE) swagger-convert-v3
 	@echo "OpenAPI 3.0 documentation generated at backend/docs/openapi3.{json,yaml}"
