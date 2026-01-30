@@ -49,6 +49,14 @@ export default function GiftItemForm({
       notes: string;
       position: string;
     }) => {
+      // Parse numeric fields, set to undefined if empty or invalid
+      const parsedPrice =
+        data.price.trim() !== '' ? parseFloat(data.price) : NaN;
+      const parsedPriority =
+        data.priority.trim() !== '' ? parseInt(data.priority, 10) : NaN;
+      const parsedPosition =
+        data.position.trim() !== '' ? parseInt(data.position, 10) : NaN;
+
       if (existingItem) {
         // Update existing item
         return apiClient.updateGiftItem(wishlistId, existingItem.id, {
@@ -56,10 +64,10 @@ export default function GiftItemForm({
           description: data.description,
           link: data.link,
           image_url: data.image_url,
-          price: parseFloat(data.price) || 0,
-          priority: parseInt(data.priority, 10) || 0,
+          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
+          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
-          position: parseInt(data.position, 10) || 0,
+          position: !isNaN(parsedPosition) ? parsedPosition : undefined,
         });
       } else {
         // Create new item
@@ -68,10 +76,10 @@ export default function GiftItemForm({
           description: data.description,
           link: data.link,
           image_url: data.image_url,
-          price: parseFloat(data.price) || 0,
-          priority: parseInt(data.priority, 10) || 0,
+          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
+          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
-          position: parseInt(data.position, 10) || 0,
+          position: !isNaN(parsedPosition) ? parsedPosition : undefined,
         });
       }
     },
