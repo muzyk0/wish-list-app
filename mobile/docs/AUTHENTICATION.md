@@ -52,7 +52,7 @@ EXPO_PUBLIC_FACEBOOK_CLIENT_ID=your_facebook_client_id
 #### Google OAuth
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
-3. Enable the Google+ API
+3. Navigate to "APIs & Services" > "Credentials"
 4. Create OAuth 2.0 credentials for:
    - Web application (for web builds)
    - Android application (for Android builds)
