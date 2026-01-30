@@ -23,11 +23,33 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"wish-list/internal/handlers"
 	"wish-list/internal/services"
 	"wish-list/internal/validation"
+
+	_ "wish-list/docs" // Import generated docs
 )
+
+// @title Wish List API
+// @version 1.0
+// @description A RESTful API for managing wish lists, gift items, and reservations.
+// @description Features include user authentication, wish list management, gift item tracking, and reservation system.
+
+// @contact.name API Support
+// @contact.email support@wishlist.example.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
 	// Load environment variables from .env file
@@ -229,6 +251,9 @@ func main() {
 }
 
 func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+	// Swagger documentation endpoint
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	// Health check endpoint
 	e.GET("/health", healthHandler.Health)
 

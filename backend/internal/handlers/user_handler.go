@@ -54,6 +54,18 @@ type AuthResponse struct {
 	Token string               `json:"token"`
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Create a new user account with email and password
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body RegisterRequest true "User registration information"
+// @Success 201 {object} AuthResponse "User created successfully"
+// @Failure 400 {object} map[string]string "Invalid request body or validation error"
+// @Failure 409 {object} map[string]string "User with this email already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/register [post]
 func (h *UserHandler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
@@ -111,6 +123,18 @@ func (h *UserHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, response)
 }
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate user with email and password
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param credentials body LoginRequest true "User login credentials"
+// @Success 200 {object} AuthResponse "Login successful"
+// @Failure 400 {object} map[string]string "Invalid request body or validation error"
+// @Failure 401 {object} map[string]string "Invalid credentials"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/login [post]
 func (h *UserHandler) Login(c echo.Context) error {
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
@@ -161,6 +185,18 @@ func (h *UserHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+// GetProfile godoc
+// @Summary Get user profile
+// @Description Get the authenticated user's profile information
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} services.UserOutput "User profile"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /protected/profile [get]
 func (h *UserHandler) GetProfile(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)
@@ -189,6 +225,20 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// UpdateProfile godoc
+// @Summary Update user profile
+// @Description Update the authenticated user's profile information
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param profile body UpdateProfileRequest true "Updated profile information"
+// @Success 200 {object} services.UserOutput "Updated user profile"
+// @Failure 400 {object} map[string]string "Invalid request body or validation error"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /protected/profile [put]
 func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)

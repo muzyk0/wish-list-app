@@ -120,6 +120,17 @@ format-backend: ## Format backend with go fmt
 	@echo "Formatting backend..."
 	@cd backend && go fmt ./...
 
+.PHONY: swagger-generate
+swagger-generate: ## Generate OpenAPI documentation from Go code annotations
+	@echo "Generating OpenAPI documentation..."
+	@if ! command -v swag >/dev/null 2>&1; then \
+		echo "Installing swag..."; \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
+	fi
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
+	@echo "OpenAPI documentation generated at backend/docs/swagger.{json,yaml}"
+	@echo "Swagger UI available at http://localhost:8080/swagger/index.html"
+
 .PHONY: test
 test: ## Run tests for all components
 	@echo "Running tests..."
