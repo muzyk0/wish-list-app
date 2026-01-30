@@ -47,6 +47,119 @@ The application follows a microservices architecture with shared components:
 - **UI components**: Custom components in `/mobile/components/`
 - **API integration**: Uses TanStack Query for data fetching and caching
 - **Asset management**: Expo Asset system for images and fonts
+- **Deep linking**: Custom URL scheme `wishlistapp://` with support for dynamic routes
+
+#### Expo Router Best Practices
+
+**Dynamic Routes**:
+```typescript
+// File structure: app/lists/[id]/index.tsx
+
+// Access route parameters
+import { useLocalSearchParams } from 'expo-router';
+
+export default function ListDetails() {
+  const { id } = useLocalSearchParams(); // Type-safe parameter access
+  return <Text>List ID: {id}</Text>;
+}
+```
+
+**Navigation Methods**:
+```typescript
+import { Link, router } from 'expo-router';
+
+// Method 1: Declarative with Link component (inline ID)
+<Link href="/lists/123">View List</Link>
+
+// Method 2: Declarative with typed params
+<Link
+  href={{
+    pathname: '/lists/[id]',
+    params: { id: '123' }
+  }}
+>
+  View List
+</Link>
+
+// Method 3: Imperative navigation
+router.navigate({
+  pathname: '/lists/[id]',
+  params: { id: '123' }
+});
+
+// Method 4: Simple push
+router.push('/lists/123');
+```
+
+**Deep Link Handling** (in `_layout.tsx`):
+- Use regex matching for parameter extraction (not `split()`)
+- Validate parameters before navigation
+- Handle both cold start (`Linking.getInitialURL()`) and warm start (`Linking.addEventListener()`)
+- Example:
+  ```typescript
+  const match = path.match(/^lists\/([^\/]+)/);
+  if (match && match[1]) {
+    router.navigate({
+      pathname: '/lists/[id]',
+      params: { id: match[1] }
+    });
+  }
+  ```
+
+**OAuth and Authentication**:
+- Use `AuthSession.AuthRequest` for OAuth flows (not `WebBrowser.openAuthSessionAsync`)
+- Enable PKCE with `usePKCE: true`
+- Define discovery endpoints as plain objects typed as `AuthSession.DiscoveryDocument`
+- Use `expo-secure-store` for token persistence (not `localStorage`)
+- Example:
+  ```typescript
+  const discovery: AuthSession.DiscoveryDocument = {
+    authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+    tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  };
+
+  const request = new AuthSession.AuthRequest({
+    clientId,
+    redirectUri,
+    scopes: ['openid', 'profile', 'email'],
+    usePKCE: true,
+  });
+
+  const result = await request.promptAsync(discovery);
+  ```
+
+**Deep Linking Configuration** (in `app.json`):
+```json
+{
+  "expo": {
+    "scheme": "wishlistapp",
+    "ios": {
+      "associatedDomains": ["applinks:lk.domain.com"]
+    },
+    "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "lk.domain.com" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    }
+  }
+}
+```
+
+**Testing Deep Links**:
+```bash
+# iOS Simulator
+xcrun simctl openurl booted wishlistapp://lists/123
+
+# Android Emulator
+adb shell am start -W -a android.intent.action.VIEW -d "wishlistapp://lists/123"
+```
+
+For detailed deep linking documentation, see `/docs/DEEP_LINKING.md`.
 
 ### Frontend Development
 - **Routing**: Next.js App Router in `frontend/src/app/`
