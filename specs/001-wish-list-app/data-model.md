@@ -91,8 +91,8 @@ A record of a guest reserving a gift item.
 - `status` (ENUM: active, cancelled, fulfilled, expired): Current status of the reservation
 - `reserved_at` (TIMESTAMPTZ, not null): Timestamp when item was reserved
 - `expires_at` (TIMESTAMPTZ, nullable): Expiration timestamp for anonymous reservations
-- `cancelled_at` (TIMESTAMPTZ, nullable): Timestamp when reservation was cancelled
-- `cancelled_reason` (TEXT, nullable): Reason for cancellation
+- `canceled_at` (TIMESTAMPTZ, nullable): Timestamp when reservation was cancelled
+- `canceled_reason` (TEXT, nullable): Reason for cancellation
 - `notification_sent` (BOOLEAN, default: false): Whether reservation notification was sent
 
 **Validation Rules:**

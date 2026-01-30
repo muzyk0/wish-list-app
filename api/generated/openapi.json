@@ -2099,11 +2099,11 @@
             "type": "string",
             "format": "date-time"
           },
-          "cancelled_at": {
+          "canceled_at": {
             "type": "string",
             "format": "date-time"
           },
-          "cancelled_reason": {
+          "canceled_reason": {
             "type": "string"
           }
         }

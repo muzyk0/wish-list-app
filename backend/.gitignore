@@ -1,0 +1,42 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+bin/
+main
+
+# Vendor
+vendor/
+
+# Test binary, build with `go test -c`
+*.test
+
+# Coverage
+coverage.out
+*.cov
+
+# Generated files
+generated/
+
+# Environment specific configurations
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.log.*
+!*.log.example

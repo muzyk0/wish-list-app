@@ -38,7 +38,6 @@ The application follows a microservices architecture with shared components:
 - **Custom components**: Business-specific components are in `frontend/src/components/[domain]/`
 
 ### Code Generation & Type Safety
-- **Database**: Use `make generate` to refresh database models for sqlx (manual updates needed)
 - **API clients**: Generated from OpenAPI specifications in `/contracts/`
 - **Type checking**: Run `npm run type-check` to verify TypeScript correctness
 - **Linting & formatting**: Use `make format` for consistent code style across all components
@@ -213,6 +212,199 @@ make clean                    # Clean build artifacts
 6. Run tests with `make test` to ensure code quality
 7. Use the Makefile for all common operations to maintain consistency
 8. Update task status in `/specs/001-wish-list-app/tasks.md` as you complete items
+
+## Backend Best Practices & Patterns
+
+### Error Handling
+- **Sentinel Errors**: Use sentinel errors for type-safe error handling instead of string matching
+  ```go
+  var (
+      ErrWishListNotFound  = errors.New("wishlist not found")
+      ErrWishListForbidden = errors.New("not authorized to access this wishlist")
+  )
+
+  // Check with errors.Is()
+  if errors.Is(err, services.ErrWishListNotFound) {
+      return c.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+  }
+  ```
+- **Never use string matching** like `strings.Contains(err.Error(), "not found")` - it's brittle and error-prone
+- **Wrap errors** with `fmt.Errorf("%w", err)` to preserve error types for `errors.Is()` checks
+
+### HTTP Status Codes
+- **401 Unauthorized**: Authentication required (missing or invalid token)
+- **403 Forbidden**: Authenticated but not authorized (ownership/permission check failed)
+- **404 Not Found**: Resource doesn't exist
+- **500 Internal Server Error**: Unexpected server errors only
+- **Important**: Authorization failures should return 403, NOT 500
+
+### Context Hierarchy & Lifecycle Management
+- **Use parent context hierarchy**: Pass application context to services instead of creating separate contexts
+  ```go
+  // In main.go
+  appCtx, appCancel := context.WithCancel(context.Background())
+  defer appCancel()
+
+  // Pass to services
+  accountCleanupService.StartScheduledCleanup(appCtx)
+  ```
+- **Single source of truth**: Application context controls all background goroutines
+- **Graceful shutdown**: Cancel parent context to stop all child goroutines automatically
+
+### Graceful Shutdown Pattern
+1. Create application context at startup
+2. Pass context to all background services
+3. Use `select` in goroutines to monitor context cancellation:
+   ```go
+   select {
+   case <-ticker.C:
+       // Do work
+   case <-ctx.Done():
+       log.Println("Shutting down...")
+       return
+   }
+   ```
+4. On shutdown signal, cancel context and stop tickers
+
+### Docker & Security
+- **Never hardcode credentials** in docker-compose.yml
+- **Use environment variable interpolation**:
+  ```yaml
+  DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@postgres:5432/db}
+  ```
+- **Multi-stage builds**: Use builder stage for compilation, minimal runtime stage
+- **Health checks**: Implement proper health checks for all services
+- **Non-root users**: Always run containers as non-root user for security
+
+### Database Testing
+- **Use sqlmock** for testing database interactions without real database:
+  ```go
+  mockDB, mock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+  sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+  ```
+- **Test both success and failure cases** (connection success, connection failure, timeouts)
+- **Verify expectations**: Always call `mock.ExpectationsWereMet()` at end of tests
+
+### Type Conversions & NULL Handling
+- **pgtype.Numeric to float64**: Always check `Valid` field and handle conversion errors
+  ```go
+  var price float64
+  if item.Price.Valid {
+      priceValue, err := item.Price.Float64Value()
+      if err == nil && priceValue.Valid {
+          price = priceValue.Float64
+      }
+  }
+  ```
+- **pgtype.Text**: Check `Valid` field before accessing `String`
+  ```go
+  // WRONG - crashes if FirstName.Valid is false
+  userName := user.FirstName.String
+
+  // CORRECT - safe NULL handling
+  var userName string
+  if user.FirstName.Valid {
+      userName = user.FirstName.String
+  }
+  if user.LastName.Valid {
+      if userName != "" {
+          userName += " "
+      }
+      userName += user.LastName.String
+  }
+  ```
+- **pgtype.UUID**: Use `Scan()` method for parsing string UUIDs
+- **pgtype.Date**: Parse RFC3339 strings using `time.Parse(time.RFC3339, dateString)`
+- **Safe pattern for nullable fields**: Always check `.Valid` before accessing `.String`, `.Int32`, etc.
+
+### Transaction Safety & Atomicity
+- **Wrap related operations in transactions**: Use database transactions to ensure atomicity for multi-step operations
+  ```go
+  tx, err := s.db.BeginTxx(ctx, nil)
+  if err != nil {
+      return fmt.Errorf("failed to start transaction: %w", err)
+  }
+  defer tx.Rollback() // Auto-rollback on panic or early return
+
+  // Perform all operations within transaction
+  if err := repo.DeleteWithExecutor(ctx, tx, id); err != nil {
+      return err // Rollback happens automatically
+  }
+
+  // Commit only after all operations succeed
+  if err := tx.Commit(); err != nil {
+      return fmt.Errorf("failed to commit: %w", err)
+  }
+  ```
+- **Send notifications after commit**: Never send emails or external notifications inside a transaction
+  - Collect notification data during transaction
+  - Send notifications only after successful commit
+  - If notifications fail, don't rollback the transaction
+- **Return errors immediately**: Don't log and continue - return errors so transaction can rollback
+- **Use repository methods within transactions**: Pass transaction executor to repository methods
+
+### Repository Pattern & Architecture
+- **Never bypass repositories**: All database operations must go through repository layer
+  ```go
+  // WRONG - Service layer using raw SQL
+  _, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id = $1", id)
+
+  // CORRECT - Service layer using repository
+  if err := s.userRepo.DeleteWithExecutor(ctx, tx, id); err != nil {
+      return err
+  }
+  ```
+- **Executor Pattern for transactions**: Repositories accept `db.Executor` interface to work with both DB and Tx
+  ```go
+  // Executor interface in db package
+  type Executor interface {
+      ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+      QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row
+      GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+      SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+  }
+
+  // Repository implementation
+  func (r *UserRepository) Delete(ctx context.Context, id pgtype.UUID) error {
+      return r.DeleteWithExecutor(ctx, r.db, id)
+  }
+
+  func (r *UserRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
+      query := "DELETE FROM users WHERE id = $1"
+      result, err := executor.ExecContext(ctx, query, id)
+      // ... error handling
+  }
+  ```
+- **Benefits of Executor pattern**:
+  - Maintains clean separation of concerns
+  - Fully testable with mocks
+  - Works with or without transactions
+  - Single source of truth for database logic
+  - No layer violations (service → repository → database)
+
+### Logging Best Practices
+- **Conditional success logging**: Only log success when operations actually succeed
+  ```go
+  // WRONG - logs success even on failure
+  if err := sendEmail(); err != nil {
+      log.Printf("Failed: %v", err)
+  }
+  log.Printf("Success!") // Always executes!
+
+  // CORRECT - success only logged when err == nil
+  if err := sendEmail(); err != nil {
+      log.Printf("Failed: %v", err)
+  } else {
+      log.Printf("Success!")
+  }
+  ```
+- **Error context**: Include relevant IDs and context in error logs for debugging
+- **No PII in logs**: Never log emails, names, or other PII in plaintext (Constitution Requirement CR-004)
+
+### Production Code Quality
+- **Remove debug statements**: Never leave `fmt.Printf` debug statements in production code
+- **Use structured logging**: Use proper logging library instead of fmt.Printf
+- **Clean code**: Remove commented-out code, TODOs, and temporary hacks before committing
 
 ## Important Notes
 
