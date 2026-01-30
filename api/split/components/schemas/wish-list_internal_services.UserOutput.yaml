@@ -1,0 +1,12 @@
+properties:
+  avatar_url:
+    type: string
+  email:
+    type: string
+  first_name:
+    type: string
+  id:
+    type: string
+  last_name:
+    type: string
+type: object

@@ -1,0 +1,6 @@
+properties:
+  token:
+    type: string
+  user:
+    $ref: ./wish-list_internal_services.UserOutput.yaml
+type: object

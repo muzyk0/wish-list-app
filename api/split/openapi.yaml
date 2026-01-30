@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@wishlist.example.com
+    name: API Support
+  description: >-
+    A RESTful API for managing wish lists, gift items, and reservations.
+
+    Features include user authentication, wish list management, gift item
+    tracking, and reservation system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Wish List API
+  version: '1.0'
+paths:
+  /auth/login:
+    $ref: paths/auth_login.yaml
+  /auth/register:
+    $ref: paths/auth_register.yaml
+  /protected/profile:
+    $ref: paths/protected_profile.yaml
+servers:
+  - url: //localhost:8080/api
+components:
+  securitySchemes:
+    BearerAuth:
+      description: Type "Bearer" followed by a space and JWT token.
+      in: header
+      name: Authorization
+      type: apiKey

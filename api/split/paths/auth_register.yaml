@@ -1,0 +1,43 @@
+post:
+  description: Create a new user account with email and password
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.RegisterRequest.yaml
+    description: User registration information
+    required: true
+  responses:
+    '201':
+      description: User created successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '409':
+      description: User with this email already exists
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Register a new user
+  tags:
+    - Authentication

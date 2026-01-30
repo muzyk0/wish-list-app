@@ -1,0 +1,267 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@wishlist.example.com
+    name: API Support
+  description: >-
+    A RESTful API for managing wish lists, gift items, and reservations.
+
+    Features include user authentication, wish list management, gift item tracking, and reservation system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Wish List API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      description: Authenticate user with email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.LoginRequest"
+        description: User login credentials
+        required: true
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: User login
+      tags:
+        - Authentication
+  /auth/register:
+    post:
+      description: Create a new user account with email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.RegisterRequest"
+        description: User registration information
+        required: true
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "409":
+          description: User with this email already exists
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Register a new user
+      tags:
+        - Authentication
+  /protected/profile:
+    get:
+      description: Get the authenticated user's profile information
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get user profile
+      tags:
+        - User
+    put:
+      description: Update the authenticated user's profile information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.UpdateProfileRequest"
+        description: Updated profile information
+        required: true
+      responses:
+        "200":
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Update user profile
+      tags:
+        - User
+servers:
+  - url: //localhost:8080/api
+components:
+  securitySchemes:
+    BearerAuth:
+      description: Type "Bearer" followed by a space and JWT token.
+      in: header
+      name: Authorization
+      type: apiKey
+  schemas:
+    internal_handlers.AuthResponse:
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+      type: object
+    internal_handlers.LoginRequest:
+      properties:
+        email:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    internal_handlers.RegisterRequest:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    internal_handlers.UpdateProfileRequest:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      type: object
+    wish-list_internal_services.UserOutput:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        id:
+          type: string
+        last_name:
+          type: string
+      type: object

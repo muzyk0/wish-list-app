@@ -142,13 +142,13 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "✓ Swagger 2.0 generated"
 	@echo ""
 	@echo "Step 2/3: Converting to OpenAPI 3.0..."
-	@pnpm exec swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
-	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
+	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
+	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 converted"
 	@echo ""
 	@echo "Step 3/3: Splitting into organized files..."
-	@mkdir -p backend/docs/split
-	@pnpm exec redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@mkdir -p api/split
+	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
 	@echo "✓ Split files created"
 	@echo ""
 	@echo "================================================"
@@ -156,9 +156,9 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "================================================"
 	@echo ""
 	@echo "📁 Generated files:"
-	@echo "  • backend/docs/swagger.{json,yaml}    (Swagger 2.0)"
-	@echo "  • backend/docs/openapi3.{json,yaml}   (OpenAPI 3.0)"
-	@echo "  • backend/docs/split/                 (Split files)"
+	@echo "  • backend/docs/swagger.{json,yaml}  (Swagger 2.0)"
+	@echo "  • api/openapi3.{json,yaml}          (OpenAPI 3.0)"
+	@echo "  • api/split/                        (Split files)"
 	@echo ""
 	@echo "🌐 View documentation:"
 	@echo "  • Swagger UI: http://localhost:8080/swagger/index.html"
@@ -175,15 +175,15 @@ swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
 	@echo "Converting to OpenAPI 3.0..."
 	@$(MAKE) swagger-convert-v3
-	@echo "OpenAPI 3.0 documentation generated at backend/docs/openapi3.{json,yaml}"
+	@echo "OpenAPI 3.0 documentation generated at api/openapi3.{json,yaml}"
 	@echo "Swagger UI available at http://localhost:8080/swagger/index.html"
 
 .PHONY: swagger-convert-v3
 swagger-convert-v3: ## Convert OpenAPI 2.0 to 3.0
 	@echo "Converting OpenAPI 2.0 to 3.0..."
-	@pnpm exec swagger2openapi backend/docs/swagger.json -o backend/docs/openapi3.json
-	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o backend/docs/openapi3.yaml
-	@echo "✓ OpenAPI 3.0 files generated: backend/docs/openapi3.{json,yaml}"
+	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
+	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
+	@echo "✓ OpenAPI 3.0 files generated: api/openapi3.{json,yaml}"
 
 .PHONY: test
 test: ## Run tests for all components
@@ -252,8 +252,8 @@ swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi
-	@mkdir -p backend/docs/split
-	@pnpm exec redocly split backend/docs/openapi3.yaml --outDir=backend/docs/split
+	@mkdir -p api/split
+	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
 	@echo "✓ OpenAPI 3.0 specification split into backend/docs/split/"
 
 .PHONY: swagger-preview
