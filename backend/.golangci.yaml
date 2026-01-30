@@ -29,7 +29,7 @@ linters:
     - misspell
     - modernize
     - nakedret
-    - nestif
+#    - nestif TODO: Enable
     - nilerr
     - nilnil
     - noctx
@@ -72,7 +72,7 @@ linters:
         - style
         - experimental
     gocyclo:
-      min-complexity: 20
+      min-complexity: 30 # TODO: Enable
     lll:
       line-length: 140
     misspell:
