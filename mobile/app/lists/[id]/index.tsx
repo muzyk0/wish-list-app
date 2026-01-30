@@ -24,7 +24,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/types';
+import type { GiftItem } from '@/lib/api/types';
 
 // Gift Item Card Component
 const GiftItemCard = ({
@@ -340,7 +340,7 @@ export default function WishListScreen() {
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text variant="headlineMedium" style={{ color: colors.primary }}>
-              {giftItems?.items.length || 0}
+              {giftItems?.length || 0}
             </Text>
             <Text
               variant="labelLarge"
@@ -351,8 +351,8 @@ export default function WishListScreen() {
           </View>
           <View style={styles.statItem}>
             <Text variant="headlineMedium" style={{ color: colors.secondary }}>
-              {giftItems?.items.filter((item) => item.reserved_by_user_id)
-                .length || 0}
+              {giftItems?.filter((item) => item.reserved_by_user_id).length ||
+                0}
             </Text>
             <Text
               variant="labelLarge"
@@ -363,8 +363,8 @@ export default function WishListScreen() {
           </View>
           <View style={styles.statItem}>
             <Text variant="headlineMedium" style={{ color: colors.primary }}>
-              {giftItems?.items.filter((item) => item.purchased_by_user_id)
-                .length || 0}
+              {giftItems?.filter((item) => item.purchased_by_user_id).length ||
+                0}
             </Text>
             <Text
               variant="labelLarge"
@@ -388,9 +388,9 @@ export default function WishListScreen() {
           />
         }
       >
-        {giftItems && giftItems.items.length > 0 ? (
+        {giftItems && giftItems.length > 0 ? (
           <View style={styles.listContainer}>
-            {giftItems.items.map((item) => (
+            {giftItems.map((item) => (
               <GiftItemCard
                 key={item.id}
                 item={item}

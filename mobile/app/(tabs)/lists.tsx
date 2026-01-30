@@ -19,7 +19,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
-import type { WishList } from '@/lib/types';
+import type { WishList } from '@/lib/api/types';
 
 export default function ListsTab() {
   const [refreshing, setRefreshing] = useState(false);

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
@@ -160,8 +160,8 @@ export default function ImageUpload({
 
   const getFileSize = async (uri: string): Promise<{ size: number }> => {
     try {
-      const info = await FileSystem.getInfoAsync(uri, { size: true });
-      return { size: (info as any).size || 0 };
+      const info = new File(uri).info();
+      return { size: info.size || 0 };
     } catch (error) {
       console.error('Error getting file size:', error);
       return { size: 0 };

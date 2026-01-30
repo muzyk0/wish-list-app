@@ -868,6 +868,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/wishlists/{wishlistId}/items/{itemId}/mark-purchased': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark gift item as purchased
+     * @description Mark a gift item as purchased by the wish list owner. This will notify the reservation holder via email.
+     */
+    post: operations['markGiftItemAsPurchased'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/wishlists/{slug}/items/{itemId}': {
     parameters: {
       query?: never;
@@ -1217,17 +1237,10 @@ export interface components {
       first_name: string;
       /** @description User's last name */
       last_name: string;
-    };
-    user_login: {
-      /** Format: email */
-      email: string;
-      /** Format: password */
-      password: string;
-    };
-    user_update: {
-      first_name?: string;
-      last_name?: string;
-      /** Format: uri */
+      /**
+       * Format: uri
+       * @description URL to the user's avatar image
+       */
       avatar_url?: string;
     };
     user_response: {
@@ -1245,47 +1258,40 @@ export interface components {
       /** Format: date-time */
       updated_at?: string;
     };
+    error: {
+      /** @example Error message */
+      error?: string;
+      /** @example ERROR_CODE */
+      code?: string;
+    };
+    user_login: {
+      /** Format: email */
+      email: string;
+      /** Format: password */
+      password: string;
+    };
     login_response: {
       /** @description JWT access token */
-      access_token?: string;
-      /** @description JWT refresh token */
-      refresh_token?: string;
-      user?: components['schemas']['user_response'];
+      token: string;
+      user: components['schemas']['user_response'];
+    };
+    user_update: {
+      first_name?: string;
+      last_name?: string;
+      /** Format: uri */
+      avatar_url?: string;
     };
     magic_link_request: {
       /** Format: email */
       email: string;
     };
-    magic_link_verify: {
-      /** @description Magic link token */
-      token: string;
-    };
     success: {
       /** @example true */
       success?: boolean;
     };
-    wish_list_create: {
-      /** @description Title of the wish list */
-      title: string;
-      /** @description Description of the wish list */
-      description?: string;
-      /** @description Occasion type (e.g., Birthday, Wedding) */
-      occasion?: string;
-      /**
-       * Format: date
-       * @description Date of the occasion
-       */
-      occasion_date?: string;
-      /** @description Template ID for presentation */
-      template_id?: string;
-    };
-    wish_list_update: {
-      title?: string;
-      description?: string;
-      occasion?: string;
-      /** Format: date */
-      occasion_date?: string;
-      template_id?: string;
+    magic_link_verify: {
+      /** @description Magic link token */
+      token: string;
     };
     wish_list_response: {
       /** Format: uuid */
@@ -1306,8 +1312,93 @@ export interface components {
       /** Format: date-time */
       updated_at?: string;
     };
+    pagination: {
+      page?: number;
+      limit?: number;
+      total?: number;
+      total_pages?: number;
+    };
+    wish_list_create: {
+      /** @description Title of the wish list */
+      title: string;
+      /** @description Description of the wish list */
+      description?: string;
+      /** @description Occasion type (e.g., Birthday, Wedding) */
+      occasion?: string;
+      /**
+       * Format: date
+       * @description Date of the occasion
+       */
+      occasion_date?: string;
+      /** @description Template ID for presentation */
+      template_id?: string;
+      /**
+       * @description Whether the wish list is publicly accessible
+       * @default false
+       */
+      is_public: boolean;
+    };
+    gift_item_response: {
+      /** Format: uuid */
+      id?: string;
+      /** Format: uuid */
+      wishlist_id?: string;
+      name?: string;
+      description?: string;
+      /** Format: uri */
+      link?: string;
+      /** Format: uri */
+      image_url?: string;
+      price?: number;
+      priority?: number;
+      /** Format: uuid */
+      reserved_by_user_id?: string;
+      /** Format: date-time */
+      reserved_at?: string;
+      /** Format: uuid */
+      purchased_by_user_id?: string;
+      /** Format: date-time */
+      purchased_at?: string;
+      purchased_price?: number;
+      notes?: string;
+      position?: number;
+      /** Format: date-time */
+      created_at?: string;
+      /** Format: date-time */
+      updated_at?: string;
+    };
     wish_list_with_items_response: components['schemas']['wish_list_response'] & {
       items?: components['schemas']['gift_item_response'][];
+    };
+    wish_list_update: {
+      title?: string;
+      description?: string;
+      occasion?: string;
+      /** Format: date */
+      occasion_date?: string;
+      template_id?: string;
+      /** @description Whether the wish list is publicly accessible */
+      is_public?: boolean;
+    };
+    public_gift_item_response: {
+      /** Format: uuid */
+      id?: string;
+      name?: string;
+      description?: string;
+      /** Format: uri */
+      link?: string;
+      /** Format: uri */
+      image_url?: string;
+      price?: number;
+      priority?: number;
+      reservation_status?: {
+        is_reserved?: boolean;
+        reserved_by_name?: string;
+        /** Format: date-time */
+        reserved_at?: string;
+      };
+      /** Format: date-time */
+      created_at?: string;
     };
     public_wish_list_response: {
       /** Format: uuid */
@@ -1339,6 +1430,11 @@ export interface components {
        * @description URL to the gift item
        */
       link?: string;
+      /**
+       * Format: uri
+       * @description URL to the gift item image
+       */
+      image_url?: string;
       /** @description Price of the gift item */
       price?: number;
       /** @description Priority level (0-10) */
@@ -1353,60 +1449,16 @@ export interface components {
       description?: string;
       /** Format: uri */
       link?: string;
+      /**
+       * Format: uri
+       * @description URL to the gift item image
+       */
+      image_url?: string;
       price?: number;
       priority?: number;
       /** @description Private notes from the list owner */
       notes?: string;
       position?: number;
-    };
-    gift_item_response: {
-      /** Format: uuid */
-      id?: string;
-      /** Format: uuid */
-      wishlist_id?: string;
-      name?: string;
-      description?: string;
-      /** Format: uri */
-      link?: string;
-      /** Format: uri */
-      image_url?: string;
-      price?: number;
-      priority?: number;
-      /** Format: uuid */
-      reserved_by_user_id?: string;
-      /** Format: date-time */
-      reserved_at?: string;
-      /** Format: uuid */
-      purchased_by_user_id?: string;
-      /** Format: date-time */
-      purchased_at?: string;
-      purchased_price?: number;
-      notes?: string;
-      position?: number;
-      /** Format: date-time */
-      created_at?: string;
-      /** Format: date-time */
-      updated_at?: string;
-    };
-    public_gift_item_response: {
-      /** Format: uuid */
-      id?: string;
-      name?: string;
-      description?: string;
-      /** Format: uri */
-      link?: string;
-      /** Format: uri */
-      image_url?: string;
-      price?: number;
-      priority?: number;
-      reservation_status?: {
-        is_reserved?: boolean;
-        reserved_by_name?: string;
-        /** Format: date-time */
-        reserved_at?: string;
-      };
-      /** Format: date-time */
-      created_at?: string;
     };
     /** @description Reservation request for authenticated users */
     authenticated_reservation: {
@@ -1425,22 +1477,6 @@ export interface components {
        * @description Email of the guest
        */
       guest_email: string;
-    };
-    /** @description Cancel reservation request for authenticated users */
-    cancel_authenticated_reservation: {
-      /**
-       * Format: uuid
-       * @description ID of the authenticated user (derived from JWT)
-       */
-      readonly user_id?: string;
-    };
-    /** @description Cancel reservation request for unauthenticated guests */
-    cancel_guest_reservation: {
-      /**
-       * Format: uuid
-       * @description Token associated with the reservation
-       */
-      reservation_token: string;
     };
     reservation_response: {
       /** Format: uuid */
@@ -1461,8 +1497,39 @@ export interface components {
       /** Format: date-time */
       expires_at?: string;
       /** Format: date-time */
-      cancelled_at?: string;
-      cancelled_reason?: string;
+      canceled_at?: string;
+      canceled_reason?: string;
+    };
+    /** @description Cancel reservation request for authenticated users */
+    cancel_authenticated_reservation: {
+      /**
+       * Format: uuid
+       * @description ID of the authenticated user (derived from JWT)
+       */
+      readonly user_id?: string;
+    };
+    /** @description Cancel reservation request for unauthenticated guests */
+    cancel_guest_reservation: {
+      /**
+       * Format: uuid
+       * @description Token associated with the reservation
+       */
+      reservation_token: string;
+    };
+    gift_item_summary: {
+      /** Format: uuid */
+      id?: string;
+      name?: string;
+      /** Format: uri */
+      image_url?: string;
+      price?: number;
+    };
+    wish_list_summary: {
+      /** Format: uuid */
+      id?: string;
+      title?: string;
+      owner_first_name?: string;
+      owner_last_name?: string;
     };
     reservation_details_response: {
       /** Format: uuid */
@@ -1484,33 +1551,6 @@ export interface components {
       /** @enum {string} */
       status?: Reservation_responseStatus;
     };
-    gift_item_summary: {
-      /** Format: uuid */
-      id?: string;
-      name?: string;
-      /** Format: uri */
-      image_url?: string;
-      price?: number;
-    };
-    wish_list_summary: {
-      /** Format: uuid */
-      id?: string;
-      title?: string;
-      owner_first_name?: string;
-      owner_last_name?: string;
-    };
-    pagination: {
-      page?: number;
-      limit?: number;
-      total?: number;
-      total_pages?: number;
-    };
-    error: {
-      /** @example Error message */
-      error?: string;
-      /** @example ERROR_CODE */
-      code?: string;
-    };
   };
   responses: {
     /** @description Bad request */
@@ -1531,6 +1571,33 @@ export interface components {
         'application/json': components['schemas']['error'];
       };
     };
+    /** @description Unauthorized */
+    unauthorized: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['error'];
+      };
+    };
+    /** @description Resource not found */
+    not_found: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['error'];
+      };
+    };
+    /** @description Internal server error */
+    internal_server_error: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['error'];
+      };
+    };
   };
   parameters: never;
   requestBodies: never;
@@ -1538,52 +1605,105 @@ export interface components {
   pathItems: never;
 }
 export type SchemaUserRegistration = components['schemas']['user_registration'];
-export type SchemaUserLogin = components['schemas']['user_login'];
-export type SchemaUserUpdate = components['schemas']['user_update'];
 export type SchemaUserResponse = components['schemas']['user_response'];
+export type SchemaError = components['schemas']['error'];
+export type SchemaUserLogin = components['schemas']['user_login'];
 export type SchemaLoginResponse = components['schemas']['login_response'];
+export type SchemaUserUpdate = components['schemas']['user_update'];
 export type SchemaMagicLinkRequest =
   components['schemas']['magic_link_request'];
-export type SchemaMagicLinkVerify = components['schemas']['magic_link_verify'];
 export type SchemaSuccess = components['schemas']['success'];
-export type SchemaWishListCreate = components['schemas']['wish_list_create'];
-export type SchemaWishListUpdate = components['schemas']['wish_list_update'];
+export type SchemaMagicLinkVerify = components['schemas']['magic_link_verify'];
 export type SchemaWishListResponse =
   components['schemas']['wish_list_response'];
+export type SchemaPagination = components['schemas']['pagination'];
+export type SchemaWishListCreate = components['schemas']['wish_list_create'];
+export type SchemaGiftItemResponse =
+  components['schemas']['gift_item_response'];
 export type SchemaWishListWithItemsResponse =
   components['schemas']['wish_list_with_items_response'];
+export type SchemaWishListUpdate = components['schemas']['wish_list_update'];
+export type SchemaPublicGiftItemResponse =
+  components['schemas']['public_gift_item_response'];
 export type SchemaPublicWishListResponse =
   components['schemas']['public_wish_list_response'];
 export type SchemaGiftItemCreate = components['schemas']['gift_item_create'];
 export type SchemaGiftItemUpdate = components['schemas']['gift_item_update'];
-export type SchemaGiftItemResponse =
-  components['schemas']['gift_item_response'];
-export type SchemaPublicGiftItemResponse =
-  components['schemas']['public_gift_item_response'];
 export type SchemaAuthenticatedReservation =
   components['schemas']['authenticated_reservation'];
 export type SchemaGuestReservation = components['schemas']['guest_reservation'];
+export type SchemaReservationResponse =
+  components['schemas']['reservation_response'];
 export type SchemaCancelAuthenticatedReservation =
   components['schemas']['cancel_authenticated_reservation'];
 export type SchemaCancelGuestReservation =
   components['schemas']['cancel_guest_reservation'];
-export type SchemaReservationResponse =
-  components['schemas']['reservation_response'];
+export type SchemaGiftItemSummary = components['schemas']['gift_item_summary'];
+export type SchemaWishListSummary = components['schemas']['wish_list_summary'];
 export type SchemaReservationDetailsResponse =
   components['schemas']['reservation_details_response'];
 export type SchemaReservationStatusResponse =
   components['schemas']['reservation_status_response'];
-export type SchemaGiftItemSummary = components['schemas']['gift_item_summary'];
-export type SchemaWishListSummary = components['schemas']['wish_list_summary'];
-export type SchemaPagination = components['schemas']['pagination'];
-export type SchemaError = components['schemas']['error'];
 export type ResponseBadRequest = components['responses']['BadRequest'];
 export type ResponseUnauthorized = components['responses']['Unauthorized'];
+export type ResponseUnauthorized_2 = components['responses']['unauthorized'];
+export type ResponseNotFound = components['responses']['not_found'];
+export type ResponseInternalServerError =
+  components['responses']['internal_server_error'];
 export type $defs = Record<string, never>;
+export interface operations {
+  markGiftItemAsPurchased: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The ID of the wish list */
+        wishlistId: string;
+        /** @description The ID of the gift item */
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * Format: float
+           * @description The actual price paid for the gift item
+           * @example 89.99
+           */
+          purchased_price: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Gift item marked as purchased successfully. Email notification sent to reservation holder. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['gift_item_response'];
+        };
+      };
+      401: components['responses']['unauthorized'];
+      /** @description Only the wish list owner can mark items as purchased */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['error'];
+        };
+      };
+      404: components['responses']['not_found'];
+      500: components['responses']['internal_server_error'];
+    };
+  };
+}
 export enum Reservation_responseStatus {
   active = 'active',
   cancelled = 'cancelled',
   fulfilled = 'fulfilled',
   expired = 'expired',
 }
-export type operations = Record<string, never>;

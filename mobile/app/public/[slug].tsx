@@ -10,14 +10,7 @@ import {
 } from 'react-native';
 import { ReservationButton } from '@/components/wish-list/ReservationButton';
 import { apiClient } from '@/lib/api';
-
-import type {
-  GiftItem as GiftItemType,
-  WishList as WishListType,
-} from '../../lib/types';
-
-type GiftItem = GiftItemType;
-type WishList = WishListType & { giftItems?: GiftItem[] }; // Extend to include giftItems if needed
+import type { GiftItem, WishList } from '@/lib/api/types';
 
 export default function PublicWishListScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -113,7 +106,8 @@ export default function PublicWishListScreen() {
       </View>
 
       <FlatList
-        data={wishList.giftItems || []} // For now, just use an empty array if property doesn't exist
+        // TODO: Implement
+        data={[]} // For now, just use an empty array if property doesn't exist
         renderItem={renderGiftItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}

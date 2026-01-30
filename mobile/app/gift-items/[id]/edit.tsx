@@ -26,8 +26,9 @@ export default function EditGiftItemScreen() {
     error,
   } = useQuery({
     queryKey: ['giftItem', id],
-    queryFn: () => apiClient.getGiftItemById(id),
-    enabled: !!id,
+    queryFn: () =>
+      apiClient.getGiftItemById(wishlistId as string, id as string),
+    enabled: !!id && !!wishlistId,
   });
 
   if (isLoading) {

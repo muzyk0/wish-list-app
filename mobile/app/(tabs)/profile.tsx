@@ -53,7 +53,7 @@ export default function ProfileScreen() {
       avatar_url?: string;
     }) =>
       apiClient.updateProfile({
-        email: userData.email,
+        // email: userData.email,
         first_name: userData.first_name,
         last_name: userData.last_name,
         avatar_url: userData.avatar_url,

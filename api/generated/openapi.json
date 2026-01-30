@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Wish List Application API",
-    "description": "Complete API for the Wish List application including user authentication, wish list management, gift items, and reservations",
-    "version": "1.0.0",
+    "description": "Complete API for the Wish List application including user authentication, wish list management, gift items, and reservations. The API includes caching for public endpoints (15-minute TTL) and rate limiting (100 requests/minute per IP).",
+    "version": "1.1.0",
     "contact": {
       "name": "API Support",
       "email": "support@wishlistapp.com"
@@ -1063,6 +1063,95 @@
         }
       }
     },
+    "/v1/wishlists/{wishlistId}/items/{itemId}/mark-purchased": {
+      "post": {
+        "tags": [
+          "GiftItems"
+        ],
+        "summary": "Mark gift item as purchased",
+        "description": "Mark a gift item as purchased by the wish list owner. This will notify the reservation holder via email.",
+        "operationId": "markGiftItemAsPurchased",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wishlistId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the wish list",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the gift item",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purchased_price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The actual price paid for the gift item",
+                    "example": 89.99
+                  }
+                },
+                "required": [
+                  "purchased_price"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gift item marked as purchased successfully. Email notification sent to reservation holder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gift_item_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "403": {
+            "description": "Only the wish list owner can mark items as purchased",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
+          }
+        }
+      }
+    },
     "/v1/public/wishlists/{slug}/items/{itemId}": {
       "get": {
         "summary": "Get a public gift item by wishlist slug and item ID",
@@ -1560,14 +1649,14 @@
       },
       "login_response": {
         "type": "object",
+        "required": [
+          "user",
+          "token"
+        ],
         "properties": {
-          "access_token": {
+          "token": {
             "type": "string",
             "description": "JWT access token"
-          },
-          "refresh_token": {
-            "type": "string",
-            "description": "JWT refresh token"
           },
           "user": {
             "$ref": "#/components/schemas/user_response"
@@ -2241,6 +2330,36 @@
       },
       "Unauthorized": {
         "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "not_found": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      },
+      "internal_server_error": {
+        "description": "Internal server error",
         "content": {
           "application/json": {
             "schema": {

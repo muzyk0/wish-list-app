@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Badge } from '@/components/ui/Badge';
 import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/types';
+import type { GiftItem } from '@/lib/api/types';
 
 interface GiftItemDisplayProps {
   item: GiftItem;
@@ -20,7 +20,11 @@ export default function GiftItemDisplay({
 
   const purchaseMutation = useMutation({
     mutationFn: (giftItemId: string) =>
-      apiClient.markGiftItemAsPurchased(giftItemId, item.price || 0),
+      apiClient.markGiftItemAsPurchased(
+        item.wishlist_id,
+        giftItemId,
+        item.price || 0,
+      ),
     onSuccess: () => {
       Alert.alert('Success', 'Gift item marked as purchased successfully!');
       if (onRefresh) {

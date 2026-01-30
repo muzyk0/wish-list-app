@@ -7,7 +7,7 @@ import {
   TextInput as PaperTextInput,
 } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/types';
+import type { GiftItem } from '@/lib/api/types';
 import ImageUpload from './ImageUpload';
 
 interface GiftItemFormProps {
@@ -51,7 +51,7 @@ export default function GiftItemForm({
     }) => {
       if (existingItem) {
         // Update existing item
-        return apiClient.updateGiftItem(existingItem.id, {
+        return apiClient.updateGiftItem(wishlistId, existingItem.id, {
           name: data.name,
           description: data.description,
           link: data.link,
@@ -107,7 +107,7 @@ export default function GiftItemForm({
       if (!existingItem?.id) {
         throw new Error('No item to delete');
       }
-      return apiClient.deleteGiftItem(existingItem.id);
+      return apiClient.deleteGiftItem(wishlistId, existingItem.id);
     },
     onSuccess: () => {
       Alert.alert('Success', 'Gift item deleted successfully!', [

@@ -34,8 +34,7 @@ export function ReservationButton({
 
   const reservationMutation = useMutation({
     mutationFn: (data: { guest_name: string; guest_email: string }) =>
-      apiClient.createReservation({
-        gift_item_id: giftItemId,
+      apiClient.createReservation(wishlistId, giftItemId, {
         guest_name: data.guest_name,
         guest_email: data.guest_email,
       }),

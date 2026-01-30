@@ -1,35 +1,39 @@
 // mobile/lib/api.ts
 import * as SecureStore from 'expo-secure-store';
+import createClient from 'openapi-fetch';
+import type { paths } from './schema';
 import type {
-  CreateGiftItemRequest,
-  CreateReservationRequest,
-  CreateWishListRequest,
-  GiftItem,
-  LoginRequest,
-  LoginResponse,
-  PaginatedResponse,
-  RegisterRequest,
-  Reservation,
-  Template,
-  UpdateGiftItemRequest,
-  UpdateWishListRequest,
   User,
+  UserRegistration,
+  UserLogin,
+  LoginResponse,
   WishList,
-} from '../types';
+  CreateWishListRequest,
+  UpdateWishListRequest,
+  GiftItem,
+  CreateGiftItemRequest,
+  UpdateGiftItemRequest,
+  Reservation,
+  CreateReservationRequest,
+} from './types';
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080';
 
 class ApiClient {
   private token: string | null = null;
   private tokenReady: Promise<void>;
   private resolveTokenReady!: () => void;
+  private client: ReturnType<typeof createClient<paths>>;
 
   constructor() {
     // Initialize token ready promise
     this.tokenReady = new Promise((resolve) => {
       this.resolveTokenReady = resolve;
     });
+
+    // Create openapi-fetch client
+    this.client = createClient<paths>({ baseUrl: API_BASE_URL });
+
     // Load token from secure storage
     this.loadToken();
   }
@@ -44,57 +48,52 @@ class ApiClient {
     }
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<T> {
-    // Wait for token to be loaded before making requests
-    await this.tokenReady;
-
-    const url = `${API_BASE_URL}${endpoint}`;
-
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(this.token && { Authorization: `Bearer ${this.token}` }),
-      ...options.headers,
-    };
-
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(errorData || `HTTP error! status: ${response.status}`);
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
     }
-
-    // For successful responses that don't return JSON (like DELETE requests)
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return response.json();
+    return headers;
   }
 
   // Authentication methods
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
+  async login(credentials: UserLogin): Promise<LoginResponse> {
+    await this.tokenReady;
+
+    const { data, error } = await this.client.POST('/v1/users/login', {
+      body: credentials,
+      headers: this.getHeaders(),
     });
 
-    this.setToken(response.token);
+    if (error || !data) {
+      throw new Error(
+        // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
+        (error as any)?.error || 'Login failed',
+      );
+    }
+
+    const response = data as LoginResponse;
+    await this.setToken(response.token);
     return response;
   }
 
-  async register(userData: RegisterRequest): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
+  async register(userData: UserRegistration): Promise<LoginResponse> {
+    await this.tokenReady;
+
+    const { data, error } = await this.client.POST('/v1/users/register', {
+      body: userData,
+      headers: this.getHeaders(),
     });
 
-    this.setToken(response.token);
+    if (error || !data) {
+      throw new Error(
+        // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
+        (error as any)?.error || 'Registration failed',
+      );
+    }
+
+    const response = data as LoginResponse;
+    await this.setToken(response.token);
     return response;
   }
 
@@ -118,142 +117,334 @@ class ApiClient {
 
   // User methods
   async getProfile(): Promise<User> {
-    return this.request<User>('/protected/profile');
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET('/v1/users/me', {
+      headers: this.getHeaders(),
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch profile');
+    }
+
+    return data as User;
   }
 
-  async updateProfile(userData: Partial<User>): Promise<User> {
-    return this.request<User>('/protected/profile', {
-      method: 'PUT',
-      body: JSON.stringify(userData),
+  async updateProfile(userData: {
+    first_name?: string;
+    last_name?: string;
+    avatar_url?: string;
+  }): Promise<User> {
+    await this.tokenReady;
+
+    const { data, error } = await this.client.PUT('/v1/users/me', {
+      body: userData,
+      headers: this.getHeaders(),
     });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to update profile');
+    }
+
+    return data as User;
   }
 
   async deleteAccount(): Promise<void> {
-    await this.request('/protected/account', {
-      method: 'DELETE',
+    await this.tokenReady;
+
+    // Note: DELETE /v1/users/me endpoint may not be implemented yet
+    // Commenting out for now
+    throw new Error('Delete account not implemented');
+
+    /* const { error } = await this.client.DELETE('/v1/users/me', {
+      headers: this.getHeaders(),
     });
+
+    if (error) {
+      throw new Error(
+        (error as any)?.error || 'Failed to delete account',
+      );
+    } */
   }
 
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
-    return this.request<WishList[]>('/wishlists');
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET('/v1/wishlists', {
+      headers: this.getHeaders(),
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch wish lists');
+    }
+
+    return (data as any).data || [];
   }
 
   async getWishListById(id: string): Promise<WishList> {
-    return this.request<WishList>(`/wishlists/${id}`);
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET('/v1/wishlists/{id}', {
+      params: { path: { id } },
+      headers: this.getHeaders(),
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch wish list');
+    }
+
+    return data as WishList;
   }
 
   async getPublicWishList(slug: string): Promise<WishList> {
-    return this.request<WishList>(`/public/lists/${slug}`);
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET(
+      '/v1/wishlists/public/{slug}',
+      {
+        params: { path: { slug } },
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !data) {
+      throw new Error(
+        (error as any)?.error || 'Failed to fetch public wish list',
+      );
+    }
+
+    return data as WishList;
   }
 
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
-    return this.request<WishList>('/wishlists', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    await this.tokenReady;
+
+    const { data: responseData, error } = await this.client.POST(
+      '/v1/wishlists',
+      {
+        body: data,
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error((error as any)?.error || 'Failed to create wish list');
+    }
+
+    return responseData as WishList;
   }
 
   async updateWishList(
     id: string,
     data: UpdateWishListRequest,
   ): Promise<WishList> {
-    return this.request<WishList>(`/wishlists/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    await this.tokenReady;
+
+    const { data: responseData, error } = await this.client.PUT(
+      '/v1/wishlists/{id}',
+      {
+        params: { path: { id } },
+        body: data,
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error((error as any)?.error || 'Failed to update wish list');
+    }
+
+    return responseData as WishList;
   }
 
   async deleteWishList(id: string): Promise<void> {
-    await this.request(`/wishlists/${id}`, {
-      method: 'DELETE',
+    await this.tokenReady;
+
+    const { error } = await this.client.DELETE('/v1/wishlists/{id}', {
+      params: { path: { id } },
+      headers: this.getHeaders(),
     });
+
+    if (error) {
+      throw new Error((error as any)?.error || 'Failed to delete wish list');
+    }
   }
 
   // Gift item methods
-  async getGiftItems(wishlistId: string): Promise<PaginatedResponse<GiftItem>> {
-    return this.request<PaginatedResponse<GiftItem>>(
-      `/gift-items/wishlist/${wishlistId}`,
+  async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET(
+      '/v1/wishlists/{wishlistId}/items',
+      {
+        params: { path: { wishlistId } },
+        headers: this.getHeaders(),
+      },
     );
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch gift items');
+    }
+
+    return ((data as any).data || data) as GiftItem[];
   }
 
-  async getGiftItemById(id: string): Promise<GiftItem> {
-    return this.request<GiftItem>(`/gift-items/${id}`);
+  async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET(
+      '/v1/wishlists/{wishlistId}/items/{itemId}',
+      {
+        params: { path: { wishlistId, itemId } },
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch gift item');
+    }
+
+    return data as GiftItem;
   }
 
   async createGiftItem(
     wishlistId: string,
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
-    return this.request<GiftItem>(`/gift-items/wishlist/${wishlistId}`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    await this.tokenReady;
+
+    const { data: responseData, error } = await this.client.POST(
+      '/v1/wishlists/{wishlistId}/items',
+      {
+        params: { path: { wishlistId } },
+        body: data,
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error((error as any)?.error || 'Failed to create gift item');
+    }
+
+    return responseData as GiftItem;
   }
 
   async updateGiftItem(
-    id: string,
+    wishlistId: string,
+    itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
-    return this.request<GiftItem>(`/gift-items/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    await this.tokenReady;
+
+    const { data: responseData, error } = await this.client.PUT(
+      '/v1/wishlists/{wishlistId}/items/{itemId}',
+      {
+        params: { path: { wishlistId, itemId } },
+        body: data,
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error((error as any)?.error || 'Failed to update gift item');
+    }
+
+    return responseData as GiftItem;
   }
 
-  async deleteGiftItem(id: string): Promise<void> {
-    await this.request(`/gift-items/${id}`, {
-      method: 'DELETE',
-    });
+  async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
+    await this.tokenReady;
+
+    const { error } = await this.client.DELETE(
+      '/v1/wishlists/{wishlistId}/items/{itemId}',
+      {
+        params: { path: { wishlistId, itemId } },
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error) {
+      throw new Error((error as any)?.error || 'Failed to delete gift item');
+    }
   }
 
   async markGiftItemAsPurchased(
-    giftItemId: string,
+    wishlistId: string,
+    itemId: string,
     purchasedPrice: number,
   ): Promise<GiftItem> {
-    return this.request<GiftItem>(`/gift-items/${giftItemId}/mark-purchased`, {
-      method: 'POST',
-      body: JSON.stringify({ purchased_price: purchasedPrice }),
-    });
-  }
+    await this.tokenReady;
 
-  // Template methods
-  async getTemplates(): Promise<Template[]> {
-    return this.request<Template[]>('/templates');
-  }
+    const { data, error } = await this.client.POST(
+      '/v1/wishlists/{wishlistId}/items/{itemId}/mark-purchased',
+      {
+        params: { path: { wishlistId, itemId } },
+        body: { purchased_price: purchasedPrice },
+        headers: this.getHeaders(),
+      },
+    );
 
-  async getDefaultTemplate(): Promise<Template> {
-    return this.request<Template>('/templates/default');
-  }
+    if (error || !data) {
+      throw new Error(
+        (error as any)?.error || 'Failed to mark gift item as purchased',
+      );
+    }
 
-  async updateWishListTemplate(
-    wishListId: string,
-    templateId: string,
-  ): Promise<WishList> {
-    return this.request<WishList>(`/wishlists/${wishListId}/template`, {
-      method: 'PUT',
-      body: JSON.stringify({ template_id: templateId }),
-    });
+    return data as GiftItem;
   }
 
   // Reservation methods
   async createReservation(
+    wishlistId: string,
+    itemId: string,
     data: CreateReservationRequest,
   ): Promise<Reservation> {
-    return this.request<Reservation>('/reservations', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    await this.tokenReady;
+
+    const { data: responseData, error } = await this.client.POST(
+      '/v1/wishlists/{wishlistId}/items/{itemId}/reserve',
+      {
+        params: { path: { wishlistId, itemId } },
+        body: data,
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error((error as any)?.error || 'Failed to create reservation');
+    }
+
+    return responseData as Reservation;
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    return this.request<Reservation[]>('/reservations/my');
+    await this.tokenReady;
+
+    const { data, error } = await this.client.GET('/v1/users/me/reservations', {
+      headers: this.getHeaders(),
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to fetch reservations');
+    }
+
+    return ((data as any).data || data) as Reservation[];
   }
 
-  async cancelReservation(id: string): Promise<void> {
-    await this.request(`/reservations/${id}/cancel`, {
-      method: 'POST',
-    });
+  async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
+    await this.tokenReady;
+
+    const { error } = await this.client.POST(
+      '/v1/wishlists/{wishlistId}/items/{itemId}/cancel-reservation',
+      {
+        params: { path: { wishlistId, itemId } },
+        headers: this.getHeaders(),
+      },
+    );
+
+    if (error) {
+      throw new Error((error as any)?.error || 'Failed to cancel reservation');
+    }
   }
 }
 
@@ -263,11 +454,10 @@ export const apiClient = new ApiClient();
 export const registerUser = async (userData: {
   email: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
 }) => {
-  // The API client will handle the transformation to snake_case
-  const registerRequest: RegisterRequest = {
+  const registerRequest: UserRegistration = {
     email: userData.email,
     password: userData.password,
     first_name: userData.firstName,
@@ -280,7 +470,7 @@ export const loginUser = async (credentials: {
   email: string;
   password: string;
 }) => {
-  const loginRequest: LoginRequest = {
+  const loginRequest: UserLogin = {
     email: credentials.email,
     password: credentials.password,
   };

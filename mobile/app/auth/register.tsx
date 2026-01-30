@@ -40,8 +40,8 @@ export default function RegisterScreen() {
     }: {
       email: string;
       password: string;
-      firstName?: string;
-      lastName?: string;
+      firstName: string;
+      lastName: string;
     }) => registerUser({ email, password, firstName, lastName }),
     onSuccess: () => {
       Alert.alert(
