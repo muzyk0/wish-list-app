@@ -106,8 +106,7 @@ export default function PublicWishListScreen() {
       </View>
 
       <FlatList
-        // TODO: Implement
-        data={[]} // For now, just use an empty array if property doesn't exist
+        data={wishList.giftItems ?? []}
         renderItem={renderGiftItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
