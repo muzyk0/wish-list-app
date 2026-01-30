@@ -67,7 +67,7 @@ export default function PublicWishListScreen() {
           <Text style={styles.itemDescription}>{item.description}</Text>
         ) : null}
 
-        {item.price !== 0 && item.price !== undefined && (
+        {item.price !== undefined && item.price !== null && (
           <Text style={styles.itemPrice}>${item.price}</Text>
         )}
 
