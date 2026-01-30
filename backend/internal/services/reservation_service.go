@@ -132,7 +132,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	// For guest reservations, we need to check and create atomically
 	// First, check if there's an active reservation using a transaction
 	activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, giftItemID)
-	if err != nil {
+	if err != nil && !errors.Is(err, repositories.ErrNoActiveReservation) {
 		return nil, fmt.Errorf("failed to check existing reservation: %w", err)
 	}
 
@@ -286,7 +286,7 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 
 	// Check if gift item is already reserved using atomic operation
 	activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, itemID)
-	if err != nil {
+	if err != nil && !errors.Is(err, repositories.ErrNoActiveReservation) {
 		return nil, fmt.Errorf("failed to check existing reservation: %w", err)
 	}
 
@@ -342,7 +342,7 @@ func (s *ReservationService) GetReservationStatus(ctx context.Context, publicSlu
 
 	// Check if there's an active reservation for this gift item
 	activeReservation, err := s.repo.GetActiveReservationForGiftItem(ctx, itemID)
-	if err != nil {
+	if err != nil && !errors.Is(err, repositories.ErrNoActiveReservation) {
 		return nil, fmt.Errorf("failed to get reservation status: %w", err)
 	}
 

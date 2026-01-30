@@ -51,7 +51,8 @@ func TestNewService(t *testing.T) {
 	})
 }
 
-func TestEncryptDecrypt(t *testing.T) {
+func setupTestService(t *testing.T) (*Service, context.Context) {
+	t.Helper()
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 	if err != nil {
@@ -63,33 +64,38 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Fatalf("failed to create service: %v", err)
 	}
 
-	ctx := context.Background()
+	return svc, context.Background()
+}
 
-	t.Run("encrypt and decrypt simple text", func(t *testing.T) {
-		plaintext := "hello@example.com"
+func TestEncryptDecrypt_BasicRoundTrip(t *testing.T) {
+	svc, ctx := setupTestService(t)
+	plaintext := "hello@example.com"
 
-		ciphertext, err := svc.Encrypt(ctx, plaintext)
-		if err != nil {
-			t.Fatalf("encrypt failed: %v", err)
-		}
+	ciphertext, err := svc.Encrypt(ctx, plaintext)
+	if err != nil {
+		t.Fatalf("encrypt failed: %v", err)
+	}
 
-		if ciphertext == "" {
-			t.Fatal("ciphertext should not be empty")
-		}
+	if ciphertext == "" {
+		t.Fatal("ciphertext should not be empty")
+	}
 
-		if ciphertext == plaintext {
-			t.Fatal("ciphertext should not equal plaintext")
-		}
+	if ciphertext == plaintext {
+		t.Fatal("ciphertext should not equal plaintext")
+	}
 
-		decrypted, err := svc.Decrypt(ctx, ciphertext)
-		if err != nil {
-			t.Fatalf("decrypt failed: %v", err)
-		}
+	decrypted, err := svc.Decrypt(ctx, ciphertext)
+	if err != nil {
+		t.Fatalf("decrypt failed: %v", err)
+	}
 
-		if decrypted != plaintext {
-			t.Fatalf("expected %q, got %q", plaintext, decrypted)
-		}
-	})
+	if decrypted != plaintext {
+		t.Fatalf("expected %q, got %q", plaintext, decrypted)
+	}
+}
+
+func TestEncryptDecrypt_EmptyStrings(t *testing.T) {
+	svc, ctx := setupTestService(t)
 
 	t.Run("encrypt empty string", func(t *testing.T) {
 		ciphertext, err := svc.Encrypt(ctx, "")
@@ -112,37 +118,43 @@ func TestEncryptDecrypt(t *testing.T) {
 			t.Fatal("plaintext should be empty for empty ciphertext")
 		}
 	})
+}
 
-	t.Run("encrypt PII data", func(t *testing.T) {
-		testCases := []struct {
-			name      string
-			plaintext string
-		}{
-			{"email", "user@example.com"},
-			{"name with spaces", "John Doe"},
-			{"unicode characters", "Владислав Петров"},
-			{"special characters", "user+tag@example.com"},
-			{"long text", "This is a very long piece of text that should still be encrypted and decrypted correctly without any issues"},
-		}
+func TestEncryptDecrypt_PIIData(t *testing.T) {
+	svc, ctx := setupTestService(t)
 
-		for _, tc := range testCases {
-			t.Run(tc.name, func(t *testing.T) {
-				ciphertext, err := svc.Encrypt(ctx, tc.plaintext)
-				if err != nil {
-					t.Fatalf("encrypt failed: %v", err)
-				}
+	testCases := []struct {
+		name      string
+		plaintext string
+	}{
+		{"email", "user@example.com"},
+		{"name with spaces", "John Doe"},
+		{"unicode characters", "Владислав Петров"},
+		{"special characters", "user+tag@example.com"},
+		{"long text", "This is a very long piece of text that should still be encrypted and decrypted correctly without any issues"},
+	}
 
-				decrypted, err := svc.Decrypt(ctx, ciphertext)
-				if err != nil {
-					t.Fatalf("decrypt failed: %v", err)
-				}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ciphertext, err := svc.Encrypt(ctx, tc.plaintext)
+			if err != nil {
+				t.Fatalf("encrypt failed: %v", err)
+			}
 
-				if decrypted != tc.plaintext {
-					t.Fatalf("expected %q, got %q", tc.plaintext, decrypted)
-				}
-			})
-		}
-	})
+			decrypted, err := svc.Decrypt(ctx, ciphertext)
+			if err != nil {
+				t.Fatalf("decrypt failed: %v", err)
+			}
+
+			if decrypted != tc.plaintext {
+				t.Fatalf("expected %q, got %q", tc.plaintext, decrypted)
+			}
+		})
+	}
+}
+
+func TestEncryptDecrypt_ErrorCases(t *testing.T) {
+	svc, ctx := setupTestService(t)
 
 	t.Run("decrypt invalid ciphertext", func(t *testing.T) {
 		_, err := svc.Decrypt(ctx, "invalid-base64!")
@@ -166,40 +178,41 @@ func TestEncryptDecrypt(t *testing.T) {
 			t.Fatal("expected error for tampered ciphertext")
 		}
 	})
+}
 
-	t.Run("encrypt produces different ciphertext each time", func(t *testing.T) {
-		plaintext := "hello@example.com"
+func TestEncryptDecrypt_NonceUniqueness(t *testing.T) {
+	svc, ctx := setupTestService(t)
+	plaintext := "hello@example.com"
 
-		ciphertext1, err := svc.Encrypt(ctx, plaintext)
-		if err != nil {
-			t.Fatalf("encrypt 1 failed: %v", err)
-		}
+	ciphertext1, err := svc.Encrypt(ctx, plaintext)
+	if err != nil {
+		t.Fatalf("encrypt 1 failed: %v", err)
+	}
 
-		ciphertext2, err := svc.Encrypt(ctx, plaintext)
-		if err != nil {
-			t.Fatalf("encrypt 2 failed: %v", err)
-		}
+	ciphertext2, err := svc.Encrypt(ctx, plaintext)
+	if err != nil {
+		t.Fatalf("encrypt 2 failed: %v", err)
+	}
 
-		// Due to random nonce, ciphertexts should be different
-		if ciphertext1 == ciphertext2 {
-			t.Fatal("expected different ciphertexts for same plaintext (due to random nonce)")
-		}
+	// Due to random nonce, ciphertexts should be different
+	if ciphertext1 == ciphertext2 {
+		t.Fatal("expected different ciphertexts for same plaintext (due to random nonce)")
+	}
 
-		// But both should decrypt to same plaintext
-		decrypted1, err := svc.Decrypt(ctx, ciphertext1)
-		if err != nil {
-			t.Fatalf("decrypt 1 failed: %v", err)
-		}
+	// But both should decrypt to same plaintext
+	decrypted1, err := svc.Decrypt(ctx, ciphertext1)
+	if err != nil {
+		t.Fatalf("decrypt 1 failed: %v", err)
+	}
 
-		decrypted2, err := svc.Decrypt(ctx, ciphertext2)
-		if err != nil {
-			t.Fatalf("decrypt 2 failed: %v", err)
-		}
+	decrypted2, err := svc.Decrypt(ctx, ciphertext2)
+	if err != nil {
+		t.Fatalf("decrypt 2 failed: %v", err)
+	}
 
-		if decrypted1 != plaintext || decrypted2 != plaintext {
-			t.Fatalf("expected both to decrypt to %q, got %q and %q", plaintext, decrypted1, decrypted2)
-		}
-	})
+	if decrypted1 != plaintext || decrypted2 != plaintext {
+		t.Fatalf("expected both to decrypt to %q, got %q and %q", plaintext, decrypted1, decrypted2)
+	}
 }
 
 func TestEncryptDecryptFields(t *testing.T) {

@@ -355,8 +355,8 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 	query := `
 		UPDATE reservations SET
 			status = $2,
-			canceled_at = CASE WHEN $2 = 'cancelled' THEN $3 ELSE canceled_at END,
-			cancel_reason = CASE WHEN $2 = 'cancelled' THEN $4 ELSE cancel_reason END,
+			canceled_at = CASE WHEN $2 = 'canceled' THEN $3 ELSE canceled_at END,
+			cancel_reason = CASE WHEN $2 = 'canceled' THEN $4 ELSE cancel_reason END,
 			updated_at = NOW()
 		WHERE id = $1
 		RETURNING
@@ -393,8 +393,8 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 	query := `
 		UPDATE reservations SET
 			status = $2,
-			canceled_at = CASE WHEN $2 = 'cancelled' THEN $3 ELSE canceled_at END,
-			cancel_reason = CASE WHEN $2 = 'cancelled' THEN $4 ELSE cancel_reason END,
+			canceled_at = CASE WHEN $2 = 'canceled' THEN $3 ELSE canceled_at END,
+			cancel_reason = CASE WHEN $2 = 'canceled' THEN $4 ELSE cancel_reason END,
 			updated_at = NOW()
 		WHERE reservation_token = $1
 		RETURNING

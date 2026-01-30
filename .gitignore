@@ -37,6 +37,7 @@ vendor/
 coverage.txt
 *.prof
 backend/server
+backend/migrate
 
 # Environment files
 .env*

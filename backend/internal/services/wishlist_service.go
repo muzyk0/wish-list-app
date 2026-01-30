@@ -426,17 +426,18 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	}
 
 	output := &WishListOutput{
-		ID:          updated.ID.String(),
-		OwnerID:     updated.OwnerID.String(),
-		Title:       updated.Title,
-		Description: updated.Description.String,
-		Occasion:    updated.Occasion.String,
-		TemplateID:  updated.TemplateID,
-		IsPublic:    updated.IsPublic.Bool,
-		PublicSlug:  updated.PublicSlug.String,
-		ViewCount:   int64(updated.ViewCount.Int32),
-		CreatedAt:   updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   updated.UpdatedAt.Time.Format(time.RFC3339),
+		ID:           updated.ID.String(),
+		OwnerID:      updated.OwnerID.String(),
+		Title:        updated.Title,
+		Description:  updated.Description.String,
+		Occasion:     updated.Occasion.String,
+		OccasionDate: updated.OccasionDate.Time.Format(time.RFC3339),
+		TemplateID:   updated.TemplateID,
+		IsPublic:     updated.IsPublic.Bool,
+		PublicSlug:   updated.PublicSlug.String,
+		ViewCount:    int64(updated.ViewCount.Int32),
+		CreatedAt:    updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:    updated.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	return output, nil
