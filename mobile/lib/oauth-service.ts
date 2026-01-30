@@ -46,9 +46,18 @@ export const startGoogleOAuth = async (): Promise<{
       };
     }
 
+    // Get app scheme from environment variable
+    const appScheme =
+      process.env.EXPO_PUBLIC_APP_SCHEME || process.env.APP_SCHEME;
+    if (!appScheme) {
+      throw new Error(
+        'APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.',
+      );
+    }
+
     // Create redirect URI
     const redirectUri = AuthSession.makeRedirectUri({
-      native: 'com.anonymous.mobile://oauth', // Replace with your actual app scheme
+      native: `${appScheme}://oauth`,
       preferLocalhost: true,
     });
 
@@ -105,9 +114,18 @@ export const startFacebookOAuth = async (): Promise<{
       };
     }
 
+    // Get app scheme from environment variable
+    const appScheme =
+      process.env.EXPO_PUBLIC_APP_SCHEME || process.env.APP_SCHEME;
+    if (!appScheme) {
+      throw new Error(
+        'APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.',
+      );
+    }
+
     // Create redirect URI
     const redirectUri = AuthSession.makeRedirectUri({
-      native: 'com.anonymous.mobile://oauth',
+      native: `${appScheme}://oauth`,
       preferLocalhost: true,
     });
 

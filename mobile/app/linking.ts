@@ -24,10 +24,7 @@ export const linking = {
           index: 'home',
           lists: 'lists',
           explore: 'explore',
-          reservations: {
-            path: 'my/reservations',
-            alias: 'reservations',
-          },
+          reservations: 'my/reservations',
           profile: 'profile',
         },
       },
@@ -39,7 +36,7 @@ export const linking = {
       },
       lists: {
         screens: {
-          'create': 'lists/create',
+          create: 'lists/create',
           '[id]/index': 'lists/:id',
           '[id]/edit': 'lists/:id/edit',
         },

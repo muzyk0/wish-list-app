@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import {
@@ -32,10 +33,20 @@ export default function LoginScreen() {
   const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       loginUser({ email, password }),
-    onSuccess: (_data) => {
-      // Store the token in AsyncStorage or secure storage
-      // For now, just navigate to home
-      router.push('/(tabs)');
+    onSuccess: async (data) => {
+      try {
+        // Store the token securely
+        if (data.token) {
+          await SecureStore.setItemAsync('auth_token', data.token);
+        }
+        router.push('/(tabs)');
+      } catch (error) {
+        console.error('Error storing token:', error);
+        Alert.alert(
+          'Error',
+          'Failed to save authentication. Please try again.',
+        );
+      }
     },
     onError: (error: Error) => {
       Alert.alert('Error', error.message || 'Login failed. Please try again.');

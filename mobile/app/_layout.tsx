@@ -21,13 +21,13 @@ export default function RootLayout() {
       if (path) {
         // Map web paths to mobile routes
         const routeMap: { [key: string]: string } = {
-          'home': '/(tabs)',
+          home: '/(tabs)',
           'auth/login': '/auth/login',
           'auth/register': '/auth/register',
           'my/reservations': '/(tabs)/reservations',
-          'lists': '/(tabs)/lists',
-          'explore': '/(tabs)/explore',
-          'profile': '/(tabs)/profile',
+          lists: '/(tabs)/lists',
+          explore: '/(tabs)/explore',
+          profile: '/(tabs)/profile',
         };
 
         // Handle parameterized routes
@@ -50,8 +50,11 @@ export default function RootLayout() {
         }
 
         if (path.startsWith('gift-items/') && path.includes('/edit')) {
-          const id = path.split('/')[2];
-          router.push(`/gift-items/${id}/edit` as any);
+          const match = path.match(/^gift-items\/([^\/]+)\/edit/);
+          if (match && match[1]) {
+            const id = match[1];
+            router.push(`/gift-items/${id}/edit` as any);
+          }
           return;
         }
 

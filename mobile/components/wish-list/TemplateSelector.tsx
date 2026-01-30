@@ -39,10 +39,10 @@ export default function TemplateSelector({
   const updateTemplateMutation = useMutation({
     mutationFn: (templateId: string) =>
       apiClient.updateWishListTemplate(wishlistId, templateId),
-    onSuccess: (_data) => {
+    onSuccess: (_data, templateId) => {
       Alert.alert('Success', 'Template updated successfully!');
       if (onTemplateChange) {
-        onTemplateChange(currentTemplateId);
+        onTemplateChange(templateId);
       }
     },
     onError: (error) => {

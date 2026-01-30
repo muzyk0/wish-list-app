@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { ReservationButton } from '@/components/wish-list/ReservationButton';
 import { apiClient } from '@/lib/api';
 
 import type {
@@ -29,7 +30,11 @@ export default function PublicWishListScreen() {
     isRefetching,
   } = useQuery<WishList>({
     queryKey: ['public-wishlist', slug],
-    queryFn: () => apiClient.getPublicWishList(slug as string),
+    queryFn: async () => {
+      const resp = await apiClient.getPublicWishList(slug as string);
+      // Normalize response: API returns 'items', component expects 'giftItems'
+      return { ...resp, giftItems: (resp as any).items ?? [] } as WishList;
+    },
     enabled: !!slug,
     retry: 1,
   });
@@ -84,12 +89,12 @@ export default function PublicWishListScreen() {
         ) : null}
 
         <View style={styles.itemActions}>
-          {!isReserved && !isPurchased && (
-            <Text style={styles.reserveButton}>Reserve Item</Text>
-          )}
-          {isReserved && !isPurchased && (
-            <Text style={styles.reservedByText}>Reserved</Text>
-          )}
+          <ReservationButton
+            giftItemId={item.id}
+            wishlistId={wishList.id}
+            isReserved={isReserved}
+            onReservationSuccess={() => refetch()}
+          />
         </View>
       </View>
     );

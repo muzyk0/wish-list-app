@@ -2,42 +2,21 @@ import { useMutation } from '@tanstack/react-query';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Badge } from '@/components/ui/Badge';
 import { apiClient } from '@/lib/api';
-
-interface GiftItem {
-  id: string;
-  wishlistId: string;
-  name: string;
-  description?: string;
-  link?: string;
-  imageUrl?: string;
-  price?: number;
-  priority: number;
-  reservedByUserId?: string;
-  reservedAt?: string;
-  purchasedByUserId?: string;
-  purchasedAt?: string;
-  purchasedPrice?: number;
-  notes?: string;
-  position: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { GiftItem } from '@/lib/types';
 
 interface GiftItemDisplayProps {
   item: GiftItem;
-  wishlistId: string;
   onRefresh?: () => void; // Callback to refresh the list after purchase
   showPurchaseOption?: boolean; // Whether to show purchase option (typically for owner)
 }
 
 export default function GiftItemDisplay({
   item,
-  wishlistId: _wishlistId,
   onRefresh,
   showPurchaseOption = false,
 }: GiftItemDisplayProps) {
-  const isReserved = !!item.reservedByUserId;
-  const isPurchased = !!item.purchasedByUserId;
+  const isReserved = !!item.reserved_by_user_id;
+  const isPurchased = !!item.purchased_by_user_id;
 
   const purchaseMutation = useMutation({
     mutationFn: (giftItemId: string) =>

@@ -123,9 +123,9 @@ export interface Reservation {
 }
 
 export interface CreateReservationRequest {
-  giftItemId: string;
-  guestName?: string;
-  guestEmail?: string;
+  gift_item_id: string;
+  guest_name?: string;
+  guest_email?: string;
 }
 
 export interface CancelReservationRequest {

@@ -1,4 +1,5 @@
 // mobile/lib/api.ts
+import * as SecureStore from 'expo-secure-store';
 import type {
   CreateGiftItemRequest,
   CreateReservationRequest,
@@ -21,22 +22,25 @@ const API_BASE_URL =
 
 class ApiClient {
   private token: string | null = null;
+  private tokenReady: Promise<void>;
+  private resolveTokenReady!: () => void;
 
   constructor() {
-    // Check for token in AsyncStorage on initialization
+    // Initialize token ready promise
+    this.tokenReady = new Promise((resolve) => {
+      this.resolveTokenReady = resolve;
+    });
+    // Load token from secure storage
     this.loadToken();
   }
 
   private async loadToken() {
     try {
-      // Using a mock for now since we don't have AsyncStorage imported
-      // In a real implementation: this.token = await AsyncStorage.getItem('token');
-      // For now, we'll just use a placeholder
-      if (typeof window !== 'undefined') {
-        this.token = localStorage.getItem('token'); // Using localStorage as a placeholder
-      }
+      this.token = await SecureStore.getItemAsync('auth_token');
     } catch (error) {
       console.error('Error loading token:', error);
+    } finally {
+      this.resolveTokenReady();
     }
   }
 
@@ -44,6 +48,9 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
+    // Wait for token to be loaded before making requests
+    await this.tokenReady;
+
     const url = `${API_BASE_URL}${endpoint}`;
 
     const headers = {
@@ -93,19 +100,17 @@ class ApiClient {
 
   async logout(): Promise<void> {
     this.token = null;
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token'); // Using localStorage as a placeholder
+    try {
+      await SecureStore.deleteItemAsync('auth_token');
+    } catch (error) {
+      console.error('Error removing token:', error);
     }
   }
 
   private async setToken(token: string): Promise<void> {
     this.token = token;
     try {
-      // In a real implementation: await AsyncStorage.setItem('token', token);
-      // For now, using localStorage as a placeholder
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-      }
+      await SecureStore.setItemAsync('auth_token', token);
     } catch (error) {
       console.error('Error saving token:', error);
     }

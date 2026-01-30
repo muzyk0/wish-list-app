@@ -12,7 +12,7 @@ import ImageUpload from './ImageUpload';
 
 interface GiftItemFormProps {
   wishlistId: string;
-  existingItem: GiftItem; // Optional existing item for editing
+  existingItem?: GiftItem; // Optional existing item for editing
   onComplete?: () => void; // Callback when form is completed
 }
 
@@ -103,7 +103,12 @@ export default function GiftItemForm({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => apiClient.deleteGiftItem(existingItem.id),
+    mutationFn: () => {
+      if (!existingItem?.id) {
+        throw new Error('No item to delete');
+      }
+      return apiClient.deleteGiftItem(existingItem.id);
+    },
     onSuccess: () => {
       Alert.alert('Success', 'Gift item deleted successfully!', [
         {
@@ -277,7 +282,7 @@ export default function GiftItemForm({
         )}
       </PaperButton>
 
-      {existingItem && (
+      {existingItem?.id && (
         <PaperButton
           mode="contained-tonal"
           onPress={handleDelete}

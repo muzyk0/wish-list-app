@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
+import { apiClient } from '@/lib/api';
 
 interface ImageUploadProps {
   onImageUpload: (url: string) => void;
@@ -119,12 +121,18 @@ export default function ImageUpload({
         name: `gift-image.${fileExtension}`,
       } as unknown as File);
 
-      // For now, skip authentication for image upload since the API client doesn't expose token getter
-      // In a real implementation, you'd need to add a method to ApiClient to get the token
+      // Get auth token and upload with authentication
+      const token = await (apiClient as any).getAuthToken?.();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/images/upload`,
         {
           method: 'POST',
+          headers,
           body: formData,
         },
       );
@@ -150,10 +158,14 @@ export default function ImageUpload({
     }
   };
 
-  const getFileSize = async (_uri: string): Promise<{ size: number }> => {
-    // This is a simplified implementation - in a real app, you'd get the actual file size
-    // For now, we'll just return a mock value since React Native doesn't have direct file system access
-    return { size: 1024 }; // Placeholder - actual implementation would get real file size
+  const getFileSize = async (uri: string): Promise<{ size: number }> => {
+    try {
+      const info = await FileSystem.getInfoAsync(uri, { size: true });
+      return { size: (info as any).size || 0 };
+    } catch (error) {
+      console.error('Error getting file size:', error);
+      return { size: 0 };
+    }
   };
 
   const removeImage = () => {

@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Alert, StyleSheet } from 'react-native';
 import {
@@ -9,6 +10,7 @@ import {
   TextInput,
   useTheme,
 } from 'react-native-paper';
+import { apiClient } from '@/lib/api';
 
 interface ReservationButtonProps {
   giftItemId: string;
@@ -29,46 +31,36 @@ export function ReservationButton({
   const [modalVisible, setModalVisible] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleReservation = async () => {
+  const reservationMutation = useMutation({
+    mutationFn: (data: { guest_name: string; guest_email: string }) =>
+      apiClient.createReservation({
+        gift_item_id: giftItemId,
+        guest_name: data.guest_name,
+        guest_email: data.guest_email,
+      }),
+    onSuccess: () => {
+      Alert.alert('Success', 'Gift item reserved successfully!');
+      setModalVisible(false);
+      setGuestName('');
+      setGuestEmail('');
+      onReservationSuccess?.();
+    },
+    onError: (error: Error) => {
+      Alert.alert('Error', error?.message || 'Failed to reserve gift item');
+    },
+  });
+
+  const handleReservation = () => {
     if (!guestName.trim() || !guestEmail.trim()) {
       Alert.alert('Error', 'Please enter your name and email');
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/wishlists/${wishlistId}/items/${giftItemId}/reserve`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            guestName: guestName.trim(),
-            guestEmail: guestEmail.trim(),
-          }),
-        },
-      );
-
-      if (response.ok) {
-        Alert.alert('Success', 'Gift item reserved successfully!');
-        setModalVisible(false);
-        setGuestName('');
-        setGuestEmail('');
-        onReservationSuccess?.();
-      } else {
-        const data = await response.json();
-        Alert.alert('Error', data.error || 'Failed to reserve gift item');
-      }
-    } catch {
-      Alert.alert('Error', 'An error occurred while reserving the gift item');
-    } finally {
-      setLoading(false);
-    }
+    reservationMutation.mutate({
+      guest_name: guestName.trim(),
+      guest_email: guestEmail.trim(),
+    });
   };
 
   if (isReserved) {
@@ -131,10 +123,14 @@ export function ReservationButton({
             </Button>
             <Button
               onPress={handleReservation}
-              loading={loading}
-              disabled={loading}
+              loading={reservationMutation.isPending}
+              disabled={reservationMutation.isPending}
             >
-              <Text>{loading ? 'Reserving...' : 'Reserve Gift'}</Text>
+              <Text>
+                {reservationMutation.isPending
+                  ? 'Reserving...'
+                  : 'Reserve Gift'}
+              </Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

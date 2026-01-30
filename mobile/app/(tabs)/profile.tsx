@@ -87,12 +87,16 @@ export default function ProfileScreen() {
 
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteAccount(),
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Clear auth session and cached data
+      await apiClient.logout();
+      queryClient.clear();
+
       Alert.alert('Success', 'Account deleted successfully!', [
         {
           text: 'OK',
           onPress: () => {
-            // In a real app, this would log out the user and redirect to login
+            // Navigation will be handled by auth state change
           },
         },
       ]);
@@ -155,19 +159,26 @@ export default function ProfileScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.headerSection}>
         <View style={styles.avatarContainer}>
-          <Avatar.Image
-            size={100}
-            source={{ uri: user?.avatar_url || undefined }}
-            style={styles.avatar}
-          >
-            {!user?.avatar_url && user?.first_name && (
-              <Text variant="headlineSmall">
-                {(
-                  user.first_name.charAt(0) + (user.last_name?.charAt(0) || '')
-                ).toUpperCase()}
-              </Text>
-            )}
-          </Avatar.Image>
+          {user?.avatar_url ? (
+            <Avatar.Image
+              size={100}
+              source={{ uri: user.avatar_url }}
+              style={styles.avatar}
+            />
+          ) : (
+            <Avatar.Text
+              size={100}
+              label={
+                user?.first_name
+                  ? (
+                      user.first_name.charAt(0) +
+                      (user.last_name?.charAt(0) || '')
+                    ).toUpperCase()
+                  : user?.email.charAt(0).toUpperCase() || '?'
+              }
+              style={styles.avatar}
+            />
+          )}
         </View>
 
         <Text
