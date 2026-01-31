@@ -766,9 +766,61 @@ pagination:
 
 ---
 
+## Mobile API Client Errors (BLOCKING)
+
+⛔ **CRITICAL**: Mobile app is completely broken after OpenAPI type regeneration. 42 TypeScript compilation errors preventing app from running.
+
+**Root Cause**: Fundamental API contract mismatch between mobile client expectations and actual backend implementation.
+
+### Critical Fixes Needed (New Issues #63-#67)
+
+- [ ] #### #63: Fix API_BASE_URL missing /api prefix
+**File**: `mobile/lib/api/api.ts:20`
+**Priority**: Critical (Blocking)
+**Issue**: Base URL `http://10.0.2.2:8080` should be `http://10.0.2.2:8080/api`
+**Impact**: All API requests going to wrong URLs, resulting in 404 errors
+**Fix**: Update API_BASE_URL constant to include `/api` suffix
+
+- [ ] #### #64: Update authentication API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: Critical (Blocking)
+**Issue**: Mobile uses `/v1/users/register` and `/v1/users/login`, backend uses `/auth/register` and `/auth/login`
+**Impact**: Login and registration completely broken
+**Fix**: Update login/register methods to use `/auth/*` paths
+
+- [ ] #### #65: Update profile API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: Critical (Blocking)
+**Issue**: Mobile uses `/v1/users/me`, backend uses `/protected/profile`
+**Impact**: Profile operations broken (get, update, delete)
+**Fix**: Update getProfile, updateProfile, deleteAccount methods
+
+- [ ] #### #66: Fix types.ts schema imports
+**File**: `mobile/lib/api/types.ts`
+**Priority**: Critical (Blocking)
+**Issue**: 14 type errors - manual type aliases reference non-existent schema names
+**Impact**: 14 TypeScript compilation errors
+**Fix**: Replace manual aliases with direct imports from generated schema (e.g., use `components["schemas"]["internal_handlers.AuthResponse"]`)
+
+- [ ] #### #67: Update wishlist and gift item API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: High (Blocking)
+**Issue**: Mobile uses `/v1/wishlists/{wishlistId}/items/*`, backend uses `/wishlists/{wishlistId}/gift-items/*`
+**Impact**: 18 TypeScript errors, all wishlist/gift operations broken
+**Fix**:
+- Remove `/v1` prefix from all paths
+- Change `/items/*` to `/gift-items/*`
+- Update purchase endpoint from `/mark-purchased` to `/purchase`
+- Update reservation endpoints structure
+
+**See detailed analysis**: `claudedocs/mobile-api-client-errors.md`
+
+---
+
 ## Next Steps
 
-1. **Start with Critical Priority issues** (6 issues) - Security vulnerabilities and blocking problems
+1. **Fix blocking mobile API client issues FIRST** (#63-#67) - App completely broken, 42 compilation errors
+2. **Start with Critical Priority issues** (6 issues) - Security vulnerabilities and blocking problems
    - **Frontend Security**: #41 JWT_SECRET exposure and #42 localStorage XSS vulnerability are urgent
    - **Mobile Auth**: #24 session cleanup, #26 token storage, #36 secure storage
 2. **Address High Priority issues** (27 issues) - Core functionality and type safety
