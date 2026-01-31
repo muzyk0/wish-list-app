@@ -83,20 +83,21 @@ type UserReservationsResponse struct {
 }
 
 // CreateReservation godoc
-// @Summary Create a reservation for a gift item
-// @Description Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
-// @Tags Reservations
-// @Accept json
-// @Produce json
-// @Param wishlistId path string true "Wish List ID"
-// @Param itemId path string true "Gift Item ID"
-// @Param reservation_request body CreateReservationRequest false "Reservation information (required for guests)"
-// @Success 200 {object} CreateReservationResponse "Reservation created successfully"
-// @Failure 400 {object} map[string]string "Invalid request body or validation error"
-// @Failure 401 {object} map[string]string "Unauthorized (guests need name and email)"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Security BearerAuth
-// @Router /wishlists/{wishlistId}/gift-items/{itemId}/reservation [post]
+//
+//	@Summary		Create a reservation for a gift item
+//	@Description	Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
+//	@Tags			Reservations
+//	@Accept			json
+//	@Produce		json
+//	@Param			wishlistId			path		string						true	"Wish List ID"
+//	@Param			itemId				path		string						true	"Gift Item ID"
+//	@Param			reservation_request	body		CreateReservationRequest	false	"Reservation information (required for guests)"
+//	@Success		200					{object}	CreateReservationResponse	"Reservation created successfully"
+//	@Failure		400					{object}	map[string]string			"Invalid request body or validation error"
+//	@Failure		401					{object}	map[string]string			"Unauthorized (guests need name and email)"
+//	@Failure		500					{object}	map[string]string			"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{wishlistId}/gift-items/{itemId}/reservation [post]
 func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -199,20 +200,21 @@ func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 }
 
 // CancelReservation godoc
-// @Summary Cancel a reservation for a gift item
-// @Description Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
-// @Tags Reservations
-// @Accept json
-// @Produce json
-// @Param wishlistId path string true "Wish List ID"
-// @Param itemId path string true "Gift Item ID"
-// @Param cancel_request body CancelReservationRequest false "Cancellation information (required for guests)"
-// @Success 200 {object} CreateReservationResponse "Reservation canceled successfully"
-// @Failure 400 {object} map[string]string "Invalid request body or validation error"
-// @Failure 401 {object} map[string]string "Unauthorized (guests need reservation token)"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Security BearerAuth
-// @Router /wishlists/{wishlistId}/gift-items/{itemId}/reservation [delete]
+//
+//	@Summary		Cancel a reservation for a gift item
+//	@Description	Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
+//	@Tags			Reservations
+//	@Accept			json
+//	@Produce		json
+//	@Param			wishlistId		path		string						true	"Wish List ID"
+//	@Param			itemId			path		string						true	"Gift Item ID"
+//	@Param			cancel_request	body		CancelReservationRequest	false	"Cancellation information (required for guests)"
+//	@Success		200				{object}	CreateReservationResponse	"Reservation canceled successfully"
+//	@Failure		400				{object}	map[string]string			"Invalid request body or validation error"
+//	@Failure		401				{object}	map[string]string			"Unauthorized (guests need reservation token)"
+//	@Failure		500				{object}	map[string]string			"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{wishlistId}/gift-items/{itemId}/reservation [delete]
 func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -322,17 +324,18 @@ func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 }
 
 // GetUserReservations godoc
-// @Summary Get all reservations made by the authenticated user
-// @Description Get all reservations made by the authenticated user with pagination.
-// @Tags Reservations
-// @Produce json
-// @Param page query int false "Page number (default 1)"
-// @Param limit query int false "Items per page (default 10, max 100)"
-// @Success 200 {object} UserReservationsResponse "List of user reservations retrieved successfully"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Security BearerAuth
-// @Router /reservations [get]
+//
+//	@Summary		Get all reservations made by the authenticated user
+//	@Description	Get all reservations made by the authenticated user with pagination.
+//	@Tags			Reservations
+//	@Produce		json
+//	@Param			page	query		int							false	"Page number (default 1)"
+//	@Param			limit	query		int							false	"Items per page (default 10, max 100)"
+//	@Success		200		{object}	UserReservationsResponse	"List of user reservations retrieved successfully"
+//	@Failure		401		{object}	map[string]string			"Unauthorized"
+//	@Failure		500		{object}	map[string]string			"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/reservations [get]
 func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 	pageStr := c.QueryParam("page")
 	limitStr := c.QueryParam("limit")
@@ -449,15 +452,16 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 }
 
 // GetGuestReservations godoc
-// @Summary Get reservations made by a guest using a token
-// @Description Get all reservations made by a guest using their reservation token.
-// @Tags Reservations
-// @Produce json
-// @Param token query string true "Reservation token"
-// @Success 200 {array} ReservationDetailsResponse "List of guest reservations retrieved successfully"
-// @Failure 400 {object} map[string]string "Invalid request parameters"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /reservations/guest [get]
+//
+//	@Summary		Get reservations made by a guest using a token
+//	@Description	Get all reservations made by a guest using their reservation token.
+//	@Tags			Reservations
+//	@Produce		json
+//	@Param			token	query		string						true	"Reservation token"
+//	@Success		200		{array}		ReservationDetailsResponse	"List of guest reservations retrieved successfully"
+//	@Failure		400		{object}	map[string]string			"Invalid request parameters"
+//	@Failure		500		{object}	map[string]string			"Internal server error"
+//	@Router			/reservations/guest [get]
 func (h *ReservationHandler) GetGuestReservations(c echo.Context) error {
 	tokenStr := c.QueryParam("token")
 	if tokenStr == "" {
@@ -530,15 +534,16 @@ func (h *ReservationHandler) GetGuestReservations(c echo.Context) error {
 }
 
 // GetReservationStatus godoc
-// @Summary Get the reservation status for a gift item in a public wish list
-// @Description Get the reservation status for a specific gift item in a public wish list.
-// @Tags Reservations
-// @Produce json
-// @Param slug path string true "Public wish list slug"
-// @Param itemId path string true "Gift Item ID"
-// @Success 200 {object} ReservationStatusResponse "Reservation status retrieved successfully"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /public/wishlists/{slug}/gift-items/{itemId}/reservation-status [get]
+//
+//	@Summary		Get the reservation status for a gift item in a public wish list
+//	@Description	Get the reservation status for a specific gift item in a public wish list.
+//	@Tags			Reservations
+//	@Produce		json
+//	@Param			slug	path		string						true	"Public wish list slug"
+//	@Param			itemId	path		string						true	"Gift Item ID"
+//	@Success		200		{object}	ReservationStatusResponse	"Reservation status retrieved successfully"
+//	@Failure		500		{object}	map[string]string			"Internal server error"
+//	@Router			/public/wishlists/{slug}/gift-items/{itemId}/reservation-status [get]
 func (h *ReservationHandler) GetReservationStatus(c echo.Context) error {
 	publicSlug := c.Param("slug")
 	giftItemID := c.Param("itemId")
