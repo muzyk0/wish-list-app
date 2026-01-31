@@ -11,4 +11,10 @@ properties:
     type: string
   wishlist:
     $ref: ./internal_handlers.WishListSummary.yaml
+required:
+  - giftItem
+  - id
+  - reservedAt
+  - status
+  - wishlist
 type: object

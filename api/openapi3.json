@@ -1803,12 +1803,22 @@
         "schemas": {
             "internal_handlers.AuthResponse": {
                 "type": "object",
+                "required": [
+                    "token",
+                    "user"
+                ],
                 "properties": {
                     "token": {
+                        "description": "Authentication token",
                         "type": "string"
                     },
                     "user": {
-                        "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                        "description": "User information",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                            }
+                        ]
                     }
                 }
             },
@@ -1871,6 +1881,14 @@
             },
             "internal_handlers.CreateReservationResponse": {
                 "type": "object",
+                "required": [
+                    "giftItemId",
+                    "id",
+                    "notificationSent",
+                    "reservationToken",
+                    "reservedAt",
+                    "status"
+                ],
                 "properties": {
                     "cancelReason": {
                         "type": "string"
@@ -1940,6 +1958,13 @@
             },
             "internal_handlers.GetGiftItemsResponse": {
                 "type": "object",
+                "required": [
+                    "items",
+                    "limit",
+                    "page",
+                    "pages",
+                    "total"
+                ],
                 "properties": {
                     "items": {
                         "type": "array",
@@ -1963,6 +1988,10 @@
             },
             "internal_handlers.GiftItemSummary": {
                 "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
                 "properties": {
                     "id": {
                         "type": "string"
@@ -1980,6 +2009,9 @@
             },
             "internal_handlers.HealthResponse": {
                 "type": "object",
+                "required": [
+                    "status"
+                ],
                 "properties": {
                     "checks": {
                         "type": "object",
@@ -2046,6 +2078,13 @@
             },
             "internal_handlers.ReservationDetailsResponse": {
                 "type": "object",
+                "required": [
+                    "giftItem",
+                    "id",
+                    "reservedAt",
+                    "status",
+                    "wishlist"
+                ],
                 "properties": {
                     "expiresAt": {
                         "type": "string"
@@ -2069,6 +2108,10 @@
             },
             "internal_handlers.ReservationStatusResponse": {
                 "type": "object",
+                "required": [
+                    "isReserved",
+                    "status"
+                ],
                 "properties": {
                     "isReserved": {
                         "type": "boolean"
@@ -2165,6 +2208,10 @@
             },
             "internal_handlers.UserReservationsResponse": {
                 "type": "object",
+                "required": [
+                    "data",
+                    "pagination"
+                ],
                 "properties": {
                     "data": {
                         "type": "array",
@@ -2177,6 +2224,10 @@
             },
             "internal_handlers.WishListSummary": {
                 "type": "object",
+                "required": [
+                    "id",
+                    "title"
+                ],
                 "properties": {
                     "id": {
                         "type": "string"

@@ -147,6 +147,7 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "✓ OpenAPI 3.0 converted"
 	@echo ""
 	@echo "Step 3/3: Splitting into organized files..."
+	@rm -rf api/split
 	@mkdir -p api/split
 	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
 	@echo "✓ Split files created"
@@ -252,9 +253,10 @@ swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi
+	@rm -rf api/split
 	@mkdir -p api/split
 	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
-	@echo "✓ OpenAPI 3.0 specification split into backend/docs/split/"
+	@echo "✓ OpenAPI 3.0 specification split into api/split/"
 
 .PHONY: swagger-preview
 swagger-preview: ## Preview OpenAPI 3.0 specification in browser

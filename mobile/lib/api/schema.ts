@@ -1640,8 +1640,10 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         "internal_handlers.AuthResponse": {
-            token?: string;
-            user?: components["schemas"]["wish-list_internal_services.UserOutput"];
+            /** @description Authentication token */
+            token: string;
+            /** @description User information */
+            user: components["schemas"]["wish-list_internal_services.UserOutput"];
         };
         "internal_handlers.CancelReservationRequest": {
             reservationToken?: string;
@@ -1664,15 +1666,15 @@ export interface components {
             cancelReason?: string;
             canceledAt?: string;
             expiresAt?: string;
-            giftItemId?: string;
+            giftItemId: string;
             guestEmail?: string;
             guestName?: string;
-            id?: string;
-            notificationSent?: boolean;
-            reservationToken?: string;
-            reservedAt?: string;
+            id: string;
+            notificationSent: boolean;
+            reservationToken: string;
+            reservedAt: string;
             reservedByUserId?: string;
-            status?: string;
+            status: string;
         };
         "internal_handlers.CreateWishListRequest": {
             description?: string;
@@ -1684,16 +1686,16 @@ export interface components {
             title: string;
         };
         "internal_handlers.GetGiftItemsResponse": {
-            items?: components["schemas"]["wish-list_internal_services.GiftItemOutput"][];
-            limit?: number;
-            page?: number;
-            pages?: number;
-            total?: number;
+            items: components["schemas"]["wish-list_internal_services.GiftItemOutput"][];
+            limit: number;
+            page: number;
+            pages: number;
+            total: number;
         };
         "internal_handlers.GiftItemSummary": {
-            id?: string;
+            id: string;
             image_url?: string;
-            name?: string;
+            name: string;
             price?: string;
         };
         "internal_handlers.HealthResponse": {
@@ -1701,7 +1703,7 @@ export interface components {
                 [key: string]: string;
             };
             error?: string;
-            status?: string;
+            status: string;
         };
         "internal_handlers.LoginRequest": {
             email: string;
@@ -1719,17 +1721,17 @@ export interface components {
         };
         "internal_handlers.ReservationDetailsResponse": {
             expiresAt?: string;
-            giftItem?: components["schemas"]["internal_handlers.GiftItemSummary"];
-            id?: string;
-            reservedAt?: string;
-            status?: string;
-            wishlist?: components["schemas"]["internal_handlers.WishListSummary"];
+            giftItem: components["schemas"]["internal_handlers.GiftItemSummary"];
+            id: string;
+            reservedAt: string;
+            status: string;
+            wishlist: components["schemas"]["internal_handlers.WishListSummary"];
         };
         "internal_handlers.ReservationStatusResponse": {
-            isReserved?: boolean;
+            isReserved: boolean;
             reservedAt?: string;
             reservedByName?: string;
-            status?: string;
+            status: string;
         };
         "internal_handlers.UpdateGiftItemRequest": {
             description?: string;
@@ -1757,14 +1759,14 @@ export interface components {
             title?: string;
         };
         "internal_handlers.UserReservationsResponse": {
-            data?: components["schemas"]["internal_handlers.ReservationDetailsResponse"][];
-            pagination?: unknown;
+            data: components["schemas"]["internal_handlers.ReservationDetailsResponse"][];
+            pagination: unknown;
         };
         "internal_handlers.WishListSummary": {
-            id?: string;
+            id: string;
             ownerFirstName?: string;
             ownerLastName?: string;
-            title?: string;
+            title: string;
         };
         "wish-list_internal_services.GiftItemOutput": {
             created_at?: string;

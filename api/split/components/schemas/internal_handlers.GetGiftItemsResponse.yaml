@@ -11,4 +11,10 @@ properties:
     type: integer
   total:
     type: integer
+required:
+  - items
+  - limit
+  - page
+  - pages
+  - total
 type: object

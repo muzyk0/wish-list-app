@@ -1,6 +1,12 @@
 properties:
   token:
+    description: Authentication token
     type: string
   user:
-    $ref: ./wish-list_internal_services.UserOutput.yaml
+    allOf:
+      - $ref: ./wish-list_internal_services.UserOutput.yaml
+    description: User information
+required:
+  - token
+  - user
 type: object

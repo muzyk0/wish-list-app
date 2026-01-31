@@ -3,21 +3,22 @@ import * as SecureStore from 'expo-secure-store';
 import createClient from 'openapi-fetch';
 import type { paths } from './schema';
 import type {
-  User,
-  UserRegistration,
-  UserLogin,
-  LoginResponse,
-  WishList,
-  CreateWishListRequest,
-  UpdateWishListRequest,
-  GiftItem,
   CreateGiftItemRequest,
-  UpdateGiftItemRequest,
-  Reservation,
   CreateReservationRequest,
+  CreateWishListRequest,
+  GiftItem,
+  LoginResponse,
+  Reservation,
+  UpdateGiftItemRequest,
+  UpdateWishListRequest,
+  User,
+  UserLogin,
+  UserRegistration,
+  WishList,
 } from './types';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
 
 class ApiClient {
   private token: string | null = null;
@@ -72,9 +73,8 @@ class ApiClient {
       );
     }
 
-    const response = data as LoginResponse;
-    await this.setToken(response.token);
-    return response;
+    await this.setToken(data.token);
+    return data; // Fixed: was 'response' which was undefined
   }
 
   async register(userData: UserRegistration): Promise<LoginResponse> {
@@ -92,9 +92,8 @@ class ApiClient {
       );
     }
 
-    const response = data as LoginResponse;
-    await this.setToken(response.token);
-    return response;
+    await this.setToken(data.token);
+    return data; // Fixed: removed unnecessary cast and variable
   }
 
   async logout(): Promise<void> {
@@ -157,9 +156,7 @@ class ApiClient {
     });
 
     if (error) {
-      throw new Error(
-        (error as any)?.error || 'Failed to delete account',
-      );
+      throw new Error((error as any)?.error || 'Failed to delete account');
     }
   }
 
@@ -196,13 +193,10 @@ class ApiClient {
   async getPublicWishList(slug: string): Promise<WishList> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET(
-      '/public/wishlists/{slug}',
-      {
-        params: { path: { slug } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
+      params: { path: { slug } },
+      headers: this.getHeaders(),
+    });
 
     if (error || !data) {
       throw new Error(
@@ -216,13 +210,10 @@ class ApiClient {
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
     await this.tokenReady;
 
-    const { data: responseData, error } = await this.client.POST(
-      '/wishlists',
-      {
-        body: data,
-        headers: this.getHeaders(),
-      },
-    );
+    const { data: responseData, error } = await this.client.POST('/wishlists', {
+      body: data,
+      headers: this.getHeaders(),
+    });
 
     if (error || !responseData) {
       throw new Error((error as any)?.error || 'Failed to create wish list');
@@ -288,13 +279,10 @@ class ApiClient {
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET(
-      '/gift-items/{id}',
-      {
-        params: { path: { id: itemId } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { data, error } = await this.client.GET('/gift-items/{id}', {
+      params: { path: { id: itemId } },
+      headers: this.getHeaders(),
+    });
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch gift item');
@@ -351,13 +339,10 @@ class ApiClient {
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
     await this.tokenReady;
 
-    const { error } = await this.client.DELETE(
-      '/gift-items/{id}',
-      {
-        params: { path: { id: itemId } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { error } = await this.client.DELETE('/gift-items/{id}', {
+      params: { path: { id: itemId } },
+      headers: this.getHeaders(),
+    });
 
     if (error) {
       throw new Error((error as any)?.error || 'Failed to delete gift item');

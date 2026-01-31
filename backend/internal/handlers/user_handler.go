@@ -42,16 +42,23 @@ type LoginRequest struct {
 }
 
 type UpdateProfileRequest struct {
-	Email     *string `json:"email" validate:"omitempty,email"`
-	Password  *string `json:"password" validate:"omitempty,min=6"`
+	Email     *string `json:"email" validate:"email"`
+	Password  *string `json:"password" validate:"min=6"`
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
 	AvatarUrl *string `json:"avatar_url"`
 }
 
 type AuthResponse struct {
-	User  *services.UserOutput `json:"user"`
-	Token string               `json:"token"`
+	// User information
+	User *services.UserOutput `json:"user" validate:"required"`
+	// Authentication token
+	Token string `json:"token" validate:"required"`
+}
+
+type ProfileResponse struct {
+	// User profile information
+	User *services.UserOutput `json:"user" validate:"required"`
 }
 
 // Register godoc

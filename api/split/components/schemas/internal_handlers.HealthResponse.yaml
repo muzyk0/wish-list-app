@@ -7,4 +7,6 @@ properties:
     type: string
   status:
     type: string
+required:
+  - status
 type: object

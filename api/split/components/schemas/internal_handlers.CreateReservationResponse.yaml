@@ -23,4 +23,11 @@ properties:
     type: string
   status:
     type: string
+required:
+  - giftItemId
+  - id
+  - notificationSent
+  - reservationToken
+  - reservedAt
+  - status
 type: object

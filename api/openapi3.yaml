@@ -1123,9 +1123,15 @@ components:
     internal_handlers.AuthResponse:
       properties:
         token:
+          description: Authentication token
           type: string
         user:
-          $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+          allOf:
+            - $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+          description: User information
+      required:
+        - token
+        - user
       type: object
     internal_handlers.CancelReservationRequest:
       properties:
@@ -1192,6 +1198,13 @@ components:
           type: string
         status:
           type: string
+      required:
+        - giftItemId
+        - id
+        - notificationSent
+        - reservationToken
+        - reservedAt
+        - status
       type: object
     internal_handlers.CreateWishListRequest:
       properties:
@@ -1226,6 +1239,12 @@ components:
           type: integer
         total:
           type: integer
+      required:
+        - items
+        - limit
+        - page
+        - pages
+        - total
       type: object
     internal_handlers.GiftItemSummary:
       properties:
@@ -1237,6 +1256,9 @@ components:
           type: string
         price:
           type: string
+      required:
+        - id
+        - name
       type: object
     internal_handlers.HealthResponse:
       properties:
@@ -1248,6 +1270,8 @@ components:
           type: string
         status:
           type: string
+      required:
+        - status
       type: object
     internal_handlers.LoginRequest:
       properties:
@@ -1296,6 +1320,12 @@ components:
           type: string
         wishlist:
           $ref: "#/components/schemas/internal_handlers.WishListSummary"
+      required:
+        - giftItem
+        - id
+        - reservedAt
+        - status
+        - wishlist
       type: object
     internal_handlers.ReservationStatusResponse:
       properties:
@@ -1307,6 +1337,9 @@ components:
           type: string
         status:
           type: string
+      required:
+        - isReserved
+        - status
       type: object
     internal_handlers.UpdateGiftItemRequest:
       properties:
@@ -1369,6 +1402,9 @@ components:
             $ref: "#/components/schemas/internal_handlers.ReservationDetailsResponse"
           type: array
         pagination: {}
+      required:
+        - data
+        - pagination
       type: object
     internal_handlers.WishListSummary:
       properties:
@@ -1380,6 +1416,9 @@ components:
           type: string
         title:
           type: string
+      required:
+        - id
+        - title
       type: object
     wish-list_internal_services.GiftItemOutput:
       properties:

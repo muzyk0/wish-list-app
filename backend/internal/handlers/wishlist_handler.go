@@ -62,11 +62,11 @@ type UpdateGiftItemRequest struct {
 }
 
 type GetGiftItemsResponse struct {
-	Items []*services.GiftItemOutput `json:"items"`
-	Total int                        `json:"total"`
-	Page  int                        `json:"page"`
-	Limit int                        `json:"limit"`
-	Pages int                        `json:"pages"`
+	Items []*services.GiftItemOutput `json:"items" validate:"required"`
+	Total int                        `json:"total" validate:"required"`
+	Page  int                        `json:"page" validate:"required"`
+	Limit int                        `json:"limit" validate:"required"`
+	Pages int                        `json:"pages" validate:"required"`
 }
 
 type PurchaseRequest struct {
