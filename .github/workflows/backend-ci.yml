@@ -28,8 +28,11 @@ jobs:
       - name: Install dependencies
         run: cd backend && go mod download
 
+      - name: Install swag
+        run: cd backend && go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
       - name: Generate Swagger docs
-        run: cd backend && go run github.com/swaggo/swag/cmd/swag init -g cmd/server/main.go -o docs
+        run: cd backend && swag init -g cmd/server/main.go -o docs
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
@@ -77,8 +80,11 @@ jobs:
       - name: Install dependencies
         run: cd backend && go mod download
 
+      - name: Install swag
+        run: cd backend && go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
       - name: Generate Swagger docs
-        run: cd backend && go run github.com/swaggo/swag/cmd/swag init -g cmd/server/main.go -o docs
+        run: cd backend && swag init -g cmd/server/main.go -o docs
 
       - name: Run migrations
         run: |
