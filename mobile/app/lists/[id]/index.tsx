@@ -60,7 +60,6 @@ const GiftItemCard = ({
               ${item.price.toFixed(2)}
             </Text>
           )}
-          )}
         </View>
 
         {item.description && (
