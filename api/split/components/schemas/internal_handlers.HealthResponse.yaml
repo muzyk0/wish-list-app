@@ -1,0 +1,10 @@
+properties:
+  checks:
+    additionalProperties:
+      type: string
+    type: object
+  error:
+    type: string
+  status:
+    type: string
+type: object

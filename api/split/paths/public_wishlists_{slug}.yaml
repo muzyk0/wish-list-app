@@ -1,0 +1,30 @@
+get:
+  description: >-
+    Get a public wish list by its public slug. The wish list must be marked as
+    public.
+  parameters:
+    - description: Public Slug
+      in: path
+      name: slug
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Public wish list retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+    '404':
+      description: Wish list not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Get a public wish list by its slug
+  tags:
+    - Wish Lists

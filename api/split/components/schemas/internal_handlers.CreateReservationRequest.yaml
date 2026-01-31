@@ -1,0 +1,7 @@
+properties:
+  guestEmail:
+    type: string
+  guestName:
+    maxLength: 200
+    type: string
+type: object

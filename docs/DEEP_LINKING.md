@@ -113,13 +113,37 @@ Deep linking allows the web frontend to open specific screens in the mobile app 
    };
    ```
 
-2. **Parameterized Routes**: Dynamic routes are handled with custom logic
+2. **Parameterized Routes**: Dynamic routes using Expo Router patterns
    ```typescript
    // Example: wishlistapp://lists/123
    if (path.startsWith('lists/')) {
-     const id = path.split('/')[1];
-     router.push(`/lists/${id}`);
+     const match = path.match(/^lists\/([^\/]+)/);
+     if (match && match[1]) {
+       const id = match[1];
+       // Method 1: String path (inline ID)
+       router.push(`/lists/${id}`);
+
+       // Method 2: Object with params (type-safe)
+       router.navigate({
+         pathname: '/lists/[id]',
+         params: { id }
+       });
+     }
    }
+   ```
+
+   **Best Practice**: Use regex matching instead of split() for robust parameter extraction.
+
+   **TypeScript Type Safety**:
+   ```typescript
+   // ✅ Correct - typed params object
+   router.navigate({
+     pathname: '/lists/[id]',
+     params: { id: '123' }
+   });
+
+   // ❌ Wrong - unmatched route pattern
+   router.navigate('/lists/[id]'); // Missing params
    ```
 
 3. **Cold Start**: Handles deep links when app is closed
@@ -148,6 +172,131 @@ Deep linking allows the web frontend to open specific screens in the mobile app 
 - URL examples with descriptions
 
 **Note**: This file serves as documentation. The actual routing logic is in `_layout.tsx` for better control.
+
+### 6. Declarative Navigation with Link Component
+
+**Using Link Component for Internal Navigation**:
+
+```typescript
+import { Link } from 'expo-router';
+import { View, Text, Pressable } from 'react-native';
+
+export default function ListsScreen() {
+  return (
+    <View>
+      {/* Method 1: String href (inline ID) */}
+      <Link href="/lists/123">
+        View List 123
+      </Link>
+
+      {/* Method 2: Object href with params (type-safe) */}
+      <Link
+        href={{
+          pathname: '/lists/[id]',
+          params: { id: '123' }
+        }}
+      >
+        View List (typed)
+      </Link>
+
+      {/* Method 3: With query parameters */}
+      <Link
+        href={{
+          pathname: '/lists/[id]',
+          params: { id: '123', edit: 'true' }
+        }}
+      >
+        Edit List
+      </Link>
+
+      {/* Method 4: Using asChild with custom component */}
+      <Link href="/lists/123" asChild>
+        <Pressable>
+          <Text>Custom Button</Text>
+        </Pressable>
+      </Link>
+
+      {/* Method 5: Relative navigation */}
+      <Link href="./settings">
+        Settings (relative)
+      </Link>
+    </View>
+  );
+}
+```
+
+**Imperative Navigation with router**:
+
+```typescript
+import { router } from 'expo-router';
+import { Pressable, Text } from 'react-native';
+
+export default function Screen() {
+  return (
+    <Pressable
+      onPress={() =>
+        router.navigate({
+          pathname: '/lists/[id]',
+          params: { id: '123' }
+        })
+      }
+    >
+      <Text>Navigate to List</Text>
+    </Pressable>
+  );
+}
+```
+
+### 7. Accessing Route Parameters
+
+**File**: Any screen component with dynamic routes (e.g., `app/lists/[id]/index.tsx`)
+
+**Using useLocalSearchParams Hook** (Recommended):
+```typescript
+import { useLocalSearchParams } from 'expo-router';
+import { View, Text } from 'react-native';
+
+export default function ListDetails() {
+  // Access dynamic route parameters and query params
+  const { id, edit } = useLocalSearchParams();
+
+  return (
+    <View>
+      <Text>List ID: {id}</Text>
+      <Text>Edit mode: {edit}</Text>
+    </View>
+  );
+}
+```
+
+**Key Features**:
+- Returns URL parameters for the currently focused route
+- Includes both route parameters (`[id]`) and query parameters (`?edit=true`)
+- Type-safe with TypeScript
+- Re-renders when parameters change
+
+**Getting Current Pathname**:
+```typescript
+import { usePathname } from 'expo-router';
+
+export default function Route() {
+  // Returns normalized pathname without query params
+  const pathname = usePathname(); // e.g., "/lists/123"
+
+  return <Text>Current path: {pathname}</Text>;
+}
+```
+
+**Example Routes and Parameters**:
+```typescript
+// Route: /lists/[id]?edit=true
+const params = useLocalSearchParams();
+// params = { id: "123", edit: "true" }
+
+// Route: /user/[id]/posts/[postId]
+const params = useLocalSearchParams();
+// params = { id: "user123", postId: "post456" }
+```
 
 ## Testing Deep Links
 
@@ -274,10 +423,58 @@ cat app.json | grep -A3 "scheme"
 **Symptoms**: Routes like `/lists/123` don't work
 
 **Solutions**:
-1. Verify path parsing logic extracts parameters correctly
-2. Check `router.push()` uses correct route format
-3. Test with hardcoded ID first: `router.push('/lists/123')`
-4. Ensure file-based route exists: `app/lists/[id]/index.tsx`
+
+1. **Use regex matching for parameter extraction** (not split):
+   ```typescript
+   // ✅ Correct - robust parameter extraction
+   const match = path.match(/^lists\/([^\/]+)/);
+   if (match && match[1]) {
+     const id = match[1];
+     router.push(`/lists/${id}`);
+   }
+
+   // ❌ Wrong - brittle parsing
+   const id = path.split('/')[1]; // May get wrong segment
+   ```
+
+2. **Use typed navigation with params object**:
+   ```typescript
+   // ✅ Type-safe navigation
+   router.navigate({
+     pathname: '/lists/[id]',
+     params: { id: '123' }
+   });
+
+   // ✅ Also valid - inline ID
+   router.push('/lists/123');
+
+   // ❌ Wrong - missing params
+   router.navigate('/lists/[id]');
+   ```
+
+3. **Verify file-based route structure**:
+   - Check file exists: `app/lists/[id]/index.tsx`
+   - Folder name must match param: `[id]` not `[listId]`
+   - Use `useLocalSearchParams()` in component to access `id`
+
+4. **Test with both navigation methods**:
+   ```typescript
+   // Test inline
+   router.push('/lists/123');
+
+   // Test with params object
+   router.navigate({
+     pathname: '/lists/[id]',
+     params: { id: '123' }
+   });
+   ```
+
+5. **Debug parameter extraction**:
+   ```typescript
+   const { id } = useLocalSearchParams();
+   console.log('Route parameter:', id);
+   // Should log: "123"
+   ```
 
 ### Issue 4: Cold Start vs Warm Start Inconsistency
 
@@ -390,34 +587,94 @@ const handleDeepLink = (event: { url: string }) => {
 
 ### Implementation Plan
 
-1. **iOS Universal Links**:
-   - Add associated domains to Xcode entitlements
-   - Host `apple-app-site-association` file at `https://lk.domain.com/.well-known/`
-   - Configure in app.json:
-     ```json
-     "ios": {
-       "associatedDomains": ["applinks:lk.domain.com"]
-     }
-     ```
+1. **iOS Universal Links Configuration**:
 
-2. **Android App Links**:
-   - Host `assetlinks.json` at `https://lk.domain.com/.well-known/`
-   - Add intent-filter with `android:autoVerify="true"`
-   - Configure in app.json:
-     ```json
-     "android": {
-       "intentFilters": [
-         {
-           "action": "VIEW",
-           "autoVerify": true,
-           "data": {
-             "scheme": "https",
-             "host": "lk.domain.com"
-           }
+   Add to `app.json`:
+   ```json
+   {
+     "expo": {
+       "ios": {
+         "associatedDomains": [
+           "applinks:lk.domain.com",
+           "webcredentials:lk.domain.com"
+         ],
+         "entitlements": {
+           "com.apple.developer.associated-domains": [
+             "applinks:lk.domain.com"
+           ]
          }
-       ]
+       }
      }
-     ```
+   }
+   ```
+
+   **Steps**:
+   - Host `apple-app-site-association` file at `https://lk.domain.com/.well-known/apple-app-site-association`
+   - File must be served with `Content-Type: application/json`
+   - No `.json` extension required
+   - Verify file is accessible: `curl https://lk.domain.com/.well-known/apple-app-site-association`
+
+2. **Android App Links Configuration**:
+
+   Add to `app.json`:
+   ```json
+   {
+     "expo": {
+       "android": {
+         "intentFilters": [
+           {
+             "action": "VIEW",
+             "autoVerify": true,
+             "data": [
+               {
+                 "scheme": "https",
+                 "host": "lk.domain.com",
+                 "pathPrefix": "/lists"
+               }
+             ],
+             "category": ["BROWSABLE", "DEFAULT"]
+           }
+         ]
+       }
+     }
+   }
+   ```
+
+   **Steps**:
+   - Host `assetlinks.json` at `https://lk.domain.com/.well-known/assetlinks.json`
+   - Must be served with `Content-Type: application/json`
+   - File must include app package name and SHA-256 certificate fingerprints
+   - Verify with: `curl https://lk.domain.com/.well-known/assetlinks.json`
+   - Test with: `adb shell pm verify-app-links --re-verify <package-name>`
+
+3. **Configuration with Wildcard Subdomains**:
+   ```json
+   {
+     "expo": {
+       "android": {
+         "intentFilters": [
+           {
+             "action": "VIEW",
+             "autoVerify": true,
+             "data": [
+               {
+                 "scheme": "https",
+                 "host": "*.domain.com",
+                 "pathPrefix": "/records"
+               }
+             ],
+             "category": ["BROWSABLE", "DEFAULT"]
+           }
+         ]
+       }
+     }
+   }
+   ```
+
+   **Use Cases**:
+   - Multi-tenant apps with subdomain per tenant
+   - Staging/production environments
+   - Regional domains
 
 ## Performance Considerations
 

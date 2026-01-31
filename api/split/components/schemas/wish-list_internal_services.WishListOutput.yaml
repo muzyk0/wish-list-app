@@ -1,0 +1,26 @@
+properties:
+  created_at:
+    type: string
+  description:
+    type: string
+  id:
+    type: string
+  is_public:
+    type: boolean
+  occasion:
+    type: string
+  occasion_date:
+    type: string
+  owner_id:
+    type: string
+  public_slug:
+    type: string
+  template_id:
+    type: string
+  title:
+    type: string
+  updated_at:
+    type: string
+  view_count:
+    type: integer
+type: object

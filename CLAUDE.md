@@ -47,6 +47,119 @@ The application follows a microservices architecture with shared components:
 - **UI components**: Custom components in `/mobile/components/`
 - **API integration**: Uses TanStack Query for data fetching and caching
 - **Asset management**: Expo Asset system for images and fonts
+- **Deep linking**: Custom URL scheme `wishlistapp://` with support for dynamic routes
+
+#### Expo Router Best Practices
+
+**Dynamic Routes**:
+```typescript
+// File structure: app/lists/[id]/index.tsx
+
+// Access route parameters
+import { useLocalSearchParams } from 'expo-router';
+
+export default function ListDetails() {
+  const { id } = useLocalSearchParams(); // Type-safe parameter access
+  return <Text>List ID: {id}</Text>;
+}
+```
+
+**Navigation Methods**:
+```typescript
+import { Link, router } from 'expo-router';
+
+// Method 1: Declarative with Link component (inline ID)
+<Link href="/lists/123">View List</Link>
+
+// Method 2: Declarative with typed params
+<Link
+  href={{
+    pathname: '/lists/[id]',
+    params: { id: '123' }
+  }}
+>
+  View List
+</Link>
+
+// Method 3: Imperative navigation
+router.navigate({
+  pathname: '/lists/[id]',
+  params: { id: '123' }
+});
+
+// Method 4: Simple push
+router.push('/lists/123');
+```
+
+**Deep Link Handling** (in `_layout.tsx`):
+- Use regex matching for parameter extraction (not `split()`)
+- Validate parameters before navigation
+- Handle both cold start (`Linking.getInitialURL()`) and warm start (`Linking.addEventListener()`)
+- Example:
+  ```typescript
+  const match = path.match(/^lists\/([^\/]+)/);
+  if (match && match[1]) {
+    router.navigate({
+      pathname: '/lists/[id]',
+      params: { id: match[1] }
+    });
+  }
+  ```
+
+**OAuth and Authentication**:
+- Use `AuthSession.AuthRequest` for OAuth flows (not `WebBrowser.openAuthSessionAsync`)
+- Enable PKCE with `usePKCE: true`
+- Define discovery endpoints as plain objects typed as `AuthSession.DiscoveryDocument`
+- Use `expo-secure-store` for token persistence (not `localStorage`)
+- Example:
+  ```typescript
+  const discovery: AuthSession.DiscoveryDocument = {
+    authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+    tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  };
+
+  const request = new AuthSession.AuthRequest({
+    clientId,
+    redirectUri,
+    scopes: ['openid', 'profile', 'email'],
+    usePKCE: true,
+  });
+
+  const result = await request.promptAsync(discovery);
+  ```
+
+**Deep Linking Configuration** (in `app.json`):
+```json
+{
+  "expo": {
+    "scheme": "wishlistapp",
+    "ios": {
+      "associatedDomains": ["applinks:lk.domain.com"]
+    },
+    "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "lk.domain.com" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    }
+  }
+}
+```
+
+**Testing Deep Links**:
+```bash
+# iOS Simulator
+xcrun simctl openurl booted wishlistapp://lists/123
+
+# Android Emulator
+adb shell am start -W -a android.intent.action.VIEW -d "wishlistapp://lists/123"
+```
+
+For detailed deep linking documentation, see `/docs/DEEP_LINKING.md`.
 
 ### Frontend Development
 - **Routing**: Next.js App Router in `frontend/src/app/`
@@ -418,3 +531,54 @@ make clean                    # Clean build artifacts
 - The project enforces test-first approach (Constitution Requirement CR-002)
 - API contracts must be explicitly defined (Constitution Requirement CR-003)
 - Data privacy is enforced with encryption for PII (Constitution Requirement CR-004)
+
+## Conventional Commits
+
+This project follows the Conventional Commits specification for commit messages. This ensures consistent and readable commit history that can be used for automated changelog generation and semantic versioning.
+
+### Format
+
+Commit messages MUST follow this format:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+Common types include:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `build`: Changes that affect the build system or external dependencies
+- `ci`: Changes to CI configuration files and scripts
+- `chore`: Other changes that don't modify src or test files
+
+### Scope
+
+The scope is an optional part that provides additional contextual information about the change. It should be a noun describing a section of the codebase surrounded by parentheses:
+
+```
+feat(auth): add JWT refresh token rotation
+fix(api): resolve CORS issues in wishlist endpoints
+docs(readme): update installation instructions
+```
+
+### Breaking Changes
+
+Breaking changes MUST be indicated with an exclamation mark after the type/scope and optionally with a `BREAKING CHANGE` footer:
+
+```
+feat(api)!: change authentication header format
+
+BREAKING CHANGE: The Authorization header now expects "Bearer " prefix
+instead of "JWT ".
+```

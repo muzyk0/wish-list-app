@@ -61,6 +61,32 @@ type UpdateGiftItemRequest struct {
 	Position    *int     `json:"position" validate:"omitempty,min=0"`
 }
 
+type GetGiftItemsResponse struct {
+	Items []*services.GiftItemOutput `json:"items"`
+	Total int                        `json:"total"`
+	Page  int                        `json:"page"`
+	Limit int                        `json:"limit"`
+	Pages int                        `json:"pages"`
+}
+
+type PurchaseRequest struct {
+	PurchasedPrice float64 `json:"purchased_price"`
+}
+
+// CreateWishList godoc
+//
+//	@Summary		Create a new wish list
+//	@Description	Create a new wish list for the authenticated user
+//	@Tags			Wish Lists
+//	@Accept			json
+//	@Produce		json
+//	@Param			wish_list	body		CreateWishListRequest	true	"Wish list creation information"
+//	@Success		201			{object}	services.WishListOutput	"Wish list created successfully"
+//	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401			{object}	map[string]string		"Unauthorized"
+//	@Failure		500			{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists [post]
 func (h *WishListHandler) CreateWishList(c echo.Context) error {
 	var req CreateWishListRequest
 	if err := c.Bind(&req); err != nil {
@@ -103,6 +129,18 @@ func (h *WishListHandler) CreateWishList(c echo.Context) error {
 	return c.JSON(http.StatusCreated, wishList)
 }
 
+// GetWishList godoc
+//
+//	@Summary		Get a wish list by ID
+//	@Description	Get a wish list by its ID. If the wish list is private, the user must be the owner.
+//	@Tags			Wish Lists
+//	@Produce		json
+//	@Param			id	path		string					true	"Wish List ID"
+//	@Success		200	{object}	services.WishListOutput	"Wish list retrieved successfully"
+//	@Failure		403	{object}	map[string]string		"Access denied"
+//	@Failure		404	{object}	map[string]string		"Wish list not found"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{id} [get]
 func (h *WishListHandler) GetWishList(c echo.Context) error {
 	wishListID := c.Param("id")
 
@@ -128,6 +166,17 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 	return c.JSON(http.StatusOK, wishList)
 }
 
+// GetWishListsByOwner godoc
+//
+//	@Summary		Get all wish lists owned by the authenticated user
+//	@Description	Get all wish lists owned by the currently authenticated user
+//	@Tags			Wish Lists
+//	@Produce		json
+//	@Success		200	{array}		services.WishListOutput	"List of wish lists retrieved successfully"
+//	@Failure		401	{object}	map[string]string		"Unauthorized"
+//	@Failure		500	{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists [get]
 func (h *WishListHandler) GetWishListsByOwner(c echo.Context) error {
 	// Get user from context
 	userID, _, _, err := auth.GetUserFromContext(c)
@@ -148,6 +197,23 @@ func (h *WishListHandler) GetWishListsByOwner(c echo.Context) error {
 	return c.JSON(http.StatusOK, wishLists)
 }
 
+// UpdateWishList godoc
+//
+//	@Summary		Update a wish list
+//	@Description	Update a wish list by its ID. The user must be the owner of the wish list.
+//	@Tags			Wish Lists
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		string					true	"Wish List ID"
+//	@Param			wish_list	body		UpdateWishListRequest	true	"Wish list update information"
+//	@Success		200			{object}	services.WishListOutput	"Wish list updated successfully"
+//	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401			{object}	map[string]string		"Unauthorized"
+//	@Failure		403			{object}	map[string]string		"Forbidden"
+//	@Failure		404			{object}	map[string]string		"Wish list not found"
+//	@Failure		500			{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{id} [put]
 func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 	wishListID := c.Param("id")
 
@@ -205,6 +271,19 @@ func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 	return c.JSON(http.StatusOK, wishList)
 }
 
+// DeleteWishList godoc
+//
+//	@Summary		Delete a wish list
+//	@Description	Delete a wish list by its ID. The user must be the owner of the wish list.
+//	@Tags			Wish Lists
+//	@Produce		json
+//	@Param			id	path		string				true	"Wish List ID"
+//	@Success		204	{object}	nil					"Wish list deleted successfully"
+//	@Failure		401	{object}	map[string]string	"Unauthorized"
+//	@Failure		403	{object}	map[string]string	"Forbidden"
+//	@Failure		500	{object}	map[string]string	"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{id} [delete]
 func (h *WishListHandler) DeleteWishList(c echo.Context) error {
 	wishListID := c.Param("id")
 
@@ -233,6 +312,23 @@ func (h *WishListHandler) DeleteWishList(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// CreateGiftItem godoc
+//
+//	@Summary		Create a new gift item
+//	@Description	Create a new gift item in a wish list. The user must be the owner of the wish list.
+//	@Tags			Gift Items
+//	@Accept			json
+//	@Produce		json
+//	@Param			wishlistId	path		string					true	"Wish List ID"
+//	@Param			gift_item	body		CreateGiftItemRequest	true	"Gift item creation information"
+//	@Success		201			{object}	services.GiftItemOutput	"Gift item created successfully"
+//	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401			{object}	map[string]string		"Unauthorized"
+//	@Failure		403			{object}	map[string]string		"Forbidden"
+//	@Failure		404			{object}	map[string]string		"Wishlist not found"
+//	@Failure		500			{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{wishlistId}/gift-items [post]
 func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 
@@ -293,6 +389,18 @@ func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 	return c.JSON(http.StatusCreated, giftItem)
 }
 
+// GetGiftItem godoc
+//
+//	@Summary		Get a gift item by ID
+//	@Description	Get a gift item by its ID. If the parent wish list is private, the user must be the owner.
+//	@Tags			Gift Items
+//	@Produce		json
+//	@Param			id	path		string					true	"Gift Item ID"
+//	@Success		200	{object}	services.GiftItemOutput	"Gift item retrieved successfully"
+//	@Failure		403	{object}	map[string]string		"Access denied"
+//	@Failure		404	{object}	map[string]string		"Gift item not found"
+//	@Security		BearerAuth
+//	@Router			/gift-items/{id} [get]
 func (h *WishListHandler) GetGiftItem(c echo.Context) error {
 	giftItemID := c.Param("id")
 
@@ -326,6 +434,21 @@ func (h *WishListHandler) GetGiftItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, giftItem)
 }
 
+// GetGiftItemsByWishList godoc
+//
+//	@Summary		Get all gift items in a wish list
+//	@Description	Get all gift items in a wish list. If the wish list is private, the user must be the owner.
+//	@Tags			Gift Items
+//	@Produce		json
+//	@Param			wishlistId	path		string					true	"Wish List ID"
+//	@Param			page		query		int						false	"Page number (default 1)"
+//	@Param			limit		query		int						false	"Items per page (default 10, max 100)"
+//	@Success		200			{object}	GetGiftItemsResponse	"List of gift items retrieved successfully"
+//	@Failure		403			{object}	map[string]string		"Access denied"
+//	@Failure		404			{object}	map[string]string		"Wishlist not found"
+//	@Failure		500			{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{wishlistId}/gift-items [get]
 func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 
@@ -390,14 +513,6 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 
 	pagedItems := giftItems[start:end]
 
-	type GetGiftItemsResponse struct {
-		Items []*services.GiftItemOutput `json:"items"`
-		Total int                        `json:"total"`
-		Page  int                        `json:"page"`
-		Limit int                        `json:"limit"`
-		Pages int                        `json:"pages"`
-	}
-
 	response := GetGiftItemsResponse{
 		Items: pagedItems,
 		Total: total,
@@ -409,6 +524,23 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+// UpdateGiftItem godoc
+//
+//	@Summary		Update a gift item
+//	@Description	Update a gift item by its ID. The user must be the owner of the parent wish list.
+//	@Tags			Gift Items
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		string					true	"Gift Item ID"
+//	@Param			gift_item	body		UpdateGiftItemRequest	true	"Gift item update information"
+//	@Success		200			{object}	services.GiftItemOutput	"Gift item updated successfully"
+//	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401			{object}	map[string]string		"Unauthorized"
+//	@Failure		403			{object}	map[string]string		"Forbidden"
+//	@Failure		404			{object}	map[string]string		"Gift item or wishlist not found"
+//	@Failure		500			{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/gift-items/{id} [put]
 func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 	giftItemID := c.Param("id")
 
@@ -475,6 +607,20 @@ func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, giftItem)
 }
 
+// DeleteGiftItem godoc
+//
+//	@Summary		Delete a gift item
+//	@Description	Delete a gift item by its ID. The user must be the owner of the parent wish list.
+//	@Tags			Gift Items
+//	@Produce		json
+//	@Param			id	path		string				true	"Gift Item ID"
+//	@Success		204	{object}	nil					"Gift item deleted successfully"
+//	@Failure		401	{object}	map[string]string	"Unauthorized"
+//	@Failure		403	{object}	map[string]string	"Forbidden"
+//	@Failure		404	{object}	map[string]string	"Gift item or wishlist not found"
+//	@Failure		500	{object}	map[string]string	"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/gift-items/{id} [delete]
 func (h *WishListHandler) DeleteGiftItem(c echo.Context) error {
 	giftItemID := c.Param("id")
 
@@ -519,13 +665,27 @@ func (h *WishListHandler) DeleteGiftItem(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// MarkGiftItemAsPurchased marks a gift item as purchased
+// MarkGiftItemAsPurchased godoc
+//
+//	@Summary		Mark a gift item as purchased
+//	@Description	Mark a gift item as purchased with an optional purchased price. The user must be the owner of the parent wish list.
+//	@Tags			Gift Items
+//	@Accept			json
+//	@Produce		json
+//	@Param			id					path		string					true	"Gift Item ID"
+//	@Param			purchase_request	body		PurchaseRequest			true	"Purchase information"
+//	@Success		200					{object}	services.GiftItemOutput	"Gift item marked as purchased successfully"
+//	@Failure		400					{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401					{object}	map[string]string		"Unauthorized"
+//	@Failure		403					{object}	map[string]string		"Forbidden"
+//	@Failure		404					{object}	map[string]string		"Gift item or wishlist not found"
+//	@Failure		500					{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/gift-items/{id}/purchase [post]
 func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 	giftItemID := c.Param("id")
 
-	var req struct {
-		PurchasedPrice float64 `json:"purchased_price"`
-	}
+	var req PurchaseRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Invalid request body",
@@ -578,6 +738,16 @@ func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 	return c.JSON(http.StatusOK, giftItem)
 }
 
+// GetWishListByPublicSlug godoc
+//
+//	@Summary		Get a public wish list by its slug
+//	@Description	Get a public wish list by its public slug. The wish list must be marked as public.
+//	@Tags			Wish Lists
+//	@Produce		json
+//	@Param			slug	path		string					true	"Public Slug"
+//	@Success		200		{object}	services.WishListOutput	"Public wish list retrieved successfully"
+//	@Failure		404		{object}	map[string]string		"Wish list not found"
+//	@Router			/public/wishlists/{slug} [get]
 func (h *WishListHandler) GetWishListByPublicSlug(c echo.Context) error {
 	publicSlug := c.Param("slug")
 

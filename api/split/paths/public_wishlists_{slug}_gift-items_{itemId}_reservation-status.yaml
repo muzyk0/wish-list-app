@@ -1,0 +1,34 @@
+get:
+  description: Get the reservation status for a specific gift item in a public wish list.
+  parameters:
+    - description: Public wish list slug
+      in: path
+      name: slug
+      required: true
+      schema:
+        type: string
+    - description: Gift Item ID
+      in: path
+      name: itemId
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Reservation status retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/internal_handlers.ReservationStatusResponse.yaml
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Get the reservation status for a gift item in a public wish list
+  tags:
+    - Reservations

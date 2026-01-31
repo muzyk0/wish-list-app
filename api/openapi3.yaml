@@ -1,0 +1,1460 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@wishlist.example.com
+    name: API Support
+  description: >-
+    A RESTful API for managing wish lists, gift items, and reservations.
+
+    Features include user authentication, wish list management, gift item tracking, and reservation system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Wish List API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      description: Authenticate user with email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.LoginRequest"
+        description: User login credentials
+        required: true
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: User login
+      tags:
+        - Authentication
+  /auth/register:
+    post:
+      description: Create a new user account with email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.RegisterRequest"
+        description: User registration information
+        required: true
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "409":
+          description: User with this email already exists
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Register a new user
+      tags:
+        - Authentication
+  "/gift-items/{id}":
+    delete:
+      description: Delete a gift item by its ID. The user must be the owner of the
+        parent wish list.
+      parameters:
+        - description: Gift Item ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Gift item deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Gift item or wishlist not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a gift item
+      tags:
+        - Gift Items
+    get:
+      description: Get a gift item by its ID. If the parent wish list is private, the
+        user must be the owner.
+      parameters:
+        - description: Gift Item ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Gift item retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Gift item not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get a gift item by ID
+      tags:
+        - Gift Items
+    put:
+      description: Update a gift item by its ID. The user must be the owner of the
+        parent wish list.
+      parameters:
+        - description: Gift Item ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.UpdateGiftItemRequest"
+        description: Gift item update information
+        required: true
+      responses:
+        "200":
+          description: Gift item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Gift item or wishlist not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Update a gift item
+      tags:
+        - Gift Items
+  "/gift-items/{id}/purchase":
+    post:
+      description: Mark a gift item as purchased with an optional purchased price. The
+        user must be the owner of the parent wish list.
+      parameters:
+        - description: Gift Item ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.PurchaseRequest"
+        description: Purchase information
+        required: true
+      responses:
+        "200":
+          description: Gift item marked as purchased successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Gift item or wishlist not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Mark a gift item as purchased
+      tags:
+        - Gift Items
+  /health:
+    get:
+      description: Performs a health check of the application and its dependencies
+        (database)
+      responses:
+        "200":
+          description: Application is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.HealthResponse"
+        "503":
+          description: Application is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.HealthResponse"
+      summary: Health check endpoint
+      tags:
+        - Health
+  /protected/profile:
+    get:
+      description: Get the authenticated user's profile information
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get user profile
+      tags:
+        - User
+    put:
+      description: Update the authenticated user's profile information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.UpdateProfileRequest"
+        description: Updated profile information
+        required: true
+      responses:
+        "200":
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Update user profile
+      tags:
+        - User
+  "/public/wishlists/{slug}":
+    get:
+      description: Get a public wish list by its public slug. The wish list must be
+        marked as public.
+      parameters:
+        - description: Public Slug
+          in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public wish list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+        "404":
+          description: Wish list not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Get a public wish list by its slug
+      tags:
+        - Wish Lists
+  "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status":
+    get:
+      description: Get the reservation status for a specific gift item in a public
+        wish list.
+      parameters:
+        - description: Public wish list slug
+          in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - description: Gift Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reservation status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.ReservationStatusResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Get the reservation status for a gift item in a public wish list
+      tags:
+        - Reservations
+  /reservations:
+    get:
+      description: Get all reservations made by the authenticated user with pagination.
+      parameters:
+        - description: Page number (default 1)
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: Items per page (default 10, max 100)
+          in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of user reservations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.UserReservationsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get all reservations made by the authenticated user
+      tags:
+        - Reservations
+  /reservations/guest:
+    get:
+      description: Get all reservations made by a guest using their reservation token.
+      parameters:
+        - description: Reservation token
+          in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of guest reservations retrieved successfully
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/internal_handlers.ReservationDetailsResponse"
+                type: array
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Get reservations made by a guest using a token
+      tags:
+        - Reservations
+  /s3/upload:
+    post:
+      description: Upload an image file to S3 storage. The user must be authenticated.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  description: Image file to upload (max 10MB, only images allowed)
+                  type: string
+                  format: binary
+              required:
+                - image
+        required: true
+      responses:
+        "200":
+          description: Image uploaded successfully, returns URL
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "400":
+          description: Invalid file or file too large
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Upload an image to S3
+      tags:
+        - S3 Upload
+  /wishlists:
+    get:
+      description: Get all wish lists owned by the currently authenticated user
+      responses:
+        "200":
+          description: List of wish lists retrieved successfully
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                type: array
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get all wish lists owned by the authenticated user
+      tags:
+        - Wish Lists
+    post:
+      description: Create a new wish list for the authenticated user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.CreateWishListRequest"
+        description: Wish list creation information
+        required: true
+      responses:
+        "201":
+          description: Wish list created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new wish list
+      tags:
+        - Wish Lists
+  "/wishlists/{id}":
+    delete:
+      description: Delete a wish list by its ID. The user must be the owner of the
+        wish list.
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Wish list deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a wish list
+      tags:
+        - Wish Lists
+    get:
+      description: Get a wish list by its ID. If the wish list is private, the user
+        must be the owner.
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wish list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Wish list not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get a wish list by ID
+      tags:
+        - Wish Lists
+    put:
+      description: Update a wish list by its ID. The user must be the owner of the
+        wish list.
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.UpdateWishListRequest"
+        description: Wish list update information
+        required: true
+      responses:
+        "200":
+          description: Wish list updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Wish list not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Update a wish list
+      tags:
+        - Wish Lists
+  "/wishlists/{wishlistId}/gift-items":
+    get:
+      description: Get all gift items in a wish list. If the wish list is private, the
+        user must be the owner.
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+        - description: Page number (default 1)
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: Items per page (default 10, max 100)
+          in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of gift items retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.GetGiftItemsResponse"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Wishlist not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get all gift items in a wish list
+      tags:
+        - Gift Items
+    post:
+      description: Create a new gift item in a wish list. The user must be the owner
+        of the wish list.
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.CreateGiftItemRequest"
+        description: Gift item creation information
+        required: true
+      responses:
+        "201":
+          description: Gift item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Wishlist not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new gift item
+      tags:
+        - Gift Items
+  "/wishlists/{wishlistId}/gift-items/{itemId}/reservation":
+    delete:
+      description: Cancel a reservation for a gift item. Can be done by authenticated
+        users or guests (with reservation token).
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+        - description: Gift Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.CancelReservationRequest"
+        description: Cancellation information (required for guests)
+      responses:
+        "200":
+          description: Reservation canceled successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.CreateReservationResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized (guests need reservation token)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Cancel a reservation for a gift item
+      tags:
+        - Reservations
+    post:
+      description: Create a reservation for a gift item. Can be done by authenticated
+        users or guests (with name and email).
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+        - description: Gift Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.CreateReservationRequest"
+        description: Reservation information (required for guests)
+      responses:
+        "200":
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.CreateReservationResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized (guests need name and email)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Create a reservation for a gift item
+      tags:
+        - Reservations
+servers:
+  - url: //localhost:8080/api
+components:
+  securitySchemes:
+    BearerAuth:
+      description: Type "Bearer" followed by a space and JWT token.
+      in: header
+      name: Authorization
+      type: apiKey
+  schemas:
+    internal_handlers.AuthResponse:
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+      type: object
+    internal_handlers.CancelReservationRequest:
+      properties:
+        reservationToken:
+          type: string
+      type: object
+    internal_handlers.CreateGiftItemRequest:
+      properties:
+        description:
+          type: string
+        image_url:
+          type: string
+        link:
+          type: string
+        name:
+          maxLength: 255
+          type: string
+        notes:
+          type: string
+        position:
+          minimum: 0
+          type: integer
+        price:
+          minimum: 0
+          type: number
+        priority:
+          maximum: 10
+          minimum: 0
+          type: integer
+      required:
+        - name
+      type: object
+    internal_handlers.CreateReservationRequest:
+      properties:
+        guestEmail:
+          type: string
+        guestName:
+          maxLength: 200
+          type: string
+      type: object
+    internal_handlers.CreateReservationResponse:
+      properties:
+        cancelReason:
+          type: string
+        canceledAt:
+          type: string
+        expiresAt:
+          type: string
+        giftItemId:
+          type: string
+        guestEmail:
+          type: string
+        guestName:
+          type: string
+        id:
+          type: string
+        notificationSent:
+          type: boolean
+        reservationToken:
+          type: string
+        reservedAt:
+          type: string
+        reservedByUserId:
+          type: string
+        status:
+          type: string
+      type: object
+    internal_handlers.CreateWishListRequest:
+      properties:
+        description:
+          type: string
+        is_public:
+          type: boolean
+        occasion:
+          type: string
+        occasion_date:
+          type: string
+        template_id:
+          default: default
+          type: string
+        title:
+          maxLength: 200
+          type: string
+      required:
+        - title
+      type: object
+    internal_handlers.GetGiftItemsResponse:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+          type: array
+        limit:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        total:
+          type: integer
+      type: object
+    internal_handlers.GiftItemSummary:
+      properties:
+        id:
+          type: string
+        image_url:
+          type: string
+        name:
+          type: string
+        price:
+          type: string
+      type: object
+    internal_handlers.HealthResponse:
+      properties:
+        checks:
+          additionalProperties:
+            type: string
+          type: object
+        error:
+          type: string
+        status:
+          type: string
+      type: object
+    internal_handlers.LoginRequest:
+      properties:
+        email:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    internal_handlers.PurchaseRequest:
+      properties:
+        purchased_price:
+          type: number
+      type: object
+    internal_handlers.RegisterRequest:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    internal_handlers.ReservationDetailsResponse:
+      properties:
+        expiresAt:
+          type: string
+        giftItem:
+          $ref: "#/components/schemas/internal_handlers.GiftItemSummary"
+        id:
+          type: string
+        reservedAt:
+          type: string
+        status:
+          type: string
+        wishlist:
+          $ref: "#/components/schemas/internal_handlers.WishListSummary"
+      type: object
+    internal_handlers.ReservationStatusResponse:
+      properties:
+        isReserved:
+          type: boolean
+        reservedAt:
+          type: string
+        reservedByName:
+          type: string
+        status:
+          type: string
+      type: object
+    internal_handlers.UpdateGiftItemRequest:
+      properties:
+        description:
+          type: string
+        image_url:
+          type: string
+        link:
+          type: string
+        name:
+          maxLength: 255
+          type: string
+        notes:
+          type: string
+        position:
+          minimum: 0
+          type: integer
+        price:
+          minimum: 0
+          type: number
+        priority:
+          maximum: 10
+          minimum: 0
+          type: integer
+      type: object
+    internal_handlers.UpdateProfileRequest:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        password:
+          minLength: 6
+          type: string
+      type: object
+    internal_handlers.UpdateWishListRequest:
+      properties:
+        description:
+          type: string
+        is_public:
+          type: boolean
+        occasion:
+          type: string
+        occasion_date:
+          type: string
+        template_id:
+          type: string
+        title:
+          maxLength: 200
+          type: string
+      type: object
+    internal_handlers.UserReservationsResponse:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/internal_handlers.ReservationDetailsResponse"
+          type: array
+        pagination: {}
+      type: object
+    internal_handlers.WishListSummary:
+      properties:
+        id:
+          type: string
+        ownerFirstName:
+          type: string
+        ownerLastName:
+          type: string
+        title:
+          type: string
+      type: object
+    wish-list_internal_services.GiftItemOutput:
+      properties:
+        created_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        image_url:
+          type: string
+        link:
+          type: string
+        name:
+          type: string
+        notes:
+          type: string
+        position:
+          type: integer
+        price:
+          type: number
+        priority:
+          type: integer
+        purchased_at:
+          type: string
+        purchased_by_user_id:
+          type: string
+        purchased_price:
+          type: number
+        reserved_at:
+          type: string
+        reserved_by_user_id:
+          type: string
+        updated_at:
+          type: string
+        wishlist_id:
+          type: string
+      type: object
+    wish-list_internal_services.UserOutput:
+      properties:
+        avatar_url:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        id:
+          type: string
+        last_name:
+          type: string
+      type: object
+    wish-list_internal_services.WishListOutput:
+      properties:
+        created_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        is_public:
+          type: boolean
+        occasion:
+          type: string
+        occasion_date:
+          type: string
+        owner_id:
+          type: string
+        public_slug:
+          type: string
+        template_id:
+          type: string
+        title:
+          type: string
+        updated_at:
+          type: string
+        view_count:
+          type: integer
+      type: object

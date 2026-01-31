@@ -1,0 +1,91 @@
+get:
+  description: Get the authenticated user's profile information
+  responses:
+    '200':
+      description: User profile
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/wish-list_internal_services.UserOutput.yaml
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Get user profile
+  tags:
+    - User
+put:
+  description: Update the authenticated user's profile information
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.UpdateProfileRequest.yaml
+    description: Updated profile information
+    required: true
+  responses:
+    '200':
+      description: Updated user profile
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/wish-list_internal_services.UserOutput.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Update user profile
+  tags:
+    - User

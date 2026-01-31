@@ -1,0 +1,53 @@
+post:
+  description: Upload an image file to S3 storage. The user must be authenticated.
+  requestBody:
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            image:
+              description: Image file to upload (max 10MB, only images allowed)
+              type: string
+              format: binary
+          required:
+            - image
+    required: true
+  responses:
+    '200':
+      description: Image uploaded successfully, returns URL
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '400':
+      description: Invalid file or file too large
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Upload an image to S3
+  tags:
+    - S3 Upload

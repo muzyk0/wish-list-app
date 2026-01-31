@@ -1,0 +1,4 @@
+properties:
+  reservationToken:
+    type: string
+type: object

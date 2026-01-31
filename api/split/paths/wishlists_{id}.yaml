@@ -1,0 +1,150 @@
+delete:
+  description: Delete a wish list by its ID. The user must be the owner of the wish list.
+  parameters:
+    - description: Wish List ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Wish list deleted successfully
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Delete a wish list
+  tags:
+    - Wish Lists
+get:
+  description: >-
+    Get a wish list by its ID. If the wish list is private, the user must be the
+    owner.
+  parameters:
+    - description: Wish List ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Wish list retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Wish list not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Get a wish list by ID
+  tags:
+    - Wish Lists
+put:
+  description: Update a wish list by its ID. The user must be the owner of the wish list.
+  parameters:
+    - description: Wish List ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.UpdateWishListRequest.yaml
+    description: Wish list update information
+    required: true
+  responses:
+    '200':
+      description: Wish list updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Wish list not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Update a wish list
+  tags:
+    - Wish Lists

@@ -1,0 +1,18 @@
+get:
+  description: Performs a health check of the application and its dependencies (database)
+  responses:
+    '200':
+      description: Application is healthy
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.HealthResponse.yaml
+    '503':
+      description: Application is unhealthy
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.HealthResponse.yaml
+  summary: Health check endpoint
+  tags:
+    - Health

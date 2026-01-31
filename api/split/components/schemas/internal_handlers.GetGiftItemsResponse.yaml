@@ -1,0 +1,14 @@
+properties:
+  items:
+    items:
+      $ref: ./wish-list_internal_services.GiftItemOutput.yaml
+    type: array
+  limit:
+    type: integer
+  page:
+    type: integer
+  pages:
+    type: integer
+  total:
+    type: integer
+type: object

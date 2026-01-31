@@ -1,0 +1,26 @@
+properties:
+  cancelReason:
+    type: string
+  canceledAt:
+    type: string
+  expiresAt:
+    type: string
+  giftItemId:
+    type: string
+  guestEmail:
+    type: string
+  guestName:
+    type: string
+  id:
+    type: string
+  notificationSent:
+    type: boolean
+  reservationToken:
+    type: string
+  reservedAt:
+    type: string
+  reservedByUserId:
+    type: string
+  status:
+    type: string
+type: object

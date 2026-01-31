@@ -1,0 +1,71 @@
+post:
+  description: >-
+    Mark a gift item as purchased with an optional purchased price. The user
+    must be the owner of the parent wish list.
+  parameters:
+    - description: Gift Item ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.PurchaseRequest.yaml
+    description: Purchase information
+    required: true
+  responses:
+    '200':
+      description: Gift item marked as purchased successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_services.GiftItemOutput.yaml
+    '400':
+      description: Invalid request body or validation error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Gift item or wishlist not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Mark a gift item as purchased
+  tags:
+    - Gift Items

@@ -11,9 +11,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
-    "shadcn": "^3.6.3"
-  },
-  "dependencies": {
-    "@redocly/cli": "^2.14.7"
+    "@redocly/cli": "^2.15.0",
+    "shadcn": "^3.6.3",
+    "swagger2openapi": "^7.0.8"
   }
 }
