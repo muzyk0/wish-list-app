@@ -6,52 +6,38 @@
 import type { components, paths } from './schema';
 
 // User types
-export type User = Required<components['schemas']['user_response']>;
-export type UserRegistration = components['schemas']['user_registration'];
-export type UserLogin = components['schemas']['user_login'];
-export type UserUpdate = components['schemas']['user_update'];
-export type LoginResponse = Required<components['schemas']['login_response']>;
+export type User = components['schemas']['wish-list_internal_services.UserOutput'];
+export type UserRegistration = components['schemas']['internal_handlers.RegisterRequest'];
+export type UserLogin = components['schemas']['internal_handlers.LoginRequest'];
+export type UserUpdate = components['schemas']['internal_handlers.UpdateProfileRequest'];
+export type LoginResponse = components['schemas']['internal_handlers.AuthResponse'];
 
 // Wish list types
-export type WishList = Required<components['schemas']['wish_list_response']>;
-export type WishListWithItems =
-  components['schemas']['wish_list_with_items_response'];
-export type PublicWishList = components['schemas']['public_wish_list_response'];
-export type CreateWishListRequest = components['schemas']['wish_list_create'];
-export type UpdateWishListRequest = components['schemas']['wish_list_update'];
+export type WishList = components['schemas']['wish-list_internal_services.WishListOutput'];
+export type CreateWishListRequest = components['schemas']['internal_handlers.CreateWishListRequest'];
+export type UpdateWishListRequest = components['schemas']['internal_handlers.UpdateWishListRequest'];
 
 // Gift item types
-export type GiftItem = Required<components['schemas']['gift_item_response']>;
-export type PublicGiftItem = components['schemas']['public_gift_item_response'];
-export type CreateGiftItemRequest = components['schemas']['gift_item_create'];
-export type UpdateGiftItemRequest = components['schemas']['gift_item_update'];
+export type GiftItem = components['schemas']['wish-list_internal_services.GiftItemOutput'];
+export type CreateGiftItemRequest = components['schemas']['internal_handlers.CreateGiftItemRequest'];
+export type UpdateGiftItemRequest = components['schemas']['internal_handlers.UpdateGiftItemRequest'];
 
 // Reservation types
-export type Reservation = Required<
-  components['schemas']['reservation_response']
->;
-export type GuestReservation = components['schemas']['guest_reservation'];
-export type AuthenticatedReservation =
-  components['schemas']['authenticated_reservation'];
-export type CreateReservationRequest =
-  | GuestReservation
-  | AuthenticatedReservation;
+export type Reservation = components['schemas']['internal_handlers.CreateReservationResponse'];
+export type CreateReservationRequest = components['schemas']['internal_handlers.CreateReservationRequest'];
+export type CancelReservationRequest = components['schemas']['internal_handlers.CancelReservationRequest'];
+export type ReservationDetails = components['schemas']['internal_handlers.ReservationDetailsResponse'];
+export type ReservationStatus = components['schemas']['internal_handlers.ReservationStatusResponse'];
 
-// Utility types
-export type ApiError = components['schemas']['error'];
-export type Pagination = components['schemas']['pagination'];
+// Response types
+export type GetGiftItemsResponse = components['schemas']['internal_handlers.GetGiftItemsResponse'];
+export type UserReservationsResponse = components['schemas']['internal_handlers.UserReservationsResponse'];
 
 // Path operation types for type-safe API calls
-export type RegisterOperation = paths['/v1/users/register']['post'];
-export type LoginOperation = paths['/v1/users/login']['post'];
-export type GetProfileOperation = paths['/v1/users/me']['get'];
-export type UpdateProfileOperation = paths['/v1/users/me']['put'];
-
-// Legacy compatibility types (for gradual migration)
-export interface PaginatedResponse<T> {
-  items: T[];
-  pagination: Pagination;
-}
+export type RegisterOperation = paths['/auth/register']['post'];
+export type LoginOperation = paths['/auth/login']['post'];
+export type GetProfileOperation = paths['/protected/profile']['get'];
+export type UpdateProfileOperation = paths['/protected/profile']['put'];
 
 // Authentication context type (UI-specific, not from API)
 export interface AuthContextType {
