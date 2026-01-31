@@ -431,7 +431,7 @@ pagination:
 - OR remove it if embedded docs are not wanted
 **Status**: ✅ **COMPLETED** - Added Swagger docs generation to CI workflow
 
-- [ ] #### #16: Update redis module version in go.mod
+- [x] #### #16: Update redis module version in go.mod
 **File**: `backend/go.mod`
 **Location**: Line 6
 **Priority**: Low
@@ -441,6 +441,7 @@ pagination:
 - Run `go get` or `go mod tidy` to refresh the lockfile
 - Ensure go.sum is updated
 - Run tests to verify no regressions
+**Status**: ✅ **COMPLETED** - Updated redis and other dependencies
 
 - [ ] #### #17: Fix paths in Makefile swagger targets
 **File**: `Makefile`
@@ -500,7 +501,7 @@ pagination:
 
 ### Low Priority (3 issues)
 - [ ] #13: Add language identifiers to code blocks in api/README.md
-- [ ] #16: Update redis module version in go.mod
+- [x] #16: Update redis module version in go.mod ✅
 - [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc
 
 ---
