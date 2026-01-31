@@ -1,8 +1,11 @@
-# GitHub PR #8 Issues - Todo List
+# GitHub PR Issues - Todo List
 
-> **Source**: Pull Request #8 "Add complete mobile app implementation with Expo Router"
+> **Sources**:
+> - Pull Request #8 "Add complete mobile app implementation with Expo Router"
+> - Pull Request #7 "Add complete frontend implementation with Next.js"
 > **Date Created**: 2026-01-31
-> **Total Issues**: 40
+> **Last Updated**: 2026-01-31
+> **Total Issues**: 62 (Mobile: 40, Frontend: 22)
 
 ## Overview
 
@@ -454,15 +457,246 @@ pagination:
 
 ---
 
+## Frontend Issues (22 tasks)
+
+### Security & Configuration (2 issues)
+
+- [ ] #### #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable
+**File**: `frontend/.env.example`
+**Location**: Around line 5-6
+**Priority**: Critical
+**Issue**: The JWT_SECRET is exposed as NEXT_PUBLIC_JWT_SECRET which bundles it in client-side code, making it accessible to XSS attacks.
+**Fix**:
+- Rename `NEXT_PUBLIC_JWT_SECRET` to `JWT_SECRET` in .env.example
+- Update server-side code to read `process.env.JWT_SECRET` instead
+- Ensure the secret is only accessed in API routes, Server Components, or middleware
+- Never reference in client-side code or bundled imports
+- Update README/docs referencing NEXT_PUBLIC_JWT_SECRET
+
+- [ ] #### #42: Replace localStorage JWT storage with httpOnly cookies
+**File**: `frontend/src/lib/api.ts`
+**Location**: Around line 23-92
+**Priority**: Critical
+**Issue**: JWTs are persisted in localStorage (constructor, setToken, logout), which is vulnerable to XSS attacks.
+**Fix**:
+- Remove localStorage read/write calls from constructor, setToken and logout
+- Change login/register to expect backend to set httpOnly cookie
+- OR store access token in module-scoped in-memory variable with secure refresh-token flow
+- Adjust request() to omit Authorization from localStorage
+- Include `credentials: 'include'` when using cookies
+- Coordinate backend to set Set-Cookie and implement refresh endpoints
+
+---
+
+### SSR & React Patterns (7 issues)
+
+- [ ] #### #43: Fix window.location.origin SSR crash in WishListDisplay
+**File**: `frontend/src/components/wish-list/WishListDisplay.tsx`
+**Location**: Around line 109-124
+**Priority**: High
+**Issue**: Direct access to window.location.origin in render crashes during SSR.
+**Fix**:
+- Compute safe shareUrl before render using `typeof window !== 'undefined'` guard
+- OR use useMemo/useState with useEffect
+- Guard navigator.clipboard with `typeof navigator !== 'undefined' && navigator.clipboard`
+- Update all window.location.origin references to use new shareUrl variable
+
+- [ ] #### #44: Add 'use client' directive to GiftItemDisplay component
+**File**: `frontend/src/components/wish-list/GiftItemDisplay.tsx`
+**Location**: Line 1
+**Priority**: High
+**Issue**: Component with onClick handlers missing 'use client' directive won't work in App Router.
+**Fix**: Add `'use client'` as the very first line of the file (above all imports)
+
+- [ ] #### #45: Fix missing cleanup in redirect timeout (page.tsx)
+**File**: `frontend/src/app/page.tsx`
+**Location**: Around line 11-22
+**Priority**: High
+**Issue**: handleMobileRedirect sets timeout but never clears it, risking memory leak or unexpected navigation on unmount.
+**Fix**:
+- Store timeout ID in ref or local variable
+- Wrap function in useCallback if appropriate
+- Add useEffect cleanup that calls clearTimeout(timeoutId) on unmount
+- Simplify visibility check to `document.visibilityState !== 'hidden'`
+
+- [ ] #### #46: Fix missing cleanup in useAuthRedirect hook
+**File**: `frontend/src/hooks/useAuthRedirect.ts`
+**Location**: Around line 17-36
+**Priority**: High
+**Issue**: useEffect missing cleanup to avoid state updates after unmount.
+**Fix**:
+- Create AbortController
+- Pass signal to fetch('/api/auth/me')
+- In catch handler distinguish AbortError (ignore) from other errors
+- Only call setIsAuthenticated when not aborted
+- Return cleanup function that calls controller.abort()
+
+- [ ] #### #47: Fix useFormField hook context null handling
+**File**: `frontend/src/components/ui/form.tsx`
+**Location**: Around line 44-65
+**Priority**: High
+**Issue**: Hook assumes contexts are truthy and reads fields before null check.
+**Fix**:
+- Change FormFieldContext and FormItemContext default values to null
+- Assert contexts are not null in useFormField before accessing properties
+- Throw clear errors when used outside providers
+- Read fieldContext.name and itemContext.id only after null checks
+
+- [ ] #### #48: Add forwardRef to Input component
+**File**: `frontend/src/components/ui/input.tsx`
+**Location**: Around line 5-18
+**Priority**: Medium
+**Issue**: Without forwarded ref, consumers can't focus the input for form validation.
+**Fix**: Use `React.forwardRef<HTMLInputElement, React.ComponentPropsWithoutRef<'input'>>` pattern with `displayName = 'Input'`
+
+- [ ] #### #49: Add forwardRef to Textarea component
+**File**: `frontend/src/components/ui/textarea.tsx`
+**Location**: Around line 1-16
+**Priority**: Medium
+**Issue**: Missing ref forwarding for form integration.
+**Fix**: Use `React.forwardRef<HTMLTextAreaElement, React.ComponentPropsWithoutRef<'textarea'>>` pattern with `displayName = 'Textarea'`
+
+---
+
+### UI Components (5 issues)
+
+- [ ] #### #50: Fix Button component default type
+**File**: `frontend/src/components/ui/button.tsx`
+**Location**: Around line 39-58
+**Priority**: High
+**Issue**: No safe default type so native buttons act as submit buttons in forms.
+**Fix**:
+- When asChild is false and Comp === 'button', merge `type="button"` as default
+- Preserve existing explicit type props
+- Keep Slot children untouched
+
+- [ ] #### #51: Fix GiftItemImage className injection and positioning
+**File**: `frontend/src/components/wish-list/GiftItemImage.tsx`
+**Location**: Around line 9-31
+**Priority**: Medium
+**Issue**: Injects "undefined" when className missing and uses next/image fill without positioned parent.
+**Fix**:
+- Use cn utility to safely merge classes (avoid template literal)
+- Add "relative" to wrapper div that contains Image
+- Update both empty-src branch and main wrapper
+
+- [ ] #### #52: Fix Image component size mismatch in public wishlist
+**File**: `frontend/src/app/public/[slug]/page.tsx`
+**Location**: Around line 173-179
+**Priority**: Medium
+**Issue**: Image requests 16×16px while CSS displays 64×64, causing blur.
+**Fix**: Update Image props to `width={64} height={64}` to match .w-16 .h-16 CSS
+
+- [ ] #### #53: Remove unused _redirectAttempted state
+**File**: `frontend/src/app/public/[slug]/page.tsx`
+**Location**: Line 49
+**Priority**: Low
+**Issue**: Unused state declaration clutters code.
+**Fix**: Delete the entire line `const [_redirectAttempted, _setRedirectAttempted] = useState(false)`
+
+- [ ] #### #54: Fix invalid 'path fill' property in SVG style
+**File**: `frontend/src/stories/Configure.mdx`
+**Location**: Around line 19-33
+**Priority**: Medium
+**Issue**: Inline style object in RightArrow contains invalid property 'path fill'.
+**Fix**: Remove that entry and set `fill="currentColor"` on path element instead
+
+---
+
+### Package Dependencies (3 issues)
+
+- [ ] #### #55: Move class-variance-authority and clsx to dependencies
+**File**: `frontend/package.json`
+**Location**: Around line 53-54
+**Priority**: High
+**Issue**: Runtime packages in devDependencies cause production failures.
+**Fix**:
+- Remove "class-variance-authority" and "clsx" from devDependencies
+- Add them under dependencies with same versions (^0.7.1 and ^2.1.1)
+- Run pnpm install after update
+
+- [ ] #### #56: Move @radix-ui/react-slot and lucide-react to dependencies
+**File**: `frontend/package.json`
+**Location**: Around line 40 and 55
+**Priority**: Medium
+**Issue**: Runtime UI dependencies incorrectly placed in devDependencies.
+**Fix**:
+- Move "@radix-ui/react-slot": "^1.2.4" to dependencies
+- Move "lucide-react": "^0.562.0" to dependencies
+- Run pnpm install after update
+
+- [ ] #### #57: Move postcss to devDependencies
+**File**: `frontend/package.json`
+**Location**: Line 29
+**Priority**: Low
+**Issue**: Build-time tool should be in devDependencies.
+**Fix**: Move "postcss": "^8.5.6" from dependencies to devDependencies
+
+---
+
+### Configuration & Validation (4 issues)
+
+- [ ] #### #58: Fix /frontend entry in .gitignore
+**File**: `frontend/.gitignore`
+**Location**: Around line 20-22
+**Priority**: Medium
+**Issue**: /frontend entry targets non-existent frontend/frontend/ path.
+**Fix**: Remove the "/frontend" line from .gitignore (keep /build)
+
+- [ ] #### #59: Add .env*.local pattern to .gitignore
+**File**: `frontend/.gitignore`
+**Location**: After line 42
+**Priority**: Low
+**Issue**: Missing pattern to prevent commit of local env files with secrets.
+**Fix**: Add `.env*.local` pattern to gitignore
+
+- [ ] #### #60: Use dynamic locale instead of hardcoded lang="en"
+**File**: `frontend/src/app/layout.tsx`
+**Location**: Around line 29-31
+**Priority**: Medium
+**Issue**: HTML tag hard-codes lang="en" but app supports i18n.
+**Fix**:
+- Retrieve current locale from i18n getter, Next.js params, or DEFAULT_LOCALE constant
+- Pass to `<html>` element as `lang={locale}`
+- Fallback to default locale (e.g., "ru") when none available
+
+- [ ] #### #61: Add URL encoding for reservation token
+**File**: `frontend/src/components/wish-list/MyReservations.tsx`
+**Location**: Around line 47-51
+**Priority**: High
+**Issue**: Raw token from localStorage inserted into URL breaks for special characters.
+**Fix**: Use `encodeURIComponent(token)` before interpolating into fetch URL
+
+---
+
+### Miscellaneous (1 issue)
+
+- [ ] #### #62: Add missing i18n support to auth pages
+**File**: `frontend/src/app/auth/login/page.tsx` and `frontend/src/app/auth/register/page.tsx`
+**Location**: Around line 23-31
+**Priority**: Medium
+**Issue**: Hardcoded English strings don't match i18n support mentioned in PR.
+**Fix**:
+- Add 'use client' directive
+- Import useTranslation from react-i18next
+- Replace hardcoded strings with t('auth.login.title'), t('auth.login.description'), etc.
+- Add corresponding translation keys to i18n files
+
+---
+
 ## Priority Summary
 
-### Critical Priority (4 issues)
+### Critical Priority (6 issues)
 - [x] #15: Fix docs package import in backend/cmd/server/main.go ✅
-- [ ] #24: Clear session after account deletion
-- [ ] #26: Store auth token after login
-- [ ] #36: Replace localStorage with expo-secure-store in ApiClient
+- [ ] #24: Clear session after account deletion (Mobile)
+- [ ] #26: Store auth token after login (Mobile)
+- [ ] #36: Replace localStorage with expo-secure-store in ApiClient (Mobile)
+- [ ] #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable (Frontend)
+- [ ] #42: Replace localStorage JWT storage with httpOnly cookies (Frontend)
 
-### High Priority (19 issues)
+### High Priority (27 issues)
+
+**Mobile (19 issues)**:
 - [ ] #1: Fix email field persistence in profile update
 - [ ] #3: Fix FlatList data binding in public wishlist
 - [ ] #4: Fix reservation status display in public wishlist
@@ -484,7 +718,19 @@ pagination:
 - [ ] #38: Replace manual OAuth flows with AuthSession.AuthRequest
 - [ ] #39: Fix CreateReservationRequest to use snake_case in types.ts
 
-### Medium Priority (14 issues)
+**Frontend (8 issues)**:
+- [ ] #43: Fix window.location.origin SSR crash in WishListDisplay
+- [ ] #44: Add 'use client' directive to GiftItemDisplay component
+- [ ] #45: Fix missing cleanup in redirect timeout (page.tsx)
+- [ ] #46: Fix missing cleanup in useAuthRedirect hook
+- [ ] #47: Fix useFormField hook context null handling
+- [ ] #50: Fix Button component default type
+- [ ] #55: Move class-variance-authority and clsx to dependencies
+- [ ] #61: Add URL encoding for reservation token
+
+### Medium Priority (21 issues)
+
+**Mobile (14 issues)**:
 - [ ] #2: Fix zero price display logic in public wishlist
 - [ ] #6: Remove debug console statements in ImageUpload
 - [ ] #8: Add useEffect to sync imageUri with currentImageUrl prop
@@ -499,23 +745,58 @@ pagination:
 - [ ] #32: Make existingItem optional in GiftItemForm
 - [ ] #35: Fix onSuccess handler to use new template ID in TemplateSelector
 
-### Low Priority (3 issues)
-- [ ] #13: Add language identifiers to code blocks in api/README.md
-- [x] #16: Update redis module version in go.mod ✅
-- [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc
+**Frontend (7 issues)**:
+- [ ] #48: Add forwardRef to Input component
+- [ ] #49: Add forwardRef to Textarea component
+- [ ] #51: Fix GiftItemImage className injection and positioning
+- [ ] #52: Fix Image component size mismatch in public wishlist
+- [ ] #54: Fix invalid 'path fill' property in SVG style
+- [ ] #56: Move @radix-ui/react-slot and lucide-react to dependencies
+- [ ] #58: Fix /frontend entry in .gitignore
+- [ ] #60: Use dynamic locale instead of hardcoded lang="en"
+- [ ] #62: Add missing i18n support to auth pages
+
+### Low Priority (5 issues)
+- [ ] #13: Add language identifiers to code blocks in api/README.md (Mobile)
+- [x] #16: Update redis module version in go.mod ✅ (Backend)
+- [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc (Mobile)
+- [ ] #53: Remove unused _redirectAttempted state (Frontend)
+- [ ] #57: Move postcss to devDependencies (Frontend)
+- [ ] #59: Add .env*.local pattern to .gitignore (Frontend)
 
 ---
 
 ## Next Steps
 
-1. **Start with Critical Priority issues** - These are blocking or security-critical
-2. **Address High Priority issues** - Core functionality and type safety
-3. **Work through Medium Priority issues** - Important but not blocking
-4. **Complete Low Priority issues** - Polish and documentation
+1. **Start with Critical Priority issues** (6 issues) - Security vulnerabilities and blocking problems
+   - **Frontend Security**: #41 JWT_SECRET exposure and #42 localStorage XSS vulnerability are urgent
+   - **Mobile Auth**: #24 session cleanup, #26 token storage, #36 secure storage
+2. **Address High Priority issues** (27 issues) - Core functionality and type safety
+   - **Frontend**: SSR crashes (#43), React patterns (#44-47), component defaults (#50), dependencies (#55), URL encoding (#61)
+   - **Mobile**: Form persistence, API types, deep linking, reservation functionality
+3. **Work through Medium Priority issues** (21 issues) - Important but not blocking
+   - **Frontend**: ref forwarding, i18n support, image sizing, dependency organization
+   - **Mobile**: display logic, error handling, API documentation
+4. **Complete Low Priority issues** (5 issues) - Polish and documentation
 
 ## Notes
 
-- All issues are tracked in the task management system (tasks #1-#40)
+### Task Management
+- All issues are tracked in the task management system (tasks #1-#62)
+- Mobile issues: #1-#40 (from PR #8)
+- Frontend issues: #41-#62 (from PR #7)
+- Backend issues: #15-#17 (from PR #8)
 - Use `TaskUpdate` to mark tasks as in_progress when starting work
 - Use `TaskUpdate` to mark tasks as completed when finished
 - This document should be updated as issues are resolved
+
+### Sources
+- **PR #8** (Mobile): 40 issues from CodeRabbit AI review
+- **PR #7** (Frontend): 22 issues from CodeRabbit AI review (filtered from 17 actionable + 26 nitpicks)
+- **Completed**: 2 issues (#15 CI docs generation, #16 redis update)
+
+### Priority Focus
+- **Critical issues are security-related** - JWT exposure, XSS vulnerabilities, authentication flaws
+- **High priority issues affect functionality** - SSR crashes, missing client directives, wrong dependencies
+- **Medium priority issues improve quality** - ref forwarding, i18n, proper patterns
+- **Low priority issues are polish** - documentation, cleanup, style improvements
