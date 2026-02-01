@@ -13,8 +13,8 @@
     "lint:write": "biome check --write",
     "lint:write:unsafe": "biome check --write --unsafe",
     "format": "biome format --write",
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
+    "type-check": "tsgo --noEmit",
+    "type-check:watch": "tsgo --noEmit --watch",
     "generate:api": "pnpm openapi-typescript ../api/openapi3.yaml -o ./lib/api/schema.ts --root-types --enum --enum-values --dedupe-enums"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@rn-primitives/slot": "^1.2.0",
     "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-query-devtools": "^5.91.2",
+    "@typescript/native-preview": "7.0.0-dev.20260201.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "~54.0.31",
