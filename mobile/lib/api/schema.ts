@@ -187,7 +187,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.GiftItemOutput"];
+                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -241,7 +241,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.GiftItemOutput"];
+                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -412,7 +412,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.GiftItemOutput"];
+                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -552,7 +552,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.UserOutput"];
+                        "application/json": components["schemas"]["internal_handlers.UserResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -614,7 +614,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.UserOutput"];
+                        "application/json": components["schemas"]["internal_handlers.UserResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -699,7 +699,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.WishListOutput"];
+                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
                     };
                 };
                 /** @description Wish list not found */
@@ -1018,7 +1018,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.WishListOutput"][];
+                        "application/json": components["schemas"]["internal_handlers.WishListResponse"][];
                     };
                 };
                 /** @description Unauthorized */
@@ -1070,7 +1070,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.WishListOutput"];
+                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -1143,7 +1143,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.WishListOutput"];
+                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -1197,7 +1197,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.WishListOutput"];
+                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -1421,7 +1421,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["wish-list_internal_services.GiftItemOutput"];
+                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -1643,7 +1643,7 @@ export interface components {
             /** @description Authentication token */
             token: string;
             /** @description User information */
-            user: components["schemas"]["wish-list_internal_services.UserOutput"];
+            user: components["schemas"]["internal_handlers.UserResponse"];
         };
         "internal_handlers.CancelReservationRequest": {
             reservationToken?: string;
@@ -1686,11 +1686,30 @@ export interface components {
             title: string;
         };
         "internal_handlers.GetGiftItemsResponse": {
-            items: components["schemas"]["wish-list_internal_services.GiftItemOutput"][];
+            items: components["schemas"]["internal_handlers.GiftItemResponse"][];
             limit: number;
             page: number;
             pages: number;
             total: number;
+        };
+        "internal_handlers.GiftItemResponse": {
+            created_at: string;
+            description?: string;
+            id: string;
+            image_url?: string;
+            link?: string;
+            name: string;
+            notes?: string;
+            position?: number;
+            price?: number;
+            priority?: number;
+            purchased_at?: string;
+            purchased_by_user_id?: string;
+            purchased_price?: number;
+            reserved_at?: string;
+            reserved_by_user_id?: string;
+            updated_at: string;
+            wishlist_id: string;
         };
         "internal_handlers.GiftItemSummary": {
             id: string;
@@ -1762,51 +1781,32 @@ export interface components {
             data: components["schemas"]["internal_handlers.ReservationDetailsResponse"][];
             pagination: unknown;
         };
+        "internal_handlers.UserResponse": {
+            avatar_url?: string;
+            email: string;
+            first_name?: string;
+            id: string;
+            last_name?: string;
+        };
+        "internal_handlers.WishListResponse": {
+            /** @description ViewCount intentionally excluded - internal metric */
+            created_at: string;
+            description?: string;
+            id: string;
+            is_public?: boolean;
+            occasion?: string;
+            occasion_date?: string;
+            owner_id: string;
+            public_slug?: string;
+            template_id?: string;
+            title: string;
+            updated_at: string;
+        };
         "internal_handlers.WishListSummary": {
             id: string;
             ownerFirstName?: string;
             ownerLastName?: string;
             title: string;
-        };
-        "wish-list_internal_services.GiftItemOutput": {
-            created_at?: string;
-            description?: string;
-            id?: string;
-            image_url?: string;
-            link?: string;
-            name?: string;
-            notes?: string;
-            position?: number;
-            price?: number;
-            priority?: number;
-            purchased_at?: string;
-            purchased_by_user_id?: string;
-            purchased_price?: number;
-            reserved_at?: string;
-            reserved_by_user_id?: string;
-            updated_at?: string;
-            wishlist_id?: string;
-        };
-        "wish-list_internal_services.UserOutput": {
-            avatar_url?: string;
-            email?: string;
-            first_name?: string;
-            id?: string;
-            last_name?: string;
-        };
-        "wish-list_internal_services.WishListOutput": {
-            created_at?: string;
-            description?: string;
-            id?: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            owner_id?: string;
-            public_slug?: string;
-            template_id?: string;
-            title?: string;
-            updated_at?: string;
-            view_count?: number;
         };
     };
     responses: never;
@@ -1822,6 +1822,7 @@ export type SchemaInternalHandlersCreateReservationRequest = components['schemas
 export type SchemaInternalHandlersCreateReservationResponse = components['schemas']['internal_handlers.CreateReservationResponse'];
 export type SchemaInternalHandlersCreateWishListRequest = components['schemas']['internal_handlers.CreateWishListRequest'];
 export type SchemaInternalHandlersGetGiftItemsResponse = components['schemas']['internal_handlers.GetGiftItemsResponse'];
+export type SchemaInternalHandlersGiftItemResponse = components['schemas']['internal_handlers.GiftItemResponse'];
 export type SchemaInternalHandlersGiftItemSummary = components['schemas']['internal_handlers.GiftItemSummary'];
 export type SchemaInternalHandlersHealthResponse = components['schemas']['internal_handlers.HealthResponse'];
 export type SchemaInternalHandlersLoginRequest = components['schemas']['internal_handlers.LoginRequest'];
@@ -1833,9 +1834,8 @@ export type SchemaInternalHandlersUpdateGiftItemRequest = components['schemas'][
 export type SchemaInternalHandlersUpdateProfileRequest = components['schemas']['internal_handlers.UpdateProfileRequest'];
 export type SchemaInternalHandlersUpdateWishListRequest = components['schemas']['internal_handlers.UpdateWishListRequest'];
 export type SchemaInternalHandlersUserReservationsResponse = components['schemas']['internal_handlers.UserReservationsResponse'];
+export type SchemaInternalHandlersUserResponse = components['schemas']['internal_handlers.UserResponse'];
+export type SchemaInternalHandlersWishListResponse = components['schemas']['internal_handlers.WishListResponse'];
 export type SchemaInternalHandlersWishListSummary = components['schemas']['internal_handlers.WishListSummary'];
-export type SchemaWishListInternalServicesGiftItemOutput = components['schemas']['wish-list_internal_services.GiftItemOutput'];
-export type SchemaWishListInternalServicesUserOutput = components['schemas']['wish-list_internal_services.UserOutput'];
-export type SchemaWishListInternalServicesWishListOutput = components['schemas']['wish-list_internal_services.WishListOutput'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
