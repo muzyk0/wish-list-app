@@ -42,6 +42,78 @@ The application follows a microservices architecture with shared components:
 - **Type checking**: Run `npm run type-check` to verify TypeScript correctness
 - **Linting & formatting**: Use `make format` for consistent code style across all components
 
+### API Documentation (Swagger/OpenAPI)
+
+The backend uses **swaggo/swag** to generate Swagger/OpenAPI documentation from Go annotations.
+
+#### Documentation Structure
+
+Library documentation is organized in modular, AI-agent-friendly files:
+
+**Location**: `/backend/library-docs/swaggo-swag/`
+
+**Files**:
+1. **README.md** - Index and quick reference
+2. **01-getting-started.md** - Installation, setup, and basic workflow
+3. **02-cli-reference.md** - `swag init` and `swag fmt` commands with all options
+4. **03-general-api-info.md** - API-level annotations (`@title`, `@version`, `@host`, `@BasePath`, etc.)
+5. **04-api-operations.md** - Endpoint annotations (`@Summary`, `@Param`, `@Success`, `@Router`, etc.)
+6. **05-security.md** - Authentication schemes (`@securityDefinitions`, `@Security`)
+7. **06-attributes-validation.md** - Field validation and constraints (enums, min/max, format, etc.)
+8. **07-examples.md** - Common patterns (CRUD, pagination, file upload, error responses)
+9. **08-advanced-features.md** - Generics, custom types, global overrides
+
+#### Quick Reference
+
+**Generate Swagger docs**:
+```bash
+swag init                           # Generate docs
+swag init --parseDependency         # Include external packages
+swag init --parseInternal           # Include internal packages
+swag fmt                            # Format annotations
+```
+
+**Common annotations**:
+```go
+// General API info (in main.go)
+// @title           Wish List API
+// @version         1.0
+// @description     API description
+// @host            localhost:8080
+// @BasePath        /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+// Endpoint annotations (in handlers)
+// @Summary      Create wishlist
+// @Description  Create a new wishlist for authenticated user
+// @Tags         Wishlists
+// @Accept       json
+// @Produce      json
+// @Param        wishlist body CreateWishlistRequest true "Wishlist data"
+// @Success      201 {object} WishlistResponse "Success"
+// @Failure      400 {object} map[string]string "Bad request"
+// @Security     BearerAuth
+// @Router       /wishlists [post]
+```
+
+#### Important Notes
+
+- **Handler DTOs Required**: Always use handler-specific response types (not service types) in `@Success` and `@Failure` annotations
+- **Validation Tags**: Use `validate:"required"` in response DTOs for OpenAPI schema generation
+- **Format Tags**: Use `format:"uuid"`, `format:"email"`, etc. for proper schema types
+- **Parse Dependencies**: When structs are in external packages, use `swag init --parseDependency`
+- **Swagger UI**: Access at `http://localhost:8080/swagger/index.html` after running backend
+
+#### Best Practices
+
+1. **Document as you code**: Add Swagger annotations when creating handlers
+2. **Use handler DTOs**: Never expose service types directly in Swagger docs
+3. **Validate annotations**: Run `swag init` to catch annotation errors early
+4. **Keep examples**: Add `example` tags to struct fields for better API docs
+5. **Security first**: Always add `@Security` annotations to protected endpoints
+
 ### Mobile Development
 - **Navigation**: Uses Expo Router with file-based routing in `/mobile/app/`
 - **UI components**: Custom components in `/mobile/components/`
