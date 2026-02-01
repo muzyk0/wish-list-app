@@ -287,15 +287,6 @@ swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
 	@echo "✓ OpenAPI 3.0 specification split into api/split/"
 
-.PHONY: swagger-preview
-swagger-preview: ## Preview OpenAPI 3.0 specification in browser
-	@echo "Starting OpenAPI 3.0 documentation preview..."
-	@if [ ! -f backend/docs/openapi3.yaml ]; then \
-		echo "OpenAPI 3.0 not found. Generating..."; \
-		$(MAKE) swagger-convert-v3; \
-	fi
-	@pnpm exec redocly preview-docs backend/docs/openapi3.yaml
-
 .PHONY: clean
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."
