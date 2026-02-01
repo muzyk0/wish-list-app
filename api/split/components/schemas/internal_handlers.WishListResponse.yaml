@@ -1,6 +1,5 @@
 properties:
   created_at:
-    description: ViewCount intentionally excluded - internal metric
     type: string
   description:
     type: string
@@ -22,10 +21,13 @@ properties:
     type: string
   updated_at:
     type: string
+  view_count:
+    type: string
 required:
   - created_at
   - id
   - owner_id
   - title
   - updated_at
+  - view_count
 type: object

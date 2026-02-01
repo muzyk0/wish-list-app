@@ -72,9 +72,9 @@ type WishListResponse struct {
 	TemplateID   string `json:"template_id"`
 	IsPublic     bool   `json:"is_public"`
 	PublicSlug   string `json:"public_slug"`
-	// ViewCount intentionally excluded - internal metric
-	CreatedAt string `json:"created_at" validate:"required"`
-	UpdatedAt string `json:"updated_at" validate:"required"`
+	ViewCount    string `json:"view_count" validate:"required"`
+	CreatedAt    string `json:"created_at" validate:"required"`
+	UpdatedAt    string `json:"updated_at" validate:"required"`
 }
 
 // GiftItemResponse is the handler-level DTO for gift item data
@@ -125,9 +125,9 @@ func (h *WishListHandler) toWishListResponse(wl *services.WishListOutput) *WishL
 		TemplateID:   wl.TemplateID,
 		IsPublic:     wl.IsPublic,
 		PublicSlug:   wl.PublicSlug,
-		// ViewCount intentionally excluded - internal metric
-		CreatedAt: wl.CreatedAt,
-		UpdatedAt: wl.UpdatedAt,
+		ViewCount:    fmt.Sprintf("%d", wl.ViewCount),
+		CreatedAt:    wl.CreatedAt,
+		UpdatedAt:    wl.UpdatedAt,
 	}
 }
 

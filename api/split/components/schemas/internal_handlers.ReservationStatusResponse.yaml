@@ -1,13 +1,13 @@
 properties:
-  isReserved:
+  is_reserved:
     type: boolean
-  reservedAt:
+  reserved_at:
     type: string
-  reservedByName:
+  reserved_by_name:
     type: string
   status:
     type: string
 required:
-  - isReserved
+  - is_reserved
   - status
 type: object

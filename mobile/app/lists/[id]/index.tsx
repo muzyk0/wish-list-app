@@ -122,7 +122,7 @@ const GiftItemCard = ({
             </Chip>
           )}
 
-          {item.priority > 0 && (
+          {item.priority && item.priority > 0 && (
             <Chip mode="outlined">
               <Text>Priority: {item.priority}/10</Text>
             </Chip>

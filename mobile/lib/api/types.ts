@@ -6,32 +6,48 @@
 import type { components, paths } from './schema';
 
 // User types
-export type User = components['schemas']['wish-list_internal_services.UserOutput'];
-export type UserRegistration = components['schemas']['internal_handlers.RegisterRequest'];
+export type User = components['schemas']['internal_handlers.UserResponse'];
+export type UserRegistration =
+  components['schemas']['internal_handlers.RegisterRequest'];
 export type UserLogin = components['schemas']['internal_handlers.LoginRequest'];
-export type UserUpdate = components['schemas']['internal_handlers.UpdateProfileRequest'];
-export type LoginResponse = components['schemas']['internal_handlers.AuthResponse'];
+export type UserUpdate =
+  components['schemas']['internal_handlers.UpdateProfileRequest'];
+export type LoginResponse =
+  components['schemas']['internal_handlers.AuthResponse'];
 
 // Wish list types
-export type WishList = components['schemas']['wish-list_internal_services.WishListOutput'];
-export type CreateWishListRequest = components['schemas']['internal_handlers.CreateWishListRequest'];
-export type UpdateWishListRequest = components['schemas']['internal_handlers.UpdateWishListRequest'];
+export type WishList =
+  components['schemas']['internal_handlers.WishListResponse'];
+export type CreateWishListRequest =
+  components['schemas']['internal_handlers.CreateWishListRequest'];
+export type UpdateWishListRequest =
+  components['schemas']['internal_handlers.UpdateWishListRequest'];
 
 // Gift item types
-export type GiftItem = components['schemas']['wish-list_internal_services.GiftItemOutput'];
-export type CreateGiftItemRequest = components['schemas']['internal_handlers.CreateGiftItemRequest'];
-export type UpdateGiftItemRequest = components['schemas']['internal_handlers.UpdateGiftItemRequest'];
+export type GiftItem =
+  components['schemas']['internal_handlers.GiftItemResponse'];
+export type CreateGiftItemRequest =
+  components['schemas']['internal_handlers.CreateGiftItemRequest'];
+export type UpdateGiftItemRequest =
+  components['schemas']['internal_handlers.UpdateGiftItemRequest'];
 
 // Reservation types
-export type Reservation = components['schemas']['internal_handlers.CreateReservationResponse'];
-export type CreateReservationRequest = components['schemas']['internal_handlers.CreateReservationRequest'];
-export type CancelReservationRequest = components['schemas']['internal_handlers.CancelReservationRequest'];
-export type ReservationDetails = components['schemas']['internal_handlers.ReservationDetailsResponse'];
-export type ReservationStatus = components['schemas']['internal_handlers.ReservationStatusResponse'];
+export type Reservation =
+  components['schemas']['internal_handlers.CreateReservationResponse'];
+export type CreateReservationRequest =
+  components['schemas']['internal_handlers.CreateReservationRequest'];
+export type CancelReservationRequest =
+  components['schemas']['internal_handlers.CancelReservationRequest'];
+export type ReservationDetails =
+  components['schemas']['internal_handlers.ReservationDetailsResponse'];
+export type ReservationStatus =
+  components['schemas']['internal_handlers.ReservationStatusResponse'];
 
 // Response types
-export type GetGiftItemsResponse = components['schemas']['internal_handlers.GetGiftItemsResponse'];
-export type UserReservationsResponse = components['schemas']['internal_handlers.UserReservationsResponse'];
+export type GetGiftItemsResponse =
+  components['schemas']['internal_handlers.GetGiftItemsResponse'];
+export type UserReservationsResponse =
+  components['schemas']['internal_handlers.UserReservationsResponse'];
 
 // Path operation types for type-safe API calls
 export type RegisterOperation = paths['/auth/register']['post'];

@@ -37,9 +37,9 @@ type ReservationDetail struct {
 	GiftItemID          pgtype.UUID
 	ReservedByUserID    pgtype.UUID
 	GuestName           pgtype.Text
-	EncryptedGuestName  pgtype.Text        `db:"encrypted_guest_name"` // PII encrypted
+	EncryptedGuestName  pgtype.Text `db:"encrypted_guest_name"` // PII encrypted
 	GuestEmail          pgtype.Text
-	EncryptedGuestEmail pgtype.Text        `db:"encrypted_guest_email"` // PII encrypted
+	EncryptedGuestEmail pgtype.Text `db:"encrypted_guest_email"` // PII encrypted
 	ReservationToken    pgtype.UUID
 	Status              string
 	ReservedAt          pgtype.Timestamptz

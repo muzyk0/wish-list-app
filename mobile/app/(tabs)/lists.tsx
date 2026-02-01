@@ -122,7 +122,9 @@ export default function ListsTab() {
             variant="bodySmall"
             style={[styles.listStat, { color: colors.outline }]}
           >
-            {item.view_count > 0 ? `${item.view_count} views` : 'Not viewed'}
+            {item.view_count !== '0'
+              ? `${item.view_count} views`
+              : 'Not viewed'}
           </Text>
           <Text
             variant="bodySmall"

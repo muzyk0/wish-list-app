@@ -1135,7 +1135,7 @@ components:
       type: object
     internal_handlers.CancelReservationRequest:
       properties:
-        reservationToken:
+        reservation_token:
           type: string
       type: object
     internal_handlers.CreateGiftItemRequest:
@@ -1166,44 +1166,44 @@ components:
       type: object
     internal_handlers.CreateReservationRequest:
       properties:
-        guestEmail:
+        guest_email:
           type: string
-        guestName:
+        guest_name:
           maxLength: 200
           type: string
       type: object
     internal_handlers.CreateReservationResponse:
       properties:
-        cancelReason:
+        cancel_reason:
           type: string
-        canceledAt:
+        canceled_at:
           type: string
-        expiresAt:
+        expires_at:
           type: string
-        giftItemId:
+        gift_item_id:
           type: string
-        guestEmail:
+        guest_email:
           type: string
-        guestName:
+        guest_name:
           type: string
         id:
           type: string
-        notificationSent:
+        notification_sent:
           type: boolean
-        reservationToken:
+        reservation_token:
           type: string
-        reservedAt:
+        reserved_at:
           type: string
-        reservedByUserId:
+        reserved_by_user_id:
           type: string
         status:
           type: string
       required:
-        - giftItemId
+        - gift_item_id
         - id
-        - notificationSent
-        - reservationToken
-        - reservedAt
+        - notification_sent
+        - reservation_token
+        - reserved_at
         - status
       type: object
     internal_handlers.CreateWishListRequest:
@@ -1351,37 +1351,37 @@ components:
       type: object
     internal_handlers.ReservationDetailsResponse:
       properties:
-        expiresAt:
+        expires_at:
           type: string
-        giftItem:
+        gift_item:
           $ref: "#/components/schemas/internal_handlers.GiftItemSummary"
         id:
           type: string
-        reservedAt:
+        reserved_at:
           type: string
         status:
           type: string
         wishlist:
           $ref: "#/components/schemas/internal_handlers.WishListSummary"
       required:
-        - giftItem
+        - gift_item
         - id
-        - reservedAt
+        - reserved_at
         - status
         - wishlist
       type: object
     internal_handlers.ReservationStatusResponse:
       properties:
-        isReserved:
+        is_reserved:
           type: boolean
-        reservedAt:
+        reserved_at:
           type: string
-        reservedByName:
+        reserved_by_name:
           type: string
         status:
           type: string
       required:
-        - isReserved
+        - is_reserved
         - status
       type: object
     internal_handlers.UpdateGiftItemRequest:
@@ -1468,7 +1468,6 @@ components:
     internal_handlers.WishListResponse:
       properties:
         created_at:
-          description: ViewCount intentionally excluded - internal metric
           type: string
         description:
           type: string
@@ -1490,20 +1489,23 @@ components:
           type: string
         updated_at:
           type: string
+        view_count:
+          type: string
       required:
         - created_at
         - id
         - owner_id
         - title
         - updated_at
+        - view_count
       type: object
     internal_handlers.WishListSummary:
       properties:
         id:
           type: string
-        ownerFirstName:
+        owner_first_name:
           type: string
-        ownerLastName:
+        owner_last_name:
           type: string
         title:
           type: string

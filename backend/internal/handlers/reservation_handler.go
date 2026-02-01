@@ -24,36 +24,36 @@ func NewReservationHandler(service services.ReservationServiceInterface) *Reserv
 }
 
 type CreateReservationRequest struct {
-	GuestName  *string `json:"guestName" validate:"omitempty,max=200"`
-	GuestEmail *string `json:"guestEmail" validate:"omitempty,email"`
+	GuestName  *string `json:"guest_name" validate:"omitempty,max=200"`
+	GuestEmail *string `json:"guest_email" validate:"omitempty,email"`
 }
 
 type CancelReservationRequest struct {
-	ReservationToken *string `json:"reservationToken" validate:"omitempty,uuid"`
+	ReservationToken *string `json:"reservation_token" validate:"omitempty,uuid"`
 }
 
 type CreateReservationResponse struct {
 	ID               string  `json:"id" validate:"required"`
-	GiftItemID       string  `json:"giftItemId" validate:"required"`
-	ReservedByUserID *string `json:"reservedByUserId"`
-	GuestName        *string `json:"guestName"`
-	GuestEmail       *string `json:"guestEmail" validate:"email"`
-	ReservationToken string  `json:"reservationToken" validate:"required"`
+	GiftItemID       string  `json:"gift_item_id" validate:"required"`
+	ReservedByUserID *string `json:"reserved_by_user_id"`
+	GuestName        *string `json:"guest_name"`
+	GuestEmail       *string `json:"guest_email" validate:"email"`
+	ReservationToken string  `json:"reservation_token" validate:"required"`
 	Status           string  `json:"status" validate:"required"`
-	ReservedAt       string  `json:"reservedAt" validate:"required"`
-	ExpiresAt        *string `json:"expiresAt"`
-	CanceledAt       *string `json:"canceledAt"`
-	CanceledReason   *string `json:"cancelReason"`
-	NotificationSent bool    `json:"notificationSent" validate:"required"`
+	ReservedAt       string  `json:"reserved_at" validate:"required"`
+	ExpiresAt        *string `json:"expires_at"`
+	CanceledAt       *string `json:"canceled_at"`
+	CanceledReason   *string `json:"cancel_reason"`
+	NotificationSent bool    `json:"notification_sent" validate:"required"`
 }
 
 type ReservationDetailsResponse struct {
 	ID         string          `json:"id" validate:"required"`
-	GiftItem   GiftItemSummary `json:"giftItem" validate:"required"`
+	GiftItem   GiftItemSummary `json:"gift_item" validate:"required"`
 	Wishlist   WishListSummary `json:"wishlist" validate:"required"`
 	Status     string          `json:"status" validate:"required"`
-	ReservedAt string          `json:"reservedAt" validate:"required"`
-	ExpiresAt  *string         `json:"expiresAt"`
+	ReservedAt string          `json:"reserved_at" validate:"required"`
+	ExpiresAt  *string         `json:"expires_at"`
 }
 
 type GiftItemSummary struct {
@@ -66,14 +66,14 @@ type GiftItemSummary struct {
 type WishListSummary struct {
 	ID             string  `json:"id" validate:"required"`
 	Title          string  `json:"title" validate:"required"`
-	OwnerFirstName *string `json:"ownerFirstName,omitempty"`
-	OwnerLastName  *string `json:"ownerLastName,omitempty"`
+	OwnerFirstName *string `json:"owner_first_name,omitempty"`
+	OwnerLastName  *string `json:"owner_last_name,omitempty"`
 }
 
 type ReservationStatusResponse struct {
-	IsReserved     bool    `json:"isReserved" validate:"required"`
-	ReservedByName *string `json:"reservedByName"`
-	ReservedAt     *string `json:"reservedAt"`
+	IsReserved     bool    `json:"is_reserved" validate:"required"`
+	ReservedByName *string `json:"reserved_by_name"`
+	ReservedAt     *string `json:"reserved_at"`
 	Status         string  `json:"status" validate:"required"`
 }
 
