@@ -4,12 +4,36 @@
 > - Pull Request #8 "Add complete mobile app implementation with Expo Router"
 > - Pull Request #7 "Add complete frontend implementation with Next.js"
 > **Date Created**: 2026-01-31
-> **Last Updated**: 2026-01-31
+> **Last Updated**: 2026-02-01
 > **Total Issues**: 62 (Mobile: 40, Frontend: 22)
+> **Frontend Type-Check**: ✅ All TypeScript errors fixed (verified 2026-02-01)
 
 ## Overview
 
 This document tracks all issues identified in the GitHub PR review comments from CodeRabbit AI. Issues are organized by component and priority.
+
+### ✅ Recent Progress (2026-02-01)
+
+**Type-Check Status**:
+- ✅ **ALL FRONTEND TYPESCRIPT ERRORS FIXED** - `npm run type-check` passes successfully
+- ✅ Frontend compilation works without errors
+- ✅ Type safety fully restored
+
+**Verified Open Issues** (Frontend - PR #7):
+- ⚠️ **Critical**: #41 JWT_SECRET still exposed as NEXT_PUBLIC_
+- ⚠️ **High**: #44 GiftItemDisplay missing 'use client' directive
+- ⚠️ **High**: #46 useAuthRedirect missing cleanup (AbortController)
+- ⚠️ **High**: #50 Button component missing default type="button"
+- ⚠️ **High**: #55 class-variance-authority and clsx in wrong dependencies section
+- ⚠️ **Medium**: #48 Input component missing forwardRef
+- ⚠️ **Medium**: #49 Textarea component missing forwardRef
+- ⚠️ **Medium**: #56 @radix-ui/react-slot and lucide-react in wrong dependencies section
+- ⚠️ **Medium**: #58 Incorrect /frontend entry in .gitignore
+- ⚠️ **Low**: #57 postcss should be in devDependencies
+- ⚠️ **Low**: #59 Missing .env*.local pattern in .gitignore
+
+**Fixed Issues**:
+- ✅ #43 WishListDisplay SSR crash fixed (has 'use client' directive)
 
 ---
 
@@ -459,13 +483,19 @@ pagination:
 
 ## Frontend Issues (22 tasks)
 
+### ✅ Type-Check Status
+**Last Verified**: 2026-02-01
+**Status**: ✅ **ALL TYPE-CHECK ERRORS FIXED** - `npm run type-check` passes successfully
+
 ### Security & Configuration (2 issues)
 
 - [ ] #### #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable
 **File**: `frontend/.env.example`
-**Location**: Around line 5-6
+**Location**: Line 6
 **Priority**: Critical
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: The JWT_SECRET is exposed as NEXT_PUBLIC_JWT_SECRET which bundles it in client-side code, making it accessible to XSS attacks.
+**Current State**: `.env.example` still contains `NEXT_PUBLIC_JWT_SECRET=your-super-secret-jwt-key-here`
 **Fix**:
 - Rename `NEXT_PUBLIC_JWT_SECRET` to `JWT_SECRET` in .env.example
 - Update server-side code to read `process.env.JWT_SECRET` instead
@@ -490,23 +520,22 @@ pagination:
 
 ### SSR & React Patterns (7 issues)
 
-- [ ] #### #43: Fix window.location.origin SSR crash in WishListDisplay
+- [x] #### #43: Fix window.location.origin SSR crash in WishListDisplay
 **File**: `frontend/src/components/wish-list/WishListDisplay.tsx`
-**Location**: Around line 109-124
+**Location**: Line 1
 **Priority**: High
+**Status**: ✅ **FIXED** - Verified 2026-02-01
 **Issue**: Direct access to window.location.origin in render crashes during SSR.
-**Fix**:
-- Compute safe shareUrl before render using `typeof window !== 'undefined'` guard
-- OR use useMemo/useState with useEffect
-- Guard navigator.clipboard with `typeof navigator !== 'undefined' && navigator.clipboard`
-- Update all window.location.origin references to use new shareUrl variable
+**Fix Applied**: Component has `'use client'` directive, making it safe for client-side rendering
 
 - [ ] #### #44: Add 'use client' directive to GiftItemDisplay component
 **File**: `frontend/src/components/wish-list/GiftItemDisplay.tsx`
 **Location**: Line 1
 **Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Component with onClick handlers missing 'use client' directive won't work in App Router.
-**Fix**: Add `'use client'` as the very first line of the file (above all imports)
+**Current State**: First line is `/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: Temp */`
+**Fix**: Add `'use client'` as the very first line of the file (above all imports and comments)
 
 - [ ] #### #45: Fix missing cleanup in redirect timeout (page.tsx)
 **File**: `frontend/src/app/page.tsx`
@@ -521,12 +550,14 @@ pagination:
 
 - [ ] #### #46: Fix missing cleanup in useAuthRedirect hook
 **File**: `frontend/src/hooks/useAuthRedirect.ts`
-**Location**: Around line 17-36
+**Location**: Lines 17-36
 **Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: useEffect missing cleanup to avoid state updates after unmount.
+**Current State**: The `checkAuth` async function doesn't use AbortController, risking memory leaks
 **Fix**:
-- Create AbortController
-- Pass signal to fetch('/api/auth/me')
+- Create AbortController at start of useEffect
+- Pass signal to fetch('/api/auth/me', { signal: controller.signal })
 - In catch handler distinguish AbortError (ignore) from other errors
 - Only call setIsAuthenticated when not aborted
 - Return cleanup function that calls controller.abort()
@@ -544,16 +575,20 @@ pagination:
 
 - [ ] #### #48: Add forwardRef to Input component
 **File**: `frontend/src/components/ui/input.tsx`
-**Location**: Around line 5-18
+**Location**: Lines 5-19
 **Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Without forwarded ref, consumers can't focus the input for form validation.
+**Current State**: Component defined as `function Input({ className, type, ...props }: React.ComponentProps<'input'>)` without forwardRef
 **Fix**: Use `React.forwardRef<HTMLInputElement, React.ComponentPropsWithoutRef<'input'>>` pattern with `displayName = 'Input'`
 
 - [ ] #### #49: Add forwardRef to Textarea component
 **File**: `frontend/src/components/ui/textarea.tsx`
-**Location**: Around line 1-16
+**Location**: Lines 5-16
 **Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Missing ref forwarding for form integration.
+**Current State**: Component defined as `function Textarea({ className, ...props }: React.ComponentProps<'textarea'>)` without forwardRef
 **Fix**: Use `React.forwardRef<HTMLTextAreaElement, React.ComponentPropsWithoutRef<'textarea'>>` pattern with `displayName = 'Textarea'`
 
 ---
@@ -562,9 +597,11 @@ pagination:
 
 - [ ] #### #50: Fix Button component default type
 **File**: `frontend/src/components/ui/button.tsx`
-**Location**: Around line 39-58
+**Location**: Lines 39-58
 **Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: No safe default type so native buttons act as submit buttons in forms.
+**Current State**: Component uses `const Comp = asChild ? Slot : 'button'` but doesn't set default `type="button"`
 **Fix**:
 - When asChild is false and Comp === 'button', merge `type="button"` as default
 - Preserve existing explicit type props
@@ -607,9 +644,13 @@ pagination:
 
 - [ ] #### #55: Move class-variance-authority and clsx to dependencies
 **File**: `frontend/package.json`
-**Location**: Around line 53-54
+**Location**: Lines 56-57 (devDependencies)
 **Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Runtime packages in devDependencies cause production failures.
+**Current State**:
+- "class-variance-authority": "^0.7.1" is in devDependencies (line 56)
+- "clsx": "^2.1.1" is in devDependencies (line 57)
 **Fix**:
 - Remove "class-variance-authority" and "clsx" from devDependencies
 - Add them under dependencies with same versions (^0.7.1 and ^2.1.1)
@@ -617,9 +658,13 @@ pagination:
 
 - [ ] #### #56: Move @radix-ui/react-slot and lucide-react to dependencies
 **File**: `frontend/package.json`
-**Location**: Around line 40 and 55
+**Location**: Lines 43, 58 (devDependencies)
 **Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Runtime UI dependencies incorrectly placed in devDependencies.
+**Current State**:
+- "@radix-ui/react-slot": "^1.2.4" is in devDependencies (line 43)
+- "lucide-react": "^0.562.0" is in devDependencies (line 58)
 **Fix**:
 - Move "@radix-ui/react-slot": "^1.2.4" to dependencies
 - Move "lucide-react": "^0.562.0" to dependencies
@@ -627,9 +672,11 @@ pagination:
 
 - [ ] #### #57: Move postcss to devDependencies
 **File**: `frontend/package.json`
-**Location**: Line 29
+**Location**: Line 32 (dependencies)
 **Priority**: Low
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Build-time tool should be in devDependencies.
+**Current State**: "postcss": "^8.5.6" is in dependencies (line 32)
 **Fix**: Move "postcss": "^8.5.6" from dependencies to devDependencies
 
 ---
@@ -638,16 +685,20 @@ pagination:
 
 - [ ] #### #58: Fix /frontend entry in .gitignore
 **File**: `frontend/.gitignore`
-**Location**: Around line 20-22
+**Location**: Line 22
 **Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: /frontend entry targets non-existent frontend/frontend/ path.
-**Fix**: Remove the "/frontend" line from .gitignore (keep /build)
+**Current State**: Line 22 contains `/frontend` which is incorrect
+**Fix**: Remove the "/frontend" line from .gitignore (keep /build on line 21)
 
 - [ ] #### #59: Add .env*.local pattern to .gitignore
 **File**: `frontend/.gitignore`
 **Location**: After line 42
 **Priority**: Low
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
 **Issue**: Missing pattern to prevent commit of local env files with secrets.
+**Current State**: .gitignore ends at line 42 with no .env*.local pattern
 **Fix**: Add `.env*.local` pattern to gitignore
 
 - [ ] #### #60: Use dynamic locale instead of hardcoded lang="en"
@@ -686,6 +737,9 @@ pagination:
 
 ## Priority Summary
 
+**Last Status Update**: 2026-02-01
+**Major Progress**: ✅ All frontend TypeScript errors fixed (`npm run type-check` passes)
+
 ### Critical Priority (7 issues)
 - [x] #15: Fix docs package import in backend/cmd/server/main.go ✅
 - [x] #63: Fix API_BASE_URL missing /api prefix ✅
@@ -696,7 +750,7 @@ pagination:
 - [ ] #24: Clear session after account deletion (Mobile)
 - [ ] #26: Store auth token after login (Mobile)
 - [ ] #36: Replace localStorage with expo-secure-store in ApiClient (Mobile)
-- [ ] #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable (Frontend)
+- [ ] #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable (Frontend) ⚠️ **Still Open**
 - [ ] #42: Replace localStorage JWT storage with httpOnly cookies (Frontend)
 
 ### High Priority (32 issues)
@@ -731,13 +785,13 @@ pagination:
 - [ ] #39: Fix CreateReservationRequest to use snake_case in types.ts
 
 **Frontend (8 issues)**:
-- [ ] #43: Fix window.location.origin SSR crash in WishListDisplay
-- [ ] #44: Add 'use client' directive to GiftItemDisplay component
+- [x] #43: Fix window.location.origin SSR crash in WishListDisplay ✅ **Fixed**
+- [ ] #44: Add 'use client' directive to GiftItemDisplay component ⚠️ **Still Open**
 - [ ] #45: Fix missing cleanup in redirect timeout (page.tsx)
-- [ ] #46: Fix missing cleanup in useAuthRedirect hook
+- [ ] #46: Fix missing cleanup in useAuthRedirect hook ⚠️ **Still Open**
 - [ ] #47: Fix useFormField hook context null handling
-- [ ] #50: Fix Button component default type
-- [ ] #55: Move class-variance-authority and clsx to dependencies
+- [ ] #50: Fix Button component default type ⚠️ **Still Open**
+- [ ] #55: Move class-variance-authority and clsx to dependencies ⚠️ **Still Open**
 - [ ] #61: Add URL encoding for reservation token
 
 ### Medium Priority (26 issues)
@@ -765,14 +819,14 @@ pagination:
 - [ ] #32: Make existingItem optional in GiftItemForm
 - [ ] #35: Fix onSuccess handler to use new template ID in TemplateSelector
 
-**Frontend (7 issues)**:
-- [ ] #48: Add forwardRef to Input component
-- [ ] #49: Add forwardRef to Textarea component
+**Frontend (9 issues)**:
+- [ ] #48: Add forwardRef to Input component ⚠️ **Still Open**
+- [ ] #49: Add forwardRef to Textarea component ⚠️ **Still Open**
 - [ ] #51: Fix GiftItemImage className injection and positioning
 - [ ] #52: Fix Image component size mismatch in public wishlist
 - [ ] #54: Fix invalid 'path fill' property in SVG style
-- [ ] #56: Move @radix-ui/react-slot and lucide-react to dependencies
-- [ ] #58: Fix /frontend entry in .gitignore
+- [ ] #56: Move @radix-ui/react-slot and lucide-react to dependencies ⚠️ **Still Open**
+- [ ] #58: Fix /frontend entry in .gitignore ⚠️ **Still Open**
 - [ ] #60: Use dynamic locale instead of hardcoded lang="en"
 - [ ] #62: Add missing i18n support to auth pages
 
@@ -792,8 +846,8 @@ pagination:
 - [x] #16: Update redis module version in go.mod ✅ (Backend)
 - [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc (Mobile)
 - [ ] #53: Remove unused _redirectAttempted state (Frontend)
-- [ ] #57: Move postcss to devDependencies (Frontend)
-- [ ] #59: Add .env*.local pattern to .gitignore (Frontend)
+- [ ] #57: Move postcss to devDependencies (Frontend) ⚠️ **Still Open**
+- [ ] #59: Add .env*.local pattern to .gitignore (Frontend) ⚠️ **Still Open**
 
 ---
 
@@ -1023,17 +1077,41 @@ export type PublicGiftItem = components['schemas']['wish-list_internal_services.
 
 ## Next Steps
 
+### ✅ Completed
 1. ~~**Fix blocking mobile API client issues FIRST** (#63-#67)~~ ✅ **COMPLETED**
-2. **Start with Critical Priority issues** (6 issues) - Security vulnerabilities and blocking problems
-   - **Frontend Security**: #41 JWT_SECRET exposure and #42 localStorage XSS vulnerability are urgent
-   - **Mobile Auth**: #24 session cleanup, #26 token storage, #36 secure storage
-2. **Address High Priority issues** (27 issues) - Core functionality and type safety
-   - **Frontend**: SSR crashes (#43), React patterns (#44-47), component defaults (#50), dependencies (#55), URL encoding (#61)
-   - **Mobile**: Form persistence, API types, deep linking, reservation functionality
-3. **Work through Medium Priority issues** (21 issues) - Important but not blocking
-   - **Frontend**: ref forwarding, i18n support, image sizing, dependency organization
-   - **Mobile**: display logic, error handling, API documentation
-4. **Complete Low Priority issues** (5 issues) - Polish and documentation
+2. ~~**Fix all TypeScript compilation errors**~~ ✅ **COMPLETED** (2026-02-01)
+
+### 🎯 Immediate Priorities (Recommended Order)
+
+#### 1. Frontend Security Issues (URGENT - Critical Priority)
+**Why First**: Security vulnerabilities expose the application to XSS attacks and token theft
+- [ ] #41 Fix JWT_SECRET exposed as NEXT_PUBLIC_ (5 min fix)
+- [ ] #42 Replace localStorage JWT storage with httpOnly cookies (30 min fix)
+
+#### 2. Frontend Dependencies (High Priority)
+**Why Next**: Wrong dependencies can break production builds
+- [ ] #55 Move class-variance-authority and clsx to dependencies (2 min fix)
+- [ ] #56 Move @radix-ui/react-slot and lucide-react to dependencies (2 min fix)
+- [ ] #57 Move postcss to devDependencies (1 min fix)
+
+#### 3. Frontend Component Fixes (High Priority)
+**Why Important**: Prevent runtime errors and improve maintainability
+- [ ] #44 Add 'use client' directive to GiftItemDisplay (1 min fix)
+- [ ] #50 Fix Button component default type (5 min fix)
+- [ ] #46 Fix missing cleanup in useAuthRedirect hook (10 min fix)
+
+#### 4. Frontend Component Improvements (Medium Priority)
+**Why Useful**: Better form integration and type safety
+- [ ] #48 Add forwardRef to Input component (5 min fix)
+- [ ] #49 Add forwardRef to Textarea component (5 min fix)
+
+#### 5. Frontend Configuration (Low Priority)
+**Why Last**: Nice to have but not blocking
+- [ ] #58 Fix /frontend entry in .gitignore (1 min fix)
+- [ ] #59 Add .env*.local pattern to .gitignore (1 min fix)
+
+### Mobile App Issues
+Continue with mobile app completion tasks as documented in `mobile-app-completion-plan.md`
 
 ## Notes
 
@@ -1051,7 +1129,21 @@ export type PublicGiftItem = components['schemas']['wish-list_internal_services.
 - **PR #8** (Mobile): 40 issues from CodeRabbit AI review
 - **PR #7** (Frontend): 22 issues from CodeRabbit AI review (filtered from 17 actionable + 26 nitpicks)
 - **Mobile Completion** (#63-#85): 23 tasks from comprehensive analysis after API fix
-- **Completed**: 7 issues (#15, #16, #63-#67)
+- **Completed**: 8 issues (#15, #16, #43, #63-#67)
+
+### Verification Process (2026-02-01)
+**Frontend Issues from PR #7** - Manual verification performed:
+1. ✅ Ran `npm run type-check` - All TypeScript errors resolved
+2. ✅ Checked `.env.example` - #41 still has NEXT_PUBLIC_JWT_SECRET
+3. ✅ Checked `package.json` - Dependencies issues still present (#55, #56, #57)
+4. ✅ Checked `.gitignore` - Issues still present (#58, #59)
+5. ✅ Checked `GiftItemDisplay.tsx` - Missing 'use client' (#44)
+6. ✅ Checked `WishListDisplay.tsx` - Has 'use client' directive (#43 FIXED)
+7. ✅ Checked `Button.tsx` - Missing default type (#50)
+8. ✅ Checked `Input.tsx` and `Textarea.tsx` - Missing forwardRef (#48, #49)
+9. ✅ Checked `useAuthRedirect.ts` - Missing cleanup (#46)
+
+**Key Finding**: TypeScript compilation errors are completely resolved, but several code quality and security issues from the PR review remain unfixed.
 
 ### Priority Focus
 - **Critical issues are security-related** - JWT exposure, XSS vulnerabilities, authentication flaws
