@@ -70,89 +70,89 @@ func NewWishListService(
 }
 
 type CreateWishListInput struct {
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Occasion     string `json:"occasion"`
-	OccasionDate string `json:"occasion_date"`
-	TemplateID   string `json:"template_id"`
-	IsPublic     bool   `json:"is_public"`
+	Title        string
+	Description  string
+	Occasion     string
+	OccasionDate string
+	TemplateID   string
+	IsPublic     bool
 }
 
 type UpdateWishListInput struct {
-	Title        *string `json:"title"`
-	Description  *string `json:"description"`
-	Occasion     *string `json:"occasion"`
-	OccasionDate *string `json:"occasion_date"`
-	TemplateID   *string `json:"template_id"`
-	IsPublic     *bool   `json:"is_public"`
+	Title        *string
+	Description  *string
+	Occasion     *string
+	OccasionDate *string
+	TemplateID   *string
+	IsPublic     *bool
 }
 
 type WishListOutput struct {
-	ID           string `json:"id"`
-	OwnerID      string `json:"owner_id"`
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Occasion     string `json:"occasion"`
-	OccasionDate string `json:"occasion_date"`
-	TemplateID   string `json:"template_id"`
-	IsPublic     bool   `json:"is_public"`
-	PublicSlug   string `json:"public_slug"`
-	ViewCount    int64  `json:"view_count"`
-	CreatedAt    string `json:"created_at"`
-	UpdatedAt    string `json:"updated_at"`
+	ID           string
+	OwnerID      string
+	Title        string
+	Description  string
+	Occasion     string
+	OccasionDate string
+	TemplateID   string
+	IsPublic     bool
+	PublicSlug   string
+	ViewCount    int64
+	CreatedAt    string
+	UpdatedAt    string
 }
 
 type CreateGiftItemInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Link        string  `json:"link"`
-	ImageURL    string  `json:"image_url"`
-	Price       float64 `json:"price"`
-	Priority    int     `json:"priority"`
-	Notes       string  `json:"notes"`
-	Position    int     `json:"position"`
+	Name        string
+	Description string
+	Link        string
+	ImageURL    string
+	Price       float64
+	Priority    int
+	Notes       string
+	Position    int
 }
 
 type UpdateGiftItemInput struct {
-	Name        *string  `json:"name,omitempty"`
-	Description *string  `json:"description,omitempty"`
-	Link        *string  `json:"link,omitempty"`
-	ImageURL    *string  `json:"image_url,omitempty"`
-	Price       *float64 `json:"price,omitempty"`
-	Priority    *int     `json:"priority,omitempty"`
-	Notes       *string  `json:"notes,omitempty"`
-	Position    *int     `json:"position,omitempty"`
+	Name        *string
+	Description *string
+	Link        *string
+	ImageURL    *string
+	Price       *float64
+	Priority    *int
+	Notes       *string
+	Position    *int
 }
 
 type GiftItemOutput struct {
-	ID                string  `json:"id"`
-	WishlistID        string  `json:"wishlist_id"`
-	Name              string  `json:"name"`
-	Description       string  `json:"description"`
-	Link              string  `json:"link"`
-	ImageURL          string  `json:"image_url"`
-	Price             float64 `json:"price"`
-	Priority          int     `json:"priority"`
-	ReservedByUserID  string  `json:"reserved_by_user_id"`
-	ReservedAt        string  `json:"reserved_at"`
-	PurchasedByUserID string  `json:"purchased_by_user_id"`
-	PurchasedAt       string  `json:"purchased_at"`
-	PurchasedPrice    float64 `json:"purchased_price"`
-	Notes             string  `json:"notes"`
-	Position          int     `json:"position"`
-	CreatedAt         string  `json:"created_at"`
-	UpdatedAt         string  `json:"updated_at"`
+	ID                string
+	WishlistID        string
+	Name              string
+	Description       string
+	Link              string
+	ImageURL          string
+	Price             float64
+	Priority          int
+	ReservedByUserID  string
+	ReservedAt        string
+	PurchasedByUserID string
+	PurchasedAt       string
+	PurchasedPrice    float64
+	Notes             string
+	Position          int
+	CreatedAt         string
+	UpdatedAt         string
 }
 
 type TemplateOutput struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	PreviewImageUrl string `json:"preview_image_url"`
-	Config          []byte `json:"config"` // JSONB stored as bytes
-	IsDefault       bool   `json:"is_default"`
-	CreatedAt       string `json:"created_at"`
-	UpdatedAt       string `json:"updated_at"`
+	ID              string
+	Name            string
+	Description     string
+	PreviewImageUrl string
+	Config          []byte // JSONB stored as bytes
+	IsDefault       bool
+	CreatedAt       string
+	UpdatedAt       string
 }
 
 func (s *WishListService) CreateWishList(ctx context.Context, userID string, input CreateWishListInput) (*WishListOutput, error) {

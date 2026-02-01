@@ -53,18 +53,18 @@ type CancelReservationInput struct {
 }
 
 type ReservationOutput struct {
-	ID               pgtype.UUID        `json:"id"`
-	GiftItemID       pgtype.UUID        `json:"giftItemId"`
-	ReservedByUserID pgtype.UUID        `json:"reservedByUserId"`
-	GuestName        *string            `json:"guestName"`
-	GuestEmail       *string            `json:"guestEmail"`
-	ReservationToken pgtype.UUID        `json:"reservationToken"`
-	Status           string             `json:"status"`
-	ReservedAt       pgtype.Timestamptz `json:"reservedAt"`
-	ExpiresAt        pgtype.Timestamptz `json:"expiresAt"`
-	CanceledAt       pgtype.Timestamptz `json:"canceledAt"`
-	CancelReason     pgtype.Text        `json:"cancelReason"`
-	NotificationSent pgtype.Bool        `json:"notificationSent"`
+	ID               pgtype.UUID
+	GiftItemID       pgtype.UUID
+	ReservedByUserID pgtype.UUID
+	GuestName        *string
+	GuestEmail       *string
+	ReservationToken pgtype.UUID
+	Status           string
+	ReservedAt       pgtype.Timestamptz
+	ExpiresAt        pgtype.Timestamptz
+	CanceledAt       pgtype.Timestamptz
+	CancelReason     pgtype.Text
+	NotificationSent pgtype.Bool
 }
 
 type ReservationStatusOutput struct {
