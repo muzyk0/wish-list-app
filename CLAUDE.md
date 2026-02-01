@@ -298,6 +298,13 @@ make clean                    # Clean build artifacts
 - Services: `backend/internal/services`
 - Old generated code directory removed (migrated from sqlc to manual sqlx operations)
 
+**Architecture Guide**: For comprehensive backend architecture documentation, see `/docs/Go-Architecture-Guide.md`. This guide covers:
+- 3-layer architecture (Handler-Service-Repository)
+- The ONE non-negotiable rule: JSON serialization ONLY in handlers
+- Complete code examples with good patterns and anti-patterns
+- Data flow, validation strategy, testing approach
+- Security considerations and when to evolve the architecture
+
 ### Mobile Structure
 - Routes defined in `mobile/app` using Expo Router
 - Components in `mobile/components`
