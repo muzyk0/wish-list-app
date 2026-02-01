@@ -1,7 +1,7 @@
 properties:
   items:
     items:
-      $ref: ./wish-list_internal_services.GiftItemOutput.yaml
+      $ref: ./internal_handlers.GiftItemResponse.yaml
     type: array
   limit:
     type: integer

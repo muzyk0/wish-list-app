@@ -168,7 +168,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "403":
           description: Access denied
           content:
@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -358,7 +358,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+                $ref: "#/components/schemas/internal_handlers.UserResponse"
         "401":
           description: Unauthorized
           content:
@@ -403,7 +403,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+                $ref: "#/components/schemas/internal_handlers.UserResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -458,7 +458,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "404":
           description: Wish list not found
           content:
@@ -649,7 +649,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                  $ref: "#/components/schemas/internal_handlers.WishListResponse"
                 type: array
         "401":
           description: Unauthorized
@@ -687,7 +687,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -776,7 +776,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "403":
           description: Access denied
           content:
@@ -821,7 +821,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -947,7 +947,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -1127,7 +1127,7 @@ components:
           type: string
         user:
           allOf:
-            - $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+            - $ref: "#/components/schemas/internal_handlers.UserResponse"
           description: User information
       required:
         - token
@@ -1229,7 +1229,7 @@ components:
       properties:
         items:
           items:
-            $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+            $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
           type: array
         limit:
           type: integer
@@ -1245,6 +1245,49 @@ components:
         - page
         - pages
         - total
+      type: object
+    internal_handlers.GiftItemResponse:
+      properties:
+        created_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        image_url:
+          type: string
+        link:
+          type: string
+        name:
+          type: string
+        notes:
+          type: string
+        position:
+          type: integer
+        price:
+          type: number
+        priority:
+          type: integer
+        purchased_at:
+          type: string
+        purchased_by_user_id:
+          type: string
+        purchased_price:
+          type: number
+        reserved_at:
+          type: string
+        reserved_by_user_id:
+          type: string
+        updated_at:
+          type: string
+        wishlist_id:
+          type: string
+      required:
+        - created_at
+        - id
+        - name
+        - updated_at
+        - wishlist_id
       type: object
     internal_handlers.GiftItemSummary:
       properties:
@@ -1406,58 +1449,7 @@ components:
         - data
         - pagination
       type: object
-    internal_handlers.WishListSummary:
-      properties:
-        id:
-          type: string
-        ownerFirstName:
-          type: string
-        ownerLastName:
-          type: string
-        title:
-          type: string
-      required:
-        - id
-        - title
-      type: object
-    wish-list_internal_services.GiftItemOutput:
-      properties:
-        created_at:
-          type: string
-        description:
-          type: string
-        id:
-          type: string
-        image_url:
-          type: string
-        link:
-          type: string
-        name:
-          type: string
-        notes:
-          type: string
-        position:
-          type: integer
-        price:
-          type: number
-        priority:
-          type: integer
-        purchased_at:
-          type: string
-        purchased_by_user_id:
-          type: string
-        purchased_price:
-          type: number
-        reserved_at:
-          type: string
-        reserved_by_user_id:
-          type: string
-        updated_at:
-          type: string
-        wishlist_id:
-          type: string
-      type: object
-    wish-list_internal_services.UserOutput:
+    internal_handlers.UserResponse:
       properties:
         avatar_url:
           type: string
@@ -1469,10 +1461,14 @@ components:
           type: string
         last_name:
           type: string
+      required:
+        - email
+        - id
       type: object
-    wish-list_internal_services.WishListOutput:
+    internal_handlers.WishListResponse:
       properties:
         created_at:
+          description: ViewCount intentionally excluded - internal metric
           type: string
         description:
           type: string
@@ -1494,6 +1490,24 @@ components:
           type: string
         updated_at:
           type: string
-        view_count:
-          type: integer
+      required:
+        - created_at
+        - id
+        - owner_id
+        - title
+        - updated_at
+      type: object
+    internal_handlers.WishListSummary:
+      properties:
+        id:
+          type: string
+        ownerFirstName:
+          type: string
+        ownerLastName:
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - title
       type: object

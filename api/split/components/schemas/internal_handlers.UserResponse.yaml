@@ -9,4 +9,7 @@ properties:
     type: string
   last_name:
     type: string
+required:
+  - email
+  - id
 type: object

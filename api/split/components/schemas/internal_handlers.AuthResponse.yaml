@@ -4,7 +4,7 @@ properties:
     type: string
   user:
     allOf:
-      - $ref: ./wish-list_internal_services.UserOutput.yaml
+      - $ref: ./internal_handlers.UserResponse.yaml
     description: User information
 required:
   - token

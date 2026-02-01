@@ -185,7 +185,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -257,7 +257,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -450,7 +450,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -572,7 +572,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
                                 }
                             }
                         }
@@ -646,7 +646,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
                                 }
                             }
                         }
@@ -730,7 +730,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1044,7 +1044,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                        "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                     }
                                 }
                             }
@@ -1106,7 +1106,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1182,7 +1182,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1254,7 +1254,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1524,7 +1524,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -1816,7 +1816,7 @@
                         "description": "User information",
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                                "$ref": "#/components/schemas/internal_handlers.UserResponse"
                             }
                         ]
                     }
@@ -1969,7 +1969,7 @@
                     "items": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                            "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                         }
                     },
                     "limit": {
@@ -1983,6 +1983,69 @@
                     },
                     "total": {
                         "type": "integer"
+                    }
+                }
+            },
+            "internal_handlers.GiftItemResponse": {
+                "type": "object",
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "updated_at",
+                    "wishlist_id"
+                ],
+                "properties": {
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "priority": {
+                        "type": "integer"
+                    },
+                    "purchased_at": {
+                        "type": "string"
+                    },
+                    "purchased_by_user_id": {
+                        "type": "string"
+                    },
+                    "purchased_price": {
+                        "type": "number"
+                    },
+                    "reserved_at": {
+                        "type": "string"
+                    },
+                    "reserved_by_user_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "wishlist_id": {
+                        "type": "string"
                     }
                 }
             },
@@ -2222,85 +2285,12 @@
                     "pagination": {}
                 }
             },
-            "internal_handlers.WishListSummary": {
+            "internal_handlers.UserResponse": {
                 "type": "object",
                 "required": [
-                    "id",
-                    "title"
+                    "email",
+                    "id"
                 ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "ownerFirstName": {
-                        "type": "string"
-                    },
-                    "ownerLastName": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    }
-                }
-            },
-            "wish-list_internal_services.GiftItemOutput": {
-                "type": "object",
-                "properties": {
-                    "created_at": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "id": {
-                        "type": "string"
-                    },
-                    "image_url": {
-                        "type": "string"
-                    },
-                    "link": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "notes": {
-                        "type": "string"
-                    },
-                    "position": {
-                        "type": "integer"
-                    },
-                    "price": {
-                        "type": "number"
-                    },
-                    "priority": {
-                        "type": "integer"
-                    },
-                    "purchased_at": {
-                        "type": "string"
-                    },
-                    "purchased_by_user_id": {
-                        "type": "string"
-                    },
-                    "purchased_price": {
-                        "type": "number"
-                    },
-                    "reserved_at": {
-                        "type": "string"
-                    },
-                    "reserved_by_user_id": {
-                        "type": "string"
-                    },
-                    "updated_at": {
-                        "type": "string"
-                    },
-                    "wishlist_id": {
-                        "type": "string"
-                    }
-                }
-            },
-            "wish-list_internal_services.UserOutput": {
-                "type": "object",
                 "properties": {
                     "avatar_url": {
                         "type": "string"
@@ -2319,10 +2309,18 @@
                     }
                 }
             },
-            "wish-list_internal_services.WishListOutput": {
+            "internal_handlers.WishListResponse": {
                 "type": "object",
+                "required": [
+                    "created_at",
+                    "id",
+                    "owner_id",
+                    "title",
+                    "updated_at"
+                ],
                 "properties": {
                     "created_at": {
+                        "description": "ViewCount intentionally excluded - internal metric",
                         "type": "string"
                     },
                     "description": {
@@ -2354,9 +2352,27 @@
                     },
                     "updated_at": {
                         "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.WishListSummary": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
                     },
-                    "view_count": {
-                        "type": "integer"
+                    "ownerFirstName": {
+                        "type": "string"
+                    },
+                    "ownerLastName": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
                     }
                 }
             }

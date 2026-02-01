@@ -66,8 +66,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/wish-list_internal_services.GiftItemOutput.yaml
+            $ref: ../components/schemas/internal_handlers.GiftItemResponse.yaml
     '403':
       description: Access denied
       content:
@@ -113,8 +112,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/wish-list_internal_services.GiftItemOutput.yaml
+            $ref: ../components/schemas/internal_handlers.GiftItemResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:
