@@ -49,16 +49,39 @@ type UpdateProfileRequest struct {
 	AvatarUrl *string `json:"avatar_url"`
 }
 
+// UserResponse is the handler-level DTO for user data
+type UserResponse struct {
+	ID        string `json:"id" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	AvatarUrl string `json:"avatar_url"`
+}
+
 type AuthResponse struct {
 	// User information
-	User *services.UserOutput `json:"user" validate:"required"`
+	User *UserResponse `json:"user" validate:"required"`
 	// Authentication token
 	Token string `json:"token" validate:"required"`
 }
 
 type ProfileResponse struct {
 	// User profile information
-	User *services.UserOutput `json:"user" validate:"required"`
+	User *UserResponse `json:"user" validate:"required"`
+}
+
+// toUserResponse maps service layer UserOutput to handler layer UserResponse
+func (h *UserHandler) toUserResponse(user *services.UserOutput) *UserResponse {
+	if user == nil {
+		return nil
+	}
+	return &UserResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		AvatarUrl: user.AvatarUrl,
+	}
 }
 
 // Register godoc
@@ -124,7 +147,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 	_ = h.analyticsService.TrackUserRegistration(ctx, user.ID, user.Email)
 
 	response := AuthResponse{
-		User:  user,
+		User:  h.toUserResponse(user),
 		Token: tokenString,
 	}
 
@@ -187,7 +210,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	_ = h.analyticsService.TrackUserLogin(ctx, user.ID)
 
 	response := AuthResponse{
-		User:  user,
+		User:  h.toUserResponse(user),
 		Token: tokenString,
 	}
 
@@ -202,7 +225,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200	{object}	services.UserOutput	"User profile"
+//	@Success		200	{object}	UserResponse	"User profile"
 //	@Failure		401	{object}	map[string]string	"Unauthorized"
 //	@Failure		404	{object}	map[string]string	"User not found"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
@@ -232,7 +255,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, h.toUserResponse(user))
 }
 
 // UpdateProfile godoc
@@ -244,7 +267,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Param			profile	body		UpdateProfileRequest	true	"Updated profile information"
-//	@Success		200		{object}	services.UserOutput		"Updated user profile"
+//	@Success		200		{object}	UserResponse		"Updated user profile"
 //	@Failure		400		{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401		{object}	map[string]string		"Unauthorized"
 //	@Failure		404		{object}	map[string]string		"User not found"
@@ -290,7 +313,7 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, h.toUserResponse(user))
 }
 
 func (h *UserHandler) DeleteAccount(c echo.Context) error {

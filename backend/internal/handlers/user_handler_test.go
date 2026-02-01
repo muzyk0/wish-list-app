@@ -103,8 +103,17 @@ func TestUserHandler_Register(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	// Expected output
-	expectedUser := &services.UserOutput{
+	// Service returns this
+	serviceUser := &services.UserOutput{
+		ID:        "123",
+		Email:     "test@example.com",
+		FirstName: "John",
+		LastName:  "Doe",
+		AvatarUrl: "",
+	}
+
+	// Handler should map it to this
+	expectedResponse := &UserResponse{
 		ID:        "123",
 		Email:     "test@example.com",
 		FirstName: "John",
@@ -119,7 +128,7 @@ func TestUserHandler_Register(t *testing.T) {
 		FirstName: reqBody.FirstName,
 		LastName:  reqBody.LastName,
 		AvatarUrl: reqBody.AvatarUrl,
-	}).Return(expectedUser, nil)
+	}).Return(serviceUser, nil)
 
 	// Call the handler
 	err := handler.Register(c)
@@ -131,7 +140,7 @@ func TestUserHandler_Register(t *testing.T) {
 	var response AuthResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
-	assert.Equal(t, expectedUser, response.User)
+	assert.Equal(t, expectedResponse, response.User)
 	assert.NotEmpty(t, response.Token)
 
 	mockService.AssertExpectations(t)
@@ -158,8 +167,17 @@ func TestUserHandler_Login(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	// Expected output
-	expectedUser := &services.UserOutput{
+	// Service returns this
+	serviceUser := &services.UserOutput{
+		ID:        "123",
+		Email:     "test@example.com",
+		FirstName: "John",
+		LastName:  "Doe",
+		AvatarUrl: "",
+	}
+
+	// Handler should map it to this
+	expectedResponse := &UserResponse{
 		ID:        "123",
 		Email:     "test@example.com",
 		FirstName: "John",
@@ -171,7 +189,7 @@ func TestUserHandler_Login(t *testing.T) {
 	mockService.On("Login", mock.Anything, services.LoginUserInput{
 		Email:    reqBody.Email,
 		Password: reqBody.Password,
-	}).Return(expectedUser, nil)
+	}).Return(serviceUser, nil)
 
 	// Call the handler
 	err := handler.Login(c)
@@ -183,7 +201,7 @@ func TestUserHandler_Login(t *testing.T) {
 	var response AuthResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
-	assert.Equal(t, expectedUser, response.User)
+	assert.Equal(t, expectedResponse, response.User)
 	assert.NotEmpty(t, response.Token)
 
 	mockService.AssertExpectations(t)
@@ -458,7 +476,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
 
-		var response services.UserOutput
+		var response UserResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
 		assert.Equal(t, expectedUser.Email, response.Email)
