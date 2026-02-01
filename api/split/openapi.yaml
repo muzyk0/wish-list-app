@@ -24,6 +24,10 @@ paths:
     $ref: paths/gift-items_{id}_purchase.yaml
   /health:
     $ref: paths/health.yaml
+  /protected/account:
+    $ref: paths/protected_account.yaml
+  /protected/export-data:
+    $ref: paths/protected_export-data.yaml
   /protected/profile:
     $ref: paths/protected_profile.yaml
   /public/wishlists/{slug}:

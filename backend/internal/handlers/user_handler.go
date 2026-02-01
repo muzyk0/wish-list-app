@@ -316,6 +316,18 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, h.toUserResponse(user))
 }
 
+// DeleteAccount godoc
+//
+// @Summary      Delete user account
+// @Description  Delete the authenticated user's account and all associated data. This action is irreversible.
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      204  {object}  nil  "Account deleted successfully"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /protected/account [delete]
 func (h *UserHandler) DeleteAccount(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)
@@ -338,6 +350,18 @@ func (h *UserHandler) DeleteAccount(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// ExportUserData godoc
+//
+// @Summary      Export user data
+// @Description  Export the authenticated user's data in JSON format for compliance and personal records
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  interface{}  "User data exported successfully"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /protected/export-data [get]
 func (h *UserHandler) ExportUserData(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)

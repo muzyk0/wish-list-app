@@ -1,0 +1,28 @@
+delete:
+  description: >-
+    Delete the authenticated user's account and all associated data. This action
+    is irreversible.
+  responses:
+    '204':
+      description: Account deleted successfully
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Delete user account
+  tags:
+    - User

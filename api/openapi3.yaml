@@ -349,6 +349,65 @@ paths:
       summary: Health check endpoint
       tags:
         - Health
+  /protected/account:
+    delete:
+      description: Delete the authenticated user's account and all associated data.
+        This action is irreversible.
+      responses:
+        "204":
+          description: Account deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Delete user account
+      tags:
+        - User
+  /protected/export-data:
+    get:
+      description: Export the authenticated user's data in JSON format for compliance
+        and personal records
+      responses:
+        "200":
+          description: User data exported successfully
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Export user data
+      tags:
+        - User
   /protected/profile:
     get:
       description: Get the authenticated user's profile information
