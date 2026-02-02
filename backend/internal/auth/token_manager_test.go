@@ -15,34 +15,7 @@ func TestNewTokenManager(t *testing.T) {
 	assert.Equal(t, []byte(secret), tm.secret)
 }
 
-func TestGenerateToken(t *testing.T) {
-	secret := "test-secret"
-	tm := NewTokenManager(secret)
-
-	userID := "user-123"
-	email := "test@example.com"
-	userType := "user"
-	expiryHours := 1
-
-	tokenString, err := tm.GenerateToken(userID, email, userType, expiryHours)
-	require.NoError(t, err)
-	assert.NotEmpty(t, tokenString)
-
-	// Parse and validate the token
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (any, error) {
-		return []byte(secret), nil
-	})
-	require.NoError(t, err)
-	assert.True(t, token.Valid)
-
-	claims, ok := token.Claims.(*Claims)
-	require.True(t, ok)
-
-	assert.Equal(t, userID, claims.UserID)
-	assert.Equal(t, email, claims.Email)
-	assert.Equal(t, userType, claims.UserType)
-	assert.Equal(t, "wish-list-app", claims.Issuer)
-}
+// TestGenerateToken removed - replaced by TestGenerateAccessToken and TestGenerateRefreshToken
 
 func TestValidateToken(t *testing.T) {
 	secret := "test-secret"
@@ -52,7 +25,7 @@ func TestValidateToken(t *testing.T) {
 	email := "test@example.com"
 	userType := "user"
 
-	tokenString, err := tm.GenerateToken(userID, email, userType, 1)
+	tokenString, err := tm.GenerateAccessToken(userID, email, userType)
 	require.NoError(t, err)
 
 	claims, err := tm.ValidateToken(tokenString)
@@ -74,7 +47,7 @@ func TestValidateTokenInvalid(t *testing.T) {
 
 	// Test with wrong secret
 	wrongTm := NewTokenManager("wrong-secret")
-	tokenString, err := tm.GenerateToken("user-123", "test@example.com", "user", 1)
+	tokenString, err := tm.GenerateAccessToken("user-123", "test@example.com", "user")
 	require.NoError(t, err)
 
 	_, err = wrongTm.ValidateToken(tokenString)
@@ -109,7 +82,10 @@ func TestGenerateGuestToken(t *testing.T) {
 	assert.Equal(t, "wish-list-app", claims.Issuer)
 }
 
-func TestRefreshToken(t *testing.T) {
+// Note: Old RefreshToken method removed in favor of cross-domain auth flow.
+// Token refresh now handled by AuthHandler with rotation support.
+
+func TestGenerateAccessToken(t *testing.T) {
 	secret := "test-secret"
 	tm := NewTokenManager(secret)
 
@@ -117,20 +93,53 @@ func TestRefreshToken(t *testing.T) {
 	email := "test@example.com"
 	userType := "user"
 
-	// Generate initial token with 1 hour expiry
-	initialToken, err := tm.GenerateToken(userID, email, userType, 1)
+	tokenString, err := tm.GenerateAccessToken(userID, email, userType)
 	require.NoError(t, err)
+	assert.NotEmpty(t, tokenString)
 
-	// Refresh token with 2 hours expiry
-	refreshedToken, err := tm.RefreshToken(initialToken, 2)
+	// Parse and validate the token
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (any, error) {
+		return []byte(secret), nil
+	})
 	require.NoError(t, err)
-	assert.NotEqual(t, initialToken, refreshedToken)
+	assert.True(t, token.Valid)
 
-	// Validate refreshed token
-	claims, err := tm.ValidateToken(refreshedToken)
-	require.NoError(t, err)
+	claims, ok := token.Claims.(*Claims)
+	require.True(t, ok)
 
 	assert.Equal(t, userID, claims.UserID)
 	assert.Equal(t, email, claims.Email)
 	assert.Equal(t, userType, claims.UserType)
+	assert.Equal(t, "wish-list-app", claims.Issuer)
+	assert.Empty(t, claims.TokenID, "Access tokens should not have TokenID")
+}
+
+func TestGenerateRefreshToken(t *testing.T) {
+	secret := "test-secret"
+	tm := NewTokenManager(secret)
+
+	userID := "user-123"
+	email := "test@example.com"
+	userType := "user"
+	tokenID := "token-id-123"
+
+	tokenString, err := tm.GenerateRefreshToken(userID, email, userType, tokenID)
+	require.NoError(t, err)
+	assert.NotEmpty(t, tokenString)
+
+	// Parse and validate the token
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (any, error) {
+		return []byte(secret), nil
+	})
+	require.NoError(t, err)
+	assert.True(t, token.Valid)
+
+	claims, ok := token.Claims.(*Claims)
+	require.True(t, ok)
+
+	assert.Equal(t, userID, claims.UserID)
+	assert.Equal(t, email, claims.Email)
+	assert.Equal(t, userType, claims.UserType)
+	assert.Equal(t, tokenID, claims.TokenID)
+	assert.Equal(t, "wish-list-app", claims.Issuer)
 }

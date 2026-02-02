@@ -17,10 +17,10 @@
 
 **Purpose**: Backend infrastructure required for all auth flows
 
-- [ ] T001 Add new environment variables to backend/.env.example for JWT_REFRESH_TOKEN_EXPIRY and CORS_ALLOWED_ORIGINS
-- [ ] T002 [P] Create backend/internal/auth/code_store.go with CodeStore struct for handoff codes
-- [ ] T003 [P] Create backend/internal/middleware/cors.go with CORS configuration middleware
-- [ ] T004 [P] Create backend/internal/middleware/rate_limit.go with RateLimiter implementation
+- [X] T001 Add new environment variables to backend/.env.example for JWT_REFRESH_TOKEN_EXPIRY and CORS_ALLOWED_ORIGINS
+- [X] T002 [P] Create backend/internal/auth/code_store.go with CodeStore struct for handoff codes
+- [X] T003 [P] Create backend/internal/middleware/cors.go with CORS configuration middleware supporting credentials
+- [X] T004 [P] Create backend/internal/middleware/rate_limit.go with RateLimiter implementation
 
 ---
 
@@ -30,16 +30,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Extend backend/internal/auth/token_manager.go to support separate access (15m) and refresh (7d) token generation
-- [ ] T006 Create backend/internal/handlers/auth_handler.go with AuthHandler struct
-- [ ] T007 Implement POST /auth/refresh endpoint in backend/internal/handlers/auth_handler.go accepting cookie or Bearer token
-- [ ] T008 Implement POST /auth/mobile-handoff endpoint in backend/internal/handlers/auth_handler.go
-- [ ] T009 Implement POST /auth/exchange endpoint in backend/internal/handlers/auth_handler.go
-- [ ] T010 Implement POST /auth/logout endpoint in backend/internal/handlers/auth_handler.go
-- [ ] T011 Update backend/internal/handlers/user_handler.go Login method to set httpOnly refresh token cookie
-- [ ] T012 Register new auth routes and middleware in backend/cmd/server/main.go
-- [ ] T013 Add Swagger annotations to all new auth endpoints in backend/internal/handlers/auth_handler.go
-- [ ] T014 Run swag init to regenerate backend/docs/
+- [X] T005 Extend backend/internal/auth/token_manager.go to support separate access (15m) and refresh (7d) token generation
+- [X] T006 Create backend/internal/handlers/auth_handler.go with AuthHandler struct
+- [X] T007 Implement POST /auth/refresh endpoint in backend/internal/handlers/auth_handler.go accepting cookie or Bearer token
+- [X] T008 Implement POST /auth/mobile-handoff endpoint in backend/internal/handlers/auth_handler.go
+- [X] T009 Implement POST /auth/exchange endpoint in backend/internal/handlers/auth_handler.go
+- [X] T010 Implement POST /auth/logout endpoint in backend/internal/handlers/auth_handler.go
+- [X] T011 Update backend/internal/handlers/user_handler.go Login method to set httpOnly refresh token cookie
+- [X] T012 Register new auth routes and middleware in backend/cmd/server/main.go
+- [X] T013 Add Swagger annotations to all new auth endpoints in backend/internal/handlers/auth_handler.go
+- [X] T014 Run swag init to regenerate backend/docs/
 
 **Checkpoint**: Backend auth infrastructure ready - Frontend/Mobile can now begin
 

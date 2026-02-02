@@ -86,6 +86,11 @@ func main() {
 	// Initialize JWT token manager
 	tokenManager := auth.NewTokenManager(cfg.JWTSecret)
 
+	// Initialize code store for mobile handoff
+	codeStore := auth.NewCodeStore()
+	stopCleanup := codeStore.StartCleanupRoutine()
+	defer stopCleanup()
+
 	// Initialize S3 client
 	s3Client, err := aws.NewS3Client(cfg.AWSRegion, cfg.AWSAccessKeyID, cfg.AWSSecretAccessKey, cfg.AWSS3BucketName)
 	if err != nil {
@@ -190,6 +195,7 @@ func main() {
 	// Initialize handlers with analytics integration
 	healthHandler := handlers.NewHealthHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
+	authHandler := handlers.NewAuthHandler(userService, tokenManager, codeStore)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 
@@ -203,7 +209,7 @@ func main() {
 	accountCleanupService.StartScheduledCleanup(appCtx)
 
 	// Initialize routes
-	setupRoutes(e, healthHandler, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
+	setupRoutes(e, healthHandler, userHandler, authHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
 
 	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
@@ -250,7 +256,7 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
@@ -261,6 +267,12 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/register", userHandler.Register)
 	authGroup.POST("/login", userHandler.Login)
+	authGroup.POST("/refresh", authHandler.Refresh)
+	authGroup.POST("/exchange", authHandler.Exchange)
+
+	// Protected auth endpoints (require authentication)
+	authGroup.POST("/mobile-handoff", authHandler.MobileHandoff, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/logout", authHandler.Logout, auth.JWTMiddleware(tokenManager))
 
 	// Example protected route using JWT
 	protected := e.Group("/api/protected")

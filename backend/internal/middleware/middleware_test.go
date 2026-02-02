@@ -169,7 +169,9 @@ func TestCORSMiddleware(t *testing.T) {
 
 	// Check CORS headers
 	assert.Equal(t, "http://localhost:3000", rec.Header().Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))  // Check credentials
 	assert.Contains(t, rec.Header().Get("Access-Control-Allow-Methods"), "POST")
+	assert.Equal(t, "86400", rec.Header().Get("Access-Control-Max-Age"))
 }
 
 func TestTimeoutMiddleware(t *testing.T) {
