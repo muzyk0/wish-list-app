@@ -3,21 +3,22 @@ import * as SecureStore from 'expo-secure-store';
 import createClient from 'openapi-fetch';
 import type { paths } from './schema';
 import type {
-  User,
-  UserRegistration,
-  UserLogin,
-  LoginResponse,
-  WishList,
-  CreateWishListRequest,
-  UpdateWishListRequest,
-  GiftItem,
   CreateGiftItemRequest,
-  UpdateGiftItemRequest,
-  Reservation,
   CreateReservationRequest,
+  CreateWishListRequest,
+  GiftItem,
+  LoginResponse,
+  Reservation,
+  UpdateGiftItemRequest,
+  UpdateWishListRequest,
+  User,
+  UserLogin,
+  UserRegistration,
+  WishList,
 } from './types';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080';
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
 
 class ApiClient {
   private token: string | null = null;
@@ -60,7 +61,7 @@ class ApiClient {
   async login(credentials: UserLogin): Promise<LoginResponse> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.POST('/v1/users/login', {
+    const { data, error } = await this.client.POST('/auth/login', {
       body: credentials,
       headers: this.getHeaders(),
     });
@@ -72,15 +73,14 @@ class ApiClient {
       );
     }
 
-    const response = data as LoginResponse;
-    await this.setToken(response.token);
-    return response;
+    await this.setToken(data.token);
+    return data; // Fixed: was 'response' which was undefined
   }
 
   async register(userData: UserRegistration): Promise<LoginResponse> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.POST('/v1/users/register', {
+    const { data, error } = await this.client.POST('/auth/register', {
       body: userData,
       headers: this.getHeaders(),
     });
@@ -92,9 +92,8 @@ class ApiClient {
       );
     }
 
-    const response = data as LoginResponse;
-    await this.setToken(response.token);
-    return response;
+    await this.setToken(data.token);
+    return data; // Fixed: removed unnecessary cast and variable
   }
 
   async logout(): Promise<void> {
@@ -119,7 +118,7 @@ class ApiClient {
   async getProfile(): Promise<User> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET('/v1/users/me', {
+    const { data, error } = await this.client.GET('/protected/profile', {
       headers: this.getHeaders(),
     });
 
@@ -137,7 +136,7 @@ class ApiClient {
   }): Promise<User> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.PUT('/v1/users/me', {
+    const { data, error } = await this.client.PUT('/protected/profile', {
       body: userData,
       headers: this.getHeaders(),
     });
@@ -152,26 +151,20 @@ class ApiClient {
   async deleteAccount(): Promise<void> {
     await this.tokenReady;
 
-    // Note: DELETE /v1/users/me endpoint may not be implemented yet
-    // Commenting out for now
-    throw new Error('Delete account not implemented');
-
-    /* const { error } = await this.client.DELETE('/v1/users/me', {
+    const { error } = await this.client.DELETE('/protected/account', {
       headers: this.getHeaders(),
     });
 
     if (error) {
-      throw new Error(
-        (error as any)?.error || 'Failed to delete account',
-      );
-    } */
+      throw new Error((error as any)?.error || 'Failed to delete account');
+    }
   }
 
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET('/v1/wishlists', {
+    const { data, error } = await this.client.GET('/wishlists', {
       headers: this.getHeaders(),
     });
 
@@ -185,7 +178,7 @@ class ApiClient {
   async getWishListById(id: string): Promise<WishList> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET('/v1/wishlists/{id}', {
+    const { data, error } = await this.client.GET('/wishlists/{id}', {
       params: { path: { id } },
       headers: this.getHeaders(),
     });
@@ -200,13 +193,10 @@ class ApiClient {
   async getPublicWishList(slug: string): Promise<WishList> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET(
-      '/v1/wishlists/public/{slug}',
-      {
-        params: { path: { slug } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
+      params: { path: { slug } },
+      headers: this.getHeaders(),
+    });
 
     if (error || !data) {
       throw new Error(
@@ -220,13 +210,10 @@ class ApiClient {
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
     await this.tokenReady;
 
-    const { data: responseData, error } = await this.client.POST(
-      '/v1/wishlists',
-      {
-        body: data,
-        headers: this.getHeaders(),
-      },
-    );
+    const { data: responseData, error } = await this.client.POST('/wishlists', {
+      body: data,
+      headers: this.getHeaders(),
+    });
 
     if (error || !responseData) {
       throw new Error((error as any)?.error || 'Failed to create wish list');
@@ -242,7 +229,7 @@ class ApiClient {
     await this.tokenReady;
 
     const { data: responseData, error } = await this.client.PUT(
-      '/v1/wishlists/{id}',
+      '/wishlists/{id}',
       {
         params: { path: { id } },
         body: data,
@@ -260,7 +247,7 @@ class ApiClient {
   async deleteWishList(id: string): Promise<void> {
     await this.tokenReady;
 
-    const { error } = await this.client.DELETE('/v1/wishlists/{id}', {
+    const { error } = await this.client.DELETE('/wishlists/{id}', {
       params: { path: { id } },
       headers: this.getHeaders(),
     });
@@ -275,7 +262,7 @@ class ApiClient {
     await this.tokenReady;
 
     const { data, error } = await this.client.GET(
-      '/v1/wishlists/{wishlistId}/items',
+      '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
         headers: this.getHeaders(),
@@ -292,13 +279,10 @@ class ApiClient {
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET(
-      '/v1/wishlists/{wishlistId}/items/{itemId}',
-      {
-        params: { path: { wishlistId, itemId } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { data, error } = await this.client.GET('/gift-items/{id}', {
+      params: { path: { id: itemId } },
+      headers: this.getHeaders(),
+    });
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch gift item');
@@ -314,7 +298,7 @@ class ApiClient {
     await this.tokenReady;
 
     const { data: responseData, error } = await this.client.POST(
-      '/v1/wishlists/{wishlistId}/items',
+      '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
         body: data,
@@ -337,9 +321,9 @@ class ApiClient {
     await this.tokenReady;
 
     const { data: responseData, error } = await this.client.PUT(
-      '/v1/wishlists/{wishlistId}/items/{itemId}',
+      '/gift-items/{id}',
       {
-        params: { path: { wishlistId, itemId } },
+        params: { path: { id: itemId } },
         body: data,
         headers: this.getHeaders(),
       },
@@ -355,13 +339,10 @@ class ApiClient {
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
     await this.tokenReady;
 
-    const { error } = await this.client.DELETE(
-      '/v1/wishlists/{wishlistId}/items/{itemId}',
-      {
-        params: { path: { wishlistId, itemId } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { error } = await this.client.DELETE('/gift-items/{id}', {
+      params: { path: { id: itemId } },
+      headers: this.getHeaders(),
+    });
 
     if (error) {
       throw new Error((error as any)?.error || 'Failed to delete gift item');
@@ -376,9 +357,9 @@ class ApiClient {
     await this.tokenReady;
 
     const { data, error } = await this.client.POST(
-      '/v1/wishlists/{wishlistId}/items/{itemId}/mark-purchased',
+      '/gift-items/{id}/purchase',
       {
-        params: { path: { wishlistId, itemId } },
+        params: { path: { id: itemId } },
         body: { purchased_price: purchasedPrice },
         headers: this.getHeaders(),
       },
@@ -402,7 +383,7 @@ class ApiClient {
     await this.tokenReady;
 
     const { data: responseData, error } = await this.client.POST(
-      '/v1/wishlists/{wishlistId}/items/{itemId}/reserve',
+      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
@@ -420,7 +401,7 @@ class ApiClient {
   async getReservationsByUser(): Promise<Reservation[]> {
     await this.tokenReady;
 
-    const { data, error } = await this.client.GET('/v1/users/me/reservations', {
+    const { data, error } = await this.client.GET('/reservations', {
       headers: this.getHeaders(),
     });
 
@@ -434,8 +415,8 @@ class ApiClient {
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     await this.tokenReady;
 
-    const { error } = await this.client.POST(
-      '/v1/wishlists/{wishlistId}/items/{itemId}/cancel-reservation',
+    const { error } = await this.client.DELETE(
+      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
         headers: this.getHeaders(),

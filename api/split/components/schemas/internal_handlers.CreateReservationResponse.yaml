@@ -1,26 +1,33 @@
 properties:
-  cancelReason:
+  cancel_reason:
     type: string
-  canceledAt:
+  canceled_at:
     type: string
-  expiresAt:
+  expires_at:
     type: string
-  giftItemId:
+  gift_item_id:
     type: string
-  guestEmail:
+  guest_email:
     type: string
-  guestName:
+  guest_name:
     type: string
   id:
     type: string
-  notificationSent:
+  notification_sent:
     type: boolean
-  reservationToken:
+  reservation_token:
     type: string
-  reservedAt:
+  reserved_at:
     type: string
-  reservedByUserId:
+  reserved_by_user_id:
     type: string
   status:
     type: string
+required:
+  - gift_item_id
+  - id
+  - notification_sent
+  - reservation_token
+  - reserved_at
+  - status
 type: object

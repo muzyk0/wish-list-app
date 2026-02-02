@@ -178,7 +178,7 @@ func TestWishListHandler_GetWishListByPublicSlug(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
 
-		var response services.WishListOutput
+		var response WishListResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
 		assert.Equal(t, expectedWishList.ID, response.ID)
@@ -644,7 +644,7 @@ func TestWishListHandler_MarkGiftItemAsPurchased(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
 
-		var response services.GiftItemOutput
+		var response GiftItemResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
 		assert.InEpsilon(t, expectedGiftItem.PurchasedPrice, response.PurchasedPrice, 0.01)
@@ -995,7 +995,7 @@ func TestWishListHandler_UpdateWishListTemplate(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
 
-		var response services.WishListOutput
+		var response WishListResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		require.NoError(t, err)
 		assert.Equal(t, templateID, response.TemplateID)

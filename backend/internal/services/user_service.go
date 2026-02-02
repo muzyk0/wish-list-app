@@ -36,32 +36,32 @@ func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 }
 
 type RegisterUserInput struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	AvatarUrl string `json:"avatar_url"`
+	Email     string
+	Password  string
+	FirstName string
+	LastName  string
+	AvatarUrl string
 }
 
 type LoginUserInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string
+	Password string
 }
 
 type UpdateUserInput struct {
-	Email     *string `json:"email,omitempty"`
-	Password  *string `json:"password,omitempty"`
-	FirstName *string `json:"first_name,omitempty"`
-	LastName  *string `json:"last_name,omitempty"`
-	AvatarUrl *string `json:"avatar_url,omitempty"`
+	Email     *string
+	Password  *string
+	FirstName *string
+	LastName  *string
+	AvatarUrl *string
 }
 
 type UserOutput struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	AvatarUrl string `json:"avatar_url"`
+	ID        string
+	Email     string
+	FirstName string
+	LastName  string
+	AvatarUrl string
 }
 
 func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error) {

@@ -42,16 +42,46 @@ type LoginRequest struct {
 }
 
 type UpdateProfileRequest struct {
-	Email     *string `json:"email" validate:"omitempty,email"`
-	Password  *string `json:"password" validate:"omitempty,min=6"`
+	Email     *string `json:"email" validate:"email"`
+	Password  *string `json:"password" validate:"min=6"`
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
 	AvatarUrl *string `json:"avatar_url"`
 }
 
+// UserResponse is the handler-level DTO for user data
+type UserResponse struct {
+	ID        string `json:"id" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	AvatarUrl string `json:"avatar_url"`
+}
+
 type AuthResponse struct {
-	User  *services.UserOutput `json:"user"`
-	Token string               `json:"token"`
+	// User information
+	User *UserResponse `json:"user" validate:"required"`
+	// Authentication token
+	Token string `json:"token" validate:"required"`
+}
+
+type ProfileResponse struct {
+	// User profile information
+	User *UserResponse `json:"user" validate:"required"`
+}
+
+// toUserResponse maps service layer UserOutput to handler layer UserResponse
+func (h *UserHandler) toUserResponse(user *services.UserOutput) *UserResponse {
+	if user == nil {
+		return nil
+	}
+	return &UserResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		AvatarUrl: user.AvatarUrl,
+	}
 }
 
 // Register godoc
@@ -117,7 +147,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 	_ = h.analyticsService.TrackUserRegistration(ctx, user.ID, user.Email)
 
 	response := AuthResponse{
-		User:  user,
+		User:  h.toUserResponse(user),
 		Token: tokenString,
 	}
 
@@ -180,7 +210,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	_ = h.analyticsService.TrackUserLogin(ctx, user.ID)
 
 	response := AuthResponse{
-		User:  user,
+		User:  h.toUserResponse(user),
 		Token: tokenString,
 	}
 
@@ -195,7 +225,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200	{object}	services.UserOutput	"User profile"
+//	@Success		200	{object}	UserResponse	"User profile"
 //	@Failure		401	{object}	map[string]string	"Unauthorized"
 //	@Failure		404	{object}	map[string]string	"User not found"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
@@ -225,7 +255,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, h.toUserResponse(user))
 }
 
 // UpdateProfile godoc
@@ -237,7 +267,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Param			profile	body		UpdateProfileRequest	true	"Updated profile information"
-//	@Success		200		{object}	services.UserOutput		"Updated user profile"
+//	@Success		200		{object}	UserResponse		"Updated user profile"
 //	@Failure		400		{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401		{object}	map[string]string		"Unauthorized"
 //	@Failure		404		{object}	map[string]string		"User not found"
@@ -283,9 +313,21 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, h.toUserResponse(user))
 }
 
+// DeleteAccount godoc
+//
+// @Summary      Delete user account
+// @Description  Delete the authenticated user's account and all associated data. This action is irreversible.
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      204  {object}  nil  "Account deleted successfully"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /protected/account [delete]
 func (h *UserHandler) DeleteAccount(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)
@@ -308,6 +350,18 @@ func (h *UserHandler) DeleteAccount(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// ExportUserData godoc
+//
+// @Summary      Export user data
+// @Description  Export the authenticated user's data in JSON format for compliance and personal records
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  interface{}  "User data exported successfully"
+// @Failure      401  {object}  map[string]string  "Unauthorized"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /protected/export-data [get]
 func (h *UserHandler) ExportUserData(c echo.Context) error {
 	// Get user from context (after JWT middleware)
 	userID, _, _, err := auth.GetUserFromContext(c)

@@ -61,16 +61,124 @@ type UpdateGiftItemRequest struct {
 	Position    *int     `json:"position" validate:"omitempty,min=0"`
 }
 
+// WishListResponse is the handler-level DTO for wishlist data
+type WishListResponse struct {
+	ID           string `json:"id" validate:"required"`
+	OwnerID      string `json:"owner_id" validate:"required"`
+	Title        string `json:"title" validate:"required"`
+	Description  string `json:"description"`
+	Occasion     string `json:"occasion"`
+	OccasionDate string `json:"occasion_date"`
+	TemplateID   string `json:"template_id"`
+	IsPublic     bool   `json:"is_public"`
+	PublicSlug   string `json:"public_slug"`
+	ViewCount    string `json:"view_count" validate:"required"`
+	CreatedAt    string `json:"created_at" validate:"required"`
+	UpdatedAt    string `json:"updated_at" validate:"required"`
+}
+
+// GiftItemResponse is the handler-level DTO for gift item data
+type GiftItemResponse struct {
+	ID                string  `json:"id" validate:"required"`
+	WishlistID        string  `json:"wishlist_id" validate:"required"`
+	Name              string  `json:"name" validate:"required"`
+	Description       string  `json:"description"`
+	Link              string  `json:"link"`
+	ImageURL          string  `json:"image_url"`
+	Price             float64 `json:"price"`
+	Priority          int     `json:"priority"`
+	ReservedByUserID  string  `json:"reserved_by_user_id"`
+	ReservedAt        string  `json:"reserved_at"`
+	PurchasedByUserID string  `json:"purchased_by_user_id"`
+	PurchasedAt       string  `json:"purchased_at"`
+	PurchasedPrice    float64 `json:"purchased_price"`
+	Notes             string  `json:"notes"`
+	Position          int     `json:"position"`
+	CreatedAt         string  `json:"created_at" validate:"required"`
+	UpdatedAt         string  `json:"updated_at" validate:"required"`
+}
+
 type GetGiftItemsResponse struct {
-	Items []*services.GiftItemOutput `json:"items"`
-	Total int                        `json:"total"`
-	Page  int                        `json:"page"`
-	Limit int                        `json:"limit"`
-	Pages int                        `json:"pages"`
+	Items []*GiftItemResponse `json:"items" validate:"required"`
+	Total int                 `json:"total" validate:"required"`
+	Page  int                 `json:"page" validate:"required"`
+	Limit int                 `json:"limit" validate:"required"`
+	Pages int                 `json:"pages" validate:"required"`
 }
 
 type PurchaseRequest struct {
 	PurchasedPrice float64 `json:"purchased_price"`
+}
+
+// toWishListResponse maps service layer WishListOutput to handler layer WishListResponse
+func (h *WishListHandler) toWishListResponse(wl *services.WishListOutput) *WishListResponse {
+	if wl == nil {
+		return nil
+	}
+	return &WishListResponse{
+		ID:           wl.ID,
+		OwnerID:      wl.OwnerID,
+		Title:        wl.Title,
+		Description:  wl.Description,
+		Occasion:     wl.Occasion,
+		OccasionDate: wl.OccasionDate,
+		TemplateID:   wl.TemplateID,
+		IsPublic:     wl.IsPublic,
+		PublicSlug:   wl.PublicSlug,
+		ViewCount:    fmt.Sprintf("%d", wl.ViewCount),
+		CreatedAt:    wl.CreatedAt,
+		UpdatedAt:    wl.UpdatedAt,
+	}
+}
+
+// toGiftItemResponse maps service layer GiftItemOutput to handler layer GiftItemResponse
+func (h *WishListHandler) toGiftItemResponse(item *services.GiftItemOutput) *GiftItemResponse {
+	if item == nil {
+		return nil
+	}
+	return &GiftItemResponse{
+		ID:                item.ID,
+		WishlistID:        item.WishlistID,
+		Name:              item.Name,
+		Description:       item.Description,
+		Link:              item.Link,
+		ImageURL:          item.ImageURL,
+		Price:             item.Price,
+		Priority:          item.Priority,
+		ReservedByUserID:  item.ReservedByUserID,
+		ReservedAt:        item.ReservedAt,
+		PurchasedByUserID: item.PurchasedByUserID,
+		PurchasedAt:       item.PurchasedAt,
+		PurchasedPrice:    item.PurchasedPrice,
+		Notes:             item.Notes,
+		Position:          item.Position,
+		CreatedAt:         item.CreatedAt,
+		UpdatedAt:         item.UpdatedAt,
+	}
+}
+
+// toWishListResponses maps array of service layer WishListOutput to handler layer WishListResponse
+func (h *WishListHandler) toWishListResponses(wishlists []*services.WishListOutput) []*WishListResponse {
+	if wishlists == nil {
+		return nil
+	}
+	responses := make([]*WishListResponse, len(wishlists))
+	for i, wl := range wishlists {
+		responses[i] = h.toWishListResponse(wl)
+	}
+	return responses
+}
+
+// toGiftItemResponses maps array of service layer GiftItemOutput to handler layer GiftItemResponse
+func (h *WishListHandler) toGiftItemResponses(items []*services.GiftItemOutput) []*GiftItemResponse {
+	if items == nil {
+		return nil
+	}
+	responses := make([]*GiftItemResponse, len(items))
+	for i, item := range items {
+		responses[i] = h.toGiftItemResponse(item)
+	}
+	return responses
 }
 
 // CreateWishList godoc
@@ -81,7 +189,7 @@ type PurchaseRequest struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			wish_list	body		CreateWishListRequest	true	"Wish list creation information"
-//	@Success		201			{object}	services.WishListOutput	"Wish list created successfully"
+//	@Success		201			{object}	WishListResponse	"Wish list created successfully"
 //	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401			{object}	map[string]string		"Unauthorized"
 //	@Failure		500			{object}	map[string]string		"Internal server error"
@@ -126,7 +234,7 @@ func (h *WishListHandler) CreateWishList(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, wishList)
+	return c.JSON(http.StatusCreated, h.toWishListResponse(wishList))
 }
 
 // GetWishList godoc
@@ -135,10 +243,10 @@ func (h *WishListHandler) CreateWishList(c echo.Context) error {
 //	@Description	Get a wish list by its ID. If the wish list is private, the user must be the owner.
 //	@Tags			Wish Lists
 //	@Produce		json
-//	@Param			id	path		string					true	"Wish List ID"
-//	@Success		200	{object}	services.WishListOutput	"Wish list retrieved successfully"
-//	@Failure		403	{object}	map[string]string		"Access denied"
-//	@Failure		404	{object}	map[string]string		"Wish list not found"
+//	@Param			id	path		string				true	"Wish List ID"
+//	@Success		200	{object}	WishListResponse	"Wish list retrieved successfully"
+//	@Failure		403	{object}	map[string]string	"Access denied"
+//	@Failure		404	{object}	map[string]string	"Wish list not found"
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id} [get]
 func (h *WishListHandler) GetWishList(c echo.Context) error {
@@ -163,7 +271,7 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, wishList)
+	return c.JSON(http.StatusOK, h.toWishListResponse(wishList))
 }
 
 // GetWishListsByOwner godoc
@@ -172,9 +280,9 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 //	@Description	Get all wish lists owned by the currently authenticated user
 //	@Tags			Wish Lists
 //	@Produce		json
-//	@Success		200	{array}		services.WishListOutput	"List of wish lists retrieved successfully"
-//	@Failure		401	{object}	map[string]string		"Unauthorized"
-//	@Failure		500	{object}	map[string]string		"Internal server error"
+//	@Success		200	{array}		WishListResponse	"List of wish lists retrieved successfully"
+//	@Failure		401	{object}	map[string]string	"Unauthorized"
+//	@Failure		500	{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/wishlists [get]
 func (h *WishListHandler) GetWishListsByOwner(c echo.Context) error {
@@ -194,7 +302,7 @@ func (h *WishListHandler) GetWishListsByOwner(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, wishLists)
+	return c.JSON(http.StatusOK, h.toWishListResponses(wishLists))
 }
 
 // UpdateWishList godoc
@@ -206,7 +314,7 @@ func (h *WishListHandler) GetWishListsByOwner(c echo.Context) error {
 //	@Produce		json
 //	@Param			id			path		string					true	"Wish List ID"
 //	@Param			wish_list	body		UpdateWishListRequest	true	"Wish list update information"
-//	@Success		200			{object}	services.WishListOutput	"Wish list updated successfully"
+//	@Success		200			{object}	WishListResponse		"Wish list updated successfully"
 //	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401			{object}	map[string]string		"Unauthorized"
 //	@Failure		403			{object}	map[string]string		"Forbidden"
@@ -268,7 +376,7 @@ func (h *WishListHandler) UpdateWishList(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, wishList)
+	return c.JSON(http.StatusOK, h.toWishListResponse(wishList))
 }
 
 // DeleteWishList godoc
@@ -321,7 +429,7 @@ func (h *WishListHandler) DeleteWishList(c echo.Context) error {
 //	@Produce		json
 //	@Param			wishlistId	path		string					true	"Wish List ID"
 //	@Param			gift_item	body		CreateGiftItemRequest	true	"Gift item creation information"
-//	@Success		201			{object}	services.GiftItemOutput	"Gift item created successfully"
+//	@Success		201			{object}	GiftItemResponse		"Gift item created successfully"
 //	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401			{object}	map[string]string		"Unauthorized"
 //	@Failure		403			{object}	map[string]string		"Forbidden"
@@ -386,7 +494,7 @@ func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, giftItem)
+	return c.JSON(http.StatusCreated, h.toGiftItemResponse(giftItem))
 }
 
 // GetGiftItem godoc
@@ -395,10 +503,10 @@ func (h *WishListHandler) CreateGiftItem(c echo.Context) error {
 //	@Description	Get a gift item by its ID. If the parent wish list is private, the user must be the owner.
 //	@Tags			Gift Items
 //	@Produce		json
-//	@Param			id	path		string					true	"Gift Item ID"
-//	@Success		200	{object}	services.GiftItemOutput	"Gift item retrieved successfully"
-//	@Failure		403	{object}	map[string]string		"Access denied"
-//	@Failure		404	{object}	map[string]string		"Gift item not found"
+//	@Param			id	path		string				true	"Gift Item ID"
+//	@Success		200	{object}	GiftItemResponse	"Gift item retrieved successfully"
+//	@Failure		403	{object}	map[string]string	"Access denied"
+//	@Failure		404	{object}	map[string]string	"Gift item not found"
 //	@Security		BearerAuth
 //	@Router			/gift-items/{id} [get]
 func (h *WishListHandler) GetGiftItem(c echo.Context) error {
@@ -431,7 +539,7 @@ func (h *WishListHandler) GetGiftItem(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, giftItem)
+	return c.JSON(http.StatusOK, h.toGiftItemResponse(giftItem))
 }
 
 // GetGiftItemsByWishList godoc
@@ -514,7 +622,7 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 	pagedItems := giftItems[start:end]
 
 	response := GetGiftItemsResponse{
-		Items: pagedItems,
+		Items: h.toGiftItemResponses(pagedItems),
 		Total: total,
 		Page:  page,
 		Limit: limit,
@@ -533,7 +641,7 @@ func (h *WishListHandler) GetGiftItemsByWishList(c echo.Context) error {
 //	@Produce		json
 //	@Param			id			path		string					true	"Gift Item ID"
 //	@Param			gift_item	body		UpdateGiftItemRequest	true	"Gift item update information"
-//	@Success		200			{object}	services.GiftItemOutput	"Gift item updated successfully"
+//	@Success		200			{object}	GiftItemResponse		"Gift item updated successfully"
 //	@Failure		400			{object}	map[string]string		"Invalid request body or validation error"
 //	@Failure		401			{object}	map[string]string		"Unauthorized"
 //	@Failure		403			{object}	map[string]string		"Forbidden"
@@ -604,7 +712,7 @@ func (h *WishListHandler) UpdateGiftItem(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, giftItem)
+	return c.JSON(http.StatusOK, h.toGiftItemResponse(giftItem))
 }
 
 // DeleteGiftItem godoc
@@ -672,14 +780,14 @@ func (h *WishListHandler) DeleteGiftItem(c echo.Context) error {
 //	@Tags			Gift Items
 //	@Accept			json
 //	@Produce		json
-//	@Param			id					path		string					true	"Gift Item ID"
-//	@Param			purchase_request	body		PurchaseRequest			true	"Purchase information"
-//	@Success		200					{object}	services.GiftItemOutput	"Gift item marked as purchased successfully"
-//	@Failure		400					{object}	map[string]string		"Invalid request body or validation error"
-//	@Failure		401					{object}	map[string]string		"Unauthorized"
-//	@Failure		403					{object}	map[string]string		"Forbidden"
-//	@Failure		404					{object}	map[string]string		"Gift item or wishlist not found"
-//	@Failure		500					{object}	map[string]string		"Internal server error"
+//	@Param			id					path		string				true	"Gift Item ID"
+//	@Param			purchase_request	body		PurchaseRequest		true	"Purchase information"
+//	@Success		200					{object}	GiftItemResponse	"Gift item marked as purchased successfully"
+//	@Failure		400					{object}	map[string]string	"Invalid request body or validation error"
+//	@Failure		401					{object}	map[string]string	"Unauthorized"
+//	@Failure		403					{object}	map[string]string	"Forbidden"
+//	@Failure		404					{object}	map[string]string	"Gift item or wishlist not found"
+//	@Failure		500					{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/gift-items/{id}/purchase [post]
 func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
@@ -735,7 +843,7 @@ func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, giftItem)
+	return c.JSON(http.StatusOK, h.toGiftItemResponse(giftItem))
 }
 
 // GetWishListByPublicSlug godoc
@@ -744,9 +852,9 @@ func (h *WishListHandler) MarkGiftItemAsPurchased(c echo.Context) error {
 //	@Description	Get a public wish list by its public slug. The wish list must be marked as public.
 //	@Tags			Wish Lists
 //	@Produce		json
-//	@Param			slug	path		string					true	"Public Slug"
-//	@Success		200		{object}	services.WishListOutput	"Public wish list retrieved successfully"
-//	@Failure		404		{object}	map[string]string		"Wish list not found"
+//	@Param			slug	path		string				true	"Public Slug"
+//	@Success		200		{object}	WishListResponse	"Public wish list retrieved successfully"
+//	@Failure		404		{object}	map[string]string	"Wish list not found"
 //	@Router			/public/wishlists/{slug} [get]
 func (h *WishListHandler) GetWishListByPublicSlug(c echo.Context) error {
 	publicSlug := c.Param("slug")
@@ -759,5 +867,5 @@ func (h *WishListHandler) GetWishListByPublicSlug(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, wishList)
+	return c.JSON(http.StatusOK, h.toWishListResponse(wishList))
 }

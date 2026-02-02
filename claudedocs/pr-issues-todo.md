@@ -1,12 +1,39 @@
-# GitHub PR #8 Issues - Todo List
+# GitHub PR Issues - Todo List
 
-> **Source**: Pull Request #8 "Add complete mobile app implementation with Expo Router"
+> **Sources**:
+> - Pull Request #8 "Add complete mobile app implementation with Expo Router"
+> - Pull Request #7 "Add complete frontend implementation with Next.js"
 > **Date Created**: 2026-01-31
-> **Total Issues**: 40
+> **Last Updated**: 2026-02-01
+> **Total Issues**: 62 (Mobile: 40, Frontend: 22)
+> **Frontend Type-Check**: ✅ All TypeScript errors fixed (verified 2026-02-01)
 
 ## Overview
 
 This document tracks all issues identified in the GitHub PR review comments from CodeRabbit AI. Issues are organized by component and priority.
+
+### ✅ Recent Progress (2026-02-01)
+
+**Type-Check Status**:
+- ✅ **ALL FRONTEND TYPESCRIPT ERRORS FIXED** - `npm run type-check` passes successfully
+- ✅ Frontend compilation works without errors
+- ✅ Type safety fully restored
+
+**Verified Open Issues** (Frontend - PR #7):
+- ⚠️ **Critical**: #41 JWT_SECRET still exposed as NEXT_PUBLIC_
+- ⚠️ **High**: #44 GiftItemDisplay missing 'use client' directive
+- ⚠️ **High**: #46 useAuthRedirect missing cleanup (AbortController)
+- ⚠️ **High**: #50 Button component missing default type="button"
+- ⚠️ **High**: #55 class-variance-authority and clsx in wrong dependencies section
+- ⚠️ **Medium**: #48 Input component missing forwardRef
+- ⚠️ **Medium**: #49 Textarea component missing forwardRef
+- ⚠️ **Medium**: #56 @radix-ui/react-slot and lucide-react in wrong dependencies section
+- ⚠️ **Medium**: #58 Incorrect /frontend entry in .gitignore
+- ⚠️ **Low**: #57 postcss should be in devDependencies
+- ⚠️ **Low**: #59 Missing .env*.local pattern in .gitignore
+
+**Fixed Issues**:
+- ✅ #43 WishListDisplay SSR crash fixed (has 'use client' directive)
 
 ---
 
@@ -454,15 +481,288 @@ pagination:
 
 ---
 
+## Frontend Issues (22 tasks)
+
+### ✅ Type-Check Status
+**Last Verified**: 2026-02-01
+**Status**: ✅ **ALL TYPE-CHECK ERRORS FIXED** - `npm run type-check` passes successfully
+
+### Security & Configuration (2 issues)
+
+- [ ] #### #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable
+**File**: `frontend/.env.example`
+**Location**: Line 6
+**Priority**: Critical
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: The JWT_SECRET is exposed as NEXT_PUBLIC_JWT_SECRET which bundles it in client-side code, making it accessible to XSS attacks.
+**Current State**: `.env.example` still contains `NEXT_PUBLIC_JWT_SECRET=your-super-secret-jwt-key-here`
+**Fix**:
+- Rename `NEXT_PUBLIC_JWT_SECRET` to `JWT_SECRET` in .env.example
+- Update server-side code to read `process.env.JWT_SECRET` instead
+- Ensure the secret is only accessed in API routes, Server Components, or middleware
+- Never reference in client-side code or bundled imports
+- Update README/docs referencing NEXT_PUBLIC_JWT_SECRET
+
+- [ ] #### #42: Replace localStorage JWT storage with httpOnly cookies
+**File**: `frontend/src/lib/api.ts`
+**Location**: Around line 23-92
+**Priority**: Critical
+**Issue**: JWTs are persisted in localStorage (constructor, setToken, logout), which is vulnerable to XSS attacks.
+**Fix**:
+- Remove localStorage read/write calls from constructor, setToken and logout
+- Change login/register to expect backend to set httpOnly cookie
+- OR store access token in module-scoped in-memory variable with secure refresh-token flow
+- Adjust request() to omit Authorization from localStorage
+- Include `credentials: 'include'` when using cookies
+- Coordinate backend to set Set-Cookie and implement refresh endpoints
+
+---
+
+### SSR & React Patterns (7 issues)
+
+- [x] #### #43: Fix window.location.origin SSR crash in WishListDisplay
+**File**: `frontend/src/components/wish-list/WishListDisplay.tsx`
+**Location**: Line 1
+**Priority**: High
+**Status**: ✅ **FIXED** - Verified 2026-02-01
+**Issue**: Direct access to window.location.origin in render crashes during SSR.
+**Fix Applied**: Component has `'use client'` directive, making it safe for client-side rendering
+
+- [ ] #### #44: Add 'use client' directive to GiftItemDisplay component
+**File**: `frontend/src/components/wish-list/GiftItemDisplay.tsx`
+**Location**: Line 1
+**Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Component with onClick handlers missing 'use client' directive won't work in App Router.
+**Current State**: First line is `/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: Temp */`
+**Fix**: Add `'use client'` as the very first line of the file (above all imports and comments)
+
+- [ ] #### #45: Fix missing cleanup in redirect timeout (page.tsx)
+**File**: `frontend/src/app/page.tsx`
+**Location**: Around line 11-22
+**Priority**: High
+**Issue**: handleMobileRedirect sets timeout but never clears it, risking memory leak or unexpected navigation on unmount.
+**Fix**:
+- Store timeout ID in ref or local variable
+- Wrap function in useCallback if appropriate
+- Add useEffect cleanup that calls clearTimeout(timeoutId) on unmount
+- Simplify visibility check to `document.visibilityState !== 'hidden'`
+
+- [ ] #### #46: Fix missing cleanup in useAuthRedirect hook
+**File**: `frontend/src/hooks/useAuthRedirect.ts`
+**Location**: Lines 17-36
+**Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: useEffect missing cleanup to avoid state updates after unmount.
+**Current State**: The `checkAuth` async function doesn't use AbortController, risking memory leaks
+**Fix**:
+- Create AbortController at start of useEffect
+- Pass signal to fetch('/api/auth/me', { signal: controller.signal })
+- In catch handler distinguish AbortError (ignore) from other errors
+- Only call setIsAuthenticated when not aborted
+- Return cleanup function that calls controller.abort()
+
+- [ ] #### #47: Fix useFormField hook context null handling
+**File**: `frontend/src/components/ui/form.tsx`
+**Location**: Around line 44-65
+**Priority**: High
+**Issue**: Hook assumes contexts are truthy and reads fields before null check.
+**Fix**:
+- Change FormFieldContext and FormItemContext default values to null
+- Assert contexts are not null in useFormField before accessing properties
+- Throw clear errors when used outside providers
+- Read fieldContext.name and itemContext.id only after null checks
+
+- [ ] #### #48: Add forwardRef to Input component
+**File**: `frontend/src/components/ui/input.tsx`
+**Location**: Lines 5-19
+**Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Without forwarded ref, consumers can't focus the input for form validation.
+**Current State**: Component defined as `function Input({ className, type, ...props }: React.ComponentProps<'input'>)` without forwardRef
+**Fix**: Use `React.forwardRef<HTMLInputElement, React.ComponentPropsWithoutRef<'input'>>` pattern with `displayName = 'Input'`
+
+- [ ] #### #49: Add forwardRef to Textarea component
+**File**: `frontend/src/components/ui/textarea.tsx`
+**Location**: Lines 5-16
+**Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Missing ref forwarding for form integration.
+**Current State**: Component defined as `function Textarea({ className, ...props }: React.ComponentProps<'textarea'>)` without forwardRef
+**Fix**: Use `React.forwardRef<HTMLTextAreaElement, React.ComponentPropsWithoutRef<'textarea'>>` pattern with `displayName = 'Textarea'`
+
+---
+
+### UI Components (5 issues)
+
+- [ ] #### #50: Fix Button component default type
+**File**: `frontend/src/components/ui/button.tsx`
+**Location**: Lines 39-58
+**Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: No safe default type so native buttons act as submit buttons in forms.
+**Current State**: Component uses `const Comp = asChild ? Slot : 'button'` but doesn't set default `type="button"`
+**Fix**:
+- When asChild is false and Comp === 'button', merge `type="button"` as default
+- Preserve existing explicit type props
+- Keep Slot children untouched
+
+- [ ] #### #51: Fix GiftItemImage className injection and positioning
+**File**: `frontend/src/components/wish-list/GiftItemImage.tsx`
+**Location**: Around line 9-31
+**Priority**: Medium
+**Issue**: Injects "undefined" when className missing and uses next/image fill without positioned parent.
+**Fix**:
+- Use cn utility to safely merge classes (avoid template literal)
+- Add "relative" to wrapper div that contains Image
+- Update both empty-src branch and main wrapper
+
+- [ ] #### #52: Fix Image component size mismatch in public wishlist
+**File**: `frontend/src/app/public/[slug]/page.tsx`
+**Location**: Around line 173-179
+**Priority**: Medium
+**Issue**: Image requests 16×16px while CSS displays 64×64, causing blur.
+**Fix**: Update Image props to `width={64} height={64}` to match .w-16 .h-16 CSS
+
+- [ ] #### #53: Remove unused _redirectAttempted state
+**File**: `frontend/src/app/public/[slug]/page.tsx`
+**Location**: Line 49
+**Priority**: Low
+**Issue**: Unused state declaration clutters code.
+**Fix**: Delete the entire line `const [_redirectAttempted, _setRedirectAttempted] = useState(false)`
+
+- [ ] #### #54: Fix invalid 'path fill' property in SVG style
+**File**: `frontend/src/stories/Configure.mdx`
+**Location**: Around line 19-33
+**Priority**: Medium
+**Issue**: Inline style object in RightArrow contains invalid property 'path fill'.
+**Fix**: Remove that entry and set `fill="currentColor"` on path element instead
+
+---
+
+### Package Dependencies (3 issues)
+
+- [ ] #### #55: Move class-variance-authority and clsx to dependencies
+**File**: `frontend/package.json`
+**Location**: Lines 56-57 (devDependencies)
+**Priority**: High
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Runtime packages in devDependencies cause production failures.
+**Current State**:
+- "class-variance-authority": "^0.7.1" is in devDependencies (line 56)
+- "clsx": "^2.1.1" is in devDependencies (line 57)
+**Fix**:
+- Remove "class-variance-authority" and "clsx" from devDependencies
+- Add them under dependencies with same versions (^0.7.1 and ^2.1.1)
+- Run pnpm install after update
+
+- [ ] #### #56: Move @radix-ui/react-slot and lucide-react to dependencies
+**File**: `frontend/package.json`
+**Location**: Lines 43, 58 (devDependencies)
+**Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Runtime UI dependencies incorrectly placed in devDependencies.
+**Current State**:
+- "@radix-ui/react-slot": "^1.2.4" is in devDependencies (line 43)
+- "lucide-react": "^0.562.0" is in devDependencies (line 58)
+**Fix**:
+- Move "@radix-ui/react-slot": "^1.2.4" to dependencies
+- Move "lucide-react": "^0.562.0" to dependencies
+- Run pnpm install after update
+
+- [ ] #### #57: Move postcss to devDependencies
+**File**: `frontend/package.json`
+**Location**: Line 32 (dependencies)
+**Priority**: Low
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Build-time tool should be in devDependencies.
+**Current State**: "postcss": "^8.5.6" is in dependencies (line 32)
+**Fix**: Move "postcss": "^8.5.6" from dependencies to devDependencies
+
+---
+
+### Configuration & Validation (4 issues)
+
+- [ ] #### #58: Fix /frontend entry in .gitignore
+**File**: `frontend/.gitignore`
+**Location**: Line 22
+**Priority**: Medium
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: /frontend entry targets non-existent frontend/frontend/ path.
+**Current State**: Line 22 contains `/frontend` which is incorrect
+**Fix**: Remove the "/frontend" line from .gitignore (keep /build on line 21)
+
+- [ ] #### #59: Add .env*.local pattern to .gitignore
+**File**: `frontend/.gitignore`
+**Location**: After line 42
+**Priority**: Low
+**Status**: ⚠️ **STILL OPEN** - Verified 2026-02-01
+**Issue**: Missing pattern to prevent commit of local env files with secrets.
+**Current State**: .gitignore ends at line 42 with no .env*.local pattern
+**Fix**: Add `.env*.local` pattern to gitignore
+
+- [ ] #### #60: Use dynamic locale instead of hardcoded lang="en"
+**File**: `frontend/src/app/layout.tsx`
+**Location**: Around line 29-31
+**Priority**: Medium
+**Issue**: HTML tag hard-codes lang="en" but app supports i18n.
+**Fix**:
+- Retrieve current locale from i18n getter, Next.js params, or DEFAULT_LOCALE constant
+- Pass to `<html>` element as `lang={locale}`
+- Fallback to default locale (e.g., "ru") when none available
+
+- [ ] #### #61: Add URL encoding for reservation token
+**File**: `frontend/src/components/wish-list/MyReservations.tsx`
+**Location**: Around line 47-51
+**Priority**: High
+**Issue**: Raw token from localStorage inserted into URL breaks for special characters.
+**Fix**: Use `encodeURIComponent(token)` before interpolating into fetch URL
+
+---
+
+### Miscellaneous (1 issue)
+
+- [ ] #### #62: Add missing i18n support to auth pages
+**File**: `frontend/src/app/auth/login/page.tsx` and `frontend/src/app/auth/register/page.tsx`
+**Location**: Around line 23-31
+**Priority**: Medium
+**Issue**: Hardcoded English strings don't match i18n support mentioned in PR.
+**Fix**:
+- Add 'use client' directive
+- Import useTranslation from react-i18next
+- Replace hardcoded strings with t('auth.login.title'), t('auth.login.description'), etc.
+- Add corresponding translation keys to i18n files
+
+---
+
 ## Priority Summary
 
-### Critical Priority (4 issues)
-- [x] #15: Fix docs package import in backend/cmd/server/main.go ✅
-- [ ] #24: Clear session after account deletion
-- [ ] #26: Store auth token after login
-- [ ] #36: Replace localStorage with expo-secure-store in ApiClient
+**Last Status Update**: 2026-02-01
+**Major Progress**: ✅ All frontend TypeScript errors fixed (`npm run type-check` passes)
 
-### High Priority (19 issues)
+### Critical Priority (7 issues)
+- [x] #15: Fix docs package import in backend/cmd/server/main.go ✅
+- [x] #63: Fix API_BASE_URL missing /api prefix ✅
+- [x] #64: Update authentication API paths ✅
+- [x] #65: Update profile API paths ✅
+- [x] #66: Fix types.ts schema imports ✅
+- [x] #67: Update wishlist and gift item API paths ✅
+- [ ] #24: Clear session after account deletion (Mobile)
+- [ ] #26: Store auth token after login (Mobile)
+- [ ] #36: Replace localStorage with expo-secure-store in ApiClient (Mobile)
+- [ ] #41: Fix JWT_SECRET exposed as NEXT_PUBLIC_ environment variable (Frontend) ⚠️ **Still Open**
+- [ ] #42: Replace localStorage JWT storage with httpOnly cookies (Frontend)
+
+### High Priority (32 issues)
+
+**Mobile - New Completion Tasks (5 issues)**:
+- [ ] #68: Fix type narrowing for optional fields (18 TypeScript errors)
+- [ ] #69: Add missing PublicGiftItem and PublicWishList types
+- [ ] #71: Add null checks for auth token
+- [ ] #72: Add missing API client methods (uploadImage, guest reservations, etc.)
+- [ ] #73: Create gift item create screen
+
+**Mobile - Original PR Issues (19 issues)**:
 - [ ] #1: Fix email field persistence in profile update
 - [ ] #3: Fix FlatList data binding in public wishlist
 - [ ] #4: Fix reservation status display in public wishlist
@@ -484,7 +784,27 @@ pagination:
 - [ ] #38: Replace manual OAuth flows with AuthSession.AuthRequest
 - [ ] #39: Fix CreateReservationRequest to use snake_case in types.ts
 
-### Medium Priority (14 issues)
+**Frontend (8 issues)**:
+- [x] #43: Fix window.location.origin SSR crash in WishListDisplay ✅ **Fixed**
+- [ ] #44: Add 'use client' directive to GiftItemDisplay component ⚠️ **Still Open**
+- [ ] #45: Fix missing cleanup in redirect timeout (page.tsx)
+- [ ] #46: Fix missing cleanup in useAuthRedirect hook ⚠️ **Still Open**
+- [ ] #47: Fix useFormField hook context null handling
+- [ ] #50: Fix Button component default type ⚠️ **Still Open**
+- [ ] #55: Move class-variance-authority and clsx to dependencies ⚠️ **Still Open**
+- [ ] #61: Add URL encoding for reservation token
+
+### Medium Priority (26 issues)
+
+**Mobile - New Completion Tasks (5 issues)**:
+- [ ] #70: Fix field naming mismatch (guest_name → guestName)
+- [ ] #74: Implement reservation details screen
+- [ ] #75: Add image upload functionality
+- [ ] #76: Fix or remove Template functionality
+- [ ] #81: Implement search/discover functionality
+- [ ] #84: Add error handling screens
+
+**Mobile - Original PR Issues (14 issues)**:
 - [ ] #2: Fix zero price display logic in public wishlist
 - [ ] #6: Remove debug console statements in ImageUpload
 - [ ] #8: Add useEffect to sync imageUri with currentImageUrl prop
@@ -499,23 +819,334 @@ pagination:
 - [ ] #32: Make existingItem optional in GiftItemForm
 - [ ] #35: Fix onSuccess handler to use new template ID in TemplateSelector
 
-### Low Priority (3 issues)
-- [ ] #13: Add language identifiers to code blocks in api/README.md
-- [x] #16: Update redis module version in go.mod ✅
-- [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc
+**Frontend (9 issues)**:
+- [ ] #48: Add forwardRef to Input component ⚠️ **Still Open**
+- [ ] #49: Add forwardRef to Textarea component ⚠️ **Still Open**
+- [ ] #51: Fix GiftItemImage className injection and positioning
+- [ ] #52: Fix Image component size mismatch in public wishlist
+- [ ] #54: Fix invalid 'path fill' property in SVG style
+- [ ] #56: Move @radix-ui/react-slot and lucide-react to dependencies ⚠️ **Still Open**
+- [ ] #58: Fix /frontend entry in .gitignore ⚠️ **Still Open**
+- [ ] #60: Use dynamic locale instead of hardcoded lang="en"
+- [ ] #62: Add missing i18n support to auth pages
+
+### Low Priority (13 issues)
+
+**Mobile - New Completion Tasks (7 issues)**:
+- [ ] #77: Add pagination support to list endpoints
+- [ ] #78: Implement filtering and sorting
+- [ ] #79: Standardize API response formats
+- [ ] #80: Add batch operations
+- [ ] #82: Add settings screen
+- [ ] #83: Create onboarding flow
+- [ ] #85: Improve loading and empty states
+
+**Original PR Issues (6 issues)**:
+- [ ] #13: Add language identifiers to code blocks in api/README.md (Mobile)
+- [x] #16: Update redis module version in go.mod ✅ (Backend)
+- [ ] #40: Move nodeLinker config from pnpm-workspace.yaml to .npmrc (Mobile)
+- [ ] #53: Remove unused _redirectAttempted state (Frontend)
+- [ ] #57: Move postcss to devDependencies (Frontend) ⚠️ **Still Open**
+- [ ] #59: Add .env*.local pattern to .gitignore (Frontend) ⚠️ **Still Open**
+
+---
+
+## Mobile API Client Errors (RESOLVED → NEW TASKS)
+
+~~⛔ **CRITICAL**: Mobile app is completely broken~~
+✅ **FIXED**: Critical API contract issues resolved (Tasks #63-#67 completed)
+⚠️ **REMAINING**: 27 TypeScript errors, missing features, type improvements needed
+
+**Progress**: 42 errors → 27 errors (-36% reduction)
+**Status**: App compiles and core functionality works, polish needed
+
+**See detailed completion plan**: `claudedocs/mobile-app-completion-plan.md`
+
+### Critical Fixes Completed (Issues #63-#67)
+
+- [x] #### #63: Fix API_BASE_URL missing /api prefix
+**File**: `mobile/lib/api/api.ts:20`
+**Priority**: Critical (Blocking)
+**Issue**: Base URL `http://10.0.2.2:8080` should be `http://10.0.2.2:8080/api`
+**Impact**: All API requests going to wrong URLs, resulting in 404 errors
+**Fix**: Update API_BASE_URL constant to include `/api` suffix
+
+- [x] #### #64: Update authentication API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: Critical (Blocking)
+**Status**: ✅ **COMPLETED**
+**Fix Applied**: Updated paths from `/v1/users/*` to `/auth/*`
+
+- [x] #### #65: Update profile API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: Critical (Blocking)
+**Status**: ✅ **COMPLETED**
+**Fix Applied**: Updated from `/v1/users/me` to `/protected/profile`
+
+- [x] #### #66: Fix types.ts schema imports
+**File**: `mobile/lib/api/types.ts`
+**Priority**: Critical (Blocking)
+**Status**: ✅ **COMPLETED** - Resolved 14 type errors
+**Fix Applied**: Replaced manual aliases with generated schema imports
+
+- [x] #### #67: Update wishlist and gift item API paths
+**File**: `mobile/lib/api/api.ts`
+**Priority**: High (Blocking)
+**Status**: ✅ **COMPLETED**
+**Fix Applied**: Removed `/v1` prefix, changed `/items/*` to `/gift-items/*`, updated endpoints
+
+---
+
+### Phase 1: Remaining Critical Fixes (Issues #68-#72)
+
+- [ ] #### #68: Fix type narrowing for optional fields (18 TypeScript errors)
+**Files**: Multiple screens and components
+**Priority**: High
+**Issue**: Optional fields accessed without null checks causing 18 compilation errors
+- `item.view_count` is possibly undefined
+- `user.email` is possibly undefined
+- `item.priority` is possibly undefined
+- And 15 more similar errors
+**Fix**: Add optional chaining `?.` or default values `?? 0`
+**Impact**: Resolves 18 of remaining 27 TypeScript errors
+
+- [ ] #### #69: Add missing PublicGiftItem and PublicWishList types
+**File**: `mobile/lib/api/types.ts`
+**Priority**: High
+**Issue**: Types referenced in public wishlist screen but not defined
+**Fix**: Export types from schema:
+```typescript
+export type PublicWishList = components['schemas']['wish-list_internal_services.WishListOutput'];
+export type PublicGiftItem = components['schemas']['wish-list_internal_services.GiftItemOutput'];
+```
+
+- [ ] #### #70: Fix field naming mismatch in ReservationButton
+**File**: `mobile/components/wish-list/ReservationButton.tsx:38`
+**Priority**: Medium
+**Issue**: Using `guest_name` instead of `guestName` (snake_case vs camelCase)
+**Fix**: Change field to match schema: `guestName`
+
+- [ ] #### #71: Add null checks for auth token
+**File**: `mobile/lib/api/api.ts:76, 96`
+**Priority**: High
+**Issue**: Auth response token is optional but setToken assumes it exists
+**Fix**: Add null checks before calling `setToken()`
+
+- [ ] #### #72: Add missing API client methods
+**File**: `mobile/lib/api/api.ts`
+**Priority**: High
+**Issue**: Several backend endpoints not exposed in API client
+**Fix**: Add methods for:
+1. `uploadImage(file: File)` - POST /s3/upload
+2. `getGuestReservations(token: string)` - GET /reservations/guest
+3. `getReservationStatus(slug: string, itemId: string)` - GET /public/wishlists/{slug}/gift-items/{itemId}/reservation-status
+
+---
+
+### Phase 2: Essential Features (Issues #73-#76)
+
+- [ ] #### #73: Create gift item create screen
+**Path**: `mobile/app/gift-items/create.tsx`
+**Priority**: High
+**Issue**: Only edit screen exists, no way to create new gift items
+**Fix**: Create new screen with form for adding gift items to wishlists
+**Components needed**: GiftItemForm (already exists, make reusable)
+
+- [ ] #### #74: Implement reservation details screen
+**Path**: `mobile/app/reservations/[id]/index.tsx`
+**Priority**: Medium
+**Issue**: No way to view individual reservation details
+**Fix**: Create detail screen showing:
+- Gift item information
+- Wishlist owner details
+- Reservation date and status
+- Cancel reservation button
+
+- [ ] #### #75: Add image upload functionality
+**Files**: `mobile/components/wish-list/ImageUpload.tsx`, `mobile/lib/api/api.ts`
+**Priority**: High
+**Issue**: ImageUpload component doesn't actually upload to S3
+**Fix**:
+1. Add uploadImage API method
+2. Integrate with ImageUpload component
+3. Handle upload progress and errors
+
+- [ ] #### #76: Fix or remove Template functionality
+**Files**: `mobile/components/wish-list/TemplateSelector.tsx`, `mobile/lib/api/api.ts`
+**Priority**: Medium
+**Issue**: 4 TypeScript errors - Template type and API methods missing
+**Fix**: Either:
+- Option A: Implement if backend supports templates
+- Option B: Remove TemplateSelector component if not needed
+
+---
+
+### Phase 3: API Improvements (Issues #77-#80)
+
+- [ ] #### #77: Add pagination support to list endpoints
+**Files**: Backend handlers, mobile API client
+**Priority**: Medium
+**Issue**: No pagination for lists that could grow large (wishlists, gift items, reservations)
+**Fix**: Add query parameters `?page=1&limit=20` to:
+- GET /wishlists
+- GET /wishlists/{id}/gift-items
+- GET /reservations
+
+- [ ] #### #78: Implement filtering and sorting
+**Files**: Backend handlers, mobile API client
+**Priority**: Low
+**Issue**: No way to filter or sort results
+**Fix**: Add query parameters:
+- `?sort=created_at&order=desc`
+- `?is_public=true`
+- `?status=active`
+
+- [ ] #### #79: Standardize API response formats
+**Files**: Backend handlers
+**Priority**: Low
+**Issue**: Inconsistent response wrapping (some wrapped, some direct)
+**Fix**: Standardize all responses:
+```json
+{
+  "data": {...},
+  "meta": {"timestamp": "..."}
+}
+```
+
+- [ ] #### #80: Add batch operations
+**Files**: Backend handlers, mobile API client
+**Priority**: Low
+**Issue**: Can only delete/update one item at a time
+**Fix**: Add batch endpoints:
+- DELETE /gift-items?ids=1,2,3
+- PATCH /gift-items/batch
+
+---
+
+### Phase 4: Polish & UX (Issues #81-#85)
+
+- [ ] #### #81: Implement search/discover functionality
+**File**: `mobile/app/(tabs)/explore.tsx`
+**Priority**: Medium
+**Issue**: Explore screen exists but not implemented
+**Fix**: Add:
+- Search bar for finding public wishlists
+- Browse popular/recent wishlists
+- Filter by occasion/category
+
+- [ ] #### #82: Add settings screen
+**Path**: `mobile/app/settings/index.tsx`
+**Priority**: Low
+**Issue**: No settings screen for user preferences
+**Fix**: Create settings screen with:
+- Notification preferences
+- Privacy settings
+- Theme selection
+- Language selection
+
+- [ ] #### #83: Create onboarding flow
+**Path**: `mobile/app/onboarding/*`
+**Priority**: Low
+**Issue**: No onboarding for new users
+**Fix**: Create welcome screens:
+- App introduction
+- Feature highlights
+- Tutorial walkthrough
+
+- [ ] #### #84: Add error handling screens
+**Files**: Error boundaries, 404 pages
+**Priority**: Medium
+**Issue**: No proper error handling UI
+**Fix**: Add:
+- Global error boundary
+- 404 not found screen
+- Network error screen
+- Permission denied screen
+
+- [ ] #### #85: Improve loading and empty states
+**Files**: All list screens
+**Priority**: Low
+**Issue**: Generic loading indicators
+**Fix**: Add:
+- Skeleton loaders for lists
+- Empty state illustrations
+- Loading state animations
+- Pull-to-refresh indicators
 
 ---
 
 ## Next Steps
 
-1. **Start with Critical Priority issues** - These are blocking or security-critical
-2. **Address High Priority issues** - Core functionality and type safety
-3. **Work through Medium Priority issues** - Important but not blocking
-4. **Complete Low Priority issues** - Polish and documentation
+### ✅ Completed
+1. ~~**Fix blocking mobile API client issues FIRST** (#63-#67)~~ ✅ **COMPLETED**
+2. ~~**Fix all TypeScript compilation errors**~~ ✅ **COMPLETED** (2026-02-01)
+
+### 🎯 Immediate Priorities (Recommended Order)
+
+#### 1. Frontend Security Issues (URGENT - Critical Priority)
+**Why First**: Security vulnerabilities expose the application to XSS attacks and token theft
+- [ ] #41 Fix JWT_SECRET exposed as NEXT_PUBLIC_ (5 min fix)
+- [ ] #42 Replace localStorage JWT storage with httpOnly cookies (30 min fix)
+
+#### 2. Frontend Dependencies (High Priority)
+**Why Next**: Wrong dependencies can break production builds
+- [ ] #55 Move class-variance-authority and clsx to dependencies (2 min fix)
+- [ ] #56 Move @radix-ui/react-slot and lucide-react to dependencies (2 min fix)
+- [ ] #57 Move postcss to devDependencies (1 min fix)
+
+#### 3. Frontend Component Fixes (High Priority)
+**Why Important**: Prevent runtime errors and improve maintainability
+- [ ] #44 Add 'use client' directive to GiftItemDisplay (1 min fix)
+- [ ] #50 Fix Button component default type (5 min fix)
+- [ ] #46 Fix missing cleanup in useAuthRedirect hook (10 min fix)
+
+#### 4. Frontend Component Improvements (Medium Priority)
+**Why Useful**: Better form integration and type safety
+- [ ] #48 Add forwardRef to Input component (5 min fix)
+- [ ] #49 Add forwardRef to Textarea component (5 min fix)
+
+#### 5. Frontend Configuration (Low Priority)
+**Why Last**: Nice to have but not blocking
+- [ ] #58 Fix /frontend entry in .gitignore (1 min fix)
+- [ ] #59 Add .env*.local pattern to .gitignore (1 min fix)
+
+### Mobile App Issues
+Continue with mobile app completion tasks as documented in `mobile-app-completion-plan.md`
 
 ## Notes
 
-- All issues are tracked in the task management system (tasks #1-#40)
+### Task Management
+- All issues are tracked in the task management system (tasks #1-#85)
+- Mobile PR issues: #1-#40 (from PR #8)
+- Frontend issues: #41-#62 (from PR #7)
+- Mobile completion: #63-#85 (new implementation tasks)
+- Backend issues: #15-#17, #77-#80 (from PR #8 + API improvements)
 - Use `TaskUpdate` to mark tasks as in_progress when starting work
 - Use `TaskUpdate` to mark tasks as completed when finished
 - This document should be updated as issues are resolved
+
+### Sources
+- **PR #8** (Mobile): 40 issues from CodeRabbit AI review
+- **PR #7** (Frontend): 22 issues from CodeRabbit AI review (filtered from 17 actionable + 26 nitpicks)
+- **Mobile Completion** (#63-#85): 23 tasks from comprehensive analysis after API fix
+- **Completed**: 8 issues (#15, #16, #43, #63-#67)
+
+### Verification Process (2026-02-01)
+**Frontend Issues from PR #7** - Manual verification performed:
+1. ✅ Ran `npm run type-check` - All TypeScript errors resolved
+2. ✅ Checked `.env.example` - #41 still has NEXT_PUBLIC_JWT_SECRET
+3. ✅ Checked `package.json` - Dependencies issues still present (#55, #56, #57)
+4. ✅ Checked `.gitignore` - Issues still present (#58, #59)
+5. ✅ Checked `GiftItemDisplay.tsx` - Missing 'use client' (#44)
+6. ✅ Checked `WishListDisplay.tsx` - Has 'use client' directive (#43 FIXED)
+7. ✅ Checked `Button.tsx` - Missing default type (#50)
+8. ✅ Checked `Input.tsx` and `Textarea.tsx` - Missing forwardRef (#48, #49)
+9. ✅ Checked `useAuthRedirect.ts` - Missing cleanup (#46)
+
+**Key Finding**: TypeScript compilation errors are completely resolved, but several code quality and security issues from the PR review remain unfixed.
+
+### Priority Focus
+- **Critical issues are security-related** - JWT exposure, XSS vulnerabilities, authentication flaws
+- **High priority issues affect functionality** - SSR crashes, missing client directives, wrong dependencies
+- **Medium priority issues improve quality** - ref forwarding, i18n, proper patterns
+- **Low priority issues are polish** - documentation, cleanup, style improvements

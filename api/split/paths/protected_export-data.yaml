@@ -1,0 +1,31 @@
+get:
+  description: >-
+    Export the authenticated user's data in JSON format for compliance and
+    personal records
+  responses:
+    '200':
+      description: User data exported successfully
+      content:
+        application/json:
+          schema: {}
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Export user data
+  tags:
+    - User

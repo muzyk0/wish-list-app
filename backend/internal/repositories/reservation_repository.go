@@ -33,27 +33,27 @@ type ReservationRepositoryInterface interface {
 }
 
 type ReservationDetail struct {
-	ID                  pgtype.UUID        `json:"id"`
-	GiftItemID          pgtype.UUID        `json:"gift_item_id"`
-	ReservedByUserID    pgtype.UUID        `json:"reserved_by_user_id"`
-	GuestName           pgtype.Text        `json:"guest_name"`
-	EncryptedGuestName  pgtype.Text        `json:"-" db:"encrypted_guest_name"` // PII encrypted
-	GuestEmail          pgtype.Text        `json:"guest_email"`
-	EncryptedGuestEmail pgtype.Text        `json:"-" db:"encrypted_guest_email"` // PII encrypted
-	ReservationToken    pgtype.UUID        `json:"reservation_token"`
-	Status              string             `json:"status"`
-	ReservedAt          pgtype.Timestamptz `json:"reserved_at"`
-	ExpiresAt           pgtype.Timestamptz `json:"expires_at"`
-	CanceledAt          pgtype.Timestamptz `json:"canceled_at"`
-	CancelReason        pgtype.Text        `json:"canceled_reason"`
-	NotificationSent    pgtype.Bool        `json:"notification_sent"`
-	GiftItemName        pgtype.Text        `json:"gift_item_name"`
-	GiftItemImageURL    pgtype.Text        `json:"gift_item_image_url"`
-	GiftItemPrice       pgtype.Numeric     `json:"gift_item_price"`
-	WishlistID          pgtype.UUID        `json:"wishlist_id"`
-	WishlistTitle       pgtype.Text        `json:"wishlist_title"`
-	OwnerFirstName      pgtype.Text        `json:"owner_first_name"`
-	OwnerLastName       pgtype.Text        `json:"owner_last_name"`
+	ID                  pgtype.UUID
+	GiftItemID          pgtype.UUID
+	ReservedByUserID    pgtype.UUID
+	GuestName           pgtype.Text
+	EncryptedGuestName  pgtype.Text `db:"encrypted_guest_name"` // PII encrypted
+	GuestEmail          pgtype.Text
+	EncryptedGuestEmail pgtype.Text `db:"encrypted_guest_email"` // PII encrypted
+	ReservationToken    pgtype.UUID
+	Status              string
+	ReservedAt          pgtype.Timestamptz
+	ExpiresAt           pgtype.Timestamptz
+	CanceledAt          pgtype.Timestamptz
+	CancelReason        pgtype.Text
+	NotificationSent    pgtype.Bool
+	GiftItemName        pgtype.Text
+	GiftItemImageURL    pgtype.Text
+	GiftItemPrice       pgtype.Numeric
+	WishlistID          pgtype.UUID
+	WishlistTitle       pgtype.Text
+	OwnerFirstName      pgtype.Text
+	OwnerLastName       pgtype.Text
 }
 
 type ReservationRepository struct {

@@ -185,7 +185,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -257,7 +257,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -450,7 +450,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -554,6 +554,101 @@
                 }
             }
         },
+        "/protected/account": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete the authenticated user's account and all associated data. This action is irreversible.",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user account",
+                "responses": {
+                    "204": {
+                        "description": "Account deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/protected/export-data": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Export the authenticated user's data in JSON format for compliance and personal records",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Export user data",
+                "responses": {
+                    "200": {
+                        "description": "User data exported successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/protected/profile": {
             "get": {
                 "security": [
@@ -572,7 +667,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
                                 }
                             }
                         }
@@ -646,7 +741,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
                                 }
                             }
                         }
@@ -730,7 +825,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1044,7 +1139,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                        "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                     }
                                 }
                             }
@@ -1106,7 +1201,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1182,7 +1277,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1254,7 +1349,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.WishListOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
                                 }
                             }
                         }
@@ -1524,7 +1619,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                                    "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                                 }
                             }
                         }
@@ -1803,19 +1898,29 @@
         "schemas": {
             "internal_handlers.AuthResponse": {
                 "type": "object",
+                "required": [
+                    "token",
+                    "user"
+                ],
                 "properties": {
                     "token": {
+                        "description": "Authentication token",
                         "type": "string"
                     },
                     "user": {
-                        "$ref": "#/components/schemas/wish-list_internal_services.UserOutput"
+                        "description": "User information",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/internal_handlers.UserResponse"
+                            }
+                        ]
                     }
                 }
             },
             "internal_handlers.CancelReservationRequest": {
                 "type": "object",
                 "properties": {
-                    "reservationToken": {
+                    "reservation_token": {
                         "type": "string"
                     }
                 }
@@ -1860,10 +1965,10 @@
             "internal_handlers.CreateReservationRequest": {
                 "type": "object",
                 "properties": {
-                    "guestEmail": {
+                    "guest_email": {
                         "type": "string"
                     },
-                    "guestName": {
+                    "guest_name": {
                         "type": "string",
                         "maxLength": 200
                     }
@@ -1871,38 +1976,46 @@
             },
             "internal_handlers.CreateReservationResponse": {
                 "type": "object",
+                "required": [
+                    "gift_item_id",
+                    "id",
+                    "notification_sent",
+                    "reservation_token",
+                    "reserved_at",
+                    "status"
+                ],
                 "properties": {
-                    "cancelReason": {
+                    "cancel_reason": {
                         "type": "string"
                     },
-                    "canceledAt": {
+                    "canceled_at": {
                         "type": "string"
                     },
-                    "expiresAt": {
+                    "expires_at": {
                         "type": "string"
                     },
-                    "giftItemId": {
+                    "gift_item_id": {
                         "type": "string"
                     },
-                    "guestEmail": {
+                    "guest_email": {
                         "type": "string"
                     },
-                    "guestName": {
+                    "guest_name": {
                         "type": "string"
                     },
                     "id": {
                         "type": "string"
                     },
-                    "notificationSent": {
+                    "notification_sent": {
                         "type": "boolean"
                     },
-                    "reservationToken": {
+                    "reservation_token": {
                         "type": "string"
                     },
-                    "reservedAt": {
+                    "reserved_at": {
                         "type": "string"
                     },
-                    "reservedByUserId": {
+                    "reserved_by_user_id": {
                         "type": "string"
                     },
                     "status": {
@@ -1940,11 +2053,18 @@
             },
             "internal_handlers.GetGiftItemsResponse": {
                 "type": "object",
+                "required": [
+                    "items",
+                    "limit",
+                    "page",
+                    "pages",
+                    "total"
+                ],
                 "properties": {
                     "items": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                            "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
                         }
                     },
                     "limit": {
@@ -1961,8 +2081,75 @@
                     }
                 }
             },
+            "internal_handlers.GiftItemResponse": {
+                "type": "object",
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "updated_at",
+                    "wishlist_id"
+                ],
+                "properties": {
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "priority": {
+                        "type": "integer"
+                    },
+                    "purchased_at": {
+                        "type": "string"
+                    },
+                    "purchased_by_user_id": {
+                        "type": "string"
+                    },
+                    "purchased_price": {
+                        "type": "number"
+                    },
+                    "reserved_at": {
+                        "type": "string"
+                    },
+                    "reserved_by_user_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "wishlist_id": {
+                        "type": "string"
+                    }
+                }
+            },
             "internal_handlers.GiftItemSummary": {
                 "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
                 "properties": {
                     "id": {
                         "type": "string"
@@ -1980,6 +2167,9 @@
             },
             "internal_handlers.HealthResponse": {
                 "type": "object",
+                "required": [
+                    "status"
+                ],
                 "properties": {
                     "checks": {
                         "type": "object",
@@ -2046,17 +2236,24 @@
             },
             "internal_handlers.ReservationDetailsResponse": {
                 "type": "object",
+                "required": [
+                    "gift_item",
+                    "id",
+                    "reserved_at",
+                    "status",
+                    "wishlist"
+                ],
                 "properties": {
-                    "expiresAt": {
+                    "expires_at": {
                         "type": "string"
                     },
-                    "giftItem": {
+                    "gift_item": {
                         "$ref": "#/components/schemas/internal_handlers.GiftItemSummary"
                     },
                     "id": {
                         "type": "string"
                     },
-                    "reservedAt": {
+                    "reserved_at": {
                         "type": "string"
                     },
                     "status": {
@@ -2069,14 +2266,18 @@
             },
             "internal_handlers.ReservationStatusResponse": {
                 "type": "object",
+                "required": [
+                    "is_reserved",
+                    "status"
+                ],
                 "properties": {
-                    "isReserved": {
+                    "is_reserved": {
                         "type": "boolean"
                     },
-                    "reservedAt": {
+                    "reserved_at": {
                         "type": "string"
                     },
-                    "reservedByName": {
+                    "reserved_by_name": {
                         "type": "string"
                     },
                     "status": {
@@ -2165,6 +2366,10 @@
             },
             "internal_handlers.UserReservationsResponse": {
                 "type": "object",
+                "required": [
+                    "data",
+                    "pagination"
+                ],
                 "properties": {
                     "data": {
                         "type": "array",
@@ -2175,81 +2380,12 @@
                     "pagination": {}
                 }
             },
-            "internal_handlers.WishListSummary": {
+            "internal_handlers.UserResponse": {
                 "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "ownerFirstName": {
-                        "type": "string"
-                    },
-                    "ownerLastName": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    }
-                }
-            },
-            "wish-list_internal_services.GiftItemOutput": {
-                "type": "object",
-                "properties": {
-                    "created_at": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "id": {
-                        "type": "string"
-                    },
-                    "image_url": {
-                        "type": "string"
-                    },
-                    "link": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "notes": {
-                        "type": "string"
-                    },
-                    "position": {
-                        "type": "integer"
-                    },
-                    "price": {
-                        "type": "number"
-                    },
-                    "priority": {
-                        "type": "integer"
-                    },
-                    "purchased_at": {
-                        "type": "string"
-                    },
-                    "purchased_by_user_id": {
-                        "type": "string"
-                    },
-                    "purchased_price": {
-                        "type": "number"
-                    },
-                    "reserved_at": {
-                        "type": "string"
-                    },
-                    "reserved_by_user_id": {
-                        "type": "string"
-                    },
-                    "updated_at": {
-                        "type": "string"
-                    },
-                    "wishlist_id": {
-                        "type": "string"
-                    }
-                }
-            },
-            "wish-list_internal_services.UserOutput": {
-                "type": "object",
+                "required": [
+                    "email",
+                    "id"
+                ],
                 "properties": {
                     "avatar_url": {
                         "type": "string"
@@ -2268,8 +2404,16 @@
                     }
                 }
             },
-            "wish-list_internal_services.WishListOutput": {
+            "internal_handlers.WishListResponse": {
                 "type": "object",
+                "required": [
+                    "created_at",
+                    "id",
+                    "owner_id",
+                    "title",
+                    "updated_at",
+                    "view_count"
+                ],
                 "properties": {
                     "created_at": {
                         "type": "string"
@@ -2305,7 +2449,28 @@
                         "type": "string"
                     },
                     "view_count": {
-                        "type": "integer"
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.WishListSummary": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "owner_first_name": {
+                        "type": "string"
+                    },
+                    "owner_last_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
                     }
                 }
             }

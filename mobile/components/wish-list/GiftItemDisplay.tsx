@@ -79,7 +79,7 @@ export default function GiftItemDisplay({
       <View style={styles.details}>
         {item.price ? <Text style={styles.price}>${item.price}</Text> : null}
 
-        {item.priority > 0 ? (
+        {item.priority && item.priority > 0 ? (
           <Text style={styles.priority}>Priority: {item.priority}/10</Text>
         ) : null}
       </View>

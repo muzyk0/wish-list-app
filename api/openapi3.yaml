@@ -168,7 +168,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "403":
           description: Access denied
           content:
@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -349,6 +349,65 @@ paths:
       summary: Health check endpoint
       tags:
         - Health
+  /protected/account:
+    delete:
+      description: Delete the authenticated user's account and all associated data.
+        This action is irreversible.
+      responses:
+        "204":
+          description: Account deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Delete user account
+      tags:
+        - User
+  /protected/export-data:
+    get:
+      description: Export the authenticated user's data in JSON format for compliance
+        and personal records
+      responses:
+        "200":
+          description: User data exported successfully
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Export user data
+      tags:
+        - User
   /protected/profile:
     get:
       description: Get the authenticated user's profile information
@@ -358,7 +417,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+                $ref: "#/components/schemas/internal_handlers.UserResponse"
         "401":
           description: Unauthorized
           content:
@@ -403,7 +462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+                $ref: "#/components/schemas/internal_handlers.UserResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -458,7 +517,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "404":
           description: Wish list not found
           content:
@@ -649,7 +708,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                  $ref: "#/components/schemas/internal_handlers.WishListResponse"
                 type: array
         "401":
           description: Unauthorized
@@ -687,7 +746,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -776,7 +835,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "403":
           description: Access denied
           content:
@@ -821,7 +880,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.WishListOutput"
+                $ref: "#/components/schemas/internal_handlers.WishListResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -947,7 +1006,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+                $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
         "400":
           description: Invalid request body or validation error
           content:
@@ -1123,13 +1182,19 @@ components:
     internal_handlers.AuthResponse:
       properties:
         token:
+          description: Authentication token
           type: string
         user:
-          $ref: "#/components/schemas/wish-list_internal_services.UserOutput"
+          allOf:
+            - $ref: "#/components/schemas/internal_handlers.UserResponse"
+          description: User information
+      required:
+        - token
+        - user
       type: object
     internal_handlers.CancelReservationRequest:
       properties:
-        reservationToken:
+        reservation_token:
           type: string
       type: object
     internal_handlers.CreateGiftItemRequest:
@@ -1160,38 +1225,45 @@ components:
       type: object
     internal_handlers.CreateReservationRequest:
       properties:
-        guestEmail:
+        guest_email:
           type: string
-        guestName:
+        guest_name:
           maxLength: 200
           type: string
       type: object
     internal_handlers.CreateReservationResponse:
       properties:
-        cancelReason:
+        cancel_reason:
           type: string
-        canceledAt:
+        canceled_at:
           type: string
-        expiresAt:
+        expires_at:
           type: string
-        giftItemId:
+        gift_item_id:
           type: string
-        guestEmail:
+        guest_email:
           type: string
-        guestName:
+        guest_name:
           type: string
         id:
           type: string
-        notificationSent:
+        notification_sent:
           type: boolean
-        reservationToken:
+        reservation_token:
           type: string
-        reservedAt:
+        reserved_at:
           type: string
-        reservedByUserId:
+        reserved_by_user_id:
           type: string
         status:
           type: string
+      required:
+        - gift_item_id
+        - id
+        - notification_sent
+        - reservation_token
+        - reserved_at
+        - status
       type: object
     internal_handlers.CreateWishListRequest:
       properties:
@@ -1216,7 +1288,7 @@ components:
       properties:
         items:
           items:
-            $ref: "#/components/schemas/wish-list_internal_services.GiftItemOutput"
+            $ref: "#/components/schemas/internal_handlers.GiftItemResponse"
           type: array
         limit:
           type: integer
@@ -1226,6 +1298,55 @@ components:
           type: integer
         total:
           type: integer
+      required:
+        - items
+        - limit
+        - page
+        - pages
+        - total
+      type: object
+    internal_handlers.GiftItemResponse:
+      properties:
+        created_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        image_url:
+          type: string
+        link:
+          type: string
+        name:
+          type: string
+        notes:
+          type: string
+        position:
+          type: integer
+        price:
+          type: number
+        priority:
+          type: integer
+        purchased_at:
+          type: string
+        purchased_by_user_id:
+          type: string
+        purchased_price:
+          type: number
+        reserved_at:
+          type: string
+        reserved_by_user_id:
+          type: string
+        updated_at:
+          type: string
+        wishlist_id:
+          type: string
+      required:
+        - created_at
+        - id
+        - name
+        - updated_at
+        - wishlist_id
       type: object
     internal_handlers.GiftItemSummary:
       properties:
@@ -1237,6 +1358,9 @@ components:
           type: string
         price:
           type: string
+      required:
+        - id
+        - name
       type: object
     internal_handlers.HealthResponse:
       properties:
@@ -1248,6 +1372,8 @@ components:
           type: string
         status:
           type: string
+      required:
+        - status
       type: object
     internal_handlers.LoginRequest:
       properties:
@@ -1284,29 +1410,38 @@ components:
       type: object
     internal_handlers.ReservationDetailsResponse:
       properties:
-        expiresAt:
+        expires_at:
           type: string
-        giftItem:
+        gift_item:
           $ref: "#/components/schemas/internal_handlers.GiftItemSummary"
         id:
           type: string
-        reservedAt:
+        reserved_at:
           type: string
         status:
           type: string
         wishlist:
           $ref: "#/components/schemas/internal_handlers.WishListSummary"
+      required:
+        - gift_item
+        - id
+        - reserved_at
+        - status
+        - wishlist
       type: object
     internal_handlers.ReservationStatusResponse:
       properties:
-        isReserved:
+        is_reserved:
           type: boolean
-        reservedAt:
+        reserved_at:
           type: string
-        reservedByName:
+        reserved_by_name:
           type: string
         status:
           type: string
+      required:
+        - is_reserved
+        - status
       type: object
     internal_handlers.UpdateGiftItemRequest:
       properties:
@@ -1369,56 +1504,11 @@ components:
             $ref: "#/components/schemas/internal_handlers.ReservationDetailsResponse"
           type: array
         pagination: {}
+      required:
+        - data
+        - pagination
       type: object
-    internal_handlers.WishListSummary:
-      properties:
-        id:
-          type: string
-        ownerFirstName:
-          type: string
-        ownerLastName:
-          type: string
-        title:
-          type: string
-      type: object
-    wish-list_internal_services.GiftItemOutput:
-      properties:
-        created_at:
-          type: string
-        description:
-          type: string
-        id:
-          type: string
-        image_url:
-          type: string
-        link:
-          type: string
-        name:
-          type: string
-        notes:
-          type: string
-        position:
-          type: integer
-        price:
-          type: number
-        priority:
-          type: integer
-        purchased_at:
-          type: string
-        purchased_by_user_id:
-          type: string
-        purchased_price:
-          type: number
-        reserved_at:
-          type: string
-        reserved_by_user_id:
-          type: string
-        updated_at:
-          type: string
-        wishlist_id:
-          type: string
-      type: object
-    wish-list_internal_services.UserOutput:
+    internal_handlers.UserResponse:
       properties:
         avatar_url:
           type: string
@@ -1430,8 +1520,11 @@ components:
           type: string
         last_name:
           type: string
+      required:
+        - email
+        - id
       type: object
-    wish-list_internal_services.WishListOutput:
+    internal_handlers.WishListResponse:
       properties:
         created_at:
           type: string
@@ -1456,5 +1549,26 @@ components:
         updated_at:
           type: string
         view_count:
-          type: integer
+          type: string
+      required:
+        - created_at
+        - id
+        - owner_id
+        - title
+        - updated_at
+        - view_count
+      type: object
+    internal_handlers.WishListSummary:
+      properties:
+        id:
+          type: string
+        owner_first_name:
+          type: string
+        owner_last_name:
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - title
       type: object

@@ -29,6 +29,73 @@ The application follows a microservices architecture with shared components:
 - `/api`: OpenAPI specifications
 - `/specs`: Feature specifications using the Specify system
 - `/docs`: Documentation files
+- `/docs/plans`: Implementation plans for cross-domain architecture
+
+## Deployment Architecture (Cross-Domain)
+
+The application is deployed across multiple providers with different domains:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        WISH LIST APPLICATION                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐   │
+│  │  Frontend (Web)   │  │  Mobile (App)     │  │  Backend (API)    │   │
+│  │  Next.js          │  │  React Native     │  │  Go/Echo          │   │
+│  │  Vercel           │  │  Expo + Vercel    │  │  Render           │   │
+│  │                   │  │                   │  │                   │   │
+│  │  Features:        │  │  Personal Cabinet:│  │  Endpoints:       │   │
+│  │  • View wishlists │  │  • Create lists   │  │  • /auth/*        │   │
+│  │  • Reserve items  │  │  • Manage items   │  │  • /wishlists/*   │   │
+│  │  • My reservations│  │  • View reserves  │  │  • /reservations/*│   │
+│  │  • Redirect to LC │  │  • Settings       │  │  • /public/*      │   │
+│  └───────────────────┘  └───────────────────┘  └───────────────────┘   │
+│           │                      │                      ▲              │
+│           └──────────────────────┴──────────────────────┘              │
+│                       HTTPS + JWT + CORS                                │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+| Component | Provider | Purpose |
+|-----------|----------|---------|
+| Frontend | Vercel | Public pages, guest reservations, auth redirect to Mobile |
+| Mobile | Vercel/App Stores | Personal cabinet, create wishlists, manage items |
+| Backend | Render | REST API, PostgreSQL, S3 storage |
+
+### Cross-Domain Authentication
+
+Since components are on different domains, **httpOnly cookies cannot be shared**. The authentication strategy:
+
+**Token Storage**:
+- **Frontend (Web)**: Access token in memory, refresh token via API call
+- **Mobile**: Both tokens in `expo-secure-store`
+
+**Token Lifecycle**:
+- Access token: 15 minutes
+- Refresh token: 7 days
+
+**Frontend → Mobile Handoff** (OAuth-style):
+```
+1. User clicks "Personal Cabinet" on Frontend
+2. Frontend calls POST /auth/mobile-handoff → receives short-lived code (60s)
+3. Frontend redirects to Mobile via Universal Link: wishlistapp://auth?code=xxx
+4. Mobile exchanges code for tokens: POST /auth/exchange
+5. Mobile stores tokens in SecureStore
+```
+
+**Key Backend Endpoints**:
+- `POST /auth/login` - Returns accessToken + refreshToken
+- `POST /auth/refresh` - Exchange refresh token for new access token
+- `POST /auth/mobile-handoff` - Generate code for Frontend→Mobile redirect
+- `POST /auth/exchange` - Exchange handoff code for tokens
+
+**CORS Configuration** (Backend):
+```go
+AllowOrigins: ["https://wishlist.com", "https://www.wishlist.com"]
+AllowCredentials: true
+```
+
+For detailed implementation, see `/docs/plans/00-cross-domain-architecture-plan.md`.
 
 ## Important Development Aspects
 
@@ -41,6 +108,78 @@ The application follows a microservices architecture with shared components:
 - **API clients**: Generated from OpenAPI specifications in `/contracts/`
 - **Type checking**: Run `npm run type-check` to verify TypeScript correctness
 - **Linting & formatting**: Use `make format` for consistent code style across all components
+
+### API Documentation (Swagger/OpenAPI)
+
+The backend uses **swaggo/swag** to generate Swagger/OpenAPI documentation from Go annotations.
+
+#### Documentation Structure
+
+Library documentation is organized in modular, AI-agent-friendly files:
+
+**Location**: `/backend/library-docs/swaggo-swag/`
+
+**Files**:
+1. **README.md** - Index and quick reference
+2. **01-getting-started.md** - Installation, setup, and basic workflow
+3. **02-cli-reference.md** - `swag init` and `swag fmt` commands with all options
+4. **03-general-api-info.md** - API-level annotations (`@title`, `@version`, `@host`, `@BasePath`, etc.)
+5. **04-api-operations.md** - Endpoint annotations (`@Summary`, `@Param`, `@Success`, `@Router`, etc.)
+6. **05-security.md** - Authentication schemes (`@securityDefinitions`, `@Security`)
+7. **06-attributes-validation.md** - Field validation and constraints (enums, min/max, format, etc.)
+8. **07-examples.md** - Common patterns (CRUD, pagination, file upload, error responses)
+9. **08-advanced-features.md** - Generics, custom types, global overrides
+
+#### Quick Reference
+
+**Generate Swagger docs**:
+```bash
+swag init                           # Generate docs
+swag init --parseDependency         # Include external packages
+swag init --parseInternal           # Include internal packages
+swag fmt                            # Format annotations
+```
+
+**Common annotations**:
+```go
+// General API info (in main.go)
+// @title           Wish List API
+// @version         1.0
+// @description     API description
+// @host            localhost:8080
+// @BasePath        /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+// Endpoint annotations (in handlers)
+// @Summary      Create wishlist
+// @Description  Create a new wishlist for authenticated user
+// @Tags         Wishlists
+// @Accept       json
+// @Produce      json
+// @Param        wishlist body CreateWishlistRequest true "Wishlist data"
+// @Success      201 {object} WishlistResponse "Success"
+// @Failure      400 {object} map[string]string "Bad request"
+// @Security     BearerAuth
+// @Router       /wishlists [post]
+```
+
+#### Important Notes
+
+- **Handler DTOs Required**: Always use handler-specific response types (not service types) in `@Success` and `@Failure` annotations
+- **Validation Tags**: Use `validate:"required"` in response DTOs for OpenAPI schema generation
+- **Format Tags**: Use `format:"uuid"`, `format:"email"`, etc. for proper schema types
+- **Parse Dependencies**: When structs are in external packages, use `swag init --parseDependency`
+- **Swagger UI**: Access at `http://localhost:8080/swagger/index.html` after running backend
+
+#### Best Practices
+
+1. **Document as you code**: Add Swagger annotations when creating handlers
+2. **Use handler DTOs**: Never expose service types directly in Swagger docs
+3. **Validate annotations**: Run `swag init` to catch annotation errors early
+4. **Keep examples**: Add `example` tags to struct fields for better API docs
+5. **Security first**: Always add `@Security` annotations to protected endpoints
 
 ### Mobile Development
 - **Navigation**: Uses Expo Router with file-based routing in `/mobile/app/`
@@ -298,6 +437,13 @@ make clean                    # Clean build artifacts
 - Services: `backend/internal/services`
 - Old generated code directory removed (migrated from sqlc to manual sqlx operations)
 
+**Architecture Guide**: For comprehensive backend architecture documentation, see `/docs/Go-Architecture-Guide.md`. This guide covers:
+- 3-layer architecture (Handler-Service-Repository)
+- The ONE non-negotiable rule: JSON serialization ONLY in handlers
+- Complete code examples with good patterns and anti-patterns
+- Data flow, validation strategy, testing approach
+- Security considerations and when to evolve the architecture
+
 ### Mobile Structure
 - Routes defined in `mobile/app` using Expo Router
 - Components in `mobile/components`
@@ -522,6 +668,9 @@ make clean                    # Clean build artifacts
 ## Important Notes
 
 - The application uses JWT-based authentication across all components
+- **Cross-domain architecture**: Frontend (Vercel), Mobile (Vercel/App Stores), Backend (Render) - see `/docs/plans/`
+- **No httpOnly cookies for auth**: Different domains require token-based auth with refresh flow
+- **Frontend → Mobile redirect**: Uses OAuth-style handoff with short-lived codes
 - S3 integration is available for image uploads in the backend
 - Database migrations are managed with golang-migrate
 - All components share the same OpenAPI specification for API contracts
@@ -531,6 +680,17 @@ make clean                    # Clean build artifacts
 - The project enforces test-first approach (Constitution Requirement CR-002)
 - API contracts must be explicitly defined (Constitution Requirement CR-003)
 - Data privacy is enforced with encryption for PII (Constitution Requirement CR-004)
+
+## Implementation Plans
+
+Implementation plans for the cross-domain architecture are in `/docs/plans/`:
+
+| Plan | Focus |
+|------|-------|
+| `00-cross-domain-architecture-plan.md` | Auth flow, CORS, handoff - **implement first** |
+| `01-frontend-security-and-quality-plan.md` | Token management, Vercel deployment |
+| `02-mobile-app-completion-plan.md` | SecureStore, deep links, features |
+| `03-api-backend-improvements-plan.md` | Auth endpoints, Render deployment |
 
 ## Conventional Commits
 

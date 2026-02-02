@@ -24,7 +24,7 @@ func NewHealthHandler(database *db.DB) *HealthHandler {
 
 // HealthResponse represents the response from the health check endpoint
 type HealthResponse struct {
-	Status string            `json:"status"`
+	Status string            `json:"status" validate:"required"`
 	Checks map[string]string `json:"checks,omitempty"`
 	Error  string            `json:"error,omitempty"`
 }

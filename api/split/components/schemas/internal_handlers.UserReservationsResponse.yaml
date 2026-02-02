@@ -4,4 +4,7 @@ properties:
       $ref: ./internal_handlers.ReservationDetailsResponse.yaml
     type: array
   pagination: {}
+required:
+  - data
+  - pagination
 type: object

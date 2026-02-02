@@ -1,6 +1,7 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
@@ -11,13 +12,39 @@ import {
   TextInput,
   useTheme,
 } from 'react-native-paper';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { apiClient } from '@/lib/api';
+
+const updateWishListSchema = z.object({
+  title: z.string().min(1, 'Please enter a title for your wishlist.').max(200),
+  description: z.string().optional(),
+  occasion: z.string().max(100).optional(),
+  is_public: z.boolean(),
+});
+
+type UpdateWishListFormData = z.infer<typeof updateWishListSchema>;
 
 export default function EditWishListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors } = useTheme();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UpdateWishListFormData>({
+    resolver: zodResolver(updateWishListSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      occasion: '',
+      is_public: false,
+    },
+  });
 
   const {
     data: wishList,
@@ -29,32 +56,23 @@ export default function EditWishListScreen() {
     enabled: !!id,
   });
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
-  const [titleError, setTitleError] = useState('');
-
   useEffect(() => {
     if (wishList) {
-      setTitle(wishList.title);
-      setDescription(wishList.description || '');
-      setOccasion(wishList.occasion || '');
-      setIsPublic(wishList.is_public);
+      reset({
+        title: wishList.title,
+        description: wishList.description || '',
+        occasion: wishList.occasion || '',
+        is_public: wishList.is_public,
+      });
     }
-  }, [wishList]);
+  }, [wishList, reset]);
 
   const updateMutation = useMutation({
-    mutationFn: (data: {
-      title: string;
-      description?: string;
-      occasion?: string;
-      is_public: boolean;
-    }) =>
+    mutationFn: (data: UpdateWishListFormData) =>
       apiClient.updateWishList(id, {
-        title: data.title,
-        description: data.description,
-        occasion: data.occasion,
+        title: data.title.trim(),
+        description: data.description?.trim() || undefined,
+        occasion: data.occasion?.trim() || undefined,
         is_public: data.is_public,
       }),
     onSuccess: () => {
@@ -92,19 +110,8 @@ export default function EditWishListScreen() {
     },
   });
 
-  const handleUpdate = () => {
-    if (!title.trim()) {
-      setTitleError('Please enter a title for your wishlist.');
-      return;
-    }
-
-    setTitleError('');
-    updateMutation.mutate({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      occasion: occasion.trim() || undefined,
-      is_public: isPublic,
-    });
+  const onSubmit = (data: UpdateWishListFormData) => {
+    updateMutation.mutate(data);
   };
 
   const handleDelete = () => {
@@ -185,26 +192,28 @@ export default function EditWishListScreen() {
             >
               Title *
             </Text>
-            <TextInput
-              mode="outlined"
-              value={title}
-              onChangeText={(text) => {
-                setTitle(text);
-                if (titleError && text.trim()) {
-                  setTitleError('');
-                }
-              }}
-              placeholder="Wishlist title"
-              maxLength={200}
-              disabled={updateMutation.isPending}
-              error={!!titleError}
-              style={styles.input}
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  mode="outlined"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Wishlist title"
+                  maxLength={200}
+                  disabled={updateMutation.isPending}
+                  error={!!errors.title}
+                  style={styles.input}
+                />
+              )}
             />
-            {titleError ? (
-              <HelperText type="error" visible={!!titleError}>
-                {titleError}
+            {errors.title && (
+              <HelperText type="error" visible={!!errors.title}>
+                {errors.title.message}
               </HelperText>
-            ) : null}
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -214,15 +223,22 @@ export default function EditWishListScreen() {
             >
               Description
             </Text>
-            <TextInput
-              mode="outlined"
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Wishlist description"
-              multiline
-              numberOfLines={3}
-              disabled={updateMutation.isPending}
-              style={[styles.input, styles.multiline]}
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  mode="outlined"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Wishlist description"
+                  multiline
+                  numberOfLines={3}
+                  disabled={updateMutation.isPending}
+                  style={[styles.input, styles.multiline]}
+                />
+              )}
             />
           </View>
 
@@ -233,14 +249,21 @@ export default function EditWishListScreen() {
             >
               Occasion
             </Text>
-            <TextInput
-              mode="outlined"
-              value={occasion}
-              onChangeText={setOccasion}
-              placeholder="Occasion (e.g., Birthday, Wedding)"
-              maxLength={100}
-              disabled={updateMutation.isPending}
-              style={styles.input}
+            <Controller
+              control={control}
+              name="occasion"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  mode="outlined"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Occasion (e.g., Birthday, Wedding)"
+                  maxLength={100}
+                  disabled={updateMutation.isPending}
+                  style={styles.input}
+                />
+              )}
             />
           </View>
 
@@ -248,17 +271,23 @@ export default function EditWishListScreen() {
             <Text variant="labelLarge" style={{ color: colors.onSurface }}>
               Make Public
             </Text>
-            <Switch
-              value={isPublic}
-              onValueChange={setIsPublic}
-              disabled={updateMutation.isPending}
-              color={colors.primary}
+            <Controller
+              control={control}
+              name="is_public"
+              render={({ field: { onChange, value } }) => (
+                <Switch
+                  value={value}
+                  onValueChange={onChange}
+                  disabled={updateMutation.isPending}
+                  color={colors.primary}
+                />
+              )}
             />
           </View>
 
           <Button
             mode="contained"
-            onPress={handleUpdate}
+            onPress={handleSubmit(onSubmit)}
             loading={updateMutation.isPending}
             disabled={updateMutation.isPending}
             style={styles.button}

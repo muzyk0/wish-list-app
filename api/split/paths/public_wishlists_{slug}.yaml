@@ -15,8 +15,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+            $ref: ../components/schemas/internal_handlers.WishListResponse.yaml
     '404':
       description: Wish list not found
       content:

@@ -24,62 +24,62 @@ func NewReservationHandler(service services.ReservationServiceInterface) *Reserv
 }
 
 type CreateReservationRequest struct {
-	GuestName  *string `json:"guestName" validate:"omitempty,max=200"`
-	GuestEmail *string `json:"guestEmail" validate:"omitempty,email"`
+	GuestName  *string `json:"guest_name" validate:"omitempty,max=200"`
+	GuestEmail *string `json:"guest_email" validate:"omitempty,email"`
 }
 
 type CancelReservationRequest struct {
-	ReservationToken *string `json:"reservationToken" validate:"omitempty,uuid"`
+	ReservationToken *string `json:"reservation_token" validate:"omitempty,uuid"`
 }
 
 type CreateReservationResponse struct {
-	ID               string  `json:"id"`
-	GiftItemID       string  `json:"giftItemId"`
-	ReservedByUserID *string `json:"reservedByUserId"`
-	GuestName        *string `json:"guestName"`
-	GuestEmail       *string `json:"guestEmail"`
-	ReservationToken string  `json:"reservationToken"`
-	Status           string  `json:"status"`
-	ReservedAt       string  `json:"reservedAt"`
-	ExpiresAt        *string `json:"expiresAt"`
-	CanceledAt       *string `json:"canceledAt"`
-	CanceledReason   *string `json:"cancelReason"`
-	NotificationSent bool    `json:"notificationSent"`
+	ID               string  `json:"id" validate:"required"`
+	GiftItemID       string  `json:"gift_item_id" validate:"required"`
+	ReservedByUserID *string `json:"reserved_by_user_id"`
+	GuestName        *string `json:"guest_name"`
+	GuestEmail       *string `json:"guest_email" validate:"email"`
+	ReservationToken string  `json:"reservation_token" validate:"required"`
+	Status           string  `json:"status" validate:"required"`
+	ReservedAt       string  `json:"reserved_at" validate:"required"`
+	ExpiresAt        *string `json:"expires_at"`
+	CanceledAt       *string `json:"canceled_at"`
+	CanceledReason   *string `json:"cancel_reason"`
+	NotificationSent bool    `json:"notification_sent" validate:"required"`
 }
 
 type ReservationDetailsResponse struct {
-	ID         string          `json:"id"`
-	GiftItem   GiftItemSummary `json:"giftItem"`
-	Wishlist   WishListSummary `json:"wishlist"`
-	Status     string          `json:"status"`
-	ReservedAt string          `json:"reservedAt"`
-	ExpiresAt  *string         `json:"expiresAt"`
+	ID         string          `json:"id" validate:"required"`
+	GiftItem   GiftItemSummary `json:"gift_item" validate:"required"`
+	Wishlist   WishListSummary `json:"wishlist" validate:"required"`
+	Status     string          `json:"status" validate:"required"`
+	ReservedAt string          `json:"reserved_at" validate:"required"`
+	ExpiresAt  *string         `json:"expires_at"`
 }
 
 type GiftItemSummary struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
+	ID       string  `json:"id" validate:"required"`
+	Name     string  `json:"name" validate:"required"`
 	ImageURL *string `json:"image_url,omitempty"`
 	Price    *string `json:"price,omitempty"`
 }
 
 type WishListSummary struct {
-	ID             string  `json:"id"`
-	Title          string  `json:"title"`
-	OwnerFirstName *string `json:"ownerFirstName,omitempty"`
-	OwnerLastName  *string `json:"ownerLastName,omitempty"`
+	ID             string  `json:"id" validate:"required"`
+	Title          string  `json:"title" validate:"required"`
+	OwnerFirstName *string `json:"owner_first_name,omitempty"`
+	OwnerLastName  *string `json:"owner_last_name,omitempty"`
 }
 
 type ReservationStatusResponse struct {
-	IsReserved     bool    `json:"isReserved"`
-	ReservedByName *string `json:"reservedByName"`
-	ReservedAt     *string `json:"reservedAt"`
-	Status         string  `json:"status"`
+	IsReserved     bool    `json:"is_reserved" validate:"required"`
+	ReservedByName *string `json:"reserved_by_name"`
+	ReservedAt     *string `json:"reserved_at"`
+	Status         string  `json:"status" validate:"required"`
 }
 
 type UserReservationsResponse struct {
-	Data       []ReservationDetailsResponse `json:"data"`
-	Pagination any                          `json:"pagination"`
+	Data       []ReservationDetailsResponse `json:"data" validate:"required"`
+	Pagination any                          `json:"pagination" validate:"required"`
 }
 
 // CreateReservation godoc

@@ -33,4 +33,10 @@ properties:
     type: string
   wishlist_id:
     type: string
+required:
+  - created_at
+  - id
+  - name
+  - updated_at
+  - wishlist_id
 type: object

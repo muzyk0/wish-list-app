@@ -7,8 +7,7 @@ get:
         application/json:
           schema:
             items:
-              $ref: >-
-                ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+              $ref: ../components/schemas/internal_handlers.WishListResponse.yaml
             type: array
     '401':
       description: Unauthorized
@@ -46,8 +45,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/wish-list_internal_services.WishListOutput.yaml
+            $ref: ../components/schemas/internal_handlers.WishListResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

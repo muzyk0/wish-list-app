@@ -1,4 +1,4 @@
 properties:
-  reservationToken:
+  reservation_token:
     type: string
 type: object

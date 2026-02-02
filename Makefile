@@ -12,6 +12,9 @@ help: ## Show this help message
 	@echo "  \033[36mswagger-convert-v3\033[0m          Convert Swagger 2.0 to OpenAPI 3.0"
 	@echo "  \033[36mswagger-split\033[0m               Split OpenAPI 3.0 into organized files"
 	@echo "  \033[36mswagger-preview\033[0m             Preview OpenAPI specification in browser"
+	@echo "  \033[36mschema-frontend\033[0m             Regenerate frontend API schema"
+	@echo "  \033[36mschema-mobile\033[0m               Regenerate mobile API schema"
+	@echo "  \033[36mschema-all\033[0m                  Regenerate both frontend and mobile schemas"
 
 .PHONY: setup
 setup: ## Set up the development environment
@@ -128,12 +131,12 @@ format-backend: ## Format backend with go fmt
 	@cd backend && go fmt ./...
 
 .PHONY: docs
-docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Split)
+docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Split + Schemas)
 	@echo "================================================"
 	@echo "📚 Generating Complete API Documentation"
 	@echo "================================================"
 	@echo ""
-	@echo "Step 1/3: Generating Swagger 2.0 from Go annotations..."
+	@echo "Step 1/4: Generating Swagger 2.0 from Go annotations..."
 	@if ! command -v swag >/dev/null 2>&1; then \
 		echo "Installing swag..."; \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
@@ -141,15 +144,19 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
 	@echo "✓ Swagger 2.0 generated"
 	@echo ""
-	@echo "Step 2/3: Converting to OpenAPI 3.0..."
+	@echo "Step 2/4: Converting to OpenAPI 3.0..."
 	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
 	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 converted"
 	@echo ""
-	@echo "Step 3/3: Splitting into organized files..."
+	@echo "Step 3/4: Splitting into organized files..."
+	@rm -rf api/split
 	@mkdir -p api/split
 	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
 	@echo "✓ Split files created"
+	@echo ""
+	@echo "Step 4/4: Regenerating client schemas..."
+	@$(MAKE) schema-all
 	@echo ""
 	@echo "================================================"
 	@echo "✅ Documentation Complete!"
@@ -159,6 +166,8 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "  • backend/docs/swagger.{json,yaml}  (Swagger 2.0)"
 	@echo "  • api/openapi3.{json,yaml}          (OpenAPI 3.0)"
 	@echo "  • api/split/                        (Split files)"
+	@echo "  • frontend/src/lib/api/schema.ts    (Frontend types)"
+	@echo "  • mobile/lib/api/schema.ts          (Mobile types)"
 	@echo ""
 	@echo "🌐 View documentation:"
 	@echo "  • Swagger UI: http://localhost:8080/swagger/index.html"
@@ -184,6 +193,27 @@ swagger-convert-v3: ## Convert OpenAPI 2.0 to 3.0
 	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
 	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 files generated: api/openapi3.{json,yaml}"
+
+.PHONY: schema-frontend
+schema-frontend: ## Regenerate frontend API schema from OpenAPI 3.0
+	@echo "Regenerating frontend API schema..."
+	@if [ -d "frontend/node_modules" ]; then \
+		cd frontend && pnpm run generate:api; \
+		echo "✓ Frontend API schema regenerated"; \
+	else \
+		echo "⚠ Skipping frontend schema generation (dependencies not installed)"; \
+		echo "  Run 'cd frontend && pnpm install' first"; \
+	fi
+
+.PHONY: schema-mobile
+schema-mobile: ## Regenerate mobile API schema from OpenAPI 3.0
+	@echo "Regenerating mobile API schema..."
+	@cd mobile && pnpm run generate:api
+	@echo "✓ Mobile API schema regenerated"
+
+.PHONY: schema-all
+schema-all: schema-frontend schema-mobile ## Regenerate both frontend and mobile API schemas
+	@echo "✓ All API schemas regenerated"
 
 .PHONY: test
 test: ## Run tests for all components
@@ -252,18 +282,10 @@ swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi
+	@rm -rf api/split
 	@mkdir -p api/split
 	@pnpm exec redocly split api/openapi3.yaml --outDir=api/split
-	@echo "✓ OpenAPI 3.0 specification split into backend/docs/split/"
-
-.PHONY: swagger-preview
-swagger-preview: ## Preview OpenAPI 3.0 specification in browser
-	@echo "Starting OpenAPI 3.0 documentation preview..."
-	@if [ ! -f backend/docs/openapi3.yaml ]; then \
-		echo "OpenAPI 3.0 not found. Generating..."; \
-		$(MAKE) swagger-convert-v3; \
-	fi
-	@pnpm exec redocly preview-docs backend/docs/openapi3.yaml
+	@echo "✓ OpenAPI 3.0 specification split into api/split/"
 
 .PHONY: clean
 clean: ## Clean build artifacts
