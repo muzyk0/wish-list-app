@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: Cross-Domain Auth API
+  description: Authentication endpoints for cross-domain architecture
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+  - url: https://api.wishlist.com/api
+    description: Production server (Render)
+
+tags:
+  - name: Authentication
+    description: User authentication and token management
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user with email and password. Returns access token in response body and sets refresh token as httpOnly cookie.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie
+              schema:
+                type: string
+                example: refreshToken=eyJ...; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (5 requests/minute)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Exchange refresh token for a new access token. Accepts refresh token via:
+        - httpOnly cookie (web clients)
+        - Authorization Bearer header (mobile clients)
+
+        Implements token rotation - returns new refresh token on success.
+      operationId: refreshToken
+      parameters:
+        - name: Cookie
+          in: header
+          description: Refresh token cookie (web clients)
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: Bearer refresh token (mobile clients)
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIs...
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              description: New refresh token cookie (rotated)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mobile-handoff:
+    post:
+      tags:
+        - Authentication
+      summary: Generate mobile handoff code
+      description: |
+        Generate a short-lived (60 second) one-time code for transferring
+        authentication from Frontend to Mobile app.
+      operationId: mobileHandoff
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Handoff code generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (10 requests/minute per user)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/exchange:
+    post:
+      tags:
+        - Authentication
+      summary: Exchange handoff code for tokens
+      description: |
+        Exchange a handoff code received from Frontend redirect for access
+        and refresh tokens. Code can only be used once.
+      operationId: exchangeCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeRequest'
+      responses:
+        '200':
+          description: Code exchanged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeResponse'
+        '401':
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (10 requests/minute)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Clear refresh token cookie and invalidate session
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          headers:
+            Set-Cookie:
+              description: Cleared refresh token cookie
+              schema:
+                type: string
+                example: refreshToken=; Path=/; HttpOnly; Secure; Max-Age=0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check API and database connectivity
+      operationId: healthCheck
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: System unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "securepassword123"
+
+    LoginResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - user
+      properties:
+        accessToken:
+          type: string
+          description: Short-lived JWT (15 minutes)
+          example: eyJhbGciOiJIUzI1NiIs...
+        refreshToken:
+          type: string
+          description: Long-lived JWT (7 days) - also set as httpOnly cookie
+          example: eyJhbGciOiJIUzI1NiIs...
+        user:
+          $ref: '#/components/schemas/User'
+
+    RefreshResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+          description: New access token
+        refreshToken:
+          type: string
+          description: New refresh token (rotated)
+
+    HandoffResponse:
+      type: object
+      required:
+        - code
+        - expiresIn
+      properties:
+        code:
+          type: string
+          description: One-time use handoff code
+          example: "a1b2c3d4e5f6..."
+        expiresIn:
+          type: integer
+          description: Seconds until code expires
+          example: 60
+
+    ExchangeRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: Handoff code from Frontend redirect
+          example: "a1b2c3d4e5f6..."
+
+    ExchangeResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - user
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        avatarUrl:
+          type: string
+          format: uri
+          example: https://example.com/avatar.jpg
+
+    MessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Logged out successfully
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        error:
+          type: string
+          description: Error message if unhealthy
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid credentials
