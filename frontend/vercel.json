@@ -1,13 +1,7 @@
 {
   "buildCommand": "next build",
-  "outputDirectory": ".next",
   "devCommand": "next dev",
   "cleanUrls": true,
-  "framework": null,
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "/"
-    }
-  ]
+  "trailingSlash": false,
+  "framework": "nextjs"
 }
