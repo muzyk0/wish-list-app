@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export function Header() {
   const { t } = useTranslation();
@@ -34,6 +35,7 @@ export function Header() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </nav>
