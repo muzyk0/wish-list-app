@@ -29,6 +29,73 @@ The application follows a microservices architecture with shared components:
 - `/api`: OpenAPI specifications
 - `/specs`: Feature specifications using the Specify system
 - `/docs`: Documentation files
+- `/docs/plans`: Implementation plans for cross-domain architecture
+
+## Deployment Architecture (Cross-Domain)
+
+The application is deployed across multiple providers with different domains:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        WISH LIST APPLICATION                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐   │
+│  │  Frontend (Web)   │  │  Mobile (App)     │  │  Backend (API)    │   │
+│  │  Next.js          │  │  React Native     │  │  Go/Echo          │   │
+│  │  Vercel           │  │  Expo + Vercel    │  │  Render           │   │
+│  │                   │  │                   │  │                   │   │
+│  │  Features:        │  │  Personal Cabinet:│  │  Endpoints:       │   │
+│  │  • View wishlists │  │  • Create lists   │  │  • /auth/*        │   │
+│  │  • Reserve items  │  │  • Manage items   │  │  • /wishlists/*   │   │
+│  │  • My reservations│  │  • View reserves  │  │  • /reservations/*│   │
+│  │  • Redirect to LC │  │  • Settings       │  │  • /public/*      │   │
+│  └───────────────────┘  └───────────────────┘  └───────────────────┘   │
+│           │                      │                      ▲              │
+│           └──────────────────────┴──────────────────────┘              │
+│                       HTTPS + JWT + CORS                                │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+| Component | Provider | Purpose |
+|-----------|----------|---------|
+| Frontend | Vercel | Public pages, guest reservations, auth redirect to Mobile |
+| Mobile | Vercel/App Stores | Personal cabinet, create wishlists, manage items |
+| Backend | Render | REST API, PostgreSQL, S3 storage |
+
+### Cross-Domain Authentication
+
+Since components are on different domains, **httpOnly cookies cannot be shared**. The authentication strategy:
+
+**Token Storage**:
+- **Frontend (Web)**: Access token in memory, refresh token via API call
+- **Mobile**: Both tokens in `expo-secure-store`
+
+**Token Lifecycle**:
+- Access token: 15 minutes
+- Refresh token: 7 days
+
+**Frontend → Mobile Handoff** (OAuth-style):
+```
+1. User clicks "Personal Cabinet" on Frontend
+2. Frontend calls POST /auth/mobile-handoff → receives short-lived code (60s)
+3. Frontend redirects to Mobile via Universal Link: wishlistapp://auth?code=xxx
+4. Mobile exchanges code for tokens: POST /auth/exchange
+5. Mobile stores tokens in SecureStore
+```
+
+**Key Backend Endpoints**:
+- `POST /auth/login` - Returns accessToken + refreshToken
+- `POST /auth/refresh` - Exchange refresh token for new access token
+- `POST /auth/mobile-handoff` - Generate code for Frontend→Mobile redirect
+- `POST /auth/exchange` - Exchange handoff code for tokens
+
+**CORS Configuration** (Backend):
+```go
+AllowOrigins: ["https://wishlist.com", "https://www.wishlist.com"]
+AllowCredentials: true
+```
+
+For detailed implementation, see `/docs/plans/00-cross-domain-architecture-plan.md`.
 
 ## Important Development Aspects
 
@@ -601,6 +668,9 @@ make clean                    # Clean build artifacts
 ## Important Notes
 
 - The application uses JWT-based authentication across all components
+- **Cross-domain architecture**: Frontend (Vercel), Mobile (Vercel/App Stores), Backend (Render) - see `/docs/plans/`
+- **No httpOnly cookies for auth**: Different domains require token-based auth with refresh flow
+- **Frontend → Mobile redirect**: Uses OAuth-style handoff with short-lived codes
 - S3 integration is available for image uploads in the backend
 - Database migrations are managed with golang-migrate
 - All components share the same OpenAPI specification for API contracts
@@ -610,6 +680,17 @@ make clean                    # Clean build artifacts
 - The project enforces test-first approach (Constitution Requirement CR-002)
 - API contracts must be explicitly defined (Constitution Requirement CR-003)
 - Data privacy is enforced with encryption for PII (Constitution Requirement CR-004)
+
+## Implementation Plans
+
+Implementation plans for the cross-domain architecture are in `/docs/plans/`:
+
+| Plan | Focus |
+|------|-------|
+| `00-cross-domain-architecture-plan.md` | Auth flow, CORS, handoff - **implement first** |
+| `01-frontend-security-and-quality-plan.md` | Token management, Vercel deployment |
+| `02-mobile-app-completion-plan.md` | SecureStore, deep links, features |
+| `03-api-backend-improvements-plan.md` | Auth endpoints, Render deployment |
 
 ## Conventional Commits
 
