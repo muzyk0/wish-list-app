@@ -4,6 +4,7 @@ const path = require("path");
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  output: "export",
   turbopack: {
     root: path.join(__dirname),
   },
