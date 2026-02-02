@@ -18,7 +18,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en', // Fallback to English
+    fallbackLng: 'ru', // Fallback to Russian
     defaultNS,
     interpolation: {
       escapeValue: false, // React already escapes values
