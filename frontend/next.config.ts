@@ -4,9 +4,10 @@ const path = require("path");
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  turbopack: {
-    root: path.join(__dirname),
-  },
+  outputFileTracingRoot: path.join(__dirname),
+  // turbopack: {
+  //   root: path.join(__dirname),
+  // },
 };
 
 export default nextConfig;
