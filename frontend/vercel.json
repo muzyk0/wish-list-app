@@ -1,0 +1,13 @@
+{
+  "buildCommand": "next build",
+  "outputDirectory": "dist",
+  "devCommand": "next dev",
+  "cleanUrls": true,
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
+  ]
+}
