@@ -18,14 +18,13 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'ru', // Default language - Russian
-    fallbackLng: 'ru',
+    fallbackLng: 'en', // Fallback to English
     defaultNS,
     interpolation: {
       escapeValue: false, // React already escapes values
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
     },
   });
