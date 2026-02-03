@@ -141,7 +141,8 @@ func TestUserHandler_Register(t *testing.T) {
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 	assert.Equal(t, expectedResponse, response.User)
-	assert.NotEmpty(t, response.Token)
+	assert.NotEmpty(t, response.AccessToken)
+	assert.NotEmpty(t, response.RefreshToken)
 
 	mockService.AssertExpectations(t)
 }
@@ -202,7 +203,8 @@ func TestUserHandler_Login(t *testing.T) {
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 	assert.Equal(t, expectedResponse, response.User)
-	assert.NotEmpty(t, response.Token)
+	assert.NotEmpty(t, response.AccessToken)
+	assert.NotEmpty(t, response.RefreshToken)
 
 	mockService.AssertExpectations(t)
 }
