@@ -848,7 +848,7 @@
                 }
             }
         },
-        "/health": {
+        "/healthz": {
             "get": {
                 "description": "Performs a health check of the application and its dependencies (database)",
                 "tags": [

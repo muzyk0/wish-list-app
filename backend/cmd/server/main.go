@@ -29,7 +29,7 @@ import (
 	"wish-list/internal/services"
 	"wish-list/internal/validation"
 
-	_ "wish-list/docs" // Import generated docs
+	_ "wish-list/internal/handlers/docs" // Import generated docs
 )
 
 //	@title			Wish List API

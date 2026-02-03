@@ -533,7 +533,7 @@ paths:
       summary: Mark a gift item as purchased
       tags:
         - Gift Items
-  /health:
+  /healthz:
     get:
       description: Performs a health check of the application and its dependencies
         (database)

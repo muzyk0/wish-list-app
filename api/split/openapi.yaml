@@ -34,8 +34,8 @@ paths:
     $ref: paths/gift-items_{id}.yaml
   /gift-items/{id}/purchase:
     $ref: paths/gift-items_{id}_purchase.yaml
-  /health:
-    $ref: paths/health.yaml
+  /healthz:
+    $ref: paths/healthz.yaml
   /protected/account:
     $ref: paths/protected_account.yaml
   /protected/export-data:
