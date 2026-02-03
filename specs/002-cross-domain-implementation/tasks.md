@@ -94,11 +94,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Verify backend/internal/handlers/reservation_handler.go supports guest reservations (existing)
-- [ ] T031 [US3] Ensure public wishlist endpoints in backend do not require authentication (existing)
-- [ ] T032 [US3] Verify guest token generation in backend/internal/auth/token_manager.go GenerateGuestToken (existing)
-- [ ] T033 [US3] Update frontend public wishlist page to allow unauthenticated access
-- [ ] T034 [US3] Add guest reservation form component to frontend for name/email input
+- [X] T030 [US3] Verify backend/internal/handlers/reservation_handler.go supports guest reservations (existing)
+- [X] T031 [US3] Ensure public wishlist endpoints in backend do not require authentication (existing)
+- [X] T032 [US3] Verify guest token generation in backend/internal/auth/token_manager.go GenerateGuestToken (existing)
+- [X] T033 [US3] Update frontend public wishlist page to allow unauthenticated access
+- [X] T034 [US3] Add guest reservation form component to frontend for name/email input
 
 **Checkpoint**: User Story 3 complete - Guest reservation flow works without login
 

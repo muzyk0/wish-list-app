@@ -1224,6 +1224,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/wishlists/{slug}/gift-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get gift items for a public wish list by slug
+         * @description Get all gift items for a public wish list by its public slug with pagination support.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (default 1) */
+                    page?: number;
+                    /** @description Items per page (default 10, max 100) */
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Public Slug */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Gift items retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.GetGiftItemsResponse"];
+                    };
+                };
+                /** @description Wish list not found or not public */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status": {
         parameters: {
             query?: never;

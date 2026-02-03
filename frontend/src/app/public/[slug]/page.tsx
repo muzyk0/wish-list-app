@@ -1,84 +1,48 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, Heart, Image as ImageIcon } from 'lucide-react';
+import { ExternalLink, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { GuestReservationDialog } from '@/components/guest/GuestReservationDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface GiftItem {
-  id: string;
-  name: string;
-  description: string;
-  link: string;
-  image_url: string;
-  price: string;
-  priority: number;
-  reserved_by_user_id: string;
-  reserved_at: string;
-  purchased_by_user_id: string;
-  purchased_at: string;
-  notes: string;
-  position: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface WishList {
-  id: string;
-  owner_id: string;
-  title: string;
-  description: string;
-  occasion: string;
-  occasion_date: string;
-  template_id: string;
-  is_public: boolean;
-  public_slug: string;
-  view_count: number;
-  created_at: string;
-  updated_at: string;
-  gift_items: GiftItem[];
-}
+import { apiClient } from '@/lib/api/client';
 
 export default function PublicWishListPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [_redirectAttempted, _setRedirectAttempted] = useState(false);
 
   const {
     data: wishList,
-    isLoading,
-    isError,
-  } = useQuery<WishList>({
+    isLoading: isLoadingWishList,
+    isError: isErrorWishList,
+  } = useQuery({
     queryKey: ['public-wishlist', slug],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/public/lists/${slug}`,
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch wishlist');
-      }
-      return response.json();
+      return apiClient.getPublicWishList(slug);
     },
     enabled: !!slug,
     retry: 1,
   });
 
-  // Function to handle reservation
-  const handleReserve = (itemId: string) => {
-    // On the public frontend, redirect to mobile app to handle reservation
-    const appScheme = `wishlistapp://reserve?itemId=${itemId}`;
-    const webFallback = `https://lk.domain.com/lists/${wishList?.id}/reserve/${itemId}`;
+  const {
+    data: giftItemsData,
+    isLoading: isLoadingGiftItems,
+    isError: isErrorGiftItems,
+  } = useQuery({
+    queryKey: ['public-gift-items', slug],
+    queryFn: async () => {
+      return apiClient.getPublicGiftItems(slug, 1, 100);
+    },
+    enabled: !!slug && !!wishList,
+    retry: 1,
+  });
 
-    window.location.href = appScheme;
-
-    setTimeout(() => {
-      window.location.href = webFallback;
-    }, 1000);
-  };
+  const isLoading = isLoadingWishList || isLoadingGiftItems;
+  const isError = isErrorWishList || isErrorGiftItems;
+  const giftItems = giftItemsData?.items || [];
 
   if (isLoading) {
     return (
@@ -141,7 +105,7 @@ export default function PublicWishListPage() {
           )}
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">Public List</Badge>
-            {wishList.view_count > 0 && (
+            {wishList.view_count !== '0' && (
               <Badge variant="outline">{wishList.view_count} views</Badge>
             )}
           </div>
@@ -149,7 +113,7 @@ export default function PublicWishListPage() {
       </Card>
 
       <div className="space-y-4">
-        {wishList.gift_items.length === 0 ? (
+        {giftItems.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">
@@ -158,8 +122,8 @@ export default function PublicWishListPage() {
             </CardContent>
           </Card>
         ) : (
-          wishList.gift_items
-            .sort((a, b) => a.position - b.position)
+          giftItems
+            .sort((a, b) => (a.position || 0) - (b.position || 0))
             .map((item) => {
               const isReserved = !!item.reserved_by_user_id;
               const isPurchased = !!item.purchased_by_user_id;
@@ -225,29 +189,21 @@ export default function PublicWishListPage() {
 
                         <div className="mt-4 flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            {item.priority > 0 && (
+                            {item.priority && item.priority > 0 && (
                               <span className="text-xs bg-muted px-2 py-1 rounded">
                                 Priority: {item.priority}/10
                               </span>
                             )}
                           </div>
 
-                          <Button
-                            variant={isReserved ? 'secondary' : 'default'}
-                            size="sm"
-                            onClick={() => handleReserve(item.id)}
-                            disabled={isReserved || isPurchased}
-                          >
-                            {isPurchased ? (
-                              'Already Purchased'
-                            ) : isReserved ? (
-                              'Reserved'
-                            ) : (
-                              <>
-                                <Heart className="mr-2 h-4 w-4" /> Reserve Gift
-                              </>
-                            )}
-                          </Button>
+                          <GuestReservationDialog
+                            wishlistSlug={slug}
+                            wishlistId={wishList.id}
+                            itemId={item.id}
+                            itemName={item.name}
+                            isReserved={isReserved}
+                            isPurchased={isPurchased}
+                          />
                         </div>
                       </div>
                     </div>

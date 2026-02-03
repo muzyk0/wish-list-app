@@ -1,15 +1,9 @@
 // frontend/src/lib/mobile-handoff.ts
 // Mobile handoff: Transfer authenticated session from Frontend to Mobile app
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+import { apiClient } from './api/client';
 
 const MOBILE_URL_SCHEME = 'wishlistapp://';
-
-interface HandoffResponse {
-  code: string;
-  expiresAt: string;
-}
 
 /**
  * Generate handoff code and redirect to Mobile app
@@ -20,20 +14,8 @@ interface HandoffResponse {
  */
 export async function redirectToPersonalCabinet(): Promise<void> {
   try {
-    // Call backend to generate handoff code
-    const response = await fetch(`${API_BASE_URL}/auth/mobile-handoff`, {
-      method: 'POST',
-      credentials: 'include', // Include httpOnly cookie for authentication
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate handoff code');
-    }
-
-    const data: HandoffResponse = await response.json();
+    // Call backend to generate handoff code using apiClient
+    const data = await apiClient.mobileHandoff();
 
     // Redirect to mobile app with code
     const mobileUrl = `${MOBILE_URL_SCHEME}auth?code=${data.code}`;

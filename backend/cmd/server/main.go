@@ -311,6 +311,7 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	wishListGroup.GET("/:id", wishListHandler.GetWishList)
 	wishListGroup.PUT("/:id", wishListHandler.UpdateWishList)
 	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
+	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
 	wishListGroup.GET("", wishListHandler.GetWishListsByOwner)
 
 	// Gift item endpoints
@@ -324,8 +325,9 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	giftItemGroup.POST("/:id/mark-purchased", wishListHandler.MarkGiftItemAsPurchased)
 
 	// Public wish list endpoints
-	publicListGroup := e.Group("/api/public/lists")
-	publicListGroup.GET("/:slug", wishListHandler.GetWishListByPublicSlug)
+	publicWishlistGroup := e.Group("/api/public/wishlists")
+	publicWishlistGroup.GET("/:slug", wishListHandler.GetWishListByPublicSlug)
+	publicWishlistGroup.GET("/:slug/gift-items", wishListHandler.GetGiftItemsByPublicSlug)
 
 	// Reservation endpoints
 	reservationGroup := e.Group("/api/reservations")

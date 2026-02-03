@@ -44,6 +44,8 @@ paths:
     $ref: paths/protected_profile.yaml
   /public/wishlists/{slug}:
     $ref: paths/public_wishlists_{slug}.yaml
+  /public/wishlists/{slug}/gift-items:
+    $ref: paths/public_wishlists_{slug}_gift-items.yaml
   /public/wishlists/{slug}/gift-items/{itemId}/reservation-status:
     $ref: paths/public_wishlists_{slug}_gift-items_{itemId}_reservation-status.yaml
   /reservations:

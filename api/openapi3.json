@@ -1171,6 +1171,80 @@
                 }
             }
         },
+        "/public/wishlists/{slug}/gift-items": {
+            "get": {
+                "description": "Get all gift items for a public wish list by its public slug with pagination support.",
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Get gift items for a public wish list by slug",
+                "parameters": [
+                    {
+                        "description": "Public Slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gift items retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.GetGiftItemsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wish list not found or not public",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status": {
             "get": {
                 "description": "Get the reservation status for a specific gift item in a public wish list.",
