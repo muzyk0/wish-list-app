@@ -14,8 +14,20 @@ info:
   title: Wish List API
   version: '1.0'
 paths:
+  /auth/exchange:
+    $ref: paths/auth_exchange.yaml
   /auth/login:
     $ref: paths/auth_login.yaml
+  /auth/logout:
+    $ref: paths/auth_logout.yaml
+  /auth/mobile-handoff:
+    $ref: paths/auth_mobile-handoff.yaml
+  /auth/oauth/facebook:
+    $ref: paths/auth_oauth_facebook.yaml
+  /auth/oauth/google:
+    $ref: paths/auth_oauth_google.yaml
+  /auth/refresh:
+    $ref: paths/auth_refresh.yaml
   /auth/register:
     $ref: paths/auth_register.yaml
   /gift-items/{id}:

@@ -14,6 +14,90 @@
         "version": "1.0"
     },
     "paths": {
+        "/auth/exchange": {
+            "post": {
+                "description": "Exchange a handoff code received from Frontend redirect for access and refresh tokens. Code can only be used once.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Exchange handoff code for tokens",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.ExchangeRequest"
+                            }
+                        }
+                    },
+                    "description": "Exchange request",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code exchanged successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.ExchangeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired code",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded (10 requests/minute)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate user with email and password",
@@ -71,6 +155,247 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Clear refresh token cookie and invalidate session",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/mobile-handoff": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generate a short-lived (60 second) one-time code for transferring authentication from Frontend to Mobile app.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Generate mobile handoff code",
+                "responses": {
+                    "200": {
+                        "description": "Handoff code generated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HandoffResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded (10 requests/minute per user)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/oauth/facebook": {
+            "post": {
+                "description": "Exchange Facebook authorization code for access and refresh tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Facebook OAuth authentication",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.OAuthCodeRequest"
+                            }
+                        }
+                    },
+                    "description": "Authorization code from Facebook",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentication successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/oauth/google": {
+            "post": {
+                "description": "Exchange Google authorization code for access and refresh tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Google OAuth authentication",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.OAuthCodeRequest"
+                            }
+                        }
+                    },
+                    "description": "Authorization code from Google",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentication successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Exchange refresh token for a new access token. Accepts refresh token via httpOnly cookie (web clients) or Authorization Bearer header (mobile clients). Implements token rotation - returns new refresh token on success.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh access token",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.RefreshResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1899,12 +2224,17 @@
             "internal_handlers.AuthResponse": {
                 "type": "object",
                 "required": [
-                    "token",
+                    "accessToken",
+                    "refreshToken",
                     "user"
                 ],
                 "properties": {
-                    "token": {
-                        "description": "Authentication token",
+                    "accessToken": {
+                        "description": "Access token (short-lived, 15 minutes)",
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "description": "Refresh token (long-lived, 7 days) - also set as httpOnly cookie",
                         "type": "string"
                     },
                     "user": {
@@ -2051,6 +2381,36 @@
                     }
                 }
             },
+            "internal_handlers.ExchangeRequest": {
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.ExchangeResponse": {
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken",
+                    "user"
+                ],
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/internal_handlers.UserResponse"
+                    }
+                }
+            },
             "internal_handlers.GetGiftItemsResponse": {
                 "type": "object",
                 "required": [
@@ -2165,6 +2525,23 @@
                     }
                 }
             },
+            "internal_handlers.HandoffResponse": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "expiresIn"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6..."
+                    },
+                    "expiresIn": {
+                        "type": "integer",
+                        "example": 60
+                    }
+                }
+            },
             "internal_handlers.HealthResponse": {
                 "type": "object",
                 "required": [
@@ -2201,11 +2578,48 @@
                     }
                 }
             },
+            "internal_handlers.MessageResponse": {
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.OAuthCodeRequest": {
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    }
+                }
+            },
             "internal_handlers.PurchaseRequest": {
                 "type": "object",
                 "properties": {
                     "purchased_price": {
                         "type": "number"
+                    }
+                }
+            },
+            "internal_handlers.RefreshResponse": {
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken"
+                ],
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
                     }
                 }
             },

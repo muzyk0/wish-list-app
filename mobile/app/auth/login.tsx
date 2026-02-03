@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import {
@@ -14,6 +13,7 @@ import {
 } from 'react-native-paper';
 import OAuthButton from '@/components/OAuthButton';
 import { loginUser } from '@/lib/api';
+import { setTokens } from '@/lib/api/auth';
 import {
   startAppleOAuth,
   startFacebookOAuth,
@@ -33,20 +33,9 @@ export default function LoginScreen() {
   const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       loginUser({ email, password }),
-    onSuccess: async (data) => {
-      try {
-        // Store the token securely
-        if (data.token) {
-          await SecureStore.setItemAsync('auth_token', data.token);
-        }
-        router.push('/(tabs)');
-      } catch (error) {
-        console.error('Error storing token:', error);
-        Alert.alert(
-          'Error',
-          'Failed to save authentication. Please try again.',
-        );
-      }
+    onSuccess: async () => {
+      // Tokens are already stored by the loginUser API call
+      router.push('/(tabs)');
     },
     onError: (error: Error) => {
       Alert.alert('Error', error.message || 'Login failed. Please try again.');
@@ -66,7 +55,12 @@ export default function LoginScreen() {
     setOauthLoading(provider);
 
     try {
-      let result: { success: boolean; token?: string; error?: string };
+      let result: {
+        success: boolean;
+        accessToken?: string;
+        refreshToken?: string;
+        error?: string;
+      };
       switch (provider) {
         case 'google':
           result = await startGoogleOAuth();
@@ -81,18 +75,18 @@ export default function LoginScreen() {
           throw new Error('Invalid provider');
       }
 
-      if (result.success && result.token) {
+      if (result.success && result.accessToken && result.refreshToken) {
         // Handle successful OAuth login
         try {
-          // Store the token securely
-          await SecureStore.setItemAsync('auth_token', result.token);
+          // Store both tokens securely
+          await setTokens(result.accessToken, result.refreshToken);
           Alert.alert(
             'Success',
             `${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`,
           );
           router.push('/(tabs)'); // Navigate to main app
         } catch (error) {
-          console.error('Error storing OAuth token:', error);
+          console.error('Error storing OAuth tokens:', error);
           Alert.alert(
             'Error',
             'Failed to save authentication. Please try again.',

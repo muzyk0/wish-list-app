@@ -13,6 +13,59 @@ info:
   title: Wish List API
   version: "1.0"
 paths:
+  /auth/exchange:
+    post:
+      description: Exchange a handoff code received from Frontend redirect for access
+        and refresh tokens. Code can only be used once.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.ExchangeRequest"
+        description: Exchange request
+        required: true
+      responses:
+        "200":
+          description: Code exchanged successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.ExchangeResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "429":
+          description: Rate limit exceeded (10 requests/minute)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Exchange handoff code for tokens
+      tags:
+        - Authentication
   /auth/login:
     post:
       description: Authenticate user with email and password
@@ -55,6 +108,157 @@ paths:
                   type: string
                 type: object
       summary: User login
+      tags:
+        - Authentication
+  /auth/logout:
+    post:
+      description: Clear refresh token cookie and invalidate session
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.MessageResponse"
+      security:
+        - BearerAuth: []
+      summary: Logout user
+      tags:
+        - Authentication
+  /auth/mobile-handoff:
+    post:
+      description: Generate a short-lived (60 second) one-time code for transferring
+        authentication from Frontend to Mobile app.
+      responses:
+        "200":
+          description: Handoff code generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.HandoffResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "429":
+          description: Rate limit exceeded (10 requests/minute per user)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Generate mobile handoff code
+      tags:
+        - Authentication
+  /auth/oauth/facebook:
+    post:
+      description: Exchange Facebook authorization code for access and refresh tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.OAuthCodeRequest"
+        description: Authorization code from Facebook
+        required: true
+      responses:
+        "200":
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Facebook OAuth authentication
+      tags:
+        - Auth
+  /auth/oauth/google:
+    post:
+      description: Exchange Google authorization code for access and refresh tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.OAuthCodeRequest"
+        description: Authorization code from Google
+        required: true
+      responses:
+        "200":
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.AuthResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Google OAuth authentication
+      tags:
+        - Auth
+  /auth/refresh:
+    post:
+      description: Exchange refresh token for a new access token. Accepts refresh
+        token via httpOnly cookie (web clients) or Authorization Bearer header
+        (mobile clients). Implements token rotation - returns new refresh token
+        on success.
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.RefreshResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Refresh access token
       tags:
         - Authentication
   /auth/register:
@@ -1181,15 +1385,19 @@ components:
   schemas:
     internal_handlers.AuthResponse:
       properties:
-        token:
-          description: Authentication token
+        accessToken:
+          description: Access token (short-lived, 15 minutes)
+          type: string
+        refreshToken:
+          description: Refresh token (long-lived, 7 days) - also set as httpOnly cookie
           type: string
         user:
           allOf:
             - $ref: "#/components/schemas/internal_handlers.UserResponse"
           description: User information
       required:
-        - token
+        - accessToken
+        - refreshToken
         - user
       type: object
     internal_handlers.CancelReservationRequest:
@@ -1284,6 +1492,26 @@ components:
       required:
         - title
       type: object
+    internal_handlers.ExchangeRequest:
+      properties:
+        code:
+          type: string
+      required:
+        - code
+      type: object
+    internal_handlers.ExchangeResponse:
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: "#/components/schemas/internal_handlers.UserResponse"
+      required:
+        - accessToken
+        - refreshToken
+        - user
+      type: object
     internal_handlers.GetGiftItemsResponse:
       properties:
         items:
@@ -1362,6 +1590,18 @@ components:
         - id
         - name
       type: object
+    internal_handlers.HandoffResponse:
+      properties:
+        code:
+          example: a1b2c3d4e5f6...
+          type: string
+        expiresIn:
+          example: 60
+          type: integer
+      required:
+        - code
+        - expiresIn
+      type: object
     internal_handlers.HealthResponse:
       properties:
         checks:
@@ -1386,10 +1626,34 @@ components:
         - email
         - password
       type: object
+    internal_handlers.MessageResponse:
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      type: object
+    internal_handlers.OAuthCodeRequest:
+      properties:
+        code:
+          type: string
+      required:
+        - code
+      type: object
     internal_handlers.PurchaseRequest:
       properties:
         purchased_price:
           type: number
+      type: object
+    internal_handlers.RefreshResponse:
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+        - accessToken
+        - refreshToken
       type: object
     internal_handlers.RegisterRequest:
       properties:

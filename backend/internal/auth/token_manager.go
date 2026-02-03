@@ -12,7 +12,7 @@ import (
 type Claims struct {
 	UserID   string `json:"user_id"`
 	Email    string `json:"email"`
-	UserType string `json:"user_type"` // "user" or "guest"
+	UserType string `json:"user_type"`          // "user" or "guest"
 	TokenID  string `json:"token_id,omitempty"` // For refresh tokens only (enables rotation/blacklisting)
 	jwt.RegisteredClaims
 }

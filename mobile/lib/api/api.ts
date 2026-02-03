@@ -1,6 +1,11 @@
 // mobile/lib/api.ts
-import * as SecureStore from 'expo-secure-store';
 import createClient from 'openapi-fetch';
+import {
+  clearTokens,
+  getAccessToken,
+  refreshAccessToken,
+  setTokens,
+} from './auth';
 import type { paths } from './schema';
 import type {
   CreateGiftItemRequest,
@@ -21,49 +26,64 @@ const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
 
 class ApiClient {
-  private token: string | null = null;
-  private tokenReady: Promise<void>;
-  private resolveTokenReady!: () => void;
   private client: ReturnType<typeof createClient<paths>>;
+  private refreshPromise: Promise<string | null> | null = null;
 
   constructor() {
-    // Initialize token ready promise
-    this.tokenReady = new Promise((resolve) => {
-      this.resolveTokenReady = resolve;
-    });
-
     // Create openapi-fetch client
     this.client = createClient<paths>({ baseUrl: API_BASE_URL });
-
-    // Load token from secure storage
-    this.loadToken();
   }
 
-  private async loadToken() {
-    try {
-      this.token = await SecureStore.getItemAsync('auth_token');
-    } catch (error) {
-      console.error('Error loading token:', error);
-    } finally {
-      this.resolveTokenReady();
-    }
-  }
-
-  private getHeaders(): Record<string, string> {
+  private async getHeaders(): Promise<Record<string, string>> {
+    const token = await getAccessToken();
     const headers: Record<string, string> = {};
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
     return headers;
   }
 
+  /**
+   * Make request with automatic token refresh on 401
+   */
+  private async requestWithRetry<T>(
+    makeRequest: () => Promise<{ data?: T; error?: unknown }>,
+  ): Promise<{ data?: T; error?: unknown }> {
+    // First attempt
+    let result = await makeRequest();
+
+    // If 401 and not already refreshing, try to refresh token
+    if (
+      result.error &&
+      (result.error as any)?.status === 401 &&
+      !this.refreshPromise
+    ) {
+      // Refresh token using singleton pattern
+      if (!this.refreshPromise) {
+        this.refreshPromise = refreshAccessToken();
+      }
+
+      try {
+        const newToken = await this.refreshPromise;
+        if (newToken) {
+          // Retry request with new token
+          result = await makeRequest();
+        }
+      } finally {
+        this.refreshPromise = null;
+      }
+    }
+
+    return result;
+  }
+
   // Authentication methods
   async login(credentials: UserLogin): Promise<LoginResponse> {
-    await this.tokenReady;
+    const headers = await this.getHeaders();
 
     const { data, error } = await this.client.POST('/auth/login', {
       body: credentials,
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (error || !data) {
@@ -73,16 +93,18 @@ class ApiClient {
       );
     }
 
-    await this.setToken(data.token);
-    return data; // Fixed: was 'response' which was undefined
+    // Store both access and refresh tokens from response
+    // Assuming backend returns both in response
+    await setTokens(data.accessToken, data.refreshToken); // TODO: Backend should return separate refresh token
+    return data;
   }
 
   async register(userData: UserRegistration): Promise<LoginResponse> {
-    await this.tokenReady;
+    const headers = await this.getHeaders();
 
     const { data, error } = await this.client.POST('/auth/register', {
       body: userData,
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (error || !data) {
@@ -92,34 +114,28 @@ class ApiClient {
       );
     }
 
-    await this.setToken(data.token);
-    return data; // Fixed: removed unnecessary cast and variable
+    // Store both access and refresh tokens from response
+    await setTokens(data.accessToken, data.refreshToken); // TODO: Backend should return separate refresh token
+    return data;
   }
 
   async logout(): Promise<void> {
-    this.token = null;
     try {
-      await SecureStore.deleteItemAsync('auth_token');
+      const headers = await this.getHeaders();
+      await this.client.POST('/auth/logout', { headers });
     } catch (error) {
-      console.error('Error removing token:', error);
-    }
-  }
-
-  private async setToken(token: string): Promise<void> {
-    this.token = token;
-    try {
-      await SecureStore.setItemAsync('auth_token', token);
-    } catch (error) {
-      console.error('Error saving token:', error);
+      console.error('Logout request failed:', error);
+    } finally {
+      // Always clear tokens locally
+      await clearTokens();
     }
   }
 
   // User methods
   async getProfile(): Promise<User> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/protected/profile', {
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/protected/profile', { headers });
     });
 
     if (error || !data) {
@@ -134,11 +150,12 @@ class ApiClient {
     last_name?: string;
     avatar_url?: string;
   }): Promise<User> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.PUT('/protected/profile', {
-      body: userData,
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.PUT('/protected/profile', {
+        body: userData,
+        headers,
+      });
     });
 
     if (error || !data) {
@@ -149,23 +166,24 @@ class ApiClient {
   }
 
   async deleteAccount(): Promise<void> {
-    await this.tokenReady;
-
-    const { error } = await this.client.DELETE('/protected/account', {
-      headers: this.getHeaders(),
+    const { error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.DELETE('/protected/account', { headers });
     });
 
     if (error) {
       throw new Error((error as any)?.error || 'Failed to delete account');
     }
+
+    // Clear tokens after successful account deletion
+    await clearTokens();
   }
 
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/wishlists', {
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/wishlists', { headers });
     });
 
     if (error || !data) {
@@ -176,11 +194,12 @@ class ApiClient {
   }
 
   async getWishListById(id: string): Promise<WishList> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/wishlists/{id}', {
-      params: { path: { id } },
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/wishlists/{id}', {
+        params: { path: { id } },
+        headers,
+      });
     });
 
     if (error || !data) {
@@ -191,11 +210,12 @@ class ApiClient {
   }
 
   async getPublicWishList(slug: string): Promise<WishList> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
-      params: { path: { slug } },
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/public/wishlists/{slug}', {
+        params: { path: { slug } },
+        headers,
+      });
     });
 
     if (error || !data) {
@@ -208,12 +228,15 @@ class ApiClient {
   }
 
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
-    await this.tokenReady;
-
-    const { data: responseData, error } = await this.client.POST('/wishlists', {
-      body: data,
-      headers: this.getHeaders(),
-    });
+    const { data: responseData, error } = await this.requestWithRetry(
+      async () => {
+        const headers = await this.getHeaders();
+        return this.client.POST('/wishlists', {
+          body: data,
+          headers,
+        });
+      },
+    );
 
     if (error || !responseData) {
       throw new Error((error as any)?.error || 'Failed to create wish list');
@@ -226,14 +249,14 @@ class ApiClient {
     id: string,
     data: UpdateWishListRequest,
   ): Promise<WishList> {
-    await this.tokenReady;
-
-    const { data: responseData, error } = await this.client.PUT(
-      '/wishlists/{id}',
-      {
-        params: { path: { id } },
-        body: data,
-        headers: this.getHeaders(),
+    const { data: responseData, error } = await this.requestWithRetry(
+      async () => {
+        const headers = await this.getHeaders();
+        return this.client.PUT('/wishlists/{id}', {
+          params: { path: { id } },
+          body: data,
+          headers,
+        });
       },
     );
 
@@ -245,11 +268,12 @@ class ApiClient {
   }
 
   async deleteWishList(id: string): Promise<void> {
-    await this.tokenReady;
-
-    const { error } = await this.client.DELETE('/wishlists/{id}', {
-      params: { path: { id } },
-      headers: this.getHeaders(),
+    const { error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.DELETE('/wishlists/{id}', {
+        params: { path: { id } },
+        headers,
+      });
     });
 
     if (error) {
@@ -259,15 +283,13 @@ class ApiClient {
 
   // Gift item methods
   async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET(
-      '/wishlists/{wishlistId}/gift-items',
-      {
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/wishlists/{wishlistId}/gift-items', {
         params: { path: { wishlistId } },
-        headers: this.getHeaders(),
-      },
-    );
+        headers,
+      });
+    });
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch gift items');
@@ -277,11 +299,12 @@ class ApiClient {
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/gift-items/{id}', {
-      params: { path: { id: itemId } },
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/gift-items/{id}', {
+        params: { path: { id: itemId } },
+        headers,
+      });
     });
 
     if (error || !data) {
@@ -295,14 +318,14 @@ class ApiClient {
     wishlistId: string,
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
-    const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items',
-      {
-        params: { path: { wishlistId } },
-        body: data,
-        headers: this.getHeaders(),
+    const { data: responseData, error } = await this.requestWithRetry(
+      async () => {
+        const headers = await this.getHeaders();
+        return this.client.POST('/wishlists/{wishlistId}/gift-items', {
+          params: { path: { wishlistId } },
+          body: data,
+          headers,
+        });
       },
     );
 
@@ -318,14 +341,14 @@ class ApiClient {
     itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
-    const { data: responseData, error } = await this.client.PUT(
-      '/gift-items/{id}',
-      {
-        params: { path: { id: itemId } },
-        body: data,
-        headers: this.getHeaders(),
+    const { data: responseData, error } = await this.requestWithRetry(
+      async () => {
+        const headers = await this.getHeaders();
+        return this.client.PUT('/gift-items/{id}', {
+          params: { path: { id: itemId } },
+          body: data,
+          headers,
+        });
       },
     );
 
@@ -337,11 +360,12 @@ class ApiClient {
   }
 
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
-    await this.tokenReady;
-
-    const { error } = await this.client.DELETE('/gift-items/{id}', {
-      params: { path: { id: itemId } },
-      headers: this.getHeaders(),
+    const { error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.DELETE('/gift-items/{id}', {
+        params: { path: { id: itemId } },
+        headers,
+      });
     });
 
     if (error) {
@@ -354,16 +378,14 @@ class ApiClient {
     itemId: string,
     purchasedPrice: number,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.POST(
-      '/gift-items/{id}/purchase',
-      {
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.POST('/gift-items/{id}/purchase', {
         params: { path: { id: itemId } },
         body: { purchased_price: purchasedPrice },
-        headers: this.getHeaders(),
-      },
-    );
+        headers,
+      });
+    });
 
     if (error || !data) {
       throw new Error(
@@ -380,14 +402,17 @@ class ApiClient {
     itemId: string,
     data: CreateReservationRequest,
   ): Promise<Reservation> {
-    await this.tokenReady;
-
-    const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
-      {
-        params: { path: { wishlistId, itemId } },
-        body: data,
-        headers: this.getHeaders(),
+    const { data: responseData, error } = await this.requestWithRetry(
+      async () => {
+        const headers = await this.getHeaders();
+        return this.client.POST(
+          '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+          {
+            params: { path: { wishlistId, itemId } },
+            body: data,
+            headers,
+          },
+        );
       },
     );
 
@@ -399,10 +424,9 @@ class ApiClient {
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/reservations', {
-      headers: this.getHeaders(),
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.GET('/reservations', { headers });
     });
 
     if (error || !data) {
@@ -413,15 +437,16 @@ class ApiClient {
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
-    await this.tokenReady;
-
-    const { error } = await this.client.DELETE(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
-      {
-        params: { path: { wishlistId, itemId } },
-        headers: this.getHeaders(),
-      },
-    );
+    const { error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.DELETE(
+        '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+        {
+          params: { path: { wishlistId, itemId } },
+          headers,
+        },
+      );
+    });
 
     if (error) {
       throw new Error((error as any)?.error || 'Failed to cancel reservation');

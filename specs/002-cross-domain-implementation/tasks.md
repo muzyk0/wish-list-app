@@ -75,12 +75,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Add refreshAccessToken method to frontend/src/lib/auth.ts with singleton pattern
-- [ ] T025 [US2] Modify frontend/src/lib/api.ts request method to retry on 401 after refresh attempt
-- [ ] T026 [US2] Add refresh flow to frontend/src/lib/auth.ts that calls POST /auth/refresh with credentials
-- [ ] T027 [US2] Implement refreshAccessToken in mobile/lib/api/auth.ts using SecureStore refresh token
-- [ ] T028 [US2] Modify mobile/lib/api/api.ts to add automatic token refresh on 401 response
-- [ ] T029 [US2] Create frontend/src/hooks/useAuth.ts hook with authentication state and refresh on mount
+- [X] T024 [US2] Add refreshAccessToken method to frontend/src/lib/auth.ts with singleton pattern
+- [X] T025 [US2] Modify frontend/src/lib/api.ts request method to retry on 401 after refresh attempt
+- [X] T026 [US2] Add refresh flow to frontend/src/lib/auth.ts that calls POST /auth/refresh with credentials
+- [X] T027 [US2] Implement refreshAccessToken in mobile/lib/api/auth.ts using SecureStore refresh token
+- [X] T028 [US2] Modify mobile/lib/api/api.ts to add automatic token refresh on 401 response
+- [X] T029 [US2] Create frontend/src/hooks/useAuth.ts hook with authentication state and refresh on mount
 
 **Checkpoint**: User Story 2 complete - Token refresh works automatically on both platforms
 

@@ -196,6 +196,15 @@ func main() {
 	healthHandler := handlers.NewHealthHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
 	authHandler := handlers.NewAuthHandler(userService, tokenManager, codeStore)
+	oauthHandler := handlers.NewOAuthHandler(
+		userRepo,
+		tokenManager,
+		cfg.GoogleClientID,
+		cfg.GoogleClientSecret,
+		cfg.FacebookClientID,
+		cfg.FacebookClientSecret,
+		cfg.OAuthRedirectURL,
+	)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 
@@ -209,7 +218,7 @@ func main() {
 	accountCleanupService.StartScheduledCleanup(appCtx)
 
 	// Initialize routes
-	setupRoutes(e, healthHandler, userHandler, authHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
+	setupRoutes(e, healthHandler, userHandler, authHandler, oauthHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
 
 	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
@@ -256,7 +265,7 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
@@ -269,6 +278,10 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	authGroup.POST("/login", userHandler.Login)
 	authGroup.POST("/refresh", authHandler.Refresh)
 	authGroup.POST("/exchange", authHandler.Exchange)
+
+	// OAuth endpoints
+	authGroup.POST("/oauth/google", oauthHandler.GoogleOAuth)
+	authGroup.POST("/oauth/facebook", oauthHandler.FacebookOAuth)
 
 	// Protected auth endpoints (require authentication)
 	authGroup.POST("/mobile-handoff", authHandler.MobileHandoff, auth.JWTMiddleware(tokenManager))
