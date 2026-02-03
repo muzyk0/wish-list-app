@@ -3,6 +3,7 @@
 import { MyReservations } from '@/components/wish-list/MyReservations';
 import MobileRedirect from '@/components/common/MobileRedirect';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { MOBILE_APP_URLS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
 
 export default function MyReservationsPage() {
   const { isAuthenticated, isLoading } = useAuthRedirect(true);
@@ -22,8 +23,8 @@ export default function MyReservationsPage() {
   if (isAuthenticated) {
     return (
       <MobileRedirect
-        redirectPath="my/reservations"
-        fallbackUrl="https://lk.domain.com/my/reservations"
+        redirectPath={MOBILE_APP_REDIRECT_PATHS.MY_RESERVATIONS}
+        fallbackUrl={MOBILE_APP_URLS.MY_RESERVATIONS}
       >
         <div className="container mx-auto py-10">
           <div className="flex justify-center items-center h-32">

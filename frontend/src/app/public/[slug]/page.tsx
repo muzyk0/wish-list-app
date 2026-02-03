@@ -9,6 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from '@/constants/domains';
 import { apiClient } from '@/lib/api/client';
 
 export default function PublicWishListPage() {
@@ -226,8 +230,8 @@ export default function PublicWishListPage() {
           variant="outline"
           onClick={() => {
             // Redirect to mobile app or mobile web version
-            const appScheme = 'wishlistapp://home';
-            const webFallback = 'https://lk.domain.com';
+            const appScheme = `wishlistapp://${MOBILE_APP_REDIRECT_PATHS.HOME}`;
+            const webFallback = DOMAIN_CONSTANTS.MOBILE_APP_BASE_URL;
 
             window.location.href = appScheme;
 

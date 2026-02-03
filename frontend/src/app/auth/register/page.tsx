@@ -11,12 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { MOBILE_APP_URLS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
 
 export default function RegisterPage() {
   return (
     <MobileRedirect
-      redirectPath="auth/register"
-      fallbackUrl="https://lk.domain.com/auth/register"
+      redirectPath={MOBILE_APP_REDIRECT_PATHS.AUTH_REGISTER}
+      fallbackUrl={MOBILE_APP_URLS.REGISTER}
     >
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md">
@@ -34,7 +35,7 @@ export default function RegisterPage() {
 
             <div className="space-y-2">
               <Button asChild variant="outline" className="w-full">
-                <Link href="https://lk.domain.com/auth/register">
+                <Link href={MOBILE_APP_URLS.REGISTER}>
                   Open Mobile Web Version
                 </Link>
               </Button>
