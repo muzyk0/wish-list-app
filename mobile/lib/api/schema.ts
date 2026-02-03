@@ -4,1958 +4,1980 @@
  */
 
 export interface paths {
-    "/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * User login
-         * @description Authenticate user with email and password
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description User login credentials */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.LoginRequest"];
-                };
-            };
-            responses: {
-                /** @description Login successful */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.AuthResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Invalid credentials */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /**
+     * User login
+     * @description Authenticate user with email and password
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description User login credentials */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.LoginRequest'];
         };
-        get?: never;
-        put?: never;
-        /**
-         * Register a new user
-         * @description Create a new user account with email and password
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description User registration information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.RegisterRequest"];
-                };
-            };
-            responses: {
-                /** @description User created successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.AuthResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description User with this email already exists */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+      };
+      responses: {
+        /** @description Login successful */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.AuthResponse'];
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Invalid credentials */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/gift-items/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a gift item by ID
-         * @description Get a gift item by its ID. If the parent wish list is private, the user must be the owner.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Gift Item ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Gift item retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
-                    };
-                };
-                /** @description Access denied */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Gift item not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        /**
-         * Update a gift item
-         * @description Update a gift item by its ID. The user must be the owner of the parent wish list.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Gift Item ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            /** @description Gift item update information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.UpdateGiftItemRequest"];
-                };
-            };
-            responses: {
-                /** @description Gift item updated successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Gift item or wishlist not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        post?: never;
-        /**
-         * Delete a gift item
-         * @description Delete a gift item by its ID. The user must be the owner of the parent wish list.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Gift Item ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Gift item deleted successfully */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Gift item or wishlist not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/register': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/gift-items/{id}/purchase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Register a new user
+     * @description Create a new user account with email and password
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description User registration information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.RegisterRequest'];
         };
-        get?: never;
-        put?: never;
-        /**
-         * Mark a gift item as purchased
-         * @description Mark a gift item as purchased with an optional purchased price. The user must be the owner of the parent wish list.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Gift Item ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            /** @description Purchase information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.PurchaseRequest"];
-                };
-            };
-            responses: {
-                /** @description Gift item marked as purchased successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Gift item or wishlist not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+      };
+      responses: {
+        /** @description User created successfully */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.AuthResponse'];
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description User with this email already exists */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Health check endpoint
-         * @description Performs a health check of the application and its dependencies (database)
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Application is healthy */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.HealthResponse"];
-                    };
-                };
-                /** @description Application is unhealthy */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.HealthResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gift-items/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/protected/account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Get a gift item by ID
+     * @description Get a gift item by its ID. If the parent wish list is private, the user must be the owner.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Gift Item ID */
+          id: string;
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete user account
-         * @description Delete the authenticated user's account and all associated data. This action is irreversible.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Account deleted successfully */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Gift item retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.GiftItemResponse'];
+          };
         };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        /** @description Access denied */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Gift item not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/protected/export-data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Update a gift item
+     * @description Update a gift item by its ID. The user must be the owner of the parent wish list.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Gift Item ID */
+          id: string;
         };
-        /**
-         * Export user data
-         * @description Export the authenticated user's data in JSON format for compliance and personal records
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description User data exported successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+        cookie?: never;
+      };
+      /** @description Gift item update information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.UpdateGiftItemRequest'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
+      responses: {
+        /** @description Gift item updated successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.GiftItemResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Gift item or wishlist not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/protected/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    post?: never;
+    /**
+     * Delete a gift item
+     * @description Delete a gift item by its ID. The user must be the owner of the parent wish list.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Gift Item ID */
+          id: string;
         };
-        /**
-         * Get user profile
-         * @description Get the authenticated user's profile information
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description User profile */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.UserResponse"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description User not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Gift item deleted successfully */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
         };
-        /**
-         * Update user profile
-         * @description Update the authenticated user's profile information
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
             };
-            /** @description Updated profile information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.UpdateProfileRequest"];
-                };
-            };
-            responses: {
-                /** @description Updated user profile */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.UserResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description User not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+          };
         };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Gift item or wishlist not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/public/wishlists/{slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a public wish list by its slug
-         * @description Get a public wish list by its public slug. The wish list must be marked as public.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Public Slug */
-                    slug: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Public wish list retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
-                    };
-                };
-                /** @description Wish list not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gift-items/{id}/purchase': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Mark a gift item as purchased
+     * @description Mark a gift item as purchased with an optional purchased price. The user must be the owner of the parent wish list.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Gift Item ID */
+          id: string;
         };
-        /**
-         * Get the reservation status for a gift item in a public wish list
-         * @description Get the reservation status for a specific gift item in a public wish list.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Public wish list slug */
-                    slug: string;
-                    /** @description Gift Item ID */
-                    itemId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Reservation status retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.ReservationStatusResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+        cookie?: never;
+      };
+      /** @description Purchase information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.PurchaseRequest'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
+      responses: {
+        /** @description Gift item marked as purchased successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.GiftItemResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Gift item or wishlist not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
     };
-    "/reservations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get all reservations made by the authenticated user
-         * @description Get all reservations made by the authenticated user with pagination.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (default 1) */
-                    page?: number;
-                    /** @description Items per page (default 10, max 100) */
-                    limit?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of user reservations retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.UserReservationsResponse"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/reservations/guest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Health check endpoint
+     * @description Performs a health check of the application and its dependencies (database)
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Application is healthy */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.HealthResponse'];
+          };
         };
-        /**
-         * Get reservations made by a guest using a token
-         * @description Get all reservations made by a guest using their reservation token.
-         */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Reservation token */
-                    token: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of guest reservations retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.ReservationDetailsResponse"][];
-                    };
-                };
-                /** @description Invalid request parameters */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+        /** @description Application is unhealthy */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.HealthResponse'];
+          };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/s3/upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Upload an image to S3
-         * @description Upload an image file to S3 storage. The user must be authenticated.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "multipart/form-data": {
-                        /**
-                         * Format: binary
-                         * @description Image file to upload (max 10MB, only images allowed)
-                         */
-                        image: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Image uploaded successfully, returns URL */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Invalid file or file too large */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/protected/account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/wishlists": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete user account
+     * @description Delete the authenticated user's account and all associated data. This action is irreversible.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Account deleted successfully */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
         };
-        /**
-         * Get all wish lists owned by the authenticated user
-         * @description Get all wish lists owned by the currently authenticated user
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
             };
-            requestBody?: never;
-            responses: {
-                /** @description List of wish lists retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.WishListResponse"][];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+          };
         };
-        put?: never;
-        /**
-         * Create a new wish list
-         * @description Create a new wish list for the authenticated user
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
             };
-            /** @description Wish list creation information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.CreateWishListRequest"];
-                };
-            };
-            responses: {
-                /** @description Wish list created successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/wishlists/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a wish list by ID
-         * @description Get a wish list by its ID. If the wish list is private, the user must be the owner.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Wish list retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
-                    };
-                };
-                /** @description Access denied */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Wish list not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        /**
-         * Update a wish list
-         * @description Update a wish list by its ID. The user must be the owner of the wish list.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            /** @description Wish list update information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.UpdateWishListRequest"];
-                };
-            };
-            responses: {
-                /** @description Wish list updated successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.WishListResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Wish list not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        post?: never;
-        /**
-         * Delete a wish list
-         * @description Delete a wish list by its ID. The user must be the owner of the wish list.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Wish list deleted successfully */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/protected/export-data': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/wishlists/{wishlistId}/gift-items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Export user data
+     * @description Export the authenticated user's data in JSON format for compliance and personal records
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description User data exported successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': unknown;
+          };
         };
-        /**
-         * Get all gift items in a wish list
-         * @description Get all gift items in a wish list. If the wish list is private, the user must be the owner.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number (default 1) */
-                    page?: number;
-                    /** @description Items per page (default 10, max 100) */
-                    limit?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                };
-                cookie?: never;
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
             };
-            requestBody?: never;
-            responses: {
-                /** @description List of gift items retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.GetGiftItemsResponse"];
-                    };
-                };
-                /** @description Access denied */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Wishlist not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+          };
         };
-        put?: never;
-        /**
-         * Create a new gift item
-         * @description Create a new gift item in a wish list. The user must be the owner of the wish list.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                };
-                cookie?: never;
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
             };
-            /** @description Gift item creation information */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.CreateGiftItemRequest"];
-                };
-            };
-            responses: {
-                /** @description Gift item created successfully */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.GiftItemResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Wishlist not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/wishlists/{wishlistId}/gift-items/{itemId}/reservation": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a reservation for a gift item
-         * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                    /** @description Gift Item ID */
-                    itemId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Reservation information (required for guests) */
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.CreateReservationRequest"];
-                };
-            };
-            responses: {
-                /** @description Reservation created successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.CreateReservationResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized (guests need name and email) */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        /**
-         * Cancel a reservation for a gift item
-         * @description Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                    /** @description Gift Item ID */
-                    itemId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Cancellation information (required for guests) */
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["internal_handlers.CancelReservationRequest"];
-                };
-            };
-            responses: {
-                /** @description Reservation canceled successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["internal_handlers.CreateReservationResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized (guests need reservation token) */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/protected/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * Get user profile
+     * @description Get the authenticated user's profile information
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description User profile */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.UserResponse'];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description User not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    /**
+     * Update user profile
+     * @description Update the authenticated user's profile information
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Updated profile information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.UpdateProfileRequest'];
+        };
+      };
+      responses: {
+        /** @description Updated user profile */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.UserResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description User not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/public/wishlists/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a public wish list by its slug
+     * @description Get a public wish list by its public slug. The wish list must be marked as public.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Public Slug */
+          slug: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Public wish list retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.WishListResponse'];
+          };
+        };
+        /** @description Wish list not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/public/wishlists/{slug}/gift-items/{itemId}/reservation-status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get the reservation status for a gift item in a public wish list
+     * @description Get the reservation status for a specific gift item in a public wish list.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Public wish list slug */
+          slug: string;
+          /** @description Gift Item ID */
+          itemId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Reservation status retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.ReservationStatusResponse'];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/reservations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get all reservations made by the authenticated user
+     * @description Get all reservations made by the authenticated user with pagination.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Page number (default 1) */
+          page?: number;
+          /** @description Items per page (default 10, max 100) */
+          limit?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of user reservations retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.UserReservationsResponse'];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/reservations/guest': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get reservations made by a guest using a token
+     * @description Get all reservations made by a guest using their reservation token.
+     */
+    get: {
+      parameters: {
+        query: {
+          /** @description Reservation token */
+          token: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of guest reservations retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.ReservationDetailsResponse'][];
+          };
+        };
+        /** @description Invalid request parameters */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/s3/upload': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Upload an image to S3
+     * @description Upload an image file to S3 storage. The user must be authenticated.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            /**
+             * Format: binary
+             * @description Image file to upload (max 10MB, only images allowed)
+             */
+            image: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Image uploaded successfully, returns URL */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Invalid file or file too large */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wishlists': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get all wish lists owned by the authenticated user
+     * @description Get all wish lists owned by the currently authenticated user
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of wish lists retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.WishListResponse'][];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create a new wish list
+     * @description Create a new wish list for the authenticated user
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Wish list creation information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.CreateWishListRequest'];
+        };
+      };
+      responses: {
+        /** @description Wish list created successfully */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.WishListResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wishlists/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a wish list by ID
+     * @description Get a wish list by its ID. If the wish list is private, the user must be the owner.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Wish list retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.WishListResponse'];
+          };
+        };
+        /** @description Access denied */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Wish list not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    /**
+     * Update a wish list
+     * @description Update a wish list by its ID. The user must be the owner of the wish list.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          id: string;
+        };
+        cookie?: never;
+      };
+      /** @description Wish list update information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.UpdateWishListRequest'];
+        };
+      };
+      responses: {
+        /** @description Wish list updated successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.WishListResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Wish list not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    post?: never;
+    /**
+     * Delete a wish list
+     * @description Delete a wish list by its ID. The user must be the owner of the wish list.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Wish list deleted successfully */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wishlists/{wishlistId}/gift-items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get all gift items in a wish list
+     * @description Get all gift items in a wish list. If the wish list is private, the user must be the owner.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Page number (default 1) */
+          page?: number;
+          /** @description Items per page (default 10, max 100) */
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          wishlistId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of gift items retrieved successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.GetGiftItemsResponse'];
+          };
+        };
+        /** @description Access denied */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Wishlist not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create a new gift item
+     * @description Create a new gift item in a wish list. The user must be the owner of the wish list.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          wishlistId: string;
+        };
+        cookie?: never;
+      };
+      /** @description Gift item creation information */
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.CreateGiftItemRequest'];
+        };
+      };
+      responses: {
+        /** @description Gift item created successfully */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.GiftItemResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Forbidden */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Wishlist not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wishlists/{wishlistId}/gift-items/{itemId}/reservation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create a reservation for a gift item
+     * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          wishlistId: string;
+          /** @description Gift Item ID */
+          itemId: string;
+        };
+        cookie?: never;
+      };
+      /** @description Reservation information (required for guests) */
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.CreateReservationRequest'];
+        };
+      };
+      responses: {
+        /** @description Reservation created successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.CreateReservationResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized (guests need name and email) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    /**
+     * Cancel a reservation for a gift item
+     * @description Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Wish List ID */
+          wishlistId: string;
+          /** @description Gift Item ID */
+          itemId: string;
+        };
+        cookie?: never;
+      };
+      /** @description Cancellation information (required for guests) */
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['internal_handlers.CancelReservationRequest'];
+        };
+      };
+      responses: {
+        /** @description Reservation canceled successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['internal_handlers.CreateReservationResponse'];
+          };
+        };
+        /** @description Invalid request body or validation error */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Unauthorized (guests need reservation token) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        "internal_handlers.AuthResponse": {
-            /** @description Authentication token */
-            token: string;
-            /** @description User information */
-            user: components["schemas"]["internal_handlers.UserResponse"];
-        };
-        "internal_handlers.CancelReservationRequest": {
-            reservation_token?: string;
-        };
-        "internal_handlers.CreateGiftItemRequest": {
-            description?: string;
-            image_url?: string;
-            link?: string;
-            name: string;
-            notes?: string;
-            position?: number;
-            price?: number;
-            priority?: number;
-        };
-        "internal_handlers.CreateReservationRequest": {
-            guest_email?: string;
-            guest_name?: string;
-        };
-        "internal_handlers.CreateReservationResponse": {
-            cancel_reason?: string;
-            canceled_at?: string;
-            expires_at?: string;
-            gift_item_id: string;
-            guest_email?: string;
-            guest_name?: string;
-            id: string;
-            notification_sent: boolean;
-            reservation_token: string;
-            reserved_at: string;
-            reserved_by_user_id?: string;
-            status: string;
-        };
-        "internal_handlers.CreateWishListRequest": {
-            description?: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            /** @default default */
-            template_id: string;
-            title: string;
-        };
-        "internal_handlers.GetGiftItemsResponse": {
-            items: components["schemas"]["internal_handlers.GiftItemResponse"][];
-            limit: number;
-            page: number;
-            pages: number;
-            total: number;
-        };
-        "internal_handlers.GiftItemResponse": {
-            created_at: string;
-            description?: string;
-            id: string;
-            image_url?: string;
-            link?: string;
-            name: string;
-            notes?: string;
-            position?: number;
-            price?: number;
-            priority?: number;
-            purchased_at?: string;
-            purchased_by_user_id?: string;
-            purchased_price?: number;
-            reserved_at?: string;
-            reserved_by_user_id?: string;
-            updated_at: string;
-            wishlist_id: string;
-        };
-        "internal_handlers.GiftItemSummary": {
-            id: string;
-            image_url?: string;
-            name: string;
-            price?: string;
-        };
-        "internal_handlers.HealthResponse": {
-            checks?: {
-                [key: string]: string;
-            };
-            error?: string;
-            status: string;
-        };
-        "internal_handlers.LoginRequest": {
-            email: string;
-            password: string;
-        };
-        "internal_handlers.PurchaseRequest": {
-            purchased_price?: number;
-        };
-        "internal_handlers.RegisterRequest": {
-            avatar_url?: string;
-            email: string;
-            first_name?: string;
-            last_name?: string;
-            password: string;
-        };
-        "internal_handlers.ReservationDetailsResponse": {
-            expires_at?: string;
-            gift_item: components["schemas"]["internal_handlers.GiftItemSummary"];
-            id: string;
-            reserved_at: string;
-            status: string;
-            wishlist: components["schemas"]["internal_handlers.WishListSummary"];
-        };
-        "internal_handlers.ReservationStatusResponse": {
-            is_reserved: boolean;
-            reserved_at?: string;
-            reserved_by_name?: string;
-            status: string;
-        };
-        "internal_handlers.UpdateGiftItemRequest": {
-            description?: string;
-            image_url?: string;
-            link?: string;
-            name?: string;
-            notes?: string;
-            position?: number;
-            price?: number;
-            priority?: number;
-        };
-        "internal_handlers.UpdateProfileRequest": {
-            avatar_url?: string;
-            email?: string;
-            first_name?: string;
-            last_name?: string;
-            password?: string;
-        };
-        "internal_handlers.UpdateWishListRequest": {
-            description?: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            template_id?: string;
-            title?: string;
-        };
-        "internal_handlers.UserReservationsResponse": {
-            data: components["schemas"]["internal_handlers.ReservationDetailsResponse"][];
-            pagination: unknown;
-        };
-        "internal_handlers.UserResponse": {
-            avatar_url?: string;
-            email: string;
-            first_name?: string;
-            id: string;
-            last_name?: string;
-        };
-        "internal_handlers.WishListResponse": {
-            created_at: string;
-            description?: string;
-            id: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            owner_id: string;
-            public_slug?: string;
-            template_id?: string;
-            title: string;
-            updated_at: string;
-            view_count: string;
-        };
-        "internal_handlers.WishListSummary": {
-            id: string;
-            owner_first_name?: string;
-            owner_last_name?: string;
-            title: string;
-        };
+  schemas: {
+    'internal_handlers.AuthResponse': {
+      /** @description Authentication token */
+      token: string;
+      /** @description User information */
+      user: components['schemas']['internal_handlers.UserResponse'];
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    'internal_handlers.CancelReservationRequest': {
+      reservation_token?: string;
+    };
+    'internal_handlers.CreateGiftItemRequest': {
+      description?: string;
+      image_url?: string;
+      link?: string;
+      name: string;
+      notes?: string;
+      position?: number;
+      price?: number;
+      priority?: number;
+    };
+    'internal_handlers.CreateReservationRequest': {
+      guest_email?: string;
+      guest_name?: string;
+    };
+    'internal_handlers.CreateReservationResponse': {
+      cancel_reason?: string;
+      canceled_at?: string;
+      expires_at?: string;
+      gift_item_id: string;
+      guest_email?: string;
+      guest_name?: string;
+      id: string;
+      notification_sent: boolean;
+      reservation_token: string;
+      reserved_at: string;
+      reserved_by_user_id?: string;
+      status: string;
+    };
+    'internal_handlers.CreateWishListRequest': {
+      description?: string;
+      is_public?: boolean;
+      occasion?: string;
+      occasion_date?: string;
+      /** @default default */
+      template_id: string;
+      title: string;
+    };
+    'internal_handlers.GetGiftItemsResponse': {
+      items: components['schemas']['internal_handlers.GiftItemResponse'][];
+      limit: number;
+      page: number;
+      pages: number;
+      total: number;
+    };
+    'internal_handlers.GiftItemResponse': {
+      created_at: string;
+      description?: string;
+      id: string;
+      image_url?: string;
+      link?: string;
+      name: string;
+      notes?: string;
+      position?: number;
+      price?: number;
+      priority?: number;
+      purchased_at?: string;
+      purchased_by_user_id?: string;
+      purchased_price?: number;
+      reserved_at?: string;
+      reserved_by_user_id?: string;
+      updated_at: string;
+      wishlist_id: string;
+    };
+    'internal_handlers.GiftItemSummary': {
+      id: string;
+      image_url?: string;
+      name: string;
+      price?: string;
+    };
+    'internal_handlers.HealthResponse': {
+      checks?: {
+        [key: string]: string;
+      };
+      error?: string;
+      status: string;
+    };
+    'internal_handlers.LoginRequest': {
+      email: string;
+      password: string;
+    };
+    'internal_handlers.PurchaseRequest': {
+      purchased_price?: number;
+    };
+    'internal_handlers.RegisterRequest': {
+      avatar_url?: string;
+      email: string;
+      first_name?: string;
+      last_name?: string;
+      password: string;
+    };
+    'internal_handlers.ReservationDetailsResponse': {
+      expires_at?: string;
+      gift_item: components['schemas']['internal_handlers.GiftItemSummary'];
+      id: string;
+      reserved_at: string;
+      status: string;
+      wishlist: components['schemas']['internal_handlers.WishListSummary'];
+    };
+    'internal_handlers.ReservationStatusResponse': {
+      is_reserved: boolean;
+      reserved_at?: string;
+      reserved_by_name?: string;
+      status: string;
+    };
+    'internal_handlers.UpdateGiftItemRequest': {
+      description?: string;
+      image_url?: string;
+      link?: string;
+      name?: string;
+      notes?: string;
+      position?: number;
+      price?: number;
+      priority?: number;
+    };
+    'internal_handlers.UpdateProfileRequest': {
+      avatar_url?: string;
+      email?: string;
+      first_name?: string;
+      last_name?: string;
+      password?: string;
+    };
+    'internal_handlers.UpdateWishListRequest': {
+      description?: string;
+      is_public?: boolean;
+      occasion?: string;
+      occasion_date?: string;
+      template_id?: string;
+      title?: string;
+    };
+    'internal_handlers.UserReservationsResponse': {
+      data: components['schemas']['internal_handlers.ReservationDetailsResponse'][];
+      pagination: unknown;
+    };
+    'internal_handlers.UserResponse': {
+      avatar_url?: string;
+      email: string;
+      first_name?: string;
+      id: string;
+      last_name?: string;
+    };
+    'internal_handlers.WishListResponse': {
+      created_at: string;
+      description?: string;
+      id: string;
+      is_public?: boolean;
+      occasion?: string;
+      occasion_date?: string;
+      owner_id: string;
+      public_slug?: string;
+      template_id?: string;
+      title: string;
+      updated_at: string;
+      view_count: string;
+    };
+    'internal_handlers.WishListSummary': {
+      id: string;
+      owner_first_name?: string;
+      owner_last_name?: string;
+      title: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
-export type SchemaInternalHandlersAuthResponse = components['schemas']['internal_handlers.AuthResponse'];
-export type SchemaInternalHandlersCancelReservationRequest = components['schemas']['internal_handlers.CancelReservationRequest'];
-export type SchemaInternalHandlersCreateGiftItemRequest = components['schemas']['internal_handlers.CreateGiftItemRequest'];
-export type SchemaInternalHandlersCreateReservationRequest = components['schemas']['internal_handlers.CreateReservationRequest'];
-export type SchemaInternalHandlersCreateReservationResponse = components['schemas']['internal_handlers.CreateReservationResponse'];
-export type SchemaInternalHandlersCreateWishListRequest = components['schemas']['internal_handlers.CreateWishListRequest'];
-export type SchemaInternalHandlersGetGiftItemsResponse = components['schemas']['internal_handlers.GetGiftItemsResponse'];
-export type SchemaInternalHandlersGiftItemResponse = components['schemas']['internal_handlers.GiftItemResponse'];
-export type SchemaInternalHandlersGiftItemSummary = components['schemas']['internal_handlers.GiftItemSummary'];
-export type SchemaInternalHandlersHealthResponse = components['schemas']['internal_handlers.HealthResponse'];
-export type SchemaInternalHandlersLoginRequest = components['schemas']['internal_handlers.LoginRequest'];
-export type SchemaInternalHandlersPurchaseRequest = components['schemas']['internal_handlers.PurchaseRequest'];
-export type SchemaInternalHandlersRegisterRequest = components['schemas']['internal_handlers.RegisterRequest'];
-export type SchemaInternalHandlersReservationDetailsResponse = components['schemas']['internal_handlers.ReservationDetailsResponse'];
-export type SchemaInternalHandlersReservationStatusResponse = components['schemas']['internal_handlers.ReservationStatusResponse'];
-export type SchemaInternalHandlersUpdateGiftItemRequest = components['schemas']['internal_handlers.UpdateGiftItemRequest'];
-export type SchemaInternalHandlersUpdateProfileRequest = components['schemas']['internal_handlers.UpdateProfileRequest'];
-export type SchemaInternalHandlersUpdateWishListRequest = components['schemas']['internal_handlers.UpdateWishListRequest'];
-export type SchemaInternalHandlersUserReservationsResponse = components['schemas']['internal_handlers.UserReservationsResponse'];
-export type SchemaInternalHandlersUserResponse = components['schemas']['internal_handlers.UserResponse'];
-export type SchemaInternalHandlersWishListResponse = components['schemas']['internal_handlers.WishListResponse'];
-export type SchemaInternalHandlersWishListSummary = components['schemas']['internal_handlers.WishListSummary'];
+export type SchemaInternalHandlersAuthResponse =
+  components['schemas']['internal_handlers.AuthResponse'];
+export type SchemaInternalHandlersCancelReservationRequest =
+  components['schemas']['internal_handlers.CancelReservationRequest'];
+export type SchemaInternalHandlersCreateGiftItemRequest =
+  components['schemas']['internal_handlers.CreateGiftItemRequest'];
+export type SchemaInternalHandlersCreateReservationRequest =
+  components['schemas']['internal_handlers.CreateReservationRequest'];
+export type SchemaInternalHandlersCreateReservationResponse =
+  components['schemas']['internal_handlers.CreateReservationResponse'];
+export type SchemaInternalHandlersCreateWishListRequest =
+  components['schemas']['internal_handlers.CreateWishListRequest'];
+export type SchemaInternalHandlersGetGiftItemsResponse =
+  components['schemas']['internal_handlers.GetGiftItemsResponse'];
+export type SchemaInternalHandlersGiftItemResponse =
+  components['schemas']['internal_handlers.GiftItemResponse'];
+export type SchemaInternalHandlersGiftItemSummary =
+  components['schemas']['internal_handlers.GiftItemSummary'];
+export type SchemaInternalHandlersHealthResponse =
+  components['schemas']['internal_handlers.HealthResponse'];
+export type SchemaInternalHandlersLoginRequest =
+  components['schemas']['internal_handlers.LoginRequest'];
+export type SchemaInternalHandlersPurchaseRequest =
+  components['schemas']['internal_handlers.PurchaseRequest'];
+export type SchemaInternalHandlersRegisterRequest =
+  components['schemas']['internal_handlers.RegisterRequest'];
+export type SchemaInternalHandlersReservationDetailsResponse =
+  components['schemas']['internal_handlers.ReservationDetailsResponse'];
+export type SchemaInternalHandlersReservationStatusResponse =
+  components['schemas']['internal_handlers.ReservationStatusResponse'];
+export type SchemaInternalHandlersUpdateGiftItemRequest =
+  components['schemas']['internal_handlers.UpdateGiftItemRequest'];
+export type SchemaInternalHandlersUpdateProfileRequest =
+  components['schemas']['internal_handlers.UpdateProfileRequest'];
+export type SchemaInternalHandlersUpdateWishListRequest =
+  components['schemas']['internal_handlers.UpdateWishListRequest'];
+export type SchemaInternalHandlersUserReservationsResponse =
+  components['schemas']['internal_handlers.UserReservationsResponse'];
+export type SchemaInternalHandlersUserResponse =
+  components['schemas']['internal_handlers.UserResponse'];
+export type SchemaInternalHandlersWishListResponse =
+  components['schemas']['internal_handlers.WishListResponse'];
+export type SchemaInternalHandlersWishListSummary =
+  components['schemas']['internal_handlers.WishListSummary'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
