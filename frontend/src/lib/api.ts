@@ -13,36 +13,40 @@ import type {
   User,
   WishList,
 } from './types';
+import { authManager } from './auth';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 class ApiClient {
-  private token: string | null = null;
-
-  constructor() {
-    // Check for token in localStorage on initialization
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('token');
-    }
-  }
-
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
 
+    const token = authManager.getAccessToken();
     const headers = {
       'Content-Type': 'application/json',
-      ...(this.token && { Authorization: `Bearer ${this.token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     };
 
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'include', // Always include cookies for cross-domain auth
     });
+
+    // Handle token expiration with automatic refresh
+    if (response.status === 401 && endpoint !== '/auth/refresh') {
+      const newToken = await authManager.refreshAccessToken();
+      if (newToken) {
+        // Retry request with new token
+        return this.request(endpoint, options);
+      }
+      throw new Error('Authentication required');
+    }
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -64,7 +68,9 @@ class ApiClient {
       body: JSON.stringify(credentials),
     });
 
-    this.setToken(response.token);
+    // Store access token in memory via AuthManager
+    // Refresh token is automatically set in httpOnly cookie by backend
+    authManager.setAccessToken(response.token);
     return response;
   }
 
@@ -74,21 +80,22 @@ class ApiClient {
       body: JSON.stringify(userData),
     });
 
-    this.setToken(response.token);
+    // Store access token in memory via AuthManager
+    authManager.setAccessToken(response.token);
     return response;
   }
 
   async logout(): Promise<void> {
-    this.token = null;
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-    }
-  }
+    // Clear access token from memory
+    authManager.clearAccessToken();
 
-  private setToken(token: string): void {
-    this.token = token;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', token);
+    // Call backend to clear httpOnly cookie
+    try {
+      await this.request('/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Logout request failed:', error);
     }
   }
 

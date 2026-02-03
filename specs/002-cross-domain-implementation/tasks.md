@@ -53,15 +53,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Create frontend/src/lib/auth.ts with AuthManager class storing access token in memory
-- [ ] T016 [US1] Create frontend/src/lib/mobile-handoff.ts with redirectToPersonalCabinet function
-- [ ] T017 [US1] Modify frontend/src/lib/api.ts to remove localStorage usage and use AuthManager
-- [ ] T018 [US1] Modify frontend/src/lib/api.ts to add credentials: 'include' for all fetch calls
-- [ ] T019 [US1] Update frontend/src/lib/api.ts login method to use AuthManager.setAccessToken()
-- [ ] T020 [US1] Create mobile/lib/api/auth.ts with SecureStore token management functions
-- [ ] T021 [US1] Modify mobile/app/_layout.tsx to handle auth deep links (wishlistapp://auth?code=xxx)
-- [ ] T022 [US1] Implement exchangeCodeForTokens function in mobile/lib/api/auth.ts
-- [ ] T023 [US1] Update mobile app.json with proper scheme and associatedDomains configuration
+- [X] T015 [US1] Create frontend/src/lib/auth.ts with AuthManager class storing access token in memory
+- [X] T016 [US1] Create frontend/src/lib/mobile-handoff.ts with redirectToPersonalCabinet function
+- [X] T017 [US1] Modify frontend/src/lib/api.ts to remove localStorage usage and use AuthManager
+- [X] T018 [US1] Modify frontend/src/lib/api.ts to add credentials: 'include' for all fetch calls
+- [X] T019 [US1] Update frontend/src/lib/api.ts login method to use AuthManager.setAccessToken()
+- [X] T020 [US1] Create mobile/lib/api/auth.ts with SecureStore token management functions
+- [X] T021 [US1] Modify mobile/app/_layout.tsx to handle auth deep links (wishlistapp://auth?code=xxx)
+- [X] T022 [US1] Implement exchangeCodeForTokens function in mobile/lib/api/auth.ts
+- [X] T023 [US1] Update mobile app.json with proper scheme and associatedDomains configuration
 
 **Checkpoint**: User Story 1 complete - Frontend→Mobile handoff works end-to-end
 
