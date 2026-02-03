@@ -859,7 +859,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health": {
+    "/healthz": {
         parameters: {
             query?: never;
             header?: never;
