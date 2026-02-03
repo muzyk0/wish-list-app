@@ -4,6 +4,171 @@
  */
 
 export interface paths {
+    "/auth/change-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change user email
+         * @description Change the authenticated user's email address with password verification. Requires current password to prevent unauthorized changes.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Email change request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.ChangeEmailRequest"];
+                };
+            };
+            responses: {
+                /** @description Email changed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.MessageResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized or incorrect password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Email already in use */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change user password
+         * @description Change the authenticated user's password with current password verification. This will invalidate all existing sessions except the current one.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Password change request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.ChangePasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description Password changed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.MessageResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized or incorrect password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/exchange": {
         parameters: {
             query?: never;
@@ -2220,6 +2385,14 @@ export interface components {
         "internal_handlers.CancelReservationRequest": {
             reservation_token?: string;
         };
+        "internal_handlers.ChangeEmailRequest": {
+            current_password: string;
+            new_email: string;
+        };
+        "internal_handlers.ChangePasswordRequest": {
+            current_password: string;
+            new_password: string;
+        };
         "internal_handlers.CreateGiftItemRequest": {
             description?: string;
             image_url?: string;
@@ -2360,10 +2533,8 @@ export interface components {
         };
         "internal_handlers.UpdateProfileRequest": {
             avatar_url?: string;
-            email?: string;
             first_name?: string;
             last_name?: string;
-            password?: string;
         };
         "internal_handlers.UpdateWishListRequest": {
             description?: string;
@@ -2413,6 +2584,8 @@ export interface components {
 }
 export type SchemaInternalHandlersAuthResponse = components['schemas']['internal_handlers.AuthResponse'];
 export type SchemaInternalHandlersCancelReservationRequest = components['schemas']['internal_handlers.CancelReservationRequest'];
+export type SchemaInternalHandlersChangeEmailRequest = components['schemas']['internal_handlers.ChangeEmailRequest'];
+export type SchemaInternalHandlersChangePasswordRequest = components['schemas']['internal_handlers.ChangePasswordRequest'];
 export type SchemaInternalHandlersCreateGiftItemRequest = components['schemas']['internal_handlers.CreateGiftItemRequest'];
 export type SchemaInternalHandlersCreateReservationRequest = components['schemas']['internal_handlers.CreateReservationRequest'];
 export type SchemaInternalHandlersCreateReservationResponse = components['schemas']['internal_handlers.CreateReservationResponse'];

@@ -14,6 +14,10 @@ info:
   title: Wish List API
   version: '1.0'
 paths:
+  /auth/change-email:
+    $ref: paths/auth_change-email.yaml
+  /auth/change-password:
+    $ref: paths/auth_change-password.yaml
   /auth/exchange:
     $ref: paths/auth_exchange.yaml
   /auth/login:

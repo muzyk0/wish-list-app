@@ -13,6 +13,109 @@ info:
   title: Wish List API
   version: "1.0"
 paths:
+  /auth/change-email:
+    post:
+      description: Change the authenticated user's email address with password
+        verification. Requires current password to prevent unauthorized changes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.ChangeEmailRequest"
+        description: Email change request
+        required: true
+      responses:
+        "200":
+          description: Email changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.MessageResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized or incorrect password
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Change user email
+      tags:
+        - Authentication
+  /auth/change-password:
+    post:
+      description: Change the authenticated user's password with current password
+        verification. This will invalidate all existing sessions except the
+        current one.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/internal_handlers.ChangePasswordRequest"
+        description: Password change request
+        required: true
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/internal_handlers.MessageResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized or incorrect password
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Change user password
+      tags:
+        - Authentication
   /auth/exchange:
     post:
       description: Exchange a handoff code received from Frontend redirect for access
@@ -1452,6 +1555,29 @@ components:
         reservation_token:
           type: string
       type: object
+    internal_handlers.ChangeEmailRequest:
+      properties:
+        current_password:
+          minLength: 6
+          type: string
+        new_email:
+          type: string
+      required:
+        - current_password
+        - new_email
+      type: object
+    internal_handlers.ChangePasswordRequest:
+      properties:
+        current_password:
+          minLength: 6
+          type: string
+        new_password:
+          minLength: 6
+          type: string
+      required:
+        - current_password
+        - new_password
+      type: object
     internal_handlers.CreateGiftItemRequest:
       properties:
         description:
@@ -1782,14 +1908,9 @@ components:
       properties:
         avatar_url:
           type: string
-        email:
-          type: string
         first_name:
           type: string
         last_name:
-          type: string
-        password:
-          minLength: 6
           type: string
       type: object
     internal_handlers.UpdateWishListRequest:

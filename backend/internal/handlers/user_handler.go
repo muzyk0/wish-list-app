@@ -43,8 +43,6 @@ type LoginRequest struct {
 }
 
 type UpdateProfileRequest struct {
-	Email     *string `json:"email" validate:"email"`
-	Password  *string `json:"password" validate:"min=6"`
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
 	AvatarUrl *string `json:"avatar_url"`
@@ -342,9 +340,7 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	user, err := h.service.UpdateUser(ctx, userID, services.UpdateUserInput{
-		Email:     req.Email,
-		Password:  req.Password,
+	user, err := h.service.UpdateProfile(ctx, userID, services.UpdateProfileInput{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		AvatarUrl: req.AvatarUrl,

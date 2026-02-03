@@ -179,6 +179,50 @@ class ApiClient {
     await clearTokens();
   }
 
+  async changeEmail(
+    currentPassword: string,
+    newEmail: string,
+  ): Promise<{ message: string }> {
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.POST('/auth/change-email', {
+        body: {
+          current_password: currentPassword,
+          new_email: newEmail,
+        },
+        headers,
+      });
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to change email');
+    }
+
+    return data as { message: string };
+  }
+
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const { data, error } = await this.requestWithRetry(async () => {
+      const headers = await this.getHeaders();
+      return this.client.POST('/auth/change-password', {
+        body: {
+          current_password: currentPassword,
+          new_password: newPassword,
+        },
+        headers,
+      });
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to change password');
+    }
+
+    return data as { message: string };
+  }
+
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
     const { data, error } = await this.requestWithRetry(async () => {
@@ -190,7 +234,7 @@ class ApiClient {
       throw new Error((error as any)?.error || 'Failed to fetch wish lists');
     }
 
-    return (data as any).data || [];
+    return data;
   }
 
   async getWishListById(id: string): Promise<WishList> {

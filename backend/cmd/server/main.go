@@ -286,6 +286,8 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	// Protected auth endpoints (require authentication)
 	authGroup.POST("/mobile-handoff", authHandler.MobileHandoff, auth.JWTMiddleware(tokenManager))
 	authGroup.POST("/logout", authHandler.Logout, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/change-email", authHandler.ChangeEmail, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/change-password", authHandler.ChangePassword, auth.JWTMiddleware(tokenManager))
 
 	// Example protected route using JWT
 	protected := e.Group("/api/protected")

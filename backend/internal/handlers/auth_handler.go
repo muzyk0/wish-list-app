@@ -66,6 +66,18 @@ type MessageResponse struct {
 	Message string `json:"message" validate:"required"`
 }
 
+// ChangeEmailRequest represents the request body for changing email
+type ChangeEmailRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required,min=6"`
+	NewEmail        string `json:"new_email" validate:"required,email"`
+}
+
+// ChangePasswordRequest represents the request body for changing password
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required,min=6"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
+}
+
 // Refresh godoc
 //
 //	@Summary		Refresh access token
@@ -305,5 +317,127 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, MessageResponse{
 		Message: "Logged out successfully",
+	})
+}
+
+// ChangeEmail godoc
+//
+//	@Summary		Change user email
+//	@Description	Change the authenticated user's email address with password verification. Requires current password to prevent unauthorized changes.
+//	@Tags			Authentication
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			request	body		ChangeEmailRequest	true	"Email change request"
+//	@Success		200		{object}	MessageResponse		"Email changed successfully"
+//	@Failure		400		{object}	map[string]string	"Invalid request body or validation error"
+//	@Failure		401		{object}	map[string]string	"Unauthorized or incorrect password"
+//	@Failure		409		{object}	map[string]string	"Email already in use"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Router			/auth/change-email [post]
+func (h *AuthHandler) ChangeEmail(c echo.Context) error {
+	// Get authenticated user from context
+	userID, _, _, err := auth.GetUserFromContext(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "Not authenticated",
+		})
+	}
+
+	var req ChangeEmailRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	ctx := c.Request().Context()
+	err = h.userService.ChangeEmail(ctx, userID, req.CurrentPassword, req.NewEmail)
+	if err != nil {
+		// Check for specific errors
+		if errors.Is(err, services.ErrInvalidPassword) {
+			return c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "Current password is incorrect",
+			})
+		}
+		if errors.Is(err, services.ErrUserAlreadyExists) {
+			return c.JSON(http.StatusConflict, map[string]string{
+				"error": "Email already in use",
+			})
+		}
+		// Log error and return generic message
+		c.Logger().Errorf("Failed to change email for user %s: %v", userID, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to change email",
+		})
+	}
+
+	return c.JSON(http.StatusOK, MessageResponse{
+		Message: "Email changed successfully",
+	})
+}
+
+// ChangePassword godoc
+//
+//	@Summary		Change user password
+//	@Description	Change the authenticated user's password with current password verification. This will invalidate all existing sessions except the current one.
+//	@Tags			Authentication
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			request	body		ChangePasswordRequest	true	"Password change request"
+//	@Success		200		{object}	MessageResponse			"Password changed successfully"
+//	@Failure		400		{object}	map[string]string		"Invalid request body or validation error"
+//	@Failure		401		{object}	map[string]string		"Unauthorized or incorrect password"
+//	@Failure		500		{object}	map[string]string		"Internal server error"
+//	@Router			/auth/change-password [post]
+func (h *AuthHandler) ChangePassword(c echo.Context) error {
+	// Get authenticated user from context
+	userID, _, _, err := auth.GetUserFromContext(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error": "Not authenticated",
+		})
+	}
+
+	var req ChangePasswordRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Validate request
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	ctx := c.Request().Context()
+	err = h.userService.ChangePassword(ctx, userID, req.CurrentPassword, req.NewPassword)
+	if err != nil {
+		// Check for specific errors
+		if errors.Is(err, services.ErrInvalidPassword) {
+			return c.JSON(http.StatusUnauthorized, map[string]string{
+				"error": "Current password is incorrect",
+			})
+		}
+		// Log error and return generic message
+		c.Logger().Errorf("Failed to change password for user %s: %v", userID, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to change password",
+		})
+	}
+
+	return c.JSON(http.StatusOK, MessageResponse{
+		Message: "Password changed successfully",
 	})
 }

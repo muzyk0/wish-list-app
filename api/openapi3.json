@@ -14,6 +14,171 @@
         "version": "1.0"
     },
     "paths": {
+        "/auth/change-email": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the authenticated user's email address with password verification. Requires current password to prevent unauthorized changes.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Change user email",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.ChangeEmailRequest"
+                            }
+                        }
+                    },
+                    "description": "Email change request",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or incorrect password",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already in use",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the authenticated user's password with current password verification. This will invalidate all existing sessions except the current one.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Change user password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.ChangePasswordRequest"
+                            }
+                        }
+                    },
+                    "description": "Password change request",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or incorrect password",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/exchange": {
             "post": {
                 "description": "Exchange a handoff code received from Frontend redirect for access and refresh tokens. Code can only be used once.",
@@ -2329,6 +2494,39 @@
                     }
                 }
             },
+            "internal_handlers.ChangeEmailRequest": {
+                "type": "object",
+                "required": [
+                    "current_password",
+                    "new_email"
+                ],
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "minLength": 6
+                    },
+                    "new_email": {
+                        "type": "string"
+                    }
+                }
+            },
+            "internal_handlers.ChangePasswordRequest": {
+                "type": "object",
+                "required": [
+                    "current_password",
+                    "new_password"
+                ],
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "minLength": 6
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "minLength": 6
+                    }
+                }
+            },
             "internal_handlers.CreateGiftItemRequest": {
                 "type": "object",
                 "required": [
@@ -2813,18 +3011,11 @@
                     "avatar_url": {
                         "type": "string"
                     },
-                    "email": {
-                        "type": "string"
-                    },
                     "first_name": {
                         "type": "string"
                     },
                     "last_name": {
                         "type": "string"
-                    },
-                    "password": {
-                        "type": "string",
-                        "minLength": 6
                     }
                 }
             },

@@ -1,6 +1,7 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
@@ -8,13 +9,46 @@ import {
   Button,
   Card,
   Divider,
+  HelperText,
   Switch,
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
+import { z } from 'zod';
 import { useThemeContext } from '@/contexts/ThemeContext';
 import { apiClient } from '@/lib/api';
+
+// Validation Schemas
+const profileUpdateSchema = z.object({
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  avatar_url: z.string().url('Invalid URL').optional().or(z.literal('')),
+});
+
+const emailChangeSchema = z.object({
+  new_email: z.string().email('Invalid email address'),
+  current_password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const passwordChangeSchema = z
+  .object({
+    current_password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
+    new_password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirm_password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
+  })
+  .refine((data) => data.new_password === data.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
+  });
+
+type ProfileUpdateForm = z.infer<typeof profileUpdateSchema>;
+type EmailChangeForm = z.infer<typeof emailChangeSchema>;
+type PasswordChangeForm = z.infer<typeof passwordChangeSchema>;
 
 export default function ProfileScreen() {
   const queryClient = useQueryClient();
@@ -33,33 +67,43 @@ export default function ProfileScreen() {
     retry: 1,
   });
 
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  // Profile Update Form
+  const profileForm = useForm<ProfileUpdateForm>({
+    resolver: zodResolver(profileUpdateSchema),
+    defaultValues: {
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      avatar_url: user?.avatar_url || '',
+    },
+    values: {
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      avatar_url: user?.avatar_url || '',
+    },
+  });
 
-  useEffect(() => {
-    if (user) {
-      setEmail(user.email);
-      setFirstName(user.first_name || '');
-      setLastName(user.last_name || '');
-      setAvatarUrl(user.avatar_url || '');
-    }
-  }, [user]);
+  // Email Change Form
+  const emailForm = useForm<EmailChangeForm>({
+    resolver: zodResolver(emailChangeSchema),
+    defaultValues: {
+      new_email: '',
+      current_password: '',
+    },
+  });
 
-  const updateMutation = useMutation({
-    mutationFn: (userData: {
-      email: string;
-      first_name?: string;
-      last_name?: string;
-      avatar_url?: string;
-    }) =>
-      apiClient.updateProfile({
-        // email: userData.email,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        avatar_url: userData.avatar_url,
-      }),
+  // Password Change Form
+  const passwordForm = useForm<PasswordChangeForm>({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      current_password: '',
+      new_password: '',
+      confirm_password: '',
+    },
+  });
+
+  // Mutations
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: ProfileUpdateForm) => apiClient.updateProfile(data),
     onSuccess: () => {
       Alert.alert('Success', 'Profile updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -73,24 +117,42 @@ export default function ProfileScreen() {
     },
   });
 
-  const handleUpdateProfile = () => {
-    if (!email) {
-      Alert.alert('Error', 'Email is required.');
-      return;
-    }
+  const changeEmailMutation = useMutation({
+    mutationFn: (data: EmailChangeForm) =>
+      apiClient.changeEmail(data.current_password, data.new_email),
+    onSuccess: () => {
+      Alert.alert('Success', 'Email changed successfully!');
+      emailForm.reset();
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+    // biome-ignore lint/suspicious/noExplicitAny: Error type
+    onError: (error: any) => {
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to change email. Please try again.',
+      );
+    },
+  });
 
-    updateMutation.mutate({
-      email,
-      first_name: firstName.trim() || undefined,
-      last_name: lastName.trim() || undefined,
-      avatar_url: avatarUrl.trim() || undefined,
-    });
-  };
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: PasswordChangeForm) =>
+      apiClient.changePassword(data.current_password, data.new_password),
+    onSuccess: () => {
+      Alert.alert('Success', 'Password changed successfully!');
+      passwordForm.reset();
+    },
+    // biome-ignore lint/suspicious/noExplicitAny: Error type
+    onError: (error: any) => {
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to change password. Please try again.',
+      );
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteAccount(),
     onSuccess: async () => {
-      // Clear auth session and cached data
       await apiClient.logout();
       queryClient.clear();
 
@@ -98,7 +160,6 @@ export default function ProfileScreen() {
         {
           text: 'OK',
           onPress: () => {
-            // Navigate to auth flow
             router.replace('/auth/login');
           },
         },
@@ -160,6 +221,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Header Section */}
       <View style={styles.headerSection}>
         <View style={styles.avatarContainer}>
           {user?.avatar_url ? (
@@ -200,66 +262,105 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
+      {/* Profile Update Section (Low Security) */}
       <Card style={styles.card}>
         <Card.Content>
           <Text
             variant="titleLarge"
             style={[styles.sectionTitle, { color: colors.onSurface }]}
           >
-            Account Information
+            Profile Information
+          </Text>
+          <Text
+            variant="bodySmall"
+            style={[styles.sectionDescription, { color: colors.outline }]}
+          >
+            Update your public profile details
           </Text>
 
           <Divider style={styles.divider} />
 
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            mode="outlined"
-            disabled={updateMutation.isPending}
-            style={styles.input}
-            left={<TextInput.Icon icon="email" />}
+          <Controller
+            control={profileForm.control}
+            name="first_name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="First Name"
+                  value={value || ''}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  mode="outlined"
+                  disabled={updateProfileMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="account" />}
+                />
+                {profileForm.formState.errors.first_name && (
+                  <HelperText type="error">
+                    {profileForm.formState.errors.first_name.message}
+                  </HelperText>
+                )}
+              </>
+            )}
           />
 
-          <TextInput
-            label="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
-            mode="outlined"
-            disabled={updateMutation.isPending}
-            style={styles.input}
-            left={<TextInput.Icon icon="account" />}
+          <Controller
+            control={profileForm.control}
+            name="last_name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="Last Name"
+                  value={value || ''}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  mode="outlined"
+                  disabled={updateProfileMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="account" />}
+                />
+                {profileForm.formState.errors.last_name && (
+                  <HelperText type="error">
+                    {profileForm.formState.errors.last_name.message}
+                  </HelperText>
+                )}
+              </>
+            )}
           />
 
-          <TextInput
-            label="Last Name"
-            value={lastName}
-            onChangeText={setLastName}
-            mode="outlined"
-            disabled={updateMutation.isPending}
-            style={styles.input}
-            left={<TextInput.Icon icon="account" />}
-          />
-
-          <TextInput
-            label="Avatar URL"
-            value={avatarUrl}
-            onChangeText={setAvatarUrl}
-            keyboardType="url"
-            autoCapitalize="none"
-            mode="outlined"
-            disabled={updateMutation.isPending}
-            style={styles.input}
-            left={<TextInput.Icon icon="image" />}
+          <Controller
+            control={profileForm.control}
+            name="avatar_url"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="Avatar URL"
+                  value={value || ''}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={updateProfileMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="image" />}
+                />
+                {profileForm.formState.errors.avatar_url && (
+                  <HelperText type="error">
+                    {profileForm.formState.errors.avatar_url.message}
+                  </HelperText>
+                )}
+              </>
+            )}
           />
 
           <Button
             mode="contained"
-            onPress={handleUpdateProfile}
-            loading={updateMutation.isPending}
-            disabled={updateMutation.isPending}
+            onPress={profileForm.handleSubmit((data) =>
+              updateProfileMutation.mutate(data),
+            )}
+            loading={updateProfileMutation.isPending}
+            disabled={updateProfileMutation.isPending}
             style={styles.button}
             labelStyle={styles.buttonLabel}
           >
@@ -268,6 +369,228 @@ export default function ProfileScreen() {
         </Card.Content>
       </Card>
 
+      {/* Email Change Section (High Security) */}
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text
+            variant="titleLarge"
+            style={[styles.sectionTitle, { color: colors.onSurface }]}
+          >
+            Change Email
+          </Text>
+          <Text
+            variant="bodySmall"
+            style={[styles.sectionDescription, { color: colors.outline }]}
+          >
+            Update your email address (requires password verification)
+          </Text>
+
+          <Divider style={styles.divider} />
+
+          <Controller
+            control={emailForm.control}
+            name="new_email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="New Email"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={changeEmailMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="email" />}
+                />
+                {emailForm.formState.errors.new_email && (
+                  <HelperText type="error">
+                    {emailForm.formState.errors.new_email.message}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
+
+          <Controller
+            control={emailForm.control}
+            name="current_password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="Current Password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={changeEmailMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="lock" />}
+                />
+                {emailForm.formState.errors.current_password && (
+                  <HelperText type="error">
+                    {emailForm.formState.errors.current_password.message}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
+
+          <Button
+            mode="contained"
+            onPress={emailForm.handleSubmit((data) =>
+              changeEmailMutation.mutate(data),
+            )}
+            loading={changeEmailMutation.isPending}
+            disabled={changeEmailMutation.isPending}
+            style={styles.button}
+            labelStyle={styles.buttonLabel}
+          >
+            Change Email
+          </Button>
+        </Card.Content>
+      </Card>
+
+      {/* Password Change Section (High Security) */}
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text
+            variant="titleLarge"
+            style={[styles.sectionTitle, { color: colors.onSurface }]}
+          >
+            Change Password
+          </Text>
+          <Text
+            variant="bodySmall"
+            style={[styles.sectionDescription, { color: colors.outline }]}
+          >
+            Update your password (requires current password)
+          </Text>
+
+          <Divider style={styles.divider} />
+
+          <Controller
+            control={passwordForm.control}
+            name="current_password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="Current Password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={changePasswordMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="lock" />}
+                />
+                {passwordForm.formState.errors.current_password && (
+                  <HelperText type="error">
+                    {passwordForm.formState.errors.current_password.message}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
+
+          <Controller
+            control={passwordForm.control}
+            name="new_password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="New Password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={changePasswordMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="lock-plus" />}
+                />
+                {passwordForm.formState.errors.new_password && (
+                  <HelperText type="error">
+                    {passwordForm.formState.errors.new_password.message}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
+
+          <Controller
+            control={passwordForm.control}
+            name="confirm_password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  label="Confirm New Password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  mode="outlined"
+                  disabled={changePasswordMutation.isPending}
+                  style={styles.input}
+                  left={<TextInput.Icon icon="lock-check" />}
+                />
+                {passwordForm.formState.errors.confirm_password && (
+                  <HelperText type="error">
+                    {passwordForm.formState.errors.confirm_password.message}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
+
+          <Button
+            mode="contained"
+            onPress={passwordForm.handleSubmit((data) =>
+              changePasswordMutation.mutate(data),
+            )}
+            loading={changePasswordMutation.isPending}
+            disabled={changePasswordMutation.isPending}
+            style={styles.button}
+            labelStyle={styles.buttonLabel}
+          >
+            Change Password
+          </Button>
+        </Card.Content>
+      </Card>
+
+      {/* Appearance Section */}
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text
+            variant="titleLarge"
+            style={[styles.sectionTitle, { color: colors.onSurface }]}
+          >
+            Appearance
+          </Text>
+
+          <Divider style={styles.divider} />
+
+          <View style={styles.themeToggleContainer}>
+            <Text variant="bodyLarge" style={{ color: colors.onSurface }}>
+              Dark Mode
+            </Text>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              color={colors.primary}
+            />
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Danger Zone Section */}
       <Card style={styles.card}>
         <Card.Content>
           <Text
@@ -298,30 +621,6 @@ export default function ProfileScreen() {
           >
             Delete Account
           </Button>
-        </Card.Content>
-      </Card>
-
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text
-            variant="titleLarge"
-            style={[styles.sectionTitle, { color: colors.onSurface }]}
-          >
-            Appearance
-          </Text>
-
-          <Divider style={styles.divider} />
-
-          <View style={styles.themeToggleContainer}>
-            <Text variant="bodyLarge" style={{ color: colors.onSurface }}>
-              Dark Mode
-            </Text>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              color={colors.primary}
-            />
-          </View>
         </Card.Content>
       </Card>
     </ScrollView>
@@ -373,13 +672,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: 4,
+  },
+  sectionDescription: {
+    fontSize: 12,
+    marginBottom: 12,
+    opacity: 0.7,
   },
   divider: {
     marginVertical: 12,
   },
   input: {
-    marginBottom: 16,
+    marginBottom: 4,
   },
   button: {
     marginTop: 8,
