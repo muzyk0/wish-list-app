@@ -270,7 +270,7 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Health check endpoint
-	e.GET("/health", healthHandler.Health)
+	e.GET("/healthz", healthHandler.Health)
 
 	// User authentication endpoints
 	authGroup := e.Group("/api/auth")
