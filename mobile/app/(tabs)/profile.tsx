@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { Controller, useForm } from "react-hook-form";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
   Avatar,
@@ -14,36 +14,36 @@ import {
   Text,
   TextInput,
   useTheme,
-} from "react-native-paper";
-import { z } from "zod";
-import { useThemeContext } from "@/contexts/ThemeContext";
-import { apiClient } from "@/lib/api";
+} from 'react-native-paper';
+import { z } from 'zod';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { apiClient } from '@/lib/api';
 
 // Validation Schemas
 const profileUpdateSchema = z.object({
   first_name: z.string().optional(),
   last_name: z.string().optional(),
-  avatar_url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  avatar_url: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
 const emailChangeSchema = z.object({
-  new_email: z.string().email("Invalid email address"),
-  current_password: z.string().min(6, "Password must be at least 6 characters"),
+  new_email: z.string().email('Invalid email address'),
+  current_password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 const passwordChangeSchema = z
   .object({
     current_password: z
       .string()
-      .min(6, "Password must be at least 6 characters"),
-    new_password: z.string().min(6, "Password must be at least 6 characters"),
+      .min(6, 'Password must be at least 6 characters'),
+    new_password: z.string().min(6, 'Password must be at least 6 characters'),
     confirm_password: z
       .string()
-      .min(6, "Password must be at least 6 characters"),
+      .min(6, 'Password must be at least 6 characters'),
   })
   .refine((data) => data.new_password === data.confirm_password, {
-    message: "Passwords do not match",
-    path: ["confirm_password"],
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
   });
 
 type ProfileUpdateForm = z.infer<typeof profileUpdateSchema>;
@@ -62,7 +62,7 @@ export default function ProfileScreen() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ['profile'],
     queryFn: () => apiClient.getProfile(),
     retry: 1,
   });
@@ -71,14 +71,14 @@ export default function ProfileScreen() {
   const profileForm = useForm<ProfileUpdateForm>({
     resolver: zodResolver(profileUpdateSchema),
     defaultValues: {
-      first_name: user?.first_name || "",
-      last_name: user?.last_name || "",
-      avatar_url: user?.avatar_url || "",
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      avatar_url: user?.avatar_url || '',
     },
     values: {
-      first_name: user?.first_name || "",
-      last_name: user?.last_name || "",
-      avatar_url: user?.avatar_url || "",
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      avatar_url: user?.avatar_url || '',
     },
   });
 
@@ -86,8 +86,8 @@ export default function ProfileScreen() {
   const emailForm = useForm<EmailChangeForm>({
     resolver: zodResolver(emailChangeSchema),
     defaultValues: {
-      new_email: "",
-      current_password: "",
+      new_email: '',
+      current_password: '',
     },
   });
 
@@ -95,9 +95,9 @@ export default function ProfileScreen() {
   const passwordForm = useForm<PasswordChangeForm>({
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: {
-      current_password: "",
-      new_password: "",
-      confirm_password: "",
+      current_password: '',
+      new_password: '',
+      confirm_password: '',
     },
   });
 
@@ -105,14 +105,14 @@ export default function ProfileScreen() {
   const updateProfileMutation = useMutation({
     mutationFn: (data: ProfileUpdateForm) => apiClient.updateProfile(data),
     onSuccess: () => {
-      Alert.alert("Success", "Profile updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      Alert.alert('Success', 'Profile updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to update profile. Please try again.",
+        'Error',
+        error.message || 'Failed to update profile. Please try again.',
       );
     },
   });
@@ -121,15 +121,15 @@ export default function ProfileScreen() {
     mutationFn: (data: EmailChangeForm) =>
       apiClient.changeEmail(data.current_password, data.new_email),
     onSuccess: () => {
-      Alert.alert("Success", "Email changed successfully!");
+      Alert.alert('Success', 'Email changed successfully!');
       emailForm.reset();
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to change email. Please try again.",
+        'Error',
+        error.message || 'Failed to change email. Please try again.',
       );
     },
   });
@@ -138,14 +138,14 @@ export default function ProfileScreen() {
     mutationFn: (data: PasswordChangeForm) =>
       apiClient.changePassword(data.current_password, data.new_password),
     onSuccess: () => {
-      Alert.alert("Success", "Password changed successfully!");
+      Alert.alert('Success', 'Password changed successfully!');
       passwordForm.reset();
     },
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to change password. Please try again.",
+        'Error',
+        error.message || 'Failed to change password. Please try again.',
       );
     },
   });
@@ -154,13 +154,13 @@ export default function ProfileScreen() {
     mutationFn: () => apiClient.logout(),
     onSuccess: () => {
       queryClient.clear();
-      router.replace("/auth/login");
+      router.replace('/auth/login');
     },
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to logout. Please try again.",
+        'Error',
+        error.message || 'Failed to logout. Please try again.',
       );
     },
   });
@@ -171,11 +171,11 @@ export default function ProfileScreen() {
       await apiClient.logout();
       queryClient.clear();
 
-      Alert.alert("Success", "Account deleted successfully!", [
+      Alert.alert('Success', 'Account deleted successfully!', [
         {
-          text: "OK",
+          text: 'OK',
           onPress: () => {
-            router.replace("/auth/login");
+            router.replace('/auth/login');
           },
         },
       ]);
@@ -183,17 +183,17 @@ export default function ProfileScreen() {
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to delete account. Please try again.",
+        'Error',
+        error.message || 'Failed to delete account. Please try again.',
       );
     },
   });
 
   const handleLogout = () => {
-    Alert.alert("Confirm Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert('Confirm Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: "Logout",
+        text: 'Logout',
         onPress: () => logoutMutation.mutate(),
       },
     ]);
@@ -201,13 +201,13 @@ export default function ProfileScreen() {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete your account? This action cannot be undone.",
+      'Confirm Delete',
+      'Are you sure you want to delete your account? This action cannot be undone.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: () => deleteMutation.mutate(),
         },
       ],
@@ -262,9 +262,9 @@ export default function ProfileScreen() {
                 user?.first_name
                   ? (
                       user.first_name.charAt(0) +
-                      (user.last_name?.charAt(0) || "")
+                      (user.last_name?.charAt(0) || '')
                     ).toUpperCase()
-                  : user?.email.charAt(0).toUpperCase() || "?"
+                  : user?.email.charAt(0).toUpperCase() || '?'
               }
               style={styles.avatar}
             />
@@ -277,7 +277,7 @@ export default function ProfileScreen() {
         >
           {user?.first_name && user?.last_name
             ? `${user.first_name} ${user.last_name}`
-            : user?.first_name || user?.email.split("@")[0]}
+            : user?.first_name || user?.email.split('@')[0]}
         </Text>
         <Text
           variant="bodyLarge"
@@ -312,7 +312,7 @@ export default function ProfileScreen() {
               <>
                 <TextInput
                   label="First Name"
-                  value={value || ""}
+                  value={value || ''}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   mode="outlined"
@@ -336,7 +336,7 @@ export default function ProfileScreen() {
               <>
                 <TextInput
                   label="Last Name"
-                  value={value || ""}
+                  value={value || ''}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   mode="outlined"
@@ -360,7 +360,7 @@ export default function ProfileScreen() {
               <>
                 <TextInput
                   label="Avatar URL"
-                  value={value || ""}
+                  value={value || ''}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   keyboardType="url"
@@ -681,13 +681,13 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 8,
   },
   card: {
@@ -699,20 +699,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   headerSection: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 32,
     paddingHorizontal: 16,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
   avatarContainer: {
     marginBottom: 16,
   },
   avatar: {
-    backgroundColor: "#6200ee",
+    backgroundColor: '#6200ee',
   },
   name: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 12,
     marginBottom: 4,
   },
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 4,
   },
   sectionDescription: {
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   buttonLabel: {
-    fontWeight: "600",
+    fontWeight: '600',
     fontSize: 16,
   },
   dangerDescription: {
@@ -752,16 +752,16 @@ const styles = StyleSheet.create({
   dangerButton: {
     borderRadius: 8,
     paddingVertical: 6,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
   dangerButtonLabel: {
-    fontWeight: "600",
+    fontWeight: '600',
     fontSize: 16,
   },
   themeToggleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 8,
   },
 });

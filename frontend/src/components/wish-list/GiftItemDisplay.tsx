@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: Temp */
-import { ExternalLink, Heart, ShoppingCart } from "lucide-react";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ExternalLink, Heart, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GiftItemProps {
   id: string;
@@ -114,14 +114,14 @@ export default function GiftItemDisplay({
                 <div className="flex space-x-2">
                   {onReserve && !isPurchased && (
                     <Button
-                      variant={isReserved ? "secondary" : "default"}
+                      variant={isReserved ? 'secondary' : 'default'}
                       size="sm"
                       onClick={onReserve}
                       disabled={isReserved}
                     >
                       {isReserved ? (
                         <>
-                          <Heart className="mr-2 h-4 w-4 fill-current" />{" "}
+                          <Heart className="mr-2 h-4 w-4 fill-current" />{' '}
                           Reserved
                         </>
                       ) : (

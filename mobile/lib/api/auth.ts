@@ -5,13 +5,13 @@
 // - Refresh token: 7 days
 // - Platform-native encryption (iOS Keychain, Android Keystore) or encrypted web storage
 
-import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { baseClient } from "./client";
+import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseClient } from './client';
 
-const ACCESS_TOKEN_KEY = "accessToken";
-const REFRESH_TOKEN_KEY = "refreshToken";
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 
 interface TokenResponse {
   accessToken: string;
@@ -25,7 +25,7 @@ export async function setTokens(
   accessToken: string,
   refreshToken: string,
 ): Promise<void> {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     // On web, store in AsyncStorage (less secure but available)
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
@@ -42,7 +42,7 @@ export async function setTokens(
  * Get access token - uses SecureStore on native, AsyncStorage on web
  */
 export async function getAccessToken(): Promise<string | null> {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     return await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
   } else {
     return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
@@ -53,7 +53,7 @@ export async function getAccessToken(): Promise<string | null> {
  * Get refresh token - uses SecureStore on native, AsyncStorage on web
  */
 export async function getRefreshToken(): Promise<string | null> {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
   } else {
     return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
@@ -65,7 +65,7 @@ export async function getRefreshToken(): Promise<string | null> {
  * Used for logout and account deletion
  */
 export async function clearTokens(): Promise<void> {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     await Promise.all([
       AsyncStorage.removeItem(ACCESS_TOKEN_KEY),
       AsyncStorage.removeItem(REFRESH_TOKEN_KEY),
@@ -93,14 +93,14 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function exchangeCodeForTokens(
   code: string,
 ): Promise<TokenResponse> {
-  const { data, error } = await baseClient.POST("/auth/exchange", {
+  const { data, error } = await baseClient.POST('/auth/exchange', {
     body: { code },
   });
 
   if (error || !data) {
     throw new Error(
       // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
-      (error as any)?.error || "Failed to exchange code for tokens",
+      (error as any)?.error || 'Failed to exchange code for tokens',
     );
   }
 
@@ -122,7 +122,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const { data, error } = await baseClient.POST("/auth/refresh", {
+    const { data, error } = await baseClient.POST('/auth/refresh', {
       headers: {
         Authorization: `Bearer ${refreshToken}`,
       },
@@ -158,13 +158,13 @@ export async function logout(): Promise<void> {
   // Notify backend to invalidate refresh token
   if (accessToken) {
     try {
-      await baseClient.POST("/auth/logout", {
+      await baseClient.POST('/auth/logout', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
     } catch (error) {
-      console.error("Logout request failed:", error);
+      console.error('Logout request failed:', error);
       // Continue - tokens already cleared locally
     }
   }

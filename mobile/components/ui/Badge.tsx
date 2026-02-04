@@ -1,31 +1,31 @@
-import type React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { useTheme } from "react-native-paper";
+import type React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: "default" | "secondary" | "destructive" | "outline";
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   className?: string;
 }
 
-export function Badge({ children, variant = "default" }: BadgeProps) {
+export function Badge({ children, variant = 'default' }: BadgeProps) {
   const theme = useTheme();
 
   const getVariantStyles = () => {
     switch (variant) {
-      case "secondary":
+      case 'secondary':
         return {
           backgroundColor: theme.colors.surfaceVariant,
           borderColor: theme.colors.outline,
         };
-      case "destructive":
+      case 'destructive':
         return {
-          backgroundColor: "#FEE2E2", // red-100 equivalent
-          borderColor: "#EF4444", // red-500 equivalent
+          backgroundColor: '#FEE2E2', // red-100 equivalent
+          borderColor: '#EF4444', // red-500 equivalent
         };
-      case "outline":
+      case 'outline':
         return {
-          backgroundColor: "transparent",
+          backgroundColor: 'transparent',
           borderColor: theme.colors.outline,
         };
       default:
@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: "600",
-    textAlign: "center",
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Badge } from "@/components/ui/Badge";
-import { apiClient } from "@/lib/api";
-import type { GiftItem } from "@/lib/api/types";
+import { useMutation } from '@tanstack/react-query';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Badge } from '@/components/ui/Badge';
+import { apiClient } from '@/lib/api';
+import type { GiftItem } from '@/lib/api/types';
 
 interface GiftItemDisplayProps {
   item: GiftItem;
@@ -26,7 +26,7 @@ export default function GiftItemDisplay({
         item.price || 0,
       ),
     onSuccess: () => {
-      Alert.alert("Success", "Gift item marked as purchased successfully!");
+      Alert.alert('Success', 'Gift item marked as purchased successfully!');
       if (onRefresh) {
         onRefresh();
       }
@@ -34,9 +34,9 @@ export default function GiftItemDisplay({
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
       Alert.alert(
-        "Error",
+        'Error',
         error.message ||
-          "Failed to mark gift item as purchased. Please try again.",
+          'Failed to mark gift item as purchased. Please try again.',
       );
     },
   });
@@ -45,13 +45,13 @@ export default function GiftItemDisplay({
     if (!item.id) return;
 
     Alert.alert(
-      "Confirm Purchase",
+      'Confirm Purchase',
       `Are you sure you want to mark "${item.name}" as purchased?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Mark as Purchased",
-          style: "default",
+          text: 'Mark as Purchased',
+          style: 'default',
           onPress: () => purchaseMutation.mutate(item.id),
         },
       ],
@@ -111,70 +111,70 @@ export default function GiftItemDisplay({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
     padding: 15,
     marginVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: '#eee',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 8,
   },
   name: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     flex: 1,
     marginRight: 10,
   },
   statusContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 5,
   },
   description: {
     fontSize: 14,
-    color: "#666",
+    color: '#666',
     marginBottom: 8,
   },
   details: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 15,
     marginBottom: 8,
   },
   price: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#007AFF",
+    fontWeight: 'bold',
+    color: '#007AFF',
   },
   priority: {
     fontSize: 12,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: '#e5e7eb',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   link: {
     fontSize: 12,
-    color: "#007AFF",
-    textDecorationLine: "underline",
+    color: '#007AFF',
+    textDecorationLine: 'underline',
     marginBottom: 10,
   },
   purchaseContainer: {
     marginTop: 10,
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
   },
   purchaseButton: {
-    backgroundColor: "#34C759",
+    backgroundColor: '#34C759',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 6,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

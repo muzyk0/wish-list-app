@@ -1,7 +1,7 @@
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 import {
   Appbar,
   Button,
@@ -10,25 +10,25 @@ import {
   Text,
   TextInput,
   useTheme,
-} from "react-native-paper";
-import OAuthButton from "@/components/OAuthButton";
-import { registerUser } from "@/lib/api";
+} from 'react-native-paper';
+import OAuthButton from '@/components/OAuthButton';
+import { registerUser } from '@/lib/api';
 import {
   startAppleOAuth,
   startFacebookOAuth,
   startGoogleOAuth,
-} from "@/lib/oauth-service";
+} from '@/lib/oauth-service';
 
 export default function RegisterScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const router = useRouter();
   const { colors } = useTheme();
 
   const [oauthLoading, setOauthLoading] = useState<
-    "google" | "facebook" | "apple" | null
+    'google' | 'facebook' | 'apple' | null
   >(null);
 
   const mutation = useMutation({
@@ -45,62 +45,62 @@ export default function RegisterScreen() {
     }) => registerUser({ email, password, firstName, lastName }),
     onSuccess: () => {
       Alert.alert(
-        "Success",
-        "Registration successful! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.push("/auth/login") }],
+        'Success',
+        'Registration successful! Please check your email to verify your account.',
+        [{ text: 'OK', onPress: () => router.push('/auth/login') }],
       );
     },
     onError: (error: Error) => {
       Alert.alert(
-        "Error",
-        error.message || "Registration failed. Please try again.",
+        'Error',
+        error.message || 'Registration failed. Please try again.',
       );
     },
   });
 
   const handleRegister = () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all required fields.");
+      Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
     mutation.mutate({ email, password, firstName, lastName });
   };
 
-  const handleOAuth = async (provider: "google" | "facebook" | "apple") => {
+  const handleOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     setOauthLoading(provider);
 
     try {
       let result: { success: boolean; token?: string; error?: string };
       switch (provider) {
-        case "google":
+        case 'google':
           result = await startGoogleOAuth();
           break;
-        case "facebook":
+        case 'facebook':
           result = await startFacebookOAuth();
           break;
-        case "apple":
+        case 'apple':
           result = await startAppleOAuth();
           break;
         default:
-          throw new Error("Invalid provider");
+          throw new Error('Invalid provider');
       }
 
       if (result.success && result.token) {
         // Handle successful OAuth registration
         Alert.alert(
-          "Success",
+          'Success',
           `${provider.charAt(0).toUpperCase() + provider.slice(1)} registration successful!`,
         );
-        router.push("/(tabs)"); // Navigate to main app
+        router.push('/(tabs)'); // Navigate to main app
       } else if (result.error) {
-        Alert.alert("OAuth Error", result.error);
+        Alert.alert('OAuth Error', result.error);
       }
       // biome-ignore lint/suspicious/noExplicitAny: Error type
     } catch (error: any) {
       Alert.alert(
-        "Error",
-        error.message || "An error occurred during OAuth registration",
+        'Error',
+        error.message || 'An error occurred during OAuth registration',
       );
     } finally {
       setOauthLoading(null);
@@ -196,31 +196,31 @@ export default function RegisterScreen() {
 
             <OAuthButton
               provider="google"
-              onPress={() => handleOAuth("google")}
-              loading={oauthLoading === "google"}
+              onPress={() => handleOAuth('google')}
+              loading={oauthLoading === 'google'}
             />
 
             <OAuthButton
               provider="facebook"
-              onPress={() => handleOAuth("facebook")}
-              loading={oauthLoading === "facebook"}
+              onPress={() => handleOAuth('facebook')}
+              loading={oauthLoading === 'facebook'}
             />
 
             <OAuthButton
               provider="apple"
-              onPress={() => handleOAuth("apple")}
-              loading={oauthLoading === "apple"}
+              onPress={() => handleOAuth('apple')}
+              loading={oauthLoading === 'apple'}
             />
 
             <Text
               variant="bodyMedium"
               style={[styles.footerText, { color: colors.outline }]}
             >
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Button
                 compact
                 mode="text"
-                onPress={() => router.push("/auth/login")}
+                onPress={() => router.push('/auth/login')}
                 style={styles.linkButton}
                 labelStyle={styles.linkLabel}
               >
@@ -237,7 +237,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 20,
   },
   card: {
@@ -251,12 +251,12 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 8,
   },
   subtitle: {
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   buttonLabel: {
-    fontWeight: "600",
+    fontWeight: '600',
     fontSize: 16,
   },
   dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 20,
   },
   orText: {
@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   footerText: {
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 24,
   },
   linkButton: {
     marginLeft: 4,
   },
   linkLabel: {
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

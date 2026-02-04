@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,13 +10,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { apiClient } from "@/lib/api";
+} from 'react-native';
+import { apiClient } from '@/lib/api';
 
 export default function CreateWishListScreen() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [occasion, setOccasion] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [occasion, setOccasion] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const router = useRouter();
 
@@ -29,27 +29,27 @@ export default function CreateWishListScreen() {
     }) =>
       apiClient.createWishList({
         title: data.title,
-        description: data.description || "",
-        occasion: data.occasion || "",
+        description: data.description || '',
+        occasion: data.occasion || '',
         is_public: data.is_public,
-        template_id: "default",
+        template_id: 'default',
       }),
     onSuccess: (_data) => {
-      Alert.alert("Success", "Wishlist created successfully!", [
-        { text: "OK", onPress: () => router.push("/") },
+      Alert.alert('Success', 'Wishlist created successfully!', [
+        { text: 'OK', onPress: () => router.push('/') },
       ]);
     },
     onError: (error: Error) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to create wishlist. Please try again.",
+        'Error',
+        error.message || 'Failed to create wishlist. Please try again.',
       );
     },
   });
 
   const handleCreate = () => {
     if (!title.trim()) {
-      Alert.alert("Error", "Please enter a title for your wishlist.");
+      Alert.alert('Error', 'Please enter a title for your wishlist.');
       return;
     }
 
@@ -114,17 +114,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 20,
     paddingVertical: 10,
   },
@@ -142,15 +142,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 15,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 10,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

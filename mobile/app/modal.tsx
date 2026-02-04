@@ -1,6 +1,6 @@
-import { Link, useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
-import { Appbar, Text, useTheme } from "react-native-paper";
+import { Link, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { Appbar, Text, useTheme } from 'react-native-paper';
 
 export default function ModalScreen() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ModalScreen() {
       <View style={styles.container}>
         <Text
           variant="headlineMedium"
-          style={{ color: colors.onSurface, textAlign: "center" }}
+          style={{ color: colors.onSurface, textAlign: 'center' }}
         >
           This is a modal
         </Text>
@@ -39,8 +39,8 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
   link: {

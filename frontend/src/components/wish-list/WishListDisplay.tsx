@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { ExternalLink, Eye, Share2 } from "lucide-react";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReservationButton } from "./ReservationButton";
+import { ExternalLink, Eye, Share2 } from 'lucide-react';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ReservationButton } from './ReservationButton';
 
 interface GiftItem {
   id: string;
@@ -90,8 +90,8 @@ export default function WishListDisplay({
 
         <CardContent>
           <div className="flex flex-wrap gap-2 mb-4">
-            <Badge variant={wishList.is_public ? "default" : "secondary"}>
-              {wishList.is_public ? "Public" : "Private"}
+            <Badge variant={wishList.is_public ? 'default' : 'secondary'}>
+              {wishList.is_public ? 'Public' : 'Private'}
             </Badge>
             {wishList.occasion_date && (
               <Badge variant="outline">
@@ -198,7 +198,7 @@ export default function WishListDisplay({
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-sm text-blue-600 hover:underline mt-2"
                           >
-                            View Product{" "}
+                            View Product{' '}
                             <ExternalLink className="ml-1 h-4 w-4" />
                           </a>
                         )}
@@ -218,7 +218,7 @@ export default function WishListDisplay({
                               wishlistId={wishList.id}
                               isReserved={isReserved}
                               reservedByName={
-                                item.reserved_by_user_id ? "Someone" : undefined
+                                item.reserved_by_user_id ? 'Someone' : undefined
                               }
                               onReservationSuccess={() => onReserve(item.id)}
                             />

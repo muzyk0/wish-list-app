@@ -1,6 +1,6 @@
-import { StyleSheet, View } from "react-native";
-import { Text, useTheme } from "react-native-paper";
-import { MyReservations } from "../../components/wish-list/MyReservations";
+import { StyleSheet, View } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
+import { MyReservations } from '../../components/wish-list/MyReservations';
 
 export default function ReservationsScreen() {
   const theme = useTheme();
@@ -24,6 +24,6 @@ const styles = StyleSheet.create({
   },
   title: {
     padding: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
 });

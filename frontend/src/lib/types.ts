@@ -114,7 +114,7 @@ export interface Reservation {
   guestName?: string;
   guestEmail?: string;
   reservationToken: string;
-  status: "active" | "cancelled" | "fulfilled" | "expired";
+  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
   cancelledAt?: string;

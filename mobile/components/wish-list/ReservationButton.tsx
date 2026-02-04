@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { Alert, StyleSheet } from "react-native";
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Alert, StyleSheet } from 'react-native';
 import {
   Button,
   Dialog,
@@ -9,8 +9,8 @@ import {
   Text,
   TextInput,
   useTheme,
-} from "react-native-paper";
-import { apiClient } from "@/lib/api";
+} from 'react-native-paper';
+import { apiClient } from '@/lib/api';
 
 interface ReservationButtonProps {
   giftItemId: string;
@@ -29,8 +29,8 @@ export function ReservationButton({
 }: ReservationButtonProps) {
   const theme = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
-  const [guestName, setGuestName] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
 
   const reservationMutation = useMutation({
     mutationFn: (data: { guest_name: string; guest_email: string }) =>
@@ -39,20 +39,20 @@ export function ReservationButton({
         guest_email: data.guest_email,
       }),
     onSuccess: () => {
-      Alert.alert("Success", "Gift item reserved successfully!");
+      Alert.alert('Success', 'Gift item reserved successfully!');
       setModalVisible(false);
-      setGuestName("");
-      setGuestEmail("");
+      setGuestName('');
+      setGuestEmail('');
       onReservationSuccess?.();
     },
     onError: (error: Error) => {
-      Alert.alert("Error", error?.message || "Failed to reserve gift item");
+      Alert.alert('Error', error?.message || 'Failed to reserve gift item');
     },
   });
 
   const handleReservation = () => {
     if (!guestName.trim() || !guestEmail.trim()) {
-      Alert.alert("Error", "Please enter your name and email");
+      Alert.alert('Error', 'Please enter your name and email');
       return;
     }
 
@@ -70,7 +70,7 @@ export function ReservationButton({
         style={styles.disabledButton}
         labelStyle={styles.disabledButtonText}
       >
-        Reserved by {reservedByName || "someone"}
+        Reserved by {reservedByName || 'someone'}
       </Button>
     );
   }
@@ -127,8 +127,8 @@ export function ReservationButton({
             >
               <Text>
                 {reservationMutation.isPending
-                  ? "Reserving..."
-                  : "Reserve Gift"}
+                  ? 'Reserving...'
+                  : 'Reserve Gift'}
               </Text>
             </Button>
           </Dialog.Actions>
@@ -149,18 +149,18 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
   },
   disabledButtonText: {
-    color: "#666",
-    fontWeight: "normal",
+    color: '#666',
+    fontWeight: 'normal',
   },
   modalText: {
     marginBottom: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   input: {
-    width: "100%",
+    width: '100%',
   },
 });

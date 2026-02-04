@@ -1,11 +1,11 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import type React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, Text, useTheme } from "react-native-paper";
-import { useThemeContext } from "@/contexts/ThemeContext";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import type React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { useThemeContext } from '@/contexts/ThemeContext';
 
 interface OAuthButtonProps {
-  provider: "google" | "facebook" | "apple";
+  provider: 'google' | 'facebook' | 'apple';
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
@@ -23,37 +23,37 @@ const OAuthButton: React.FC<OAuthButtonProps> = ({
   // Define provider-specific styling and text
   const getProviderConfig = () => {
     switch (provider) {
-      case "google":
+      case 'google':
         return {
-          text: "Continue with Google",
-          backgroundColor: isDark ? colors.surface : "#FFFFFF",
-          textColor: isDark ? colors.onSurface : "#000000",
-          borderColor: isDark ? colors.outline : "#CCCCCC",
-          icon: "mail" as const, // Using mail icon as Google icon
+          text: 'Continue with Google',
+          backgroundColor: isDark ? colors.surface : '#FFFFFF',
+          textColor: isDark ? colors.onSurface : '#000000',
+          borderColor: isDark ? colors.outline : '#CCCCCC',
+          icon: 'mail' as const, // Using mail icon as Google icon
         };
-      case "facebook":
+      case 'facebook':
         return {
-          text: "Continue with Facebook",
-          backgroundColor: isDark ? colors.surface : "#1877F2",
-          textColor: isDark ? colors.onSurface : "#FFFFFF",
-          borderColor: isDark ? colors.outline : "#1877F2",
-          icon: "thumb-up" as const, // Using thumb-up icon for Facebook
+          text: 'Continue with Facebook',
+          backgroundColor: isDark ? colors.surface : '#1877F2',
+          textColor: isDark ? colors.onSurface : '#FFFFFF',
+          borderColor: isDark ? colors.outline : '#1877F2',
+          icon: 'thumb-up' as const, // Using thumb-up icon for Facebook
         };
-      case "apple":
+      case 'apple':
         return {
-          text: "Continue with Apple",
-          backgroundColor: isDark ? colors.surface : "#000000",
-          textColor: isDark ? colors.onSurface : "#FFFFFF",
-          borderColor: isDark ? colors.outline : "#000000",
-          icon: "phone-iphone" as const, // Using phone-iphone icon for Apple
+          text: 'Continue with Apple',
+          backgroundColor: isDark ? colors.surface : '#000000',
+          textColor: isDark ? colors.onSurface : '#FFFFFF',
+          borderColor: isDark ? colors.outline : '#000000',
+          icon: 'phone-iphone' as const, // Using phone-iphone icon for Apple
         };
       default:
         return {
-          text: "Continue",
-          backgroundColor: isDark ? colors.surface : "#FFFFFF",
-          textColor: isDark ? colors.onSurface : "#000000",
-          borderColor: isDark ? colors.outline : "#CCCCCC",
-          icon: "person" as const, // Using person icon as default
+          text: 'Continue',
+          backgroundColor: isDark ? colors.surface : '#FFFFFF',
+          textColor: isDark ? colors.onSurface : '#000000',
+          borderColor: isDark ? colors.outline : '#CCCCCC',
+          icon: 'person' as const, // Using person icon as default
         };
     }
   };
@@ -95,18 +95,18 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
   },
   buttonLabel: {
-    fontWeight: "600",
+    fontWeight: '600',
     fontSize: 16,
-    textTransform: "none",
+    textTransform: 'none',
   },
   buttonText: {
-    fontWeight: "600",
+    fontWeight: '600',
     fontSize: 16,
   },
 });

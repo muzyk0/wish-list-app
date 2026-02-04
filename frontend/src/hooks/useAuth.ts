@@ -4,8 +4,8 @@
 // - Automatically attempts token refresh on mount
 // - Handles loading and error states
 
-import { useEffect, useState } from "react";
-import { authManager } from "@/lib/auth";
+import { useEffect, useState } from 'react';
+import { authManager } from '@/lib/auth';
 
 interface UseAuthReturn {
   isAuthenticated: boolean;
@@ -57,7 +57,7 @@ export function useAuth(): UseAuthReturn {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to refresh authentication",
+        err instanceof Error ? err.message : 'Failed to refresh authentication',
       );
       setIsAuthenticated(false);
     } finally {

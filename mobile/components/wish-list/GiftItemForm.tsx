@@ -1,14 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text } from "react-native";
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
 import {
   Button as PaperButton,
   TextInput as PaperTextInput,
-} from "react-native-paper";
-import { apiClient } from "@/lib/api";
-import type { GiftItem } from "@/lib/api/types";
-import ImageUpload from "./ImageUpload";
+} from 'react-native-paper';
+import { apiClient } from '@/lib/api';
+import type { GiftItem } from '@/lib/api/types';
+import ImageUpload from './ImageUpload';
 
 interface GiftItemFormProps {
   wishlistId: string;
@@ -21,19 +21,19 @@ export default function GiftItemForm({
   existingItem,
   onComplete,
 }: GiftItemFormProps) {
-  const [name, setName] = useState(existingItem?.name || "");
+  const [name, setName] = useState(existingItem?.name || '');
   const [description, setDescription] = useState(
-    existingItem?.description || "",
+    existingItem?.description || '',
   );
-  const [link, setLink] = useState(existingItem?.link || "");
-  const [imageUrl, setImageUrl] = useState(existingItem?.image_url || "");
-  const [price, setPrice] = useState(existingItem?.price?.toString() || "");
+  const [link, setLink] = useState(existingItem?.link || '');
+  const [imageUrl, setImageUrl] = useState(existingItem?.image_url || '');
+  const [price, setPrice] = useState(existingItem?.price?.toString() || '');
   const [priority, setPriority] = useState(
-    existingItem?.priority?.toString() || "0",
+    existingItem?.priority?.toString() || '0',
   );
-  const [notes, setNotes] = useState(existingItem?.notes || "");
+  const [notes, setNotes] = useState(existingItem?.notes || '');
   const [position, setPosition] = useState(
-    existingItem?.position?.toString() || "0",
+    existingItem?.position?.toString() || '0',
   );
 
   const router = useRouter();
@@ -51,11 +51,11 @@ export default function GiftItemForm({
     }) => {
       // Parse numeric fields, set to undefined if empty or invalid
       const parsedPrice =
-        data.price.trim() !== "" ? parseFloat(data.price) : NaN;
+        data.price.trim() !== '' ? parseFloat(data.price) : NaN;
       const parsedPriority =
-        data.priority.trim() !== "" ? parseInt(data.priority, 10) : NaN;
+        data.priority.trim() !== '' ? parseInt(data.priority, 10) : NaN;
       const parsedPosition =
-        data.position.trim() !== "" ? parseInt(data.position, 10) : NaN;
+        data.position.trim() !== '' ? parseInt(data.position, 10) : NaN;
 
       if (existingItem) {
         // Update existing item
@@ -85,11 +85,11 @@ export default function GiftItemForm({
     },
     onSuccess: (_data) => {
       Alert.alert(
-        "Success",
-        `Gift item ${existingItem ? "updated" : "created"} successfully!`,
+        'Success',
+        `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
         [
           {
-            text: "OK",
+            text: 'OK',
             onPress: () => {
               if (onComplete) {
                 onComplete();
@@ -103,9 +103,9 @@ export default function GiftItemForm({
     },
     onError: (error: Error) => {
       Alert.alert(
-        "Error",
+        'Error',
         error.message ||
-          `Failed to ${existingItem ? "update" : "create"} gift item. Please try again.`,
+          `Failed to ${existingItem ? 'update' : 'create'} gift item. Please try again.`,
       );
     },
   });
@@ -113,14 +113,14 @@ export default function GiftItemForm({
   const deleteMutation = useMutation({
     mutationFn: () => {
       if (!existingItem?.id) {
-        throw new Error("No item to delete");
+        throw new Error('No item to delete');
       }
       return apiClient.deleteGiftItem(wishlistId, existingItem.id);
     },
     onSuccess: () => {
-      Alert.alert("Success", "Gift item deleted successfully!", [
+      Alert.alert('Success', 'Gift item deleted successfully!', [
         {
-          text: "OK",
+          text: 'OK',
           onPress: () => {
             if (onComplete) {
               onComplete();
@@ -133,21 +133,21 @@ export default function GiftItemForm({
     },
     onError: (error: Error) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to delete gift item. Please try again.",
+        'Error',
+        error.message || 'Failed to delete gift item. Please try again.',
       );
     },
   });
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      Alert.alert("Error", "Please enter a name for the gift item.");
+      Alert.alert('Error', 'Please enter a name for the gift item.');
       return;
     }
 
     // Validate price if provided
     if (price && Number.isNaN(parseFloat(price))) {
-      Alert.alert("Error", "Please enter a valid price.");
+      Alert.alert('Error', 'Please enter a valid price.');
       return;
     }
 
@@ -157,7 +157,7 @@ export default function GiftItemForm({
       priority &&
       (Number.isNaN(priorityNum) || priorityNum < 0 || priorityNum > 10)
     ) {
-      Alert.alert("Error", "Please enter a priority between 0 and 10.");
+      Alert.alert('Error', 'Please enter a priority between 0 and 10.');
       return;
     }
 
@@ -177,13 +177,13 @@ export default function GiftItemForm({
     if (!existingItem) return;
 
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this gift item? This action cannot be undone.",
+      'Confirm Delete',
+      'Are you sure you want to delete this gift item? This action cannot be undone.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: () => deleteMutation.mutate(),
         },
       ],
@@ -193,7 +193,7 @@ export default function GiftItemForm({
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>
-        {existingItem ? "Edit Gift Item" : "Add New Gift Item"}
+        {existingItem ? 'Edit Gift Item' : 'Add New Gift Item'}
       </Text>
 
       <PaperTextInput
@@ -285,7 +285,7 @@ export default function GiftItemForm({
           <Text style={styles.buttonText}>Processing...</Text>
         ) : (
           <Text style={styles.buttonText}>
-            {existingItem ? "Update Item" : "Add Item"}
+            {existingItem ? 'Update Item' : 'Add Item'}
           </Text>
         )}
       </PaperButton>
@@ -313,12 +313,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
   },
   input: {
@@ -336,8 +336,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

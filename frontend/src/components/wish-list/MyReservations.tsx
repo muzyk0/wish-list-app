@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Reservation {
   id: string;
@@ -20,7 +20,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: "active" | "cancelled" | "fulfilled" | "expired";
+  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }
@@ -34,17 +34,17 @@ export function MyReservations() {
       setLoading(true);
 
       // Check if user is authenticated
-      const userResponse = await fetch("/api/auth/me");
+      const userResponse = await fetch('/api/auth/me');
       if (userResponse.ok) {
         // Authenticated user - fetch user reservations
-        const response = await fetch("/api/users/me/reservations");
+        const response = await fetch('/api/users/me/reservations');
         if (response.ok) {
           const data = await response.json();
           setReservations(data.data || []);
         }
       } else {
         // Guest user - check for reservation token in localStorage
-        const token = localStorage.getItem("reservationToken");
+        const token = localStorage.getItem('reservationToken');
         if (token) {
           const response = await fetch(
             `/api/guest/reservations?token=${token}`,
@@ -56,7 +56,7 @@ export function MyReservations() {
         }
       }
     } catch (_error) {
-      toast.error("Failed to load reservations");
+      toast.error('Failed to load reservations');
     } finally {
       setLoading(false);
     }
@@ -99,13 +99,13 @@ export function MyReservations() {
               </CardTitle>
               <Badge
                 variant={
-                  reservation.status === "active"
-                    ? "default"
-                    : reservation.status === "cancelled"
-                      ? "secondary"
-                      : reservation.status === "fulfilled"
-                        ? "outline"
-                        : "destructive"
+                  reservation.status === 'active'
+                    ? 'default'
+                    : reservation.status === 'cancelled'
+                      ? 'secondary'
+                      : reservation.status === 'fulfilled'
+                        ? 'outline'
+                        : 'destructive'
                 }
               >
                 {reservation.status.charAt(0).toUpperCase() +
@@ -113,8 +113,8 @@ export function MyReservations() {
               </Badge>
             </div>
             <p className="text-sm text-gray-500">
-              Reserved for: {reservation.wishlist.title} by{" "}
-              {reservation.wishlist.ownerFirstName}{" "}
+              Reserved for: {reservation.wishlist.title} by{' '}
+              {reservation.wishlist.ownerFirstName}{' '}
               {reservation.wishlist.ownerLastName}
             </p>
           </CardHeader>
@@ -123,18 +123,18 @@ export function MyReservations() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm">
-                  Reserved on:{" "}
+                  Reserved on:{' '}
                   {new Date(reservation.reservedAt).toLocaleDateString()}
                 </p>
                 {reservation.expiresAt && (
                   <p className="text-sm text-gray-500">
-                    Expires on:{" "}
+                    Expires on:{' '}
                     {new Date(reservation.expiresAt).toLocaleDateString()}
                   </p>
                 )}
               </div>
 
-              {reservation.status === "active" && (
+              {reservation.status === 'active' && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -143,25 +143,25 @@ export function MyReservations() {
                       const response = await fetch(
                         `/api/reservations/${reservation.id}/cancel`,
                         {
-                          method: "POST",
+                          method: 'POST',
                           headers: {
-                            "Content-Type": "application/json",
+                            'Content-Type': 'application/json',
                           },
                         },
                       );
 
                       if (response.ok) {
-                        toast.success("Reservation cancelled successfully");
+                        toast.success('Reservation cancelled successfully');
                         fetchReservations(); // Refresh the list
                       } else {
                         const data = await response.json();
                         toast.error(
-                          data.error || "Failed to cancel reservation",
+                          data.error || 'Failed to cancel reservation',
                         );
                       }
                     } catch (_error) {
                       toast.error(
-                        "An error occurred while cancelling the reservation",
+                        'An error occurred while cancelling the reservation',
                       );
                     }
                   }}

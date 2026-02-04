@@ -1,13 +1,13 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
-import { useState } from "react";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
   Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
   View,
-} from "react-native";
+} from 'react-native';
 import {
   ActivityIndicator,
   Appbar,
@@ -17,9 +17,9 @@ import {
   List,
   Text,
   useTheme,
-} from "react-native-paper";
-import { apiClient } from "@/lib/api";
-import type { WishList } from "@/lib/api/types";
+} from 'react-native-paper';
+import { apiClient } from '@/lib/api';
+import type { WishList } from '@/lib/api/types';
 
 export default function ListsTab() {
   const [refreshing, setRefreshing] = useState(false);
@@ -32,7 +32,7 @@ export default function ListsTab() {
     isError,
     refetch,
   } = useQuery<WishList[]>({
-    queryKey: ["wishlists"],
+    queryKey: ['wishlists'],
     queryFn: () => apiClient.getWishLists(),
     retry: 2,
   });
@@ -45,23 +45,23 @@ export default function ListsTab() {
 
   const handleDelete = (id: string) => {
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.",
+      'Confirm Delete',
+      'Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               await apiClient.deleteWishList(id);
-              Alert.alert("Success", "Wishlist deleted successfully!");
-              queryClient.invalidateQueries({ queryKey: ["wishlists"] });
+              Alert.alert('Success', 'Wishlist deleted successfully!');
+              queryClient.invalidateQueries({ queryKey: ['wishlists'] });
               // biome-ignore lint/suspicious/noExplicitAny: Error type
             } catch (error: any) {
               Alert.alert(
-                "Error",
-                error.message || "Failed to delete wishlist. Please try again.",
+                'Error',
+                error.message || 'Failed to delete wishlist. Please try again.',
               );
             }
           },
@@ -122,15 +122,15 @@ export default function ListsTab() {
             variant="bodySmall"
             style={[styles.listStat, { color: colors.outline }]}
           >
-            {item.view_count !== "0"
+            {item.view_count !== '0'
               ? `${item.view_count} views`
-              : "Not viewed"}
+              : 'Not viewed'}
           </Text>
           <Text
             variant="bodySmall"
             style={[styles.listStat, { color: colors.outline }]}
           >
-            {item.occasion_date || "No date set"}
+            {item.occasion_date || 'No date set'}
           </Text>
         </View>
 
@@ -139,7 +139,7 @@ export default function ListsTab() {
             mode="contained-tonal"
             onPress={() =>
               router.push({
-                pathname: "/lists/[id]/edit",
+                pathname: '/lists/[id]/edit',
                 params: { id: item.id },
               })
             }
@@ -169,7 +169,7 @@ export default function ListsTab() {
         <Button
           onPress={() =>
             router.push({
-              pathname: "/lists/[id]",
+              pathname: '/lists/[id]',
               params: { id: item.id },
             })
           }
@@ -230,7 +230,7 @@ export default function ListsTab() {
         />
         <Appbar.Action
           icon="plus"
-          onPress={() => router.push("/lists/create")}
+          onPress={() => router.push('/lists/create')}
           color={colors.onPrimary}
         />
       </Appbar.Header>
@@ -257,7 +257,7 @@ export default function ListsTab() {
             <List.Icon icon="playlist-star" />
             <Text
               variant="headlineSmall"
-              style={{ color: colors.onSurface, textAlign: "center" }}
+              style={{ color: colors.onSurface, textAlign: 'center' }}
             >
               No wish lists yet
             </Text>
@@ -265,7 +265,7 @@ export default function ListsTab() {
               variant="bodyMedium"
               style={{
                 color: colors.onSurfaceVariant,
-                textAlign: "center",
+                textAlign: 'center',
                 marginTop: 8,
               }}
             >
@@ -273,7 +273,7 @@ export default function ListsTab() {
             </Text>
             <Button
               mode="contained"
-              onPress={() => router.push("/lists/create")}
+              onPress={() => router.push('/lists/create')}
               style={styles.createButton}
               labelStyle={styles.createButtonText}
             >
@@ -289,8 +289,8 @@ export default function ListsTab() {
 const styles = StyleSheet.create({
   centerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
     padding: 16,
@@ -312,18 +312,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   titleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 8,
   },
   listTitle: {
     flex: 1,
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   publicBadge: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginLeft: 8,
     marginTop: 2,
   },
@@ -336,16 +336,16 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   listStats: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   listStat: {
     fontSize: 12,
   },
   listActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: 8,
   },
   actionButton: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   cardActions: {
     padding: 16,
@@ -365,12 +365,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   viewButtonText: {
-    fontWeight: "600",
+    fontWeight: '600',
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingTop: 50,
   },
   retryButton: {
@@ -381,6 +381,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   createButtonText: {
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

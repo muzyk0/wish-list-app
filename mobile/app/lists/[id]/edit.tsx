@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
   Button,
@@ -11,14 +11,14 @@ import {
   Text,
   TextInput,
   useTheme,
-} from "react-native-paper";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+} from 'react-native-paper';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { apiClient } from "@/lib/api";
+import { apiClient } from '@/lib/api';
 
 const updateWishListSchema = z.object({
-  title: z.string().min(1, "Please enter a title for your wishlist.").max(200),
+  title: z.string().min(1, 'Please enter a title for your wishlist.').max(200),
   description: z.string().optional(),
   occasion: z.string().max(100).optional(),
   is_public: z.boolean(),
@@ -39,9 +39,9 @@ export default function EditWishListScreen() {
   } = useForm<UpdateWishListFormData>({
     resolver: zodResolver(updateWishListSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      occasion: "",
+      title: '',
+      description: '',
+      occasion: '',
       is_public: false,
     },
   });
@@ -51,7 +51,7 @@ export default function EditWishListScreen() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["wishlist", id],
+    queryKey: ['wishlist', id],
     queryFn: () => apiClient.getWishListById(id),
     enabled: !!id,
   });
@@ -60,8 +60,8 @@ export default function EditWishListScreen() {
     if (wishList) {
       reset({
         title: wishList.title,
-        description: wishList.description || "",
-        occasion: wishList.occasion || "",
+        description: wishList.description || '',
+        occasion: wishList.occasion || '',
         is_public: wishList.is_public,
       });
     }
@@ -76,9 +76,9 @@ export default function EditWishListScreen() {
         is_public: data.is_public,
       }),
     onSuccess: () => {
-      Alert.alert("Success", "Wishlist updated successfully!", [
+      Alert.alert('Success', 'Wishlist updated successfully!', [
         {
-          text: "OK",
+          text: 'OK',
           onPress: () =>
             router.push({
               pathname: `/lists/[id]`,
@@ -89,8 +89,8 @@ export default function EditWishListScreen() {
     },
     onError: (error) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to update wishlist. Please try again.",
+        'Error',
+        error.message || 'Failed to update wishlist. Please try again.',
       );
     },
   });
@@ -98,14 +98,14 @@ export default function EditWishListScreen() {
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteWishList(id),
     onSuccess: () => {
-      Alert.alert("Success", "Wishlist deleted successfully!", [
-        { text: "OK", onPress: () => router.push("/lists") },
+      Alert.alert('Success', 'Wishlist deleted successfully!', [
+        { text: 'OK', onPress: () => router.push('/lists') },
       ]);
     },
     onError: (error) => {
       Alert.alert(
-        "Error",
-        error.message || "Failed to delete wishlist. Please try again.",
+        'Error',
+        error.message || 'Failed to delete wishlist. Please try again.',
       );
     },
   });
@@ -116,13 +116,13 @@ export default function EditWishListScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.",
+      'Confirm Delete',
+      'Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: () => deleteMutation.mutate(),
         },
       ],
@@ -331,13 +331,13 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
   },
   form: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 5,
   },
   input: {
@@ -358,9 +358,9 @@ const styles = StyleSheet.create({
     height: 100,
   },
   toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 10,
     marginBottom: 20,
   },

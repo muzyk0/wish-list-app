@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { ActivityIndicator, Card, Text, useTheme } from "react-native-paper";
-import { ReservationItem } from "./ReservationItem";
+import { useEffect, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Card, Text, useTheme } from 'react-native-paper';
+import { ReservationItem } from './ReservationItem';
 
 interface Reservation {
   id: string;
@@ -17,7 +17,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: "active" | "cancelled" | "fulfilled" | "expired";
+  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }
@@ -33,10 +33,10 @@ export function MyReservations() {
       setLoading(true);
 
       // Check if user is authenticated
-      const userResponse = await fetch("/api/auth/me");
+      const userResponse = await fetch('/api/auth/me');
       if (userResponse.ok) {
         // Authenticated user - fetch user reservations
-        const response = await fetch("/api/users/me/reservations");
+        const response = await fetch('/api/users/me/reservations');
         if (response.ok) {
           const data = await response.json();
           setReservations(data.data || []);
@@ -44,9 +44,9 @@ export function MyReservations() {
       } else {
         // Guest user - check for reservation token in AsyncStorage
         const AsyncStorage = await import(
-          "@react-native-async-storage/async-storage"
+          '@react-native-async-storage/async-storage'
         );
-        const token = await AsyncStorage.default.getItem("reservationToken");
+        const token = await AsyncStorage.default.getItem('reservationToken');
         if (token) {
           const response = await fetch(
             `/api/guest/reservations?token=${token}`,
@@ -58,7 +58,7 @@ export function MyReservations() {
         }
       }
     } catch (error) {
-      console.error("Failed to load reservations:", error);
+      console.error('Failed to load reservations:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   emptyCard: {
     margin: 16,
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   emptyText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
   },
 });

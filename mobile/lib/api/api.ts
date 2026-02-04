@@ -1,13 +1,13 @@
 // mobile/lib/api.ts
-import createClient, { type Middleware } from "openapi-fetch";
+import createClient, { type Middleware } from 'openapi-fetch';
 import {
   clearTokens,
   getAccessToken,
   refreshAccessToken,
   setTokens,
-} from "./auth";
-import { API_BASE_URL } from "./client";
-import type { paths } from "./schema";
+} from './auth';
+import { API_BASE_URL } from './client';
+import type { paths } from './schema';
 import type {
   CreateGiftItemRequest,
   CreateReservationRequest,
@@ -21,10 +21,10 @@ import type {
   UserLogin,
   UserRegistration,
   WishList,
-} from "./types";
+} from './types';
 
 // Routes that don't require authentication
-const UNPROTECTED_ROUTES = ["/auth/login", "/auth/register"];
+const UNPROTECTED_ROUTES = ['/auth/login', '/auth/register'];
 
 class ApiClient {
   private client: ReturnType<typeof createClient<paths>>;
@@ -64,7 +64,7 @@ class ApiClient {
       // Add Authorization header for protected routes
       const token = await getAccessToken();
       if (token) {
-        request.headers.set("Authorization", `Bearer ${token}`);
+        request.headers.set('Authorization', `Bearer ${token}`);
       }
 
       return request;
@@ -91,7 +91,7 @@ class ApiClient {
           if (newToken) {
             // Clone the original request with the new token
             const retryRequest = request.clone();
-            retryRequest.headers.set("Authorization", `Bearer ${newToken}`);
+            retryRequest.headers.set('Authorization', `Bearer ${newToken}`);
 
             // Retry the request with the new token
             return await fetch(retryRequest);
@@ -102,7 +102,7 @@ class ApiClient {
           return response;
         } catch (error) {
           // If refresh throws an error, clear tokens and return original response
-          console.error("Token refresh failed:", error);
+          console.error('Token refresh failed:', error);
           await clearTokens();
           return response;
         } finally {
@@ -117,14 +117,14 @@ class ApiClient {
 
   // Authentication methods
   async login(credentials: UserLogin): Promise<LoginResponse> {
-    const { data, error } = await this.client.POST("/auth/login", {
+    const { data, error } = await this.client.POST('/auth/login', {
       body: credentials,
     });
 
     if (error || !data) {
       throw new Error(
         // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
-        (error as any)?.error || "Login failed",
+        (error as any)?.error || 'Login failed',
       );
     }
 
@@ -134,14 +134,14 @@ class ApiClient {
   }
 
   async register(userData: UserRegistration): Promise<LoginResponse> {
-    const { data, error } = await this.client.POST("/auth/register", {
+    const { data, error } = await this.client.POST('/auth/register', {
       body: userData,
     });
 
     if (error || !data) {
       throw new Error(
         // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
-        (error as any)?.error || "Registration failed",
+        (error as any)?.error || 'Registration failed',
       );
     }
 
@@ -152,9 +152,9 @@ class ApiClient {
 
   async logout(): Promise<void> {
     try {
-      await this.client.POST("/auth/logout", {});
+      await this.client.POST('/auth/logout', {});
     } catch (error) {
-      console.error("Logout request failed:", error);
+      console.error('Logout request failed:', error);
     } finally {
       // Always clear tokens locally
       await clearTokens();
@@ -163,10 +163,10 @@ class ApiClient {
 
   // User methods
   async getProfile(): Promise<User> {
-    const { data, error } = await this.client.GET("/protected/profile", {});
+    const { data, error } = await this.client.GET('/protected/profile', {});
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to fetch profile");
+      throw new Error((error as any)?.error || 'Failed to fetch profile');
     }
 
     return data as User;
@@ -177,22 +177,22 @@ class ApiClient {
     last_name?: string;
     avatar_url?: string;
   }): Promise<User> {
-    const { data, error } = await this.client.PUT("/protected/profile", {
+    const { data, error } = await this.client.PUT('/protected/profile', {
       body: userData,
     });
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to update profile");
+      throw new Error((error as any)?.error || 'Failed to update profile');
     }
 
     return data as User;
   }
 
   async deleteAccount(): Promise<void> {
-    const { error } = await this.client.DELETE("/protected/account", {});
+    const { error } = await this.client.DELETE('/protected/account', {});
 
     if (error) {
-      throw new Error((error as any)?.error || "Failed to delete account");
+      throw new Error((error as any)?.error || 'Failed to delete account');
     }
 
     // Clear tokens after successful account deletion
@@ -203,7 +203,7 @@ class ApiClient {
     currentPassword: string,
     newEmail: string,
   ): Promise<{ message: string }> {
-    const { data, error } = await this.client.POST("/auth/change-email", {
+    const { data, error } = await this.client.POST('/auth/change-email', {
       body: {
         current_password: currentPassword,
         new_email: newEmail,
@@ -211,7 +211,7 @@ class ApiClient {
     });
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to change email");
+      throw new Error((error as any)?.error || 'Failed to change email');
     }
 
     return data as { message: string };
@@ -221,7 +221,7 @@ class ApiClient {
     currentPassword: string,
     newPassword: string,
   ): Promise<{ message: string }> {
-    const { data, error } = await this.client.POST("/auth/change-password", {
+    const { data, error } = await this.client.POST('/auth/change-password', {
       body: {
         current_password: currentPassword,
         new_password: newPassword,
@@ -229,7 +229,7 @@ class ApiClient {
     });
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to change password");
+      throw new Error((error as any)?.error || 'Failed to change password');
     }
 
     return data as { message: string };
@@ -237,35 +237,35 @@ class ApiClient {
 
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
-    const { data, error } = await this.client.GET("/wishlists", {});
+    const { data, error } = await this.client.GET('/wishlists', {});
 
     if (error) {
-      throw new Error((error as any)?.error || "Failed to fetch wish lists");
+      throw new Error((error as any)?.error || 'Failed to fetch wish lists');
     }
 
     return data ?? [];
   }
 
   async getWishListById(id: string): Promise<WishList> {
-    const { data, error } = await this.client.GET("/wishlists/{id}", {
+    const { data, error } = await this.client.GET('/wishlists/{id}', {
       params: { path: { id } },
     });
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to fetch wish list");
+      throw new Error((error as any)?.error || 'Failed to fetch wish list');
     }
 
     return data as WishList;
   }
 
   async getPublicWishList(slug: string): Promise<WishList> {
-    const { data, error } = await this.client.GET("/public/wishlists/{slug}", {
+    const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
       params: { path: { slug } },
     });
 
     if (error || !data) {
       throw new Error(
-        (error as any)?.error || "Failed to fetch public wish list",
+        (error as any)?.error || 'Failed to fetch public wish list',
       );
     }
 
@@ -273,12 +273,12 @@ class ApiClient {
   }
 
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
-    const { data: responseData, error } = await this.client.POST("/wishlists", {
+    const { data: responseData, error } = await this.client.POST('/wishlists', {
       body: data,
     });
 
     if (error || !responseData) {
-      throw new Error((error as any)?.error || "Failed to create wish list");
+      throw new Error((error as any)?.error || 'Failed to create wish list');
     }
 
     return responseData as WishList;
@@ -289,7 +289,7 @@ class ApiClient {
     data: UpdateWishListRequest,
   ): Promise<WishList> {
     const { data: responseData, error } = await this.client.PUT(
-      "/wishlists/{id}",
+      '/wishlists/{id}',
       {
         params: { path: { id } },
         body: data,
@@ -297,45 +297,45 @@ class ApiClient {
     );
 
     if (error || !responseData) {
-      throw new Error((error as any)?.error || "Failed to update wish list");
+      throw new Error((error as any)?.error || 'Failed to update wish list');
     }
 
     return responseData as WishList;
   }
 
   async deleteWishList(id: string): Promise<void> {
-    const { error } = await this.client.DELETE("/wishlists/{id}", {
+    const { error } = await this.client.DELETE('/wishlists/{id}', {
       params: { path: { id } },
     });
 
     if (error) {
-      throw new Error((error as any)?.error || "Failed to delete wish list");
+      throw new Error((error as any)?.error || 'Failed to delete wish list');
     }
   }
 
   // Gift item methods
   async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
     const { data, error } = await this.client.GET(
-      "/wishlists/{wishlistId}/gift-items",
+      '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
       },
     );
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to fetch gift items");
+      throw new Error((error as any)?.error || 'Failed to fetch gift items');
     }
 
     return ((data as any).data || data) as GiftItem[];
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
-    const { data, error } = await this.client.GET("/gift-items/{id}", {
+    const { data, error } = await this.client.GET('/gift-items/{id}', {
       params: { path: { id: itemId } },
     });
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to fetch gift item");
+      throw new Error((error as any)?.error || 'Failed to fetch gift item');
     }
 
     return data as GiftItem;
@@ -346,7 +346,7 @@ class ApiClient {
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
     const { data: responseData, error } = await this.client.POST(
-      "/wishlists/{wishlistId}/gift-items",
+      '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
         body: data,
@@ -354,7 +354,7 @@ class ApiClient {
     );
 
     if (error || !responseData) {
-      throw new Error((error as any)?.error || "Failed to create gift item");
+      throw new Error((error as any)?.error || 'Failed to create gift item');
     }
 
     return responseData as GiftItem;
@@ -366,7 +366,7 @@ class ApiClient {
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
     const { data: responseData, error } = await this.client.PUT(
-      "/gift-items/{id}",
+      '/gift-items/{id}',
       {
         params: { path: { id: itemId } },
         body: data,
@@ -374,19 +374,19 @@ class ApiClient {
     );
 
     if (error || !responseData) {
-      throw new Error((error as any)?.error || "Failed to update gift item");
+      throw new Error((error as any)?.error || 'Failed to update gift item');
     }
 
     return responseData as GiftItem;
   }
 
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
-    const { error } = await this.client.DELETE("/gift-items/{id}", {
+    const { error } = await this.client.DELETE('/gift-items/{id}', {
       params: { path: { id: itemId } },
     });
 
     if (error) {
-      throw new Error((error as any)?.error || "Failed to delete gift item");
+      throw new Error((error as any)?.error || 'Failed to delete gift item');
     }
   }
 
@@ -396,7 +396,7 @@ class ApiClient {
     purchasedPrice: number,
   ): Promise<GiftItem> {
     const { data, error } = await this.client.POST(
-      "/gift-items/{id}/purchase",
+      '/gift-items/{id}/purchase',
       {
         params: { path: { id: itemId } },
         body: { purchased_price: purchasedPrice },
@@ -405,7 +405,7 @@ class ApiClient {
 
     if (error || !data) {
       throw new Error(
-        (error as any)?.error || "Failed to mark gift item as purchased",
+        (error as any)?.error || 'Failed to mark gift item as purchased',
       );
     }
 
@@ -419,7 +419,7 @@ class ApiClient {
     data: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data: responseData, error } = await this.client.POST(
-      "/wishlists/{wishlistId}/gift-items/{itemId}/reservation",
+      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
@@ -427,17 +427,17 @@ class ApiClient {
     );
 
     if (error || !responseData) {
-      throw new Error((error as any)?.error || "Failed to create reservation");
+      throw new Error((error as any)?.error || 'Failed to create reservation');
     }
 
     return responseData as Reservation;
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    const { data, error } = await this.client.GET("/reservations", {});
+    const { data, error } = await this.client.GET('/reservations', {});
 
     if (error || !data) {
-      throw new Error((error as any)?.error || "Failed to fetch reservations");
+      throw new Error((error as any)?.error || 'Failed to fetch reservations');
     }
 
     return ((data as any).data || data) as Reservation[];
@@ -445,14 +445,14 @@ class ApiClient {
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     const { error } = await this.client.DELETE(
-      "/wishlists/{wishlistId}/gift-items/{itemId}/reservation",
+      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
       },
     );
 
     if (error) {
-      throw new Error((error as any)?.error || "Failed to cancel reservation");
+      throw new Error((error as any)?.error || 'Failed to cancel reservation');
     }
   }
 }

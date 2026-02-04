@@ -1,16 +1,16 @@
 // frontend/src/lib/api/client.ts
-import createClient from "openapi-fetch";
-import type { paths } from "./schema";
+import createClient from 'openapi-fetch';
+import type { paths } from './schema';
 import type {
   CreateReservationRequest,
   GetGiftItemsResponse,
   MobileHandoffResponse,
   Reservation,
   WishList,
-} from "./types";
+} from './types';
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 class AuthManager {
   private accessToken: string | null = null;
@@ -61,8 +61,8 @@ class AuthManager {
   private async doRefresh(): Promise<string | null> {
     try {
       const client = createClient<paths>({ baseUrl: API_BASE_URL });
-      const { data, error } = await client.POST("/auth/refresh", {
-        credentials: "include",
+      const { data, error } = await client.POST('/auth/refresh', {
+        credentials: 'include',
       });
 
       if (error || !data) {
@@ -78,7 +78,7 @@ class AuthManager {
 
       return null;
     } catch (error) {
-      console.error("Token refresh failed:", error);
+      console.error('Token refresh failed:', error);
       this.clearAccessToken();
       return null;
     }
@@ -102,7 +102,7 @@ class ApiClient {
   private getHeaders(): Record<string, string> {
     const token = authManager.getAccessToken();
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     };
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -115,14 +115,14 @@ class ApiClient {
    * Used for viewing shared wishlists without authentication
    */
   async getPublicWishList(slug: string): Promise<WishList> {
-    const { data, error } = await this.client.GET("/public/wishlists/{slug}", {
+    const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
       params: { path: { slug } },
     });
 
     if (error || !data) {
       throw new Error(
         (error as { error?: string })?.error ||
-          "Failed to fetch public wish list",
+          'Failed to fetch public wish list',
       );
     }
 
@@ -139,7 +139,7 @@ class ApiClient {
     limit = 10,
   ): Promise<GetGiftItemsResponse> {
     const { data, error } = await this.client.GET(
-      "/public/wishlists/{slug}/gift-items",
+      '/public/wishlists/{slug}/gift-items',
       {
         params: {
           path: { slug },
@@ -150,7 +150,7 @@ class ApiClient {
 
     if (error || !data) {
       throw new Error(
-        (error as { error?: string })?.error || "Failed to fetch gift items",
+        (error as { error?: string })?.error || 'Failed to fetch gift items',
       );
     }
 
@@ -167,18 +167,18 @@ class ApiClient {
     reservationData?: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data, error } = await this.client.POST(
-      "/wishlists/{wishlistId}/gift-items/{itemId}/reservation",
+      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
         body: reservationData,
         headers: this.getHeaders(),
-        credentials: "include",
+        credentials: 'include',
       },
     );
 
     if (error || !data) {
       throw new Error(
-        (error as { error?: string })?.error || "Failed to create reservation",
+        (error as { error?: string })?.error || 'Failed to create reservation',
       );
     }
 
@@ -190,15 +190,15 @@ class ApiClient {
    * Used to redirect authenticated users to Mobile app with session
    */
   async mobileHandoff(): Promise<MobileHandoffResponse> {
-    const { data, error } = await this.client.POST("/auth/mobile-handoff", {
+    const { data, error } = await this.client.POST('/auth/mobile-handoff', {
       headers: this.getHeaders(),
-      credentials: "include", // Supported as valid fetch option
+      credentials: 'include', // Supported as valid fetch option
     });
 
     if (error || !data) {
       throw new Error(
         (error as { error?: string })?.error ||
-          "Failed to generate handoff code",
+          'Failed to generate handoff code',
       );
     }
 
@@ -212,12 +212,12 @@ class ApiClient {
   async logout(): Promise<void> {
     try {
       // Call backend to clear httpOnly refresh token cookie
-      await this.client.POST("/auth/logout", {
+      await this.client.POST('/auth/logout', {
         headers: this.getHeaders(),
-        credentials: "include", // Required to send and clear httpOnly cookie
+        credentials: 'include', // Required to send and clear httpOnly cookie
       });
     } catch (error) {
-      console.error("Logout request failed:", error);
+      console.error('Logout request failed:', error);
       // Continue - we'll clear local token anyway
     } finally {
       // Always clear local access token
