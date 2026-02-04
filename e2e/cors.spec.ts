@@ -144,15 +144,32 @@ test.describe('CORS Protection - Phase 8', () => {
   });
 
   test('CORS headers expose Authorization header', async ({ request }) => {
-    const response = await request.fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'OPTIONS',
+    // Register a user first to get auth headers
+    const registerResponse = await request.post(`${API_BASE_URL}/api/auth/register`, {
+      data: {
+        email: `cors-auth-test-${Date.now()}@example.com`,
+        password: 'TestPassword123!',
+        first_name: 'CORS',
+        last_name: 'Auth',
+      },
       headers: {
         'Origin': 'http://localhost:3000',
-        'Access-Control-Request-Method': 'POST',
       },
     });
 
-    const headers = response.headers();
+    expect(registerResponse.ok()).toBeTruthy();
+    const registerData = await registerResponse.json();
+    expect(registerData).toHaveProperty('accessToken');
+
+    // Now make a request that includes Authorization header
+    const authResponse = await request.get(`${API_BASE_URL}/api/auth/profile`, {
+      headers: {
+        'Origin': 'http://localhost:3000',
+        'Authorization': `Bearer ${registerData.accessToken}`,
+      },
+    });
+
+    const headers = authResponse.headers();
     const exposedHeaders = headers['access-control-expose-headers'] || '';
 
     // Authorization header should be exposed for JWT tokens
@@ -161,7 +178,7 @@ test.describe('CORS Protection - Phase 8', () => {
     console.log('✓ Authorization header is exposed via CORS');
   });
 
-  test('Real cross-origin request works with credentials', async ({ request, context }) => {
+  test('Real cross-origin request works with credentials', async ({ request }) => {
     // This simulates a real cross-domain request from Frontend to Backend
     // with credentials (cookies) enabled
 
@@ -226,7 +243,7 @@ test.describe('CORS Protection - Edge Cases', () => {
 
   test('Missing Origin header does not break requests', async ({ request }) => {
     // Some requests (like from server-side) may not have Origin header
-    const response = await request.post(`${API_BASE_URL}/health`, {
+    const response = await request.get(`${API_BASE_URL}/healthz`, {
       // No Origin header
     });
 
