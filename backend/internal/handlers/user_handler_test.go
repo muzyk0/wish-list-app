@@ -64,7 +64,7 @@ func (m *MockUserService) GetUser(ctx context.Context, userID string) (*services
 	return nil, args.Error(1)
 }
 
-func (m *MockUserService) UpdateUser(ctx context.Context, userID string, input services.UpdateUserInput) (*services.UserOutput, error) {
+func (m *MockUserService) UpdateProfile(ctx context.Context, userID string, input services.UpdateProfileInput) (*services.UserOutput, error) {
 	args := m.Called(ctx, userID, input)
 	v := args.Get(0)
 	if v != nil {
@@ -73,6 +73,16 @@ func (m *MockUserService) UpdateUser(ctx context.Context, userID string, input s
 		}
 	}
 	return nil, args.Error(1)
+}
+
+func (m *MockUserService) ChangeEmail(ctx context.Context, userID string, currentPassword string, newEmail string) error {
+	args := m.Called(ctx, userID, currentPassword, newEmail)
+	return args.Error(0)
+}
+
+func (m *MockUserService) ChangePassword(ctx context.Context, userID string, currentPassword string, newPassword string) error {
+	args := m.Called(ctx, userID, currentPassword, newPassword)
+	return args.Error(0)
 }
 
 func (m *MockUserService) DeleteUser(ctx context.Context, userID string) error {
@@ -446,28 +456,22 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
-		email := "updated@example.com"
-		password := "newpassword123"
 		firstName := "Jane"
 		lastName := "Smith"
 		reqBody := UpdateProfileRequest{
-			Email:     &email,
-			Password:  &password,
 			FirstName: &firstName,
 			LastName:  &lastName,
 		}
 
 		expectedUser := &services.UserOutput{
 			ID:        authCtx.UserID,
-			Email:     email,
+			Email:     "test@example.com",
 			FirstName: firstName,
 			LastName:  lastName,
 		}
 
-		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, mock.MatchedBy(func(input services.UpdateUserInput) bool {
-			return input.Email != nil && *input.Email == email &&
-				input.Password != nil && *input.Password == password &&
-				input.FirstName != nil && *input.FirstName == firstName &&
+		mockService.On("UpdateProfile", mock.Anything, authCtx.UserID, mock.MatchedBy(func(input services.UpdateProfileInput) bool {
+			return input.FirstName != nil && *input.FirstName == firstName &&
 				input.LastName != nil && *input.LastName == lastName
 		})).Return(expectedUser, nil)
 
@@ -494,11 +498,9 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		analyticsService := analytics.NewAnalyticsService(false)
 		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
-		email := "updated@example.com"
-		password := "newpassword123"
+		firstName := "Jane"
 		reqBody := UpdateProfileRequest{
-			Email:    &email,
-			Password: &password,
+			FirstName: &firstName,
 		}
 
 		// No auth context
@@ -509,7 +511,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 
-		mockService.AssertNotCalled(t, "UpdateUser")
+		mockService.AssertNotCalled(t, "UpdateProfile")
 	})
 
 	t.Run("update profile with invalid body", func(t *testing.T) {
@@ -533,7 +535,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 
-		mockService.AssertNotCalled(t, "UpdateUser")
+		mockService.AssertNotCalled(t, "UpdateProfile")
 	})
 
 	t.Run("update profile service error", func(t *testing.T) {
@@ -544,18 +546,14 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		handler := NewUserHandler(mockService, tokenManager, nil, analyticsService)
 
 		authCtx := DefaultAuthContext()
-		email := "updated@example.com"
-		password := "newpassword123"
 		firstName := "Jane"
 		lastName := "Smith"
 		reqBody := UpdateProfileRequest{
-			Email:     &email,
-			Password:  &password,
 			FirstName: &firstName,
 			LastName:  &lastName,
 		}
 
-		mockService.On("UpdateUser", mock.Anything, authCtx.UserID, mock.AnythingOfType("services.UpdateUserInput")).
+		mockService.On("UpdateProfile", mock.Anything, authCtx.UserID, mock.AnythingOfType("services.UpdateProfileInput")).
 			Return((*services.UserOutput)(nil), assert.AnError)
 
 		c, rec := CreateTestContext(e, http.MethodPut, "/api/users/me", reqBody, &authCtx)
