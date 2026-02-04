@@ -1,7 +1,7 @@
-import { Tabs } from 'expo-router';
-import { useTheme } from 'react-native-paper';
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Tabs } from "expo-router";
+import { useTheme } from "react-native-paper";
+import { HapticTab } from "@/components/haptic-tab";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 
 export default function TabLayout() {
   const { colors } = useTheme();
@@ -23,7 +23,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={focused ? 32 : 28}
@@ -36,7 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
+          title: "Explore",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={focused ? 32 : 28}
@@ -49,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="lists"
         options={{
-          title: 'Lists',
+          title: "Lists",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={focused ? 32 : 28}
@@ -62,7 +62,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="reservations"
         options={{
-          title: 'Reservations',
+          title: "Reservations",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={focused ? 32 : 28}
@@ -75,7 +75,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={focused ? 32 : 28}

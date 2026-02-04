@@ -1,7 +1,7 @@
-import type React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { Appearance } from 'react-native';
-import { darkTheme, lightTheme, type ThemeType } from '@/theme';
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { Appearance } from "react-native";
+import { darkTheme, lightTheme, type ThemeType } from "@/theme";
 
 interface ThemeContextType {
   theme: ThemeType;
@@ -15,7 +15,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const useThemeContext = () => {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useThemeContext must be used within a ThemeProvider');
+    throw new Error("useThemeContext must be used within a ThemeProvider");
   }
   return context;
 };
@@ -25,7 +25,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [isDark, setIsDark] = useState(Appearance.getColorScheme() === 'dark');
+  const [isDark, setIsDark] = useState(Appearance.getColorScheme() === "dark");
   const [theme, setTheme] = useState<ThemeType>(
     isDark ? darkTheme : lightTheme,
   );
@@ -33,7 +33,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Listen to system theme changes
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setIsDark(colorScheme === 'dark');
+      setIsDark(colorScheme === "dark");
     });
 
     return () => {

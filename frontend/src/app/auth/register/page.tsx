@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import MobileRedirect from '@/components/common/MobileRedirect';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import MobileRedirect from "@/components/common/MobileRedirect";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,8 +10,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { MOBILE_APP_URLS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
+} from "@/components/ui/card";
+import {
+  MOBILE_APP_URLS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from "@/constants/domains";
 
 export default function RegisterPage() {
   return (
@@ -43,7 +46,7 @@ export default function RegisterPage() {
           </CardContent>
           <CardFooter>
             <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link
                 href="/auth/login"
                 className="font-medium text-primary hover:underline"

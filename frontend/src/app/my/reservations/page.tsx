@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import { MyReservations } from '@/components/wish-list/MyReservations';
-import MobileRedirect from '@/components/common/MobileRedirect';
-import { useAuthRedirect } from '@/hooks/useAuthRedirect';
-import { MOBILE_APP_URLS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
+import { MyReservations } from "@/components/wish-list/MyReservations";
+import MobileRedirect from "@/components/common/MobileRedirect";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import {
+  MOBILE_APP_URLS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from "@/constants/domains";
 
 export default function MyReservationsPage() {
   const { isAuthenticated, isLoading } = useAuthRedirect(true);

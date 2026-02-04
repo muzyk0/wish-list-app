@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
 import {
   HeroSection,
   FeaturedListsSection,
   AnnouncementBlock,
-} from '@/features/home';
-import { Header, Footer } from '@/widgets';
-import { DOMAIN_CONSTANTS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
+} from "@/features/home";
+import { Header, Footer } from "@/widgets";
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from "@/constants/domains";
 
 export default function Home() {
   const handleMobileRedirect = () => {
@@ -16,7 +19,7 @@ export default function Home() {
     window.location.href = appScheme;
 
     setTimeout(() => {
-      if (!document.hidden && document.visibilityState !== 'hidden') {
+      if (!document.hidden && document.visibilityState !== "hidden") {
         window.location.href = webFallback;
       }
     }, 1500);

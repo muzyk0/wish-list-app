@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 interface FeatureItem {
   key: string;
@@ -11,7 +11,7 @@ interface FeatureItem {
 
 const FEATURES: FeatureItem[] = [
   {
-    key: 'reservations',
+    key: "reservations",
     icon: (
       <svg
         className="size-5"
@@ -29,7 +29,7 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    key: 'themes',
+    key: "themes",
     icon: (
       <svg
         className="size-5"
@@ -47,7 +47,7 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    key: 'privacy',
+    key: "privacy",
     icon: (
       <svg
         className="size-5"
@@ -65,7 +65,7 @@ const FEATURES: FeatureItem[] = [
     ),
   },
   {
-    key: 'guest',
+    key: "guest",
     icon: (
       <svg
         className="size-5"
@@ -103,22 +103,22 @@ export function AnnouncementBlock() {
             <div className="inline-flex items-center gap-2 mb-6">
               <span className="size-1.5 rounded-full bg-amber-500" />
               <span className="text-xs sm:text-sm font-medium text-amber-400 tracking-widest uppercase">
-                {t('announcement.label')}
+                {t("announcement.label")}
               </span>
             </div>
 
             {/* Heading */}
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-              {t('announcement.title.line1')}
+              {t("announcement.title.line1")}
               <br />
               <span className="bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
-                {t('announcement.title.line2')}
+                {t("announcement.title.line2")}
               </span>
             </h2>
 
             {/* Description */}
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-8 max-w-2xl">
-              {t('announcement.description')}
+              {t("announcement.description")}
             </p>
 
             {/* Features grid */}
@@ -149,7 +149,7 @@ export function AnnouncementBlock() {
                 href="/my/reservations"
                 className="inline-flex items-center gap-2"
               >
-                {t('announcement.cta')}
+                {t("announcement.cta")}
                 <svg
                   className="size-4"
                   fill="none"

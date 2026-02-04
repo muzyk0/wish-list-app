@@ -16,42 +16,42 @@
  */
 
 export const linking = {
-  prefixes: ['wishlistapp://', 'https://lk.domain.com'],
+  prefixes: ["wishlistapp://", "https://lk.domain.com"],
   config: {
     screens: {
-      '(tabs)': {
+      "(tabs)": {
         screens: {
-          index: 'home',
-          lists: 'lists',
-          explore: 'explore',
-          reservations: 'my/reservations',
-          profile: 'profile',
+          index: "home",
+          lists: "lists",
+          explore: "explore",
+          reservations: "my/reservations",
+          profile: "profile",
         },
       },
       auth: {
         screens: {
-          login: 'auth/login',
-          register: 'auth/register',
+          login: "auth/login",
+          register: "auth/register",
         },
       },
       lists: {
         screens: {
-          create: 'lists/create',
-          '[id]/index': 'lists/:id',
-          '[id]/edit': 'lists/:id/edit',
+          create: "lists/create",
+          "[id]/index": "lists/:id",
+          "[id]/edit": "lists/:id/edit",
         },
       },
-      'gift-items': {
+      "gift-items": {
         screens: {
-          '[id]/edit': 'gift-items/:id/edit',
+          "[id]/edit": "gift-items/:id/edit",
         },
       },
       public: {
         screens: {
-          '[slug]': 'public/:slug',
+          "[slug]": "public/:slug",
         },
       },
-      modal: 'modal',
+      modal: "modal",
     },
   },
 };

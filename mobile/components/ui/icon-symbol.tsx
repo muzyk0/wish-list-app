@@ -1,18 +1,18 @@
 // Fallback for using MaterialIcons on Android and web.
 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import type { SymbolViewProps, SymbolWeight } from 'expo-symbols';
-import type { ComponentProps } from 'react';
-import type { OpaqueColorValue, StyleProp, TextStyle } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import type { SymbolViewProps, SymbolWeight } from "expo-symbols";
+import type { ComponentProps } from "react";
+import type { OpaqueColorValue, StyleProp, TextStyle } from "react-native";
 
 type IconSymbolName =
-  | 'house.fill'
-  | 'paperplane.fill'
-  | 'chevron.left.forwardslash.chevron.right'
-  | 'chevron.right'
-  | 'person.fill'
-  | 'bookmark.fill'
-  | 'purchased';
+  | "house.fill"
+  | "paperplane.fill"
+  | "chevron.left.forwardslash.chevron.right"
+  | "chevron.right"
+  | "person.fill"
+  | "bookmark.fill"
+  | "purchased";
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -21,15 +21,15 @@ type IconSymbolName =
  */
 const MAPPING: Record<
   IconSymbolName,
-  ComponentProps<typeof MaterialIcons>['name']
+  ComponentProps<typeof MaterialIcons>["name"]
 > = {
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-  'person.fill': 'account-box',
-  'bookmark.fill': 'bookmark',
-  purchased: 'list',
+  "house.fill": "home",
+  "paperplane.fill": "send",
+  "chevron.left.forwardslash.chevron.right": "code",
+  "chevron.right": "chevron-right",
+  "person.fill": "account-box",
+  "bookmark.fill": "bookmark",
+  purchased: "list",
 };
 
 /**

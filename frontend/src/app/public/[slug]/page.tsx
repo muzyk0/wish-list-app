@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, Image as ImageIcon } from 'lucide-react';
-import Image from 'next/image';
-import { useParams } from 'next/navigation';
-import { GuestReservationDialog } from '@/components/guest/GuestReservationDialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from "@tanstack/react-query";
+import { ExternalLink, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import { GuestReservationDialog } from "@/components/guest/GuestReservationDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DOMAIN_CONSTANTS,
   MOBILE_APP_REDIRECT_PATHS,
-} from '@/constants/domains';
-import { apiClient } from '@/lib/api/client';
+} from "@/constants/domains";
+import { apiClient } from "@/lib/api/client";
 
 export default function PublicWishListPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,7 +23,7 @@ export default function PublicWishListPage() {
     isLoading: isLoadingWishList,
     isError: isErrorWishList,
   } = useQuery({
-    queryKey: ['public-wishlist', slug],
+    queryKey: ["public-wishlist", slug],
     queryFn: async () => {
       return apiClient.getPublicWishList(slug);
     },
@@ -36,7 +36,7 @@ export default function PublicWishListPage() {
     isLoading: isLoadingGiftItems,
     isError: isErrorGiftItems,
   } = useQuery({
-    queryKey: ['public-gift-items', slug],
+    queryKey: ["public-gift-items", slug],
     queryFn: async () => {
       return apiClient.getPublicGiftItems(slug, 1, 100);
     },
@@ -109,7 +109,7 @@ export default function PublicWishListPage() {
           )}
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">Public List</Badge>
-            {wishList.view_count !== '0' && (
+            {wishList.view_count !== "0" && (
               <Badge variant="outline">{wishList.view_count} views</Badge>
             )}
           </div>
@@ -186,7 +186,7 @@ export default function PublicWishListPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-sm text-blue-600 hover:underline mt-2"
                           >
-                            View Product{' '}
+                            View Product{" "}
                             <ExternalLink className="ml-1 h-4 w-4" />
                           </a>
                         )}
@@ -237,7 +237,7 @@ export default function PublicWishListPage() {
 
             setTimeout(() => {
               // Only redirect if page is still visible (app didn't open)
-              if (!document.hidden && document.visibilityState !== 'hidden') {
+              if (!document.hidden && document.visibilityState !== "hidden") {
                 window.location.href = webFallback;
               }
             }, 1500);

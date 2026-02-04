@@ -1,14 +1,14 @@
-import { Stack, useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import * as Linking from 'expo-linking';
-import 'react-native-reanimated';
+import { Stack, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import * as Linking from "expo-linking";
+import "react-native-reanimated";
 
-import Providers from '@/app/providers';
-import { exchangeCodeForTokens } from '@/lib/api/auth';
+import Providers from "@/app/providers";
+import { exchangeCodeForTokens } from "@/lib/api/auth";
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  initialRouteName: "(tabs)",
 };
 
 export default function RootLayout() {
@@ -20,15 +20,15 @@ export default function RootLayout() {
       const { path, queryParams } = Linking.parse(event.url);
 
       // Handle auth deep link: wishlistapp://auth?code=xxx
-      if (path === 'auth' && queryParams?.code) {
+      if (path === "auth" && queryParams?.code) {
         try {
           await exchangeCodeForTokens(queryParams.code as string);
           // Navigate to home after successful authentication
-          router.replace('/(tabs)');
+          router.replace("/(tabs)");
         } catch (error) {
-          console.error('Failed to exchange auth code:', error);
+          console.error("Failed to exchange auth code:", error);
           // Navigate to login on error
-          router.replace('/auth/login');
+          router.replace("/auth/login");
         }
         return;
       }
@@ -36,54 +36,54 @@ export default function RootLayout() {
       if (path) {
         // Map web paths to mobile routes
         const routeMap: { [key: string]: string } = {
-          home: '/(tabs)',
-          'auth/login': '/auth/login',
-          'auth/register': '/auth/register',
-          'my/reservations': '/(tabs)/reservations',
-          lists: '/(tabs)/lists',
-          explore: '/(tabs)/explore',
-          profile: '/(tabs)/profile',
+          home: "/(tabs)",
+          "auth/login": "/auth/login",
+          "auth/register": "/auth/register",
+          "my/reservations": "/(tabs)/reservations",
+          lists: "/(tabs)/lists",
+          explore: "/(tabs)/explore",
+          profile: "/(tabs)/profile",
         };
 
         // Handle parameterized routes with type-safe navigation
-        if (path.startsWith('lists/') && path.includes('/edit')) {
+        if (path.startsWith("lists/") && path.includes("/edit")) {
           const match = path.match(/^lists\/([^\/]+)\/edit/);
           if (match && match[1]) {
             router.navigate({
-              pathname: '/lists/[id]/edit',
+              pathname: "/lists/[id]/edit",
               params: { id: match[1] },
             });
           }
           return;
         }
 
-        if (path.startsWith('lists/')) {
+        if (path.startsWith("lists/")) {
           const match = path.match(/^lists\/([^\/]+)/);
           if (match && match[1]) {
             router.navigate({
-              pathname: '/lists/[id]',
+              pathname: "/lists/[id]",
               params: { id: match[1] },
             });
           }
           return;
         }
 
-        if (path.startsWith('public/')) {
+        if (path.startsWith("public/")) {
           const match = path.match(/^public\/([^\/]+)/);
           if (match && match[1]) {
             router.navigate({
-              pathname: '/public/[slug]',
+              pathname: "/public/[slug]",
               params: { slug: match[1] },
             });
           }
           return;
         }
 
-        if (path.startsWith('gift-items/') && path.includes('/edit')) {
+        if (path.startsWith("gift-items/") && path.includes("/edit")) {
           const match = path.match(/^gift-items\/([^\/]+)\/edit/);
           if (match && match[1]) {
             router.navigate({
-              pathname: '/gift-items/[id]/edit',
+              pathname: "/gift-items/[id]/edit",
               params: { id: match[1] },
             });
           }
@@ -106,7 +106,7 @@ export default function RootLayout() {
     });
 
     // Listen for deep link events (warm start)
-    const subscription = Linking.addEventListener('url', handleDeepLink);
+    const subscription = Linking.addEventListener("url", handleDeepLink);
 
     return () => {
       subscription.remove();
@@ -125,7 +125,7 @@ export default function RootLayout() {
         <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"
-          options={{ presentation: 'modal', title: 'Modal' }}
+          options={{ presentation: "modal", title: "Modal" }}
         />
       </Stack>
       <StatusBar style="auto" />

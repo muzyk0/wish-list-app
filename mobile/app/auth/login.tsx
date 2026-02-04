@@ -1,7 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
 import {
   Appbar,
   Button,
@@ -10,24 +10,24 @@ import {
   Text,
   TextInput,
   useTheme,
-} from 'react-native-paper';
-import OAuthButton from '@/components/OAuthButton';
-import { loginUser } from '@/lib/api';
-import { setTokens } from '@/lib/api/auth';
+} from "react-native-paper";
+import OAuthButton from "@/components/OAuthButton";
+import { loginUser } from "@/lib/api";
+import { setTokens } from "@/lib/api/auth";
 import {
   startAppleOAuth,
   startFacebookOAuth,
   startGoogleOAuth,
-} from '@/lib/oauth-service';
+} from "@/lib/oauth-service";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const { colors } = useTheme();
 
   const [oauthLoading, setOauthLoading] = useState<
-    'google' | 'facebook' | 'apple' | null
+    "google" | "facebook" | "apple" | null
   >(null);
 
   const mutation = useMutation({
@@ -35,23 +35,23 @@ export default function LoginScreen() {
       loginUser({ email, password }),
     onSuccess: async () => {
       // Tokens are already stored by the loginUser API call
-      router.push('/(tabs)');
+      router.push("/(tabs)");
     },
     onError: (error: Error) => {
-      Alert.alert('Error', error.message || 'Login failed. Please try again.');
+      Alert.alert("Error", error.message || "Login failed. Please try again.");
     },
   });
 
   const handleLogin = () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields.');
+      Alert.alert("Error", "Please fill in all required fields.");
       return;
     }
 
     mutation.mutate({ email, password });
   };
 
-  const handleOAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+  const handleOAuth = async (provider: "google" | "facebook" | "apple") => {
     setOauthLoading(provider);
 
     try {
@@ -62,17 +62,17 @@ export default function LoginScreen() {
         error?: string;
       };
       switch (provider) {
-        case 'google':
+        case "google":
           result = await startGoogleOAuth();
           break;
-        case 'facebook':
+        case "facebook":
           result = await startFacebookOAuth();
           break;
-        case 'apple':
+        case "apple":
           result = await startAppleOAuth();
           break;
         default:
-          throw new Error('Invalid provider');
+          throw new Error("Invalid provider");
       }
 
       if (result.success && result.accessToken && result.refreshToken) {
@@ -81,25 +81,25 @@ export default function LoginScreen() {
           // Store both tokens securely
           await setTokens(result.accessToken, result.refreshToken);
           Alert.alert(
-            'Success',
+            "Success",
             `${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`,
           );
-          router.push('/(tabs)'); // Navigate to main app
+          router.push("/(tabs)"); // Navigate to main app
         } catch (error) {
-          console.error('Error storing OAuth tokens:', error);
+          console.error("Error storing OAuth tokens:", error);
           Alert.alert(
-            'Error',
-            'Failed to save authentication. Please try again.',
+            "Error",
+            "Failed to save authentication. Please try again.",
           );
         }
       } else if (result.error) {
-        Alert.alert('OAuth Error', result.error);
+        Alert.alert("OAuth Error", result.error);
       }
       // biome-ignore lint/suspicious/noExplicitAny: Error type
     } catch (error: any) {
       Alert.alert(
-        'Error',
-        error.message || 'An error occurred during OAuth login',
+        "Error",
+        error.message || "An error occurred during OAuth login",
       );
     } finally {
       setOauthLoading(null);
@@ -177,31 +177,31 @@ export default function LoginScreen() {
 
             <OAuthButton
               provider="google"
-              onPress={() => handleOAuth('google')}
-              loading={oauthLoading === 'google'}
+              onPress={() => handleOAuth("google")}
+              loading={oauthLoading === "google"}
             />
 
             <OAuthButton
               provider="facebook"
-              onPress={() => handleOAuth('facebook')}
-              loading={oauthLoading === 'facebook'}
+              onPress={() => handleOAuth("facebook")}
+              loading={oauthLoading === "facebook"}
             />
 
             <OAuthButton
               provider="apple"
-              onPress={() => handleOAuth('apple')}
-              loading={oauthLoading === 'apple'}
+              onPress={() => handleOAuth("apple")}
+              loading={oauthLoading === "apple"}
             />
 
             <Text
               variant="bodyMedium"
               style={[styles.footerText, { color: colors.outline }]}
             >
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <Button
                 compact
                 mode="text"
-                onPress={() => router.push('/auth/register')}
+                onPress={() => router.push("/auth/register")}
                 style={styles.linkButton}
                 labelStyle={styles.linkLabel}
               >
@@ -218,7 +218,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   card: {
@@ -232,12 +232,12 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   subtitle: {
@@ -253,12 +253,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   buttonLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 16,
   },
   dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 20,
   },
   orText: {
@@ -267,13 +267,13 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   footerText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 24,
   },
   linkButton: {
     marginLeft: 4,
   },
   linkLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

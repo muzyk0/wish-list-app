@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from "react-native";
 import {
   Button,
   Card,
@@ -6,7 +6,7 @@ import {
   Text,
   Title,
   useTheme,
-} from 'react-native-paper';
+} from "react-native-paper";
 
 interface Reservation {
   id: string;
@@ -22,7 +22,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
+  status: "active" | "cancelled" | "fulfilled" | "expired";
   reservedAt: string;
   expiresAt?: string;
 }
@@ -43,37 +43,37 @@ export function ReservationItem({
       const response = await fetch(
         `/api/reservations/${reservation.id}/cancel`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
 
       if (response.ok) {
-        Alert.alert('Success', 'Reservation cancelled successfully');
+        Alert.alert("Success", "Reservation cancelled successfully");
         onRefresh(); // Refresh the list
       } else {
         const data = await response.json();
-        Alert.alert('Error', data.error || 'Failed to cancel reservation');
+        Alert.alert("Error", data.error || "Failed to cancel reservation");
       }
     } catch {
       Alert.alert(
-        'Error',
-        'An error occurred while cancelling the reservation',
+        "Error",
+        "An error occurred while cancelling the reservation",
       );
     }
   };
 
   const getStatusColor = () => {
     switch (reservation.status) {
-      case 'active':
+      case "active":
         return theme.colors.primary;
-      case 'cancelled':
+      case "cancelled":
         return theme.colors.outline;
-      case 'fulfilled':
+      case "fulfilled":
         return theme.colors.secondary;
-      case 'expired':
+      case "expired":
         return theme.colors.error;
       default:
         return theme.colors.outline;
@@ -82,13 +82,13 @@ export function ReservationItem({
 
   const getStatusBackgroundColor = () => {
     switch (reservation.status) {
-      case 'active':
+      case "active":
         return `${theme.colors.primary}20`;
-      case 'cancelled':
+      case "cancelled":
         return `${theme.colors.outline}20`;
-      case 'fulfilled':
+      case "fulfilled":
         return `${theme.colors.secondary}20`;
-      case 'expired':
+      case "expired":
         return `${theme.colors.error}20`;
       default:
         return `${theme.colors.outline}20`;
@@ -117,26 +117,26 @@ export function ReservationItem({
         </View>
 
         <Paragraph style={styles.details}>
-          Reserved for: {reservation.wishlist.title} by{' '}
-          {reservation.wishlist.ownerFirstName}{' '}
+          Reserved for: {reservation.wishlist.title} by{" "}
+          {reservation.wishlist.ownerFirstName}{" "}
           {reservation.wishlist.ownerLastName}
         </Paragraph>
 
         <View style={styles.footer}>
           <View style={styles.dateInfo}>
             <Text style={styles.smallText}>
-              Reserved on:{' '}
+              Reserved on:{" "}
               {new Date(reservation.reservedAt).toLocaleDateString()}
             </Text>
             {reservation.expiresAt && (
               <Text style={[styles.smallText, { color: theme.colors.error }]}>
-                Expires on:{' '}
+                Expires on:{" "}
                 {new Date(reservation.expiresAt).toLocaleDateString()}
               </Text>
             )}
           </View>
 
-          {reservation.status === 'active' && (
+          {reservation.status === "active" && (
             <Button
               mode="contained"
               onPress={handleCancelReservation}
@@ -158,15 +158,15 @@ const styles = StyleSheet.create({
     margin: 8,
     borderRadius: 16,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   itemName: {
@@ -179,21 +179,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     minWidth: 80,
-    alignItems: 'center',
+    alignItems: "center",
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   details: {
     marginBottom: 12,
     lineHeight: 20,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   dateInfo: {
     flex: 1,
@@ -206,8 +206,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   cancelButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

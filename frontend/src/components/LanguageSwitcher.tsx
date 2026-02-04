@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
@@ -16,11 +16,11 @@ export function LanguageSwitcher() {
     };
 
     // Подписываемся на событие изменения языка
-    i18n.on('languageChanged', handleLanguageChange);
+    i18n.on("languageChanged", handleLanguageChange);
 
     // Отписываемся при размонтировании
     return () => {
-      i18n.off('languageChanged', handleLanguageChange);
+      i18n.off("languageChanged", handleLanguageChange);
     };
   }, [i18n]);
 
@@ -31,15 +31,15 @@ export function LanguageSwitcher() {
   return (
     <div className="flex gap-2">
       <Button
-        variant={currentLanguage === 'en' ? 'default' : 'outline'}
-        onClick={() => changeLanguage('en')}
+        variant={currentLanguage === "en" ? "default" : "outline"}
+        onClick={() => changeLanguage("en")}
         size="sm"
       >
         EN
       </Button>
       <Button
-        variant={currentLanguage === 'ru' ? 'default' : 'outline'}
-        onClick={() => changeLanguage('ru')}
+        variant={currentLanguage === "ru" ? "default" : "outline"}
+        onClick={() => changeLanguage("ru")}
         size="sm"
       >
         RU

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 /**
  * Hook to check authentication status and optionally redirect authenticated users
@@ -17,7 +17,7 @@ export function useAuthRedirect(shouldRedirect = false) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch("/api/auth/me");
         const authenticated = response.ok;
         setIsAuthenticated(authenticated);
 

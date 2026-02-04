@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { File } from 'expo-file-system';
-import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { Alert, View } from 'react-native';
-import { Button, Card, Text, useTheme } from 'react-native-paper';
-import { apiClient } from '@/lib/api';
+import { Ionicons } from "@expo/vector-icons";
+import { File } from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
+import { Alert, View } from "react-native";
+import { Button, Card, Text, useTheme } from "react-native-paper";
+import { apiClient } from "@/lib/api";
 
 interface ImageUploadProps {
   onImageUpload: (url: string) => void;
@@ -29,10 +29,10 @@ export default function ImageUpload({
       // Request media library permissions
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         Alert.alert(
-          'Permission Denied',
-          'Sorry, we need camera roll permissions to upload images.',
+          "Permission Denied",
+          "Sorry, we need camera roll permissions to upload images.",
         );
         return;
       }
@@ -48,8 +48,8 @@ export default function ImageUpload({
         uploadImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image. Please try again.");
     }
   };
 
@@ -59,10 +59,10 @@ export default function ImageUpload({
     try {
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         Alert.alert(
-          'Permission Denied',
-          'Sorry, we need camera permissions to take photos.',
+          "Permission Denied",
+          "Sorry, we need camera permissions to take photos.",
         );
         return;
       }
@@ -78,8 +78,8 @@ export default function ImageUpload({
         uploadImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo. Please try again.');
+      console.error("Error taking photo:", error);
+      Alert.alert("Error", "Failed to take photo. Please try again.");
     }
   };
 
@@ -93,21 +93,21 @@ export default function ImageUpload({
       if (fileInfo.size > 10 * 1024 * 1024) {
         // 10MB limit
         Alert.alert(
-          'File Too Large',
-          'Please select an image smaller than 10MB.',
+          "File Too Large",
+          "Please select an image smaller than 10MB.",
         );
         setUploading(false);
         return;
       }
 
       // Check file extension
-      const fileExtension = uri.split('.').pop()?.toLowerCase();
-      const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+      const fileExtension = uri.split(".").pop()?.toLowerCase();
+      const validExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
 
       if (!fileExtension || !validExtensions.includes(fileExtension)) {
         Alert.alert(
-          'Invalid File Type',
-          'Please select a valid image file (JPG, PNG, GIF, WEBP).',
+          "Invalid File Type",
+          "Please select a valid image file (JPG, PNG, GIF, WEBP).",
         );
         setUploading(false);
         return;
@@ -115,7 +115,7 @@ export default function ImageUpload({
 
       // Prepare form data
       const formData = new FormData();
-      formData.append('image', {
+      formData.append("image", {
         uri,
         type: `image/${fileExtension}`,
         name: `gift-image.${fileExtension}`,
@@ -131,7 +131,7 @@ export default function ImageUpload({
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/images/upload`,
         {
-          method: 'POST',
+          method: "POST",
           headers,
           body: formData,
         },
@@ -145,14 +145,14 @@ export default function ImageUpload({
       const result = await response.json();
       setImageUri(result.url);
       onImageUpload(result.url);
-      Alert.alert('Success', 'Image uploaded successfully!');
+      Alert.alert("Success", "Image uploaded successfully!");
     } catch (error: unknown) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Failed to upload image. Please try again.';
-      Alert.alert('Upload Failed', errorMessage);
+          : "Failed to upload image. Please try again.";
+      Alert.alert("Upload Failed", errorMessage);
     } finally {
       setUploading(false);
     }
@@ -163,14 +163,14 @@ export default function ImageUpload({
       const info = new File(uri).info();
       return { size: info.size || 0 };
     } catch (error) {
-      console.error('Error getting file size:', error);
+      console.error("Error getting file size:", error);
       return { size: 0 };
     }
   };
 
   const removeImage = () => {
     setImageUri(null);
-    onImageUpload('');
+    onImageUpload("");
   };
 
   const theme = useTheme();
@@ -200,8 +200,8 @@ export default function ImageUpload({
         <Card
           style={{
             height: 200,
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: 10,
           }}
         >
@@ -219,7 +219,7 @@ export default function ImageUpload({
         </Card>
       )}
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Button
           mode="contained"
           onPress={pickImage}

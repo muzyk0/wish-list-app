@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ReservationButtonProps {
   giftItemId: string;
@@ -30,13 +30,13 @@ export function ReservationButton({
   onReservationSuccess,
 }: ReservationButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleReservation = async () => {
     if (!guestName.trim() || !guestEmail.trim()) {
-      toast.error('Please enter your name and email');
+      toast.error("Please enter your name and email");
       return;
     }
 
@@ -46,9 +46,9 @@ export function ReservationButton({
       const response = await fetch(
         `/api/wishlists/${wishlistId}/items/${giftItemId}/reserve`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             guestName: guestName.trim(),
@@ -58,17 +58,17 @@ export function ReservationButton({
       );
 
       if (response.ok) {
-        toast.success('Gift item reserved successfully!');
+        toast.success("Gift item reserved successfully!");
         setIsOpen(false);
-        setGuestName('');
-        setGuestEmail('');
+        setGuestName("");
+        setGuestEmail("");
         onReservationSuccess?.();
       } else {
         const data = await response.json();
-        toast.error(data.error || 'Failed to reserve gift item');
+        toast.error(data.error || "Failed to reserve gift item");
       }
     } catch (_error) {
-      toast.error('An error occurred while reserving the gift item');
+      toast.error("An error occurred while reserving the gift item");
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ export function ReservationButton({
   if (isReserved) {
     return (
       <Button variant="outline" disabled className="cursor-not-allowed">
-        Reserved by {reservedByName || 'someone'}
+        Reserved by {reservedByName || "someone"}
       </Button>
     );
   }
@@ -128,7 +128,7 @@ export function ReservationButton({
               Cancel
             </Button>
             <Button onClick={handleReservation} disabled={isLoading}>
-              {isLoading ? 'Reserving...' : 'Reserve Gift'}
+              {isLoading ? "Reserving..." : "Reserve Gift"}
             </Button>
           </DialogFooter>
         </DialogContent>

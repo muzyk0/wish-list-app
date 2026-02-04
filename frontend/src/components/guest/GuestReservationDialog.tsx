@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -12,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { apiClient } from '@/lib/api/client';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { apiClient } from "@/lib/api/client";
 
 interface GuestReservationDialogProps {
   wishlistSlug: string;
@@ -44,8 +44,8 @@ export function GuestReservationDialog({
   isPurchased,
 }: GuestReservationDialogProps) {
   const [open, setOpen] = useState(false);
-  const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const queryClient = useQueryClient();
 
   const reservationMutation = useMutation({
@@ -56,13 +56,13 @@ export function GuestReservationDialog({
       }) as Promise<ReservationResponse>;
     },
     onSuccess: (data) => {
-      toast.success('Reservation Successful!', {
+      toast.success("Reservation Successful!", {
         description: `You have reserved "${itemName}". A confirmation has been sent to ${guestEmail}`,
       });
 
       // Save reservation token to localStorage for future reference
       const reservations = JSON.parse(
-        localStorage.getItem('guest_reservations') || '[]',
+        localStorage.getItem("guest_reservations") || "[]",
       );
       reservations.push({
         itemId,
@@ -72,20 +72,20 @@ export function GuestReservationDialog({
         guestName,
         guestEmail,
       });
-      localStorage.setItem('guest_reservations', JSON.stringify(reservations));
+      localStorage.setItem("guest_reservations", JSON.stringify(reservations));
 
       // Invalidate and refetch the wishlist query to update UI
       queryClient.invalidateQueries({
-        queryKey: ['public-wishlist', wishlistSlug],
+        queryKey: ["public-wishlist", wishlistSlug],
       });
 
       // Close dialog and reset form
       setOpen(false);
-      setGuestName('');
-      setGuestEmail('');
+      setGuestName("");
+      setGuestEmail("");
     },
     onError: (error: Error) => {
-      toast.error('Reservation Failed', {
+      toast.error("Reservation Failed", {
         description: error.message,
       });
     },
@@ -96,15 +96,15 @@ export function GuestReservationDialog({
 
     // Basic validation
     if (!guestName.trim()) {
-      toast.error('Validation Error', {
-        description: 'Please enter your name',
+      toast.error("Validation Error", {
+        description: "Please enter your name",
       });
       return;
     }
 
-    if (!guestEmail.trim() || !guestEmail.includes('@')) {
-      toast.error('Validation Error', {
-        description: 'Please enter a valid email address',
+    if (!guestEmail.trim() || !guestEmail.includes("@")) {
+      toast.error("Validation Error", {
+        description: "Please enter a valid email address",
       });
       return;
     }
@@ -116,14 +116,14 @@ export function GuestReservationDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant={isReserved ? 'secondary' : 'default'}
+          variant={isReserved ? "secondary" : "default"}
           size="sm"
           disabled={isReserved || isPurchased}
         >
           {isPurchased ? (
-            'Already Purchased'
+            "Already Purchased"
           ) : isReserved ? (
-            'Reserved'
+            "Reserved"
           ) : (
             <>
               <Heart className="mr-2 h-4 w-4" /> Reserve Gift
@@ -176,7 +176,7 @@ export function GuestReservationDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={reservationMutation.isPending}>
-              {reservationMutation.isPending ? 'Reserving...' : 'Reserve Gift'}
+              {reservationMutation.isPending ? "Reserving..." : "Reserve Gift"}
             </Button>
           </DialogFooter>
         </form>

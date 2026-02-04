@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import {
   ActivityIndicator,
@@ -8,9 +8,9 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { apiClient } from '@/lib/api';
-import GiftItemForm from '../../../components/wish-list/GiftItemForm';
+} from "react-native";
+import { apiClient } from "@/lib/api";
+import GiftItemForm from "../../../components/wish-list/GiftItemForm";
 
 export default function EditGiftItemScreen() {
   // biome-ignore lint/correctness/noUnusedVariables: Temp
@@ -25,7 +25,7 @@ export default function EditGiftItemScreen() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['giftItem', id],
+    queryKey: ["giftItem", id],
     queryFn: () =>
       apiClient.getGiftItemById(wishlistId as string, id as string),
     enabled: !!id && !!wishlistId,
@@ -78,28 +78,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 10,
     borderRadius: 4,
     marginTop: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

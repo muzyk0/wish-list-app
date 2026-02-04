@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
   Linking,
@@ -8,7 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   ActivityIndicator,
   Avatar,
@@ -22,9 +22,9 @@ import {
   Surface,
   Text,
   useTheme,
-} from 'react-native-paper';
-import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/api/types';
+} from "react-native-paper";
+import { apiClient } from "@/lib/api";
+import type { GiftItem } from "@/lib/api/types";
 
 // Gift Item Card Component
 const GiftItemCard = ({
@@ -77,7 +77,7 @@ const GiftItemCard = ({
             // biome-ignore lint/style/noNonNullAssertion: Not nullable
             onPress={() => Linking.openURL(item.link!)}
             compact
-            style={{ alignSelf: 'flex-start' }}
+            style={{ alignSelf: "flex-start" }}
           >
             Visit Website
           </Button>
@@ -93,7 +93,7 @@ const GiftItemCard = ({
                 backgroundColor: colors.primaryContainer,
               }}
             >
-              <Text style={{ color: colors.onPrimary, fontWeight: '600' }}>
+              <Text style={{ color: colors.onPrimary, fontWeight: "600" }}>
                 Purchased
               </Text>
             </Chip>
@@ -106,7 +106,7 @@ const GiftItemCard = ({
                 backgroundColor: colors.secondaryContainer,
               }}
             >
-              <Text style={{ color: colors.onSecondary, fontWeight: '600' }}>
+              <Text style={{ color: colors.onSecondary, fontWeight: "600" }}>
                 Reserved
               </Text>
             </Chip>
@@ -116,7 +116,7 @@ const GiftItemCard = ({
               icon="gift-open"
               style={{ borderColor: colors.primary }}
             >
-              <Text style={{ color: colors.primary, fontWeight: '600' }}>
+              <Text style={{ color: colors.primary, fontWeight: "600" }}>
                 Available
               </Text>
             </Chip>
@@ -169,7 +169,7 @@ export default function WishListScreen() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['wishlist', id],
+    queryKey: ["wishlist", id],
     queryFn: () => apiClient.getWishListById(id),
     enabled: !!id,
   });
@@ -180,7 +180,7 @@ export default function WishListScreen() {
     error: itemsError,
     refetch: refetchItems,
   } = useQuery({
-    queryKey: ['giftItems', id],
+    queryKey: ["giftItems", id],
     queryFn: () => apiClient.getGiftItems(id),
     enabled: !!id,
   });
@@ -195,17 +195,17 @@ export default function WishListScreen() {
     // In a real app, this would call the reservation API
     // For now, we'll just show an alert
     Alert.alert(
-      'Reserve Gift',
+      "Reserve Gift",
       `You are reserving "${item.name}". In a real app, this would create a reservation.`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Reserve',
+          text: "Reserve",
           onPress: () => {
-            Alert.alert('Success', 'Gift reserved successfully!');
+            Alert.alert("Success", "Gift reserved successfully!");
             // Invalidate the query to refetch data
             queryClient
-              .invalidateQueries({ queryKey: ['giftItems', id] })
+              .invalidateQueries({ queryKey: ["giftItems", id] })
               .catch(console.error);
           },
         },
@@ -315,13 +315,13 @@ export default function WishListScreen() {
               variant="bodyMedium"
               style={{ color: colors.onSurfaceVariant, marginVertical: 4 }}
             >
-              {wishList.occasion ? `${wishList.occasion}` : 'Personal Wishlist'}
+              {wishList.occasion ? `${wishList.occasion}` : "Personal Wishlist"}
             </Text>
             <Text
               variant="bodyMedium"
               style={{ color: colors.onSurfaceVariant }}
             >
-              {wishList.description || 'No description'}
+              {wishList.description || "No description"}
             </Text>
           </View>
 
@@ -418,7 +418,7 @@ export default function WishListScreen() {
             </Text>
             <Text
               variant="bodyMedium"
-              style={{ color: colors.onSurfaceVariant, textAlign: 'center' }}
+              style={{ color: colors.onSurfaceVariant, textAlign: "center" }}
             >
               Add your first gift item to get started
             </Text>
@@ -443,14 +443,14 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   errorSurface: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     margin: 16,
     borderRadius: 8,
@@ -462,21 +462,21 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 8,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   scrollContainer: {
     flex: 1,
@@ -491,41 +491,41 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   itemTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   itemPrice: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   itemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     gap: 8,
     marginTop: 8,
   },
   cardActions: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
     padding: 8,
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     marginVertical: 16,
     borderRadius: 12,
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     margin: 16,
     right: 0,
     bottom: 0,

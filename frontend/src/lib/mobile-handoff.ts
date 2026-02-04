@@ -1,9 +1,9 @@
 // frontend/src/lib/mobile-handoff.ts
 // Mobile handoff: Transfer authenticated session from Frontend to Mobile app
 
-import { apiClient } from './api/client';
+import { apiClient } from "./api/client";
 
-const MOBILE_URL_SCHEME = 'wishlistapp://';
+const MOBILE_URL_SCHEME = "wishlistapp://";
 
 /**
  * Generate handoff code and redirect to Mobile app
@@ -24,11 +24,11 @@ export async function redirectToPersonalCabinet(): Promise<void> {
     // Fallback: If mobile app not installed, show error after delay
     setTimeout(() => {
       alert(
-        'Mobile app not found. Please install the Wish List app from the App Store or Google Play.',
+        "Mobile app not found. Please install the Wish List app from the App Store or Google Play.",
       );
     }, 3000);
   } catch (error) {
-    console.error('Mobile handoff failed:', error);
-    alert('Failed to redirect to mobile app. Please try again.');
+    console.error("Mobile handoff failed:", error);
+    alert("Failed to redirect to mobile app. Please try again.");
   }
 }

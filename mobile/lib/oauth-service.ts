@@ -1,30 +1,30 @@
-import * as AuthSession from 'expo-auth-session';
-import { Platform } from 'react-native';
+import * as AuthSession from "expo-auth-session";
+import { Platform } from "react-native";
 
 // Define OAuth configuration
 const OAUTH_CONFIG = {
   // Google OAuth
   googleWebClientId:
-    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || 'GOOGLE_WEB_CLIENT_ID',
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "GOOGLE_WEB_CLIENT_ID",
   googleAndroidClientId:
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
-    'GOOGLE_ANDROID_CLIENT_ID',
+    "GOOGLE_ANDROID_CLIENT_ID",
   googleIOSClientId:
-    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || 'GOOGLE_IOS_CLIENT_ID',
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || "GOOGLE_IOS_CLIENT_ID",
 
   // Facebook OAuth
   facebookClientId:
-    process.env.EXPO_PUBLIC_FACEBOOK_CLIENT_ID || 'FACEBOOK_CLIENT_ID',
+    process.env.EXPO_PUBLIC_FACEBOOK_CLIENT_ID || "FACEBOOK_CLIENT_ID",
 
   // Backend API URL for OAuth callback
-  backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080',
+  backendUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080",
 };
 
 // Google OAuth discovery endpoint
 const googleDiscovery: AuthSession.DiscoveryDocument = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenEndpoint: "https://oauth2.googleapis.com/token",
+  revocationEndpoint: "https://oauth2.googleapis.com/revoke",
 };
 
 // OAuth response from backend
@@ -49,20 +49,20 @@ export const startGoogleOAuth = async (): Promise<{
 }> => {
   try {
     // Determine the correct client ID based on platform
-    let clientId = '';
-    if (Platform.OS === 'web') {
+    let clientId = "";
+    if (Platform.OS === "web") {
       clientId = OAUTH_CONFIG.googleWebClientId;
-    } else if (Platform.OS === 'android') {
+    } else if (Platform.OS === "android") {
       clientId = OAUTH_CONFIG.googleAndroidClientId;
-    } else if (Platform.OS === 'ios') {
+    } else if (Platform.OS === "ios") {
       clientId = OAUTH_CONFIG.googleIOSClientId;
     }
 
-    if (!clientId || clientId.includes('CLIENT_ID')) {
+    if (!clientId || clientId.includes("CLIENT_ID")) {
       return {
         success: false,
         error:
-          'OAuth is not configured. Please set up your Google client ID in environment variables.',
+          "OAuth is not configured. Please set up your Google client ID in environment variables.",
       };
     }
 
@@ -71,7 +71,7 @@ export const startGoogleOAuth = async (): Promise<{
       process.env.EXPO_PUBLIC_APP_SCHEME || process.env.APP_SCHEME;
     if (!appScheme) {
       throw new Error(
-        'APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.',
+        "APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.",
       );
     }
 
@@ -85,17 +85,17 @@ export const startGoogleOAuth = async (): Promise<{
     const request = new AuthSession.AuthRequest({
       clientId,
       redirectUri,
-      scopes: ['openid', 'profile', 'email'],
+      scopes: ["openid", "profile", "email"],
       usePKCE: true,
       extraParams: {
-        access_type: 'offline', // Request refresh token
+        access_type: "offline", // Request refresh token
       },
     });
 
     // Prompt for authorization
     const result = await request.promptAsync(googleDiscovery);
 
-    if (result.type === 'success') {
+    if (result.type === "success") {
       const { code } = result.params;
 
       if (code) {
@@ -103,9 +103,9 @@ export const startGoogleOAuth = async (): Promise<{
         const response = await fetch(
           `${OAUTH_CONFIG.backendUrl}/api/auth/oauth/google`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ code }),
           },
@@ -115,7 +115,7 @@ export const startGoogleOAuth = async (): Promise<{
           const errorData = await response.text();
           return {
             success: false,
-            error: errorData || 'Failed to authenticate with backend',
+            error: errorData || "Failed to authenticate with backend",
           };
         }
 
@@ -127,32 +127,32 @@ export const startGoogleOAuth = async (): Promise<{
           refreshToken: data.refreshToken,
         };
       } else {
-        return { success: false, error: 'Authorization code not received' };
+        return { success: false, error: "Authorization code not received" };
       }
-    } else if (result.type === 'dismiss' || result.type === 'cancel') {
-      return { success: false, error: 'OAuth flow was cancelled' };
-    } else if (result.type === 'error') {
+    } else if (result.type === "dismiss" || result.type === "cancel") {
+      return { success: false, error: "OAuth flow was cancelled" };
+    } else if (result.type === "error") {
       return {
         success: false,
-        error: result.params?.error_description || 'OAuth flow failed',
+        error: result.params?.error_description || "OAuth flow failed",
       };
     } else {
-      return { success: false, error: 'OAuth flow failed' };
+      return { success: false, error: "OAuth flow failed" };
     }
     // biome-ignore lint/suspicious/noExplicitAny: Error type
   } catch (error: any) {
-    console.error('Google OAuth error:', error);
+    console.error("Google OAuth error:", error);
     return {
       success: false,
-      error: error.message || 'An error occurred during OAuth',
+      error: error.message || "An error occurred during OAuth",
     };
   }
 };
 
 // Facebook OAuth discovery endpoint
 const facebookDiscovery: AuthSession.DiscoveryDocument = {
-  authorizationEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
-  tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
+  authorizationEndpoint: "https://www.facebook.com/v18.0/dialog/oauth",
+  tokenEndpoint: "https://graph.facebook.com/v18.0/oauth/access_token",
 };
 
 // Facebook OAuth flow
@@ -165,11 +165,11 @@ export const startFacebookOAuth = async (): Promise<{
   try {
     const facebookClientId = OAUTH_CONFIG.facebookClientId;
 
-    if (!facebookClientId || facebookClientId.includes('CLIENT_ID')) {
+    if (!facebookClientId || facebookClientId.includes("CLIENT_ID")) {
       return {
         success: false,
         error:
-          'OAuth is not configured. Please set up your Facebook client ID in environment variables.',
+          "OAuth is not configured. Please set up your Facebook client ID in environment variables.",
       };
     }
 
@@ -178,7 +178,7 @@ export const startFacebookOAuth = async (): Promise<{
       process.env.EXPO_PUBLIC_APP_SCHEME || process.env.APP_SCHEME;
     if (!appScheme) {
       throw new Error(
-        'APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.',
+        "APP_SCHEME environment variable is required for OAuth. Please set EXPO_PUBLIC_APP_SCHEME in your .env file.",
       );
     }
 
@@ -192,14 +192,14 @@ export const startFacebookOAuth = async (): Promise<{
     const request = new AuthSession.AuthRequest({
       clientId: facebookClientId,
       redirectUri,
-      scopes: ['email', 'public_profile'],
+      scopes: ["email", "public_profile"],
       usePKCE: true,
     });
 
     // Prompt for authorization
     const result = await request.promptAsync(facebookDiscovery);
 
-    if (result.type === 'success') {
+    if (result.type === "success") {
       const { code } = result.params;
 
       if (code) {
@@ -207,9 +207,9 @@ export const startFacebookOAuth = async (): Promise<{
         const response = await fetch(
           `${OAUTH_CONFIG.backendUrl}/api/auth/oauth/facebook`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ code }),
           },
@@ -219,7 +219,7 @@ export const startFacebookOAuth = async (): Promise<{
           const errorData = await response.text();
           return {
             success: false,
-            error: errorData || 'Failed to authenticate with backend',
+            error: errorData || "Failed to authenticate with backend",
           };
         }
 
@@ -231,24 +231,24 @@ export const startFacebookOAuth = async (): Promise<{
           refreshToken: data.refreshToken,
         };
       } else {
-        return { success: false, error: 'Authorization code not received' };
+        return { success: false, error: "Authorization code not received" };
       }
-    } else if (result.type === 'dismiss' || result.type === 'cancel') {
-      return { success: false, error: 'OAuth flow was cancelled' };
-    } else if (result.type === 'error') {
+    } else if (result.type === "dismiss" || result.type === "cancel") {
+      return { success: false, error: "OAuth flow was cancelled" };
+    } else if (result.type === "error") {
       return {
         success: false,
-        error: result.params?.error_description || 'OAuth flow failed',
+        error: result.params?.error_description || "OAuth flow failed",
       };
     } else {
-      return { success: false, error: 'OAuth flow failed' };
+      return { success: false, error: "OAuth flow failed" };
     }
     // biome-ignore lint/suspicious/noExplicitAny: Error type
   } catch (error: any) {
-    console.error('Facebook OAuth error:', error);
+    console.error("Facebook OAuth error:", error);
     return {
       success: false,
-      error: error.message || 'An error occurred during OAuth',
+      error: error.message || "An error occurred during OAuth",
     };
   }
 };
@@ -262,10 +262,10 @@ export const startAppleOAuth = async (): Promise<{
 }> => {
   // Apple Sign In requires additional setup and is iOS-specific
   // This is a placeholder implementation
-  if (Platform.OS !== 'ios') {
+  if (Platform.OS !== "ios") {
     return {
       success: false,
-      error: 'Apple Sign In is only available on iOS devices',
+      error: "Apple Sign In is only available on iOS devices",
     };
   }
 
@@ -275,6 +275,6 @@ export const startAppleOAuth = async (): Promise<{
   return {
     success: false,
     error:
-      'Apple Sign In requires additional setup and is not implemented in this demo',
+      "Apple Sign In requires additional setup and is not implemented in this demo",
   };
 };

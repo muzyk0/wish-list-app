@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -22,15 +22,15 @@ export function ThemeToggle() {
     );
   }
 
-  const isDark = resolvedTheme === 'dark';
+  const isDark = resolvedTheme === "dark";
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="size-10 rounded-full hover:bg-accent/80 transition-all duration-300"
-      aria-label={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
+      aria-label={isDark ? t("theme.switchToLight") : t("theme.switchToDark")}
     >
       {isDark ? (
         <svg

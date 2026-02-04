@@ -1,7 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { DOMAIN_CONSTANTS, MOBILE_APP_REDIRECT_PATHS } from '@/constants/domains';
+import { useEffect } from "react";
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from "@/constants/domains";
 
 interface MobileRedirectProps {
   redirectPath?: string; // Specific path to redirect to in the mobile app
@@ -28,7 +31,7 @@ export default function MobileRedirect({
       // If the app isn't installed, redirect to the web version after a delay
       setTimeout(() => {
         // If the page is still visible (not hidden), the app wasn't opened
-        if (!document.hidden && document.visibilityState !== 'hidden') {
+        if (!document.hidden && document.visibilityState !== "hidden") {
           window.location.href = webFallback;
         }
       }, 1500);

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export function Footer() {
   const { t } = useTranslation();
@@ -28,10 +28,10 @@ export function Footer() {
               </svg>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t('footer.description.line1')}
+              {t("footer.description.line1")}
               <br className="hidden sm:block" />
               <span className="sm:hidden"> </span>
-              {t('footer.description.line2')}
+              {t("footer.description.line2")}
             </p>
           </div>
 
@@ -41,20 +41,20 @@ export function Footer() {
               href="/auth/login"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {t('footer.login')}
+              {t("footer.login")}
             </Link>
             <Link
               href="/my/reservations"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {t('footer.myReservations')}
+              {t("footer.myReservations")}
             </Link>
           </div>
         </div>
 
         {/* Bottom */}
         <div className="mt-8 pt-6 border-t border-border/30 flex items-center justify-center text-sm text-muted-foreground/60">
-          <span>{t('footer.crafted')}</span>
+          <span>{t("footer.crafted")}</span>
           <span className="mx-2 text-amber-500">✦</span>
           <span>© 2026</span>
         </div>
