@@ -112,11 +112,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T035 [US4] Audit frontend/src/lib/api.ts for any remaining localStorage references
-- [ ] T036 [US4] Remove all localStorage.setItem('token', ...) calls from frontend/src/lib/api.ts
-- [ ] T037 [US4] Verify frontend/src/lib/auth.ts only stores access token in class property
-- [ ] T038 [US4] Add session restoration on page load in frontend/src/hooks/useAuth.ts via refresh endpoint
-- [ ] T039 [US4] Update frontend/.env.example with required environment variables
+- [X] T035 [US4] Audit frontend/src/lib/api.ts for any remaining localStorage references
+- [X] T036 [US4] Remove all localStorage.setItem('token', ...) calls from frontend/src/lib/api.ts
+- [X] T037 [US4] Verify frontend/src/lib/auth.ts only stores access token in class property
+- [X] T038 [US4] Add session restoration on page load in frontend/src/hooks/useAuth.ts via refresh endpoint
+- [X] T039 [US4] Update frontend/.env.example with required environment variables
 
 **Checkpoint**: User Story 4 complete - Zero tokens accessible via JavaScript
 
