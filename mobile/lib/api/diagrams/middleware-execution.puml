@@ -1,0 +1,69 @@
+@startuml Middleware Execution Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+start
+
+:User calls\napiClient.getProfile();
+
+partition "authMiddleware" {
+  :Parse request URL;
+
+  if (Is unprotected route?) then (yes)
+    #90EE90:Skip auth header;
+  else (no)
+    :Get access token;
+
+    if (Token exists?) then (yes)
+      :Add Authorization header;
+    else (no)
+      :Continue without auth;
+    endif
+  endif
+
+  :Return modified request;
+}
+
+:Send HTTP request;
+
+partition "Backend" {
+  :Receive request;
+  :Validate token (if present);
+
+  if (Valid token?) then (yes)
+    :Return 200 OK;
+  else (no)
+    :Return 401 Unauthorized;
+  endif
+}
+
+partition "refreshMiddleware" {
+  :Receive response;
+
+  if (Status === 401?) then (yes)
+    if (Already refreshing?) then (yes)
+      #FFD700:Await existing refresh;
+    else (no)
+      :Set isRefreshing = true;
+      :Call refreshAccessToken();
+
+      if (Refresh successful?) then (yes)
+        #90EE90:Clone request with new token;
+        :Retry with fetch();
+        :Set isRefreshing = false;
+      else (no)
+        #FF6B6B:Clear tokens;
+        :Set isRefreshing = false;
+        :Return 401 to caller;
+      endif
+    endif
+  else (no)
+    :Return response;
+  endif
+}
+
+:Return final response to user;
+
+stop
+
+@enduml

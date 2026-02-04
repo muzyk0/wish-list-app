@@ -1,0 +1,60 @@
+@startuml API Architecture
+!theme plain
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+rectangle "API Layer" {
+  rectangle "client.ts" as client #E8F5E9 {
+    rectangle "baseClient" as base
+    rectangle "API_BASE_URL" as url
+  }
+
+  rectangle "auth.ts" as auth #E3F2FD {
+    rectangle "Token Management"
+    rectangle "Login/Register"
+    rectangle "Refresh Token"
+    rectangle "Exchange Code"
+  }
+
+  rectangle "api.ts" as api #FFF3E0 {
+    rectangle "ApiClient"
+    rectangle "authMiddleware"
+    rectangle "refreshMiddleware"
+  }
+
+  rectangle "Components" as components #F3E5F5 {
+    rectangle "Profile"
+    rectangle "Wishlists"
+    rectangle "Items"
+  }
+}
+
+client -down-> auth : uses\nbaseClient
+client -down-> api : uses\nAPI_BASE_URL
+auth -down-> components : used by
+api -down-> components : used by
+
+note right of client
+  **Base Client**
+  • No middleware
+  • Single source of truth
+  • Clean HTTP client
+end note
+
+note right of auth
+  **Auth Operations**
+  • Uses baseClient
+  • No middleware
+  • Prevents recursion
+end note
+
+note right of api
+  **ApiClient**
+  • Creates NEW client
+  • WITH middleware
+  • Auto auth & refresh
+end note
+
+@enduml

@@ -8,12 +8,10 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseClient } from './client';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
-
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 interface TokenResponse {
   accessToken: string;
@@ -95,20 +93,16 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function exchangeCodeForTokens(
   code: string,
 ): Promise<TokenResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/exchange`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ code }),
+  const { data, error } = await baseClient.POST('/auth/exchange', {
+    body: { code },
   });
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(errorData || 'Failed to exchange code for tokens');
+  if (error || !data) {
+    throw new Error(
+      // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
+      (error as any)?.error || 'Failed to exchange code for tokens',
+    );
   }
-
-  const data: TokenResponse = await response.json();
 
   // Store tokens appropriately based on platform
   await setTokens(data.accessToken, data.refreshToken);
@@ -128,28 +122,25 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
+    const { data, error } = await baseClient.POST('/auth/refresh', {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${refreshToken}`,
       },
     });
 
-    if (!response.ok) {
+    if (error || !data) {
       // Refresh token invalid or expired - clear all tokens
       await clearTokens();
       return null;
     }
 
-    const data: TokenResponse = await response.json();
-
     // Store new tokens (refresh token is rotated)
+    // IMPORTANT: Await this to ensure tokens are stored before returning
     await setTokens(data.accessToken, data.refreshToken);
 
     return data.accessToken;
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    // Even if there's a network error, clear tokens to prevent stuck state
     await clearTokens();
     return null;
   }
@@ -167,10 +158,8 @@ export async function logout(): Promise<void> {
   // Notify backend to invalidate refresh token
   if (accessToken) {
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
+      await baseClient.POST('/auth/logout', {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
       });
