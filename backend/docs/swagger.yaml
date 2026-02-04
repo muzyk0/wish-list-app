@@ -1,0 +1,1830 @@
+basePath: /api
+definitions:
+  internal_handlers.AuthResponse:
+    properties:
+      accessToken:
+        description: Access token (short-lived, 15 minutes)
+        type: string
+      refreshToken:
+        description: Refresh token (long-lived, 7 days) - also set as httpOnly cookie
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/internal_handlers.UserResponse'
+        description: User information
+    required:
+    - accessToken
+    - refreshToken
+    - user
+    type: object
+  internal_handlers.CancelReservationRequest:
+    properties:
+      reservation_token:
+        type: string
+    type: object
+  internal_handlers.ChangeEmailRequest:
+    properties:
+      current_password:
+        minLength: 6
+        type: string
+      new_email:
+        type: string
+    required:
+    - current_password
+    - new_email
+    type: object
+  internal_handlers.ChangePasswordRequest:
+    properties:
+      current_password:
+        minLength: 6
+        type: string
+      new_password:
+        minLength: 6
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
+  internal_handlers.CreateGiftItemRequest:
+    properties:
+      description:
+        type: string
+      image_url:
+        type: string
+      link:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      notes:
+        type: string
+      position:
+        minimum: 0
+        type: integer
+      price:
+        minimum: 0
+        type: number
+      priority:
+        maximum: 10
+        minimum: 0
+        type: integer
+    required:
+    - name
+    type: object
+  internal_handlers.CreateReservationRequest:
+    properties:
+      guest_email:
+        type: string
+      guest_name:
+        maxLength: 200
+        type: string
+    type: object
+  internal_handlers.CreateReservationResponse:
+    properties:
+      cancel_reason:
+        type: string
+      canceled_at:
+        type: string
+      expires_at:
+        type: string
+      gift_item_id:
+        type: string
+      guest_email:
+        type: string
+      guest_name:
+        type: string
+      id:
+        type: string
+      notification_sent:
+        type: boolean
+      reservation_token:
+        type: string
+      reserved_at:
+        type: string
+      reserved_by_user_id:
+        type: string
+      status:
+        type: string
+    required:
+    - gift_item_id
+    - id
+    - notification_sent
+    - reservation_token
+    - reserved_at
+    - status
+    type: object
+  internal_handlers.CreateWishListRequest:
+    properties:
+      description:
+        type: string
+      is_public:
+        type: boolean
+      occasion:
+        type: string
+      occasion_date:
+        type: string
+      template_id:
+        default: default
+        type: string
+      title:
+        maxLength: 200
+        type: string
+    required:
+    - title
+    type: object
+  internal_handlers.ExchangeRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  internal_handlers.ExchangeResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+      user:
+        $ref: '#/definitions/internal_handlers.UserResponse'
+    required:
+    - accessToken
+    - refreshToken
+    - user
+    type: object
+  internal_handlers.GetGiftItemsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/internal_handlers.GiftItemResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      pages:
+        type: integer
+      total:
+        type: integer
+    required:
+    - items
+    - limit
+    - page
+    - pages
+    - total
+    type: object
+  internal_handlers.GiftItemResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      position:
+        type: integer
+      price:
+        type: number
+      priority:
+        type: integer
+      purchased_at:
+        type: string
+      purchased_by_user_id:
+        type: string
+      purchased_price:
+        type: number
+      reserved_at:
+        type: string
+      reserved_by_user_id:
+        type: string
+      updated_at:
+        type: string
+      wishlist_id:
+        type: string
+    required:
+    - created_at
+    - id
+    - name
+    - updated_at
+    - wishlist_id
+    type: object
+  internal_handlers.GiftItemSummary:
+    properties:
+      id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  internal_handlers.HandoffResponse:
+    properties:
+      code:
+        example: a1b2c3d4e5f6...
+        type: string
+      expiresIn:
+        example: 60
+        type: integer
+    required:
+    - code
+    - expiresIn
+    type: object
+  internal_handlers.HealthResponse:
+    properties:
+      checks:
+        additionalProperties:
+          type: string
+        type: object
+      error:
+        type: string
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  internal_handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_handlers.MessageResponse:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  internal_handlers.OAuthCodeRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  internal_handlers.PurchaseRequest:
+    properties:
+      purchased_price:
+        type: number
+    type: object
+  internal_handlers.RefreshResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    required:
+    - accessToken
+    - refreshToken
+    type: object
+  internal_handlers.RegisterRequest:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_handlers.ReservationDetailsResponse:
+    properties:
+      expires_at:
+        type: string
+      gift_item:
+        $ref: '#/definitions/internal_handlers.GiftItemSummary'
+      id:
+        type: string
+      reserved_at:
+        type: string
+      status:
+        type: string
+      wishlist:
+        $ref: '#/definitions/internal_handlers.WishListSummary'
+    required:
+    - gift_item
+    - id
+    - reserved_at
+    - status
+    - wishlist
+    type: object
+  internal_handlers.ReservationStatusResponse:
+    properties:
+      is_reserved:
+        type: boolean
+      reserved_at:
+        type: string
+      reserved_by_name:
+        type: string
+      status:
+        type: string
+    required:
+    - is_reserved
+    - status
+    type: object
+  internal_handlers.UpdateGiftItemRequest:
+    properties:
+      description:
+        type: string
+      image_url:
+        type: string
+      link:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      notes:
+        type: string
+      position:
+        minimum: 0
+        type: integer
+      price:
+        minimum: 0
+        type: number
+      priority:
+        maximum: 10
+        minimum: 0
+        type: integer
+    type: object
+  internal_handlers.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  internal_handlers.UpdateWishListRequest:
+    properties:
+      description:
+        type: string
+      is_public:
+        type: boolean
+      occasion:
+        type: string
+      occasion_date:
+        type: string
+      template_id:
+        type: string
+      title:
+        maxLength: 200
+        type: string
+    type: object
+  internal_handlers.UserReservationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/internal_handlers.ReservationDetailsResponse'
+        type: array
+      pagination: {}
+    required:
+    - data
+    - pagination
+    type: object
+  internal_handlers.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+    required:
+    - email
+    - id
+    type: object
+  internal_handlers.WishListResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      occasion:
+        type: string
+      occasion_date:
+        type: string
+      owner_id:
+        type: string
+      public_slug:
+        type: string
+      template_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      view_count:
+        type: string
+    required:
+    - created_at
+    - id
+    - owner_id
+    - title
+    - updated_at
+    - view_count
+    type: object
+  internal_handlers.WishListSummary:
+    properties:
+      id:
+        type: string
+      owner_first_name:
+        type: string
+      owner_last_name:
+        type: string
+      title:
+        type: string
+    required:
+    - id
+    - title
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@wishlist.example.com
+    name: API Support
+  description: |-
+    A RESTful API for managing wish lists, gift items, and reservations.
+    Features include user authentication, wish list management, gift item tracking, and reservation system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Wish List API
+  version: "1.0"
+paths:
+  /auth/change-email:
+    post:
+      consumes:
+      - application/json
+      description: Change the authenticated user's email address with password verification.
+        Requires current password to prevent unauthorized changes.
+      parameters:
+      - description: Email change request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.ChangeEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email changed successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized or incorrect password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Email already in use
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change user email
+      tags:
+      - Authentication
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the authenticated user's password with current password
+        verification. This will invalidate all existing sessions except the current
+        one.
+      parameters:
+      - description: Password change request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized or incorrect password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change user password
+      tags:
+      - Authentication
+  /auth/exchange:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a handoff code received from Frontend redirect for access
+        and refresh tokens. Code can only be used once.
+      parameters:
+      - description: Exchange request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.ExchangeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Code exchanged successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.ExchangeResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or expired code
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Rate limit exceeded (10 requests/minute)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Exchange handoff code for tokens
+      tags:
+      - Authentication
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - Authentication
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Clear refresh token cookie and invalidate session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout user
+      tags:
+      - Authentication
+  /auth/mobile-handoff:
+    post:
+      consumes:
+      - application/json
+      description: Generate a short-lived (60 second) one-time code for transferring
+        authentication from Frontend to Mobile app.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Handoff code generated
+          schema:
+            $ref: '#/definitions/internal_handlers.HandoffResponse'
+        "401":
+          description: Not authenticated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Rate limit exceeded (10 requests/minute per user)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate mobile handoff code
+      tags:
+      - Authentication
+  /auth/oauth/facebook:
+    post:
+      consumes:
+      - application/json
+      description: Exchange Facebook authorization code for access and refresh tokens
+      parameters:
+      - description: Authorization code from Facebook
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.OAuthCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication successful
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Facebook OAuth authentication
+      tags:
+      - Auth
+  /auth/oauth/google:
+    post:
+      consumes:
+      - application/json
+      description: Exchange Google authorization code for access and refresh tokens
+      parameters:
+      - description: Authorization code from Google
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.OAuthCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication successful
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth authentication
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchange refresh token for a new access token. Accepts refresh
+        token via httpOnly cookie (web clients) or Authorization Bearer header (mobile
+        clients). Implements token rotation - returns new refresh token on success.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refreshed successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.RefreshResponse'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with email and password
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: User with this email already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Authentication
+  /gift-items/{id}:
+    delete:
+      description: Delete a gift item by its ID. The user must be the owner of the
+        parent wish list.
+      parameters:
+      - description: Gift Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Gift item deleted successfully
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Gift item or wishlist not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a gift item
+      tags:
+      - Gift Items
+    get:
+      description: Get a gift item by its ID. If the parent wish list is private,
+        the user must be the owner.
+      parameters:
+      - description: Gift Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gift item retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Gift item not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a gift item by ID
+      tags:
+      - Gift Items
+    put:
+      consumes:
+      - application/json
+      description: Update a gift item by its ID. The user must be the owner of the
+        parent wish list.
+      parameters:
+      - description: Gift Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Gift item update information
+        in: body
+        name: gift_item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateGiftItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gift item updated successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Gift item or wishlist not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a gift item
+      tags:
+      - Gift Items
+  /gift-items/{id}/purchase:
+    post:
+      consumes:
+      - application/json
+      description: Mark a gift item as purchased with an optional purchased price.
+        The user must be the owner of the parent wish list.
+      parameters:
+      - description: Gift Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Purchase information
+        in: body
+        name: purchase_request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.PurchaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gift item marked as purchased successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Gift item or wishlist not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark a gift item as purchased
+      tags:
+      - Gift Items
+  /healthz:
+    get:
+      description: Performs a health check of the application and its dependencies
+        (database)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application is healthy
+          schema:
+            $ref: '#/definitions/internal_handlers.HealthResponse'
+        "503":
+          description: Application is unhealthy
+          schema:
+            $ref: '#/definitions/internal_handlers.HealthResponse'
+      summary: Health check endpoint
+      tags:
+      - Health
+  /protected/account:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the authenticated user's account and all associated data.
+        This action is irreversible.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Account deleted successfully
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user account
+      tags:
+      - User
+  /protected/export-data:
+    get:
+      consumes:
+      - application/json
+      description: Export the authenticated user's data in JSON format for compliance
+        and personal records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data exported successfully
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Export user data
+      tags:
+      - User
+  /protected/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the authenticated user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            $ref: '#/definitions/internal_handlers.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile information
+      parameters:
+      - description: Updated profile information
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user profile
+          schema:
+            $ref: '#/definitions/internal_handlers.UserResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - User
+  /public/wishlists/{slug}:
+    get:
+      description: Get a public wish list by its public slug. The wish list must be
+        marked as public.
+      parameters:
+      - description: Public Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public wish list retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.WishListResponse'
+        "404":
+          description: Wish list not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a public wish list by its slug
+      tags:
+      - Wish Lists
+  /public/wishlists/{slug}/gift-items:
+    get:
+      description: Get all gift items for a public wish list by its public slug with
+        pagination support.
+      parameters:
+      - description: Public Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 10, max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gift items retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GetGiftItemsResponse'
+        "404":
+          description: Wish list not found or not public
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get gift items for a public wish list by slug
+      tags:
+      - Gift Items
+  /public/wishlists/{slug}/gift-items/{itemId}/reservation-status:
+    get:
+      description: Get the reservation status for a specific gift item in a public
+        wish list.
+      parameters:
+      - description: Public wish list slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Gift Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation status retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.ReservationStatusResponse'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the reservation status for a gift item in a public wish list
+      tags:
+      - Reservations
+  /reservations:
+    get:
+      description: Get all reservations made by the authenticated user with pagination.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 10, max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user reservations retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.UserReservationsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all reservations made by the authenticated user
+      tags:
+      - Reservations
+  /reservations/guest:
+    get:
+      description: Get all reservations made by a guest using their reservation token.
+      parameters:
+      - description: Reservation token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of guest reservations retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/internal_handlers.ReservationDetailsResponse'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get reservations made by a guest using a token
+      tags:
+      - Reservations
+  /s3/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image file to S3 storage. The user must be authenticated.
+      parameters:
+      - description: Image file to upload (max 10MB, only images allowed)
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image uploaded successfully, returns URL
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid file or file too large
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload an image to S3
+      tags:
+      - S3 Upload
+  /wishlists:
+    get:
+      description: Get all wish lists owned by the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of wish lists retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/internal_handlers.WishListResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all wish lists owned by the authenticated user
+      tags:
+      - Wish Lists
+    post:
+      consumes:
+      - application/json
+      description: Create a new wish list for the authenticated user
+      parameters:
+      - description: Wish list creation information
+        in: body
+        name: wish_list
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateWishListRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Wish list created successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.WishListResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new wish list
+      tags:
+      - Wish Lists
+  /wishlists/{id}:
+    delete:
+      description: Delete a wish list by its ID. The user must be the owner of the
+        wish list.
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Wish list deleted successfully
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a wish list
+      tags:
+      - Wish Lists
+    get:
+      description: Get a wish list by its ID. If the wish list is private, the user
+        must be the owner.
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wish list retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.WishListResponse'
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Wish list not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a wish list by ID
+      tags:
+      - Wish Lists
+    put:
+      consumes:
+      - application/json
+      description: Update a wish list by its ID. The user must be the owner of the
+        wish list.
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Wish list update information
+        in: body
+        name: wish_list
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateWishListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wish list updated successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.WishListResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Wish list not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a wish list
+      tags:
+      - Wish Lists
+  /wishlists/{wishlistId}/gift-items:
+    get:
+      description: Get all gift items in a wish list. If the wish list is private,
+        the user must be the owner.
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: wishlistId
+        required: true
+        type: string
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 10, max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of gift items retrieved successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GetGiftItemsResponse'
+        "403":
+          description: Access denied
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Wishlist not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all gift items in a wish list
+      tags:
+      - Gift Items
+    post:
+      consumes:
+      - application/json
+      description: Create a new gift item in a wish list. The user must be the owner
+        of the wish list.
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: wishlistId
+        required: true
+        type: string
+      - description: Gift item creation information
+        in: body
+        name: gift_item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateGiftItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Gift item created successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Wishlist not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new gift item
+      tags:
+      - Gift Items
+  /wishlists/{wishlistId}/gift-items/{itemId}/reservation:
+    delete:
+      consumes:
+      - application/json
+      description: Cancel a reservation for a gift item. Can be done by authenticated
+        users or guests (with reservation token).
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: wishlistId
+        required: true
+        type: string
+      - description: Gift Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Cancellation information (required for guests)
+        in: body
+        name: cancel_request
+        schema:
+          $ref: '#/definitions/internal_handlers.CancelReservationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation canceled successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.CreateReservationResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized (guests need reservation token)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cancel a reservation for a gift item
+      tags:
+      - Reservations
+    post:
+      consumes:
+      - application/json
+      description: Create a reservation for a gift item. Can be done by authenticated
+        users or guests (with name and email).
+      parameters:
+      - description: Wish List ID
+        in: path
+        name: wishlistId
+        required: true
+        type: string
+      - description: Gift Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Reservation information (required for guests)
+        in: body
+        name: reservation_request
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateReservationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation created successfully
+          schema:
+            $ref: '#/definitions/internal_handlers.CreateReservationResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized (guests need name and email)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a reservation for a gift item
+      tags:
+      - Reservations
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -33,6 +33,14 @@ class AuthManager {
   }
 
   /**
+   * Logout: Clear access token from memory
+   * Note: Call apiClient.logout() to also clear httpOnly cookie on backend
+   */
+  logout(): void {
+    this.clearAccessToken();
+  }
+
+  /**
    * Refresh access token using httpOnly cookie
    * Uses singleton pattern to prevent concurrent refresh requests
    */
@@ -195,6 +203,26 @@ class ApiClient {
     }
 
     return data;
+  }
+
+  /**
+   * Logout: Clear tokens and invalidate session
+   * Clears access token from memory and httpOnly refresh cookie on backend
+   */
+  async logout(): Promise<void> {
+    try {
+      // Call backend to clear httpOnly refresh token cookie
+      await this.client.POST("/auth/logout", {
+        headers: this.getHeaders(),
+        credentials: "include", // Required to send and clear httpOnly cookie
+      });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+      // Continue - we'll clear local token anyway
+    } finally {
+      // Always clear local access token
+      authManager.logout();
+    }
   }
 }
 

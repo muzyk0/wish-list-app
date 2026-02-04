@@ -150,6 +150,21 @@ export default function ProfileScreen() {
     },
   });
 
+  const logoutMutation = useMutation({
+    mutationFn: () => apiClient.logout(),
+    onSuccess: () => {
+      queryClient.clear();
+      router.replace("/auth/login");
+    },
+    // biome-ignore lint/suspicious/noExplicitAny: Error type
+    onError: (error: any) => {
+      Alert.alert(
+        "Error",
+        error.message || "Failed to logout. Please try again.",
+      );
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteAccount(),
     onSuccess: async () => {
@@ -173,6 +188,16 @@ export default function ProfileScreen() {
       );
     },
   });
+
+  const handleLogout = () => {
+    Alert.alert("Confirm Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        onPress: () => logoutMutation.mutate(),
+      },
+    ]);
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -587,6 +612,32 @@ export default function ProfileScreen() {
               color={colors.primary}
             />
           </View>
+        </Card.Content>
+      </Card>
+
+      {/* Account Actions Section */}
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text
+            variant="titleLarge"
+            style={[styles.sectionTitle, { color: colors.onSurface }]}
+          >
+            Account
+          </Text>
+
+          <Divider style={styles.divider} />
+
+          <Button
+            mode="outlined"
+            onPress={handleLogout}
+            loading={logoutMutation.isPending}
+            disabled={logoutMutation.isPending}
+            style={styles.button}
+            labelStyle={styles.buttonLabel}
+            icon="logout"
+          >
+            Logout
+          </Button>
         </Card.Content>
       </Card>
 
