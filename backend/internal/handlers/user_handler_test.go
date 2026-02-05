@@ -75,12 +75,12 @@ func (m *MockUserService) UpdateProfile(ctx context.Context, userID string, inpu
 	return nil, args.Error(1)
 }
 
-func (m *MockUserService) ChangeEmail(ctx context.Context, userID string, currentPassword string, newEmail string) error {
+func (m *MockUserService) ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error {
 	args := m.Called(ctx, userID, currentPassword, newEmail)
 	return args.Error(0)
 }
 
-func (m *MockUserService) ChangePassword(ctx context.Context, userID string, currentPassword string, newPassword string) error {
+func (m *MockUserService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
 	args := m.Called(ctx, userID, currentPassword, newPassword)
 	return args.Error(0)
 }

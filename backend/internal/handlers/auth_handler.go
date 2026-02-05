@@ -98,8 +98,8 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 	} else {
 		// Try Authorization header (mobile clients)
 		authHeader := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(authHeader, "Bearer ") {
-			refreshToken = strings.TrimPrefix(authHeader, "Bearer ")
+		if token, found := strings.CutPrefix(authHeader, "Bearer "); found {
+			refreshToken = token
 		} else {
 			// Try request body (alternative for mobile)
 			var req RefreshRequest

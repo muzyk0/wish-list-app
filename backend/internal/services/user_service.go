@@ -23,8 +23,8 @@ type UserServiceInterface interface {
 	Login(ctx context.Context, input LoginUserInput) (*UserOutput, error)
 	GetUser(ctx context.Context, userID string) (*UserOutput, error)
 	UpdateProfile(ctx context.Context, userID string, input UpdateProfileInput) (*UserOutput, error)
-	ChangeEmail(ctx context.Context, userID string, currentPassword string, newEmail string) error
-	ChangePassword(ctx context.Context, userID string, currentPassword string, newPassword string) error
+	ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error
+	ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error
 	DeleteUser(ctx context.Context, userID string) error
 }
 
@@ -252,7 +252,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID string, input Up
 }
 
 // ChangeEmail changes the user's email address with password verification
-func (s *UserService) ChangeEmail(ctx context.Context, userID string, currentPassword string, newEmail string) error {
+func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return errors.New("invalid user id")
@@ -290,7 +290,7 @@ func (s *UserService) ChangeEmail(ctx context.Context, userID string, currentPas
 }
 
 // ChangePassword changes the user's password with current password verification
-func (s *UserService) ChangePassword(ctx context.Context, userID string, currentPassword string, newPassword string) error {
+func (s *UserService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return errors.New("invalid user id")

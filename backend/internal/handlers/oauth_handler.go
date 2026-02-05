@@ -286,9 +286,9 @@ func (h *OAuthHandler) getGoogleUserInfo(ctx context.Context, accessToken string
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequestWithContext(
 		ctx,
-		"GET",
+		http.MethodGet,
 		"https://www.googleapis.com/oauth2/v2/userinfo",
-		nil,
+		http.NoBody,
 	)
 	if err != nil {
 		return nil, err
@@ -320,9 +320,9 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequestWithContext(
 		ctx,
-		"GET",
+		http.MethodGet,
 		"https://graph.facebook.com/me?fields=id,name,email,picture",
-		nil,
+		http.NoBody,
 	)
 	if err != nil {
 		return nil, err
