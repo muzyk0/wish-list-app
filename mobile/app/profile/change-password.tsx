@@ -42,8 +42,8 @@ export default function ChangePasswordScreen() {
   const changePasswordMutation = useMutation({
     mutationFn: (data: PasswordChangeForm) =>
       apiClient.changePassword({
-        current_password: data.current_password,
-        new_password: data.new_password,
+        currentPassword: data.current_password,
+        newPassword: data.new_password,
       }),
     onSuccess: () => {
       Alert.alert('Success', 'Password changed successfully!');

@@ -199,10 +199,13 @@ class ApiClient {
     await clearTokens();
   }
 
-  async changeEmail(
-    currentPassword: string,
-    newEmail: string,
-  ): Promise<{ message: string }> {
+  async changeEmail({
+    currentPassword,
+    newEmail,
+  }: {
+    currentPassword: string;
+    newEmail: string;
+  }): Promise<{ message: string }> {
     const { data, error } = await this.client.POST('/auth/change-email', {
       body: {
         current_password: currentPassword,
@@ -217,10 +220,13 @@ class ApiClient {
     return data as { message: string };
   }
 
-  async changePassword(
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<{ message: string }> {
+  async changePassword({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
     const { data, error } = await this.client.POST('/auth/change-password', {
       body: {
         current_password: currentPassword,

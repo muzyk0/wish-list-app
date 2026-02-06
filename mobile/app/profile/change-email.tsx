@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 
 const emailChangeSchema = z.object({
-  new_email: z.string().email('Invalid email address'),
+  new_email: z.email('Invalid email address'),
   current_password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -30,7 +30,11 @@ export default function ChangeEmailScreen() {
   });
 
   const changeEmailMutation = useMutation({
-    mutationFn: (data: EmailChangeForm) => apiClient.changeEmail(data),
+    mutationFn: (data: EmailChangeForm) =>
+      apiClient.changeEmail({
+        newEmail: data.new_email,
+        currentPassword: data.current_password,
+      }),
     onSuccess: () => {
       Alert.alert('Success', 'Email updated successfully!');
       emailForm.reset();
