@@ -73,6 +73,7 @@ type WishListResponse struct {
 	IsPublic     bool   `json:"is_public"`
 	PublicSlug   string `json:"public_slug"`
 	ViewCount    string `json:"view_count" validate:"required"`
+	ItemCount    int    `json:"item_count" example:"5"`
 	CreatedAt    string `json:"created_at" validate:"required"`
 	UpdatedAt    string `json:"updated_at" validate:"required"`
 }
@@ -126,6 +127,7 @@ func (h *WishListHandler) toWishListResponse(wl *services.WishListOutput) *WishL
 		IsPublic:     wl.IsPublic,
 		PublicSlug:   wl.PublicSlug,
 		ViewCount:    fmt.Sprintf("%d", wl.ViewCount),
+		ItemCount:    int(wl.ItemCount),
 		CreatedAt:    wl.CreatedAt,
 		UpdatedAt:    wl.UpdatedAt,
 	}
@@ -277,10 +279,10 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 // GetWishListsByOwner godoc
 //
 //	@Summary		Get all wish lists owned by the authenticated user
-//	@Description	Get all wish lists owned by the currently authenticated user
+//	@Description	Get all wish lists owned by the currently authenticated user. Includes item_count for each wishlist.
 //	@Tags			Wish Lists
 //	@Produce		json
-//	@Success		200	{array}		WishListResponse	"List of wish lists retrieved successfully"
+//	@Success		200	{array}		WishListResponse	"List of wish lists retrieved successfully (includes item_count)"
 //	@Failure		401	{object}	map[string]string	"Unauthorized"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth

@@ -1435,7 +1435,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all wish lists owned by the currently authenticated user",
+                "description": "Get all wish lists owned by the currently authenticated user. Includes item_count for each wishlist.",
                 "produces": [
                     "application/json"
                 ],
@@ -1445,7 +1445,7 @@ const docTemplate = `{
                 "summary": "Get all wish lists owned by the authenticated user",
                 "responses": {
                     "200": {
-                        "description": "List of wish lists retrieved successfully",
+                        "description": "List of wish lists retrieved successfully (includes item_count)",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -2700,6 +2700,10 @@ const docTemplate = `{
                 },
                 "is_public": {
                     "type": "boolean"
+                },
+                "item_count": {
+                    "type": "integer",
+                    "example": 5
                 },
                 "occasion": {
                     "type": "string"

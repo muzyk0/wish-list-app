@@ -1,12 +1,8 @@
-import { Alert, StyleSheet, View } from 'react-native';
-import {
-  Button,
-  Card,
-  Paragraph,
-  Text,
-  Title,
-  useTheme,
-} from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 interface Reservation {
   id: string;
@@ -36,178 +32,298 @@ export function ReservationItem({
   reservation,
   onRefresh,
 }: ReservationItemProps) {
-  const theme = useTheme();
-
   const handleCancelReservation = async () => {
-    try {
-      const response = await fetch(
-        `/api/reservations/${reservation.id}/cancel`,
+    Alert.alert(
+      'Cancel Reservation',
+      'Are you sure you want to cancel this reservation?',
+      [
+        { text: 'No', style: 'cancel' },
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(
+                `/api/reservations/${reservation.id}/cancel`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                },
+              );
+
+              if (response.ok) {
+                Alert.alert('Success', 'Reservation cancelled successfully');
+                onRefresh();
+              } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to cancel reservation');
+              }
+            } catch {
+              Alert.alert(
+                'Error',
+                'An error occurred while cancelling the reservation',
+              );
+            }
           },
         },
-      );
-
-      if (response.ok) {
-        Alert.alert('Success', 'Reservation cancelled successfully');
-        onRefresh(); // Refresh the list
-      } else {
-        const data = await response.json();
-        Alert.alert('Error', data.error || 'Failed to cancel reservation');
-      }
-    } catch {
-      Alert.alert(
-        'Error',
-        'An error occurred while cancelling the reservation',
-      );
-    }
+      ],
+    );
   };
 
-  const getStatusColor = () => {
+  const getStatusConfig = () => {
     switch (reservation.status) {
       case 'active':
-        return theme.colors.primary;
+        return {
+          color: '#FFD700',
+          icon: 'clock-outline',
+          label: 'Active',
+        };
       case 'cancelled':
-        return theme.colors.outline;
+        return {
+          color: '#9E9E9E',
+          icon: 'close-circle-outline',
+          label: 'Cancelled',
+        };
       case 'fulfilled':
-        return theme.colors.secondary;
+        return {
+          color: '#4CAF50',
+          icon: 'check-circle',
+          label: 'Fulfilled',
+        };
       case 'expired':
-        return theme.colors.error;
+        return {
+          color: '#FF6B6B',
+          icon: 'alert-circle-outline',
+          label: 'Expired',
+        };
       default:
-        return theme.colors.outline;
+        return {
+          color: '#9E9E9E',
+          icon: 'help-circle-outline',
+          label: reservation.status,
+        };
     }
   };
 
-  const getStatusBackgroundColor = () => {
-    switch (reservation.status) {
-      case 'active':
-        return `${theme.colors.primary}20`;
-      case 'cancelled':
-        return `${theme.colors.outline}20`;
-      case 'fulfilled':
-        return `${theme.colors.secondary}20`;
-      case 'expired':
-        return `${theme.colors.error}20`;
-      default:
-        return `${theme.colors.outline}20`;
-    }
-  };
+  const statusConfig = getStatusConfig();
+  const ownerName = `${reservation.wishlist.ownerFirstName || ''} ${reservation.wishlist.ownerLastName || ''}`.trim();
 
   return (
-    <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-      <Card.Content>
+    <BlurView intensity={20} style={styles.card}>
+      <View style={styles.cardContent}>
+        {/* Header */}
         <View style={styles.header}>
-          <Title style={styles.itemName}>{reservation.giftItem.name}</Title>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: getStatusBackgroundColor(),
-                borderColor: getStatusColor(),
-              },
-            ]}
-          >
-            <Text style={[styles.statusText, { color: getStatusColor() }]}>
-              {reservation.status.charAt(0).toUpperCase() +
-                reservation.status.slice(1)}
+          <View style={styles.itemInfo}>
+            <Text style={styles.itemName} numberOfLines={2}>
+              {reservation.giftItem.name}
             </Text>
-          </View>
-        </View>
-
-        <Paragraph style={styles.details}>
-          Reserved for: {reservation.wishlist.title} by{' '}
-          {reservation.wishlist.ownerFirstName}{' '}
-          {reservation.wishlist.ownerLastName}
-        </Paragraph>
-
-        <View style={styles.footer}>
-          <View style={styles.dateInfo}>
-            <Text style={styles.smallText}>
-              Reserved on:{' '}
-              {new Date(reservation.reservedAt).toLocaleDateString()}
-            </Text>
-            {reservation.expiresAt && (
-              <Text style={[styles.smallText, { color: theme.colors.error }]}>
-                Expires on:{' '}
-                {new Date(reservation.expiresAt).toLocaleDateString()}
-              </Text>
+            {reservation.giftItem.price !== undefined && (
+              <View style={styles.priceContainer}>
+                <LinearGradient
+                  colors={['#FFD700', '#FFA500']}
+                  style={styles.priceGradient}
+                >
+                  <Text style={styles.priceText}>
+                    ${reservation.giftItem.price.toFixed(2)}
+                  </Text>
+                </LinearGradient>
+              </View>
             )}
           </View>
 
-          {reservation.status === 'active' && (
-            <Button
-              mode="contained"
-              onPress={handleCancelReservation}
-              style={styles.cancelButton}
-              buttonColor={theme.colors.error}
-              labelStyle={styles.cancelButtonText}
-            >
-              Cancel
-            </Button>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: `${statusConfig.color}20` },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name={statusConfig.icon as any}
+              size={14}
+              color={statusConfig.color}
+            />
+            <Text style={[styles.statusText, { color: statusConfig.color }]}>
+              {statusConfig.label}
+            </Text>
+          </View>
+        </View>
+
+        {/* Wishlist Info */}
+        <View style={styles.wishlistInfo}>
+          <MaterialCommunityIcons
+            name="gift-outline"
+            size={16}
+            color="rgba(255, 255, 255, 0.5)"
+          />
+          <Text style={styles.wishlistText} numberOfLines={1}>
+            {reservation.wishlist.title}
+          </Text>
+        </View>
+
+        {ownerName && (
+          <View style={styles.ownerInfo}>
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={16}
+              color="rgba(255, 255, 255, 0.5)"
+            />
+            <Text style={styles.ownerText} numberOfLines={1}>
+              {ownerName}
+            </Text>
+          </View>
+        )}
+
+        {/* Dates */}
+        <View style={styles.datesContainer}>
+          <View style={styles.dateItem}>
+            <MaterialCommunityIcons
+              name="calendar-check"
+              size={14}
+              color="rgba(255, 255, 255, 0.4)"
+            />
+            <Text style={styles.dateText}>
+              {new Date(reservation.reservedAt).toLocaleDateString()}
+            </Text>
+          </View>
+
+          {reservation.expiresAt && (
+            <View style={styles.dateItem}>
+              <MaterialCommunityIcons
+                name="calendar-alert"
+                size={14}
+                color="#FF6B6B"
+              />
+              <Text style={[styles.dateText, { color: '#FF6B6B' }]}>
+                Expires {new Date(reservation.expiresAt).toLocaleDateString()}
+              </Text>
+            </View>
           )}
         </View>
-      </Card.Content>
-    </Card>
+
+        {/* Cancel Button */}
+        {reservation.status === 'active' && (
+          <Pressable onPress={handleCancelReservation} style={styles.cancelButtonWrapper}>
+            <View style={styles.cancelButton}>
+              <MaterialCommunityIcons name="close" size={16} color="rgba(255, 255, 255, 0.7)" />
+              <Text style={styles.cancelButtonText}>Cancel Reservation</Text>
+            </View>
+          </Pressable>
+        )}
+      </View>
+    </BlurView>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    margin: 8,
     borderRadius: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 12,
+  },
+  cardContent: {
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 12,
+  },
+  itemInfo: {
+    flex: 1,
   },
   itemName: {
-    flex: 1,
-    marginRight: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: 6,
+  },
+  priceContainer: {
+    alignSelf: 'flex-start',
+  },
+  priceGradient: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  priceText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#000000',
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    minWidth: 80,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    textAlign: 'center',
   },
-  details: {
-    marginBottom: 12,
-    lineHeight: 20,
-  },
-  footer: {
+  wishlistInfo: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
   },
-  dateInfo: {
+  wishlistText: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
     flex: 1,
   },
-  smallText: {
+  ownerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  ownerText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.6)',
+    flex: 1,
+  },
+  datesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 12,
+  },
+  dateItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dateText: {
     fontSize: 12,
-    opacity: 0.8,
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  cancelButtonWrapper: {
+    marginTop: 4,
   },
   cancelButton: {
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+    gap: 6,
   },
   cancelButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
   },
 });

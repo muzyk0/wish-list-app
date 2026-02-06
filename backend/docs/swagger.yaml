@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  internal_handlers.AuthResponse:
+  handlers.AuthResponse:
     properties:
       accessToken:
         description: Access token (short-lived, 15 minutes)
@@ -10,19 +10,19 @@ definitions:
         type: string
       user:
         allOf:
-        - $ref: '#/definitions/internal_handlers.UserResponse'
+        - $ref: '#/definitions/handlers.UserResponse'
         description: User information
     required:
     - accessToken
     - refreshToken
     - user
     type: object
-  internal_handlers.CancelReservationRequest:
+  handlers.CancelReservationRequest:
     properties:
       reservation_token:
         type: string
     type: object
-  internal_handlers.ChangeEmailRequest:
+  handlers.ChangeEmailRequest:
     properties:
       current_password:
         minLength: 6
@@ -33,7 +33,7 @@ definitions:
     - current_password
     - new_email
     type: object
-  internal_handlers.ChangePasswordRequest:
+  handlers.ChangePasswordRequest:
     properties:
       current_password:
         minLength: 6
@@ -45,7 +45,7 @@ definitions:
     - current_password
     - new_password
     type: object
-  internal_handlers.CreateGiftItemRequest:
+  handlers.CreateGiftItemRequest:
     properties:
       description:
         type: string
@@ -71,7 +71,7 @@ definitions:
     required:
     - name
     type: object
-  internal_handlers.CreateReservationRequest:
+  handlers.CreateReservationRequest:
     properties:
       guest_email:
         type: string
@@ -79,7 +79,7 @@ definitions:
         maxLength: 200
         type: string
     type: object
-  internal_handlers.CreateReservationResponse:
+  handlers.CreateReservationResponse:
     properties:
       cancel_reason:
         type: string
@@ -113,7 +113,7 @@ definitions:
     - reserved_at
     - status
     type: object
-  internal_handlers.CreateWishListRequest:
+  handlers.CreateWishListRequest:
     properties:
       description:
         type: string
@@ -132,31 +132,31 @@ definitions:
     required:
     - title
     type: object
-  internal_handlers.ExchangeRequest:
+  handlers.ExchangeRequest:
     properties:
       code:
         type: string
     required:
     - code
     type: object
-  internal_handlers.ExchangeResponse:
+  handlers.ExchangeResponse:
     properties:
       accessToken:
         type: string
       refreshToken:
         type: string
       user:
-        $ref: '#/definitions/internal_handlers.UserResponse'
+        $ref: '#/definitions/handlers.UserResponse'
     required:
     - accessToken
     - refreshToken
     - user
     type: object
-  internal_handlers.GetGiftItemsResponse:
+  handlers.GetGiftItemsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/internal_handlers.GiftItemResponse'
+          $ref: '#/definitions/handlers.GiftItemResponse'
         type: array
       limit:
         type: integer
@@ -173,7 +173,7 @@ definitions:
     - pages
     - total
     type: object
-  internal_handlers.GiftItemResponse:
+  handlers.GiftItemResponse:
     properties:
       created_at:
         type: string
@@ -216,7 +216,7 @@ definitions:
     - updated_at
     - wishlist_id
     type: object
-  internal_handlers.GiftItemSummary:
+  handlers.GiftItemSummary:
     properties:
       id:
         type: string
@@ -230,7 +230,7 @@ definitions:
     - id
     - name
     type: object
-  internal_handlers.HandoffResponse:
+  handlers.HandoffResponse:
     properties:
       code:
         example: a1b2c3d4e5f6...
@@ -242,7 +242,7 @@ definitions:
     - code
     - expiresIn
     type: object
-  internal_handlers.HealthResponse:
+  handlers.HealthResponse:
     properties:
       checks:
         additionalProperties:
@@ -255,7 +255,7 @@ definitions:
     required:
     - status
     type: object
-  internal_handlers.LoginRequest:
+  handlers.LoginRequest:
     properties:
       email:
         type: string
@@ -266,26 +266,26 @@ definitions:
     - email
     - password
     type: object
-  internal_handlers.MessageResponse:
+  handlers.MessageResponse:
     properties:
       message:
         type: string
     required:
     - message
     type: object
-  internal_handlers.OAuthCodeRequest:
+  handlers.OAuthCodeRequest:
     properties:
       code:
         type: string
     required:
     - code
     type: object
-  internal_handlers.PurchaseRequest:
+  handlers.PurchaseRequest:
     properties:
       purchased_price:
         type: number
     type: object
-  internal_handlers.RefreshResponse:
+  handlers.RefreshResponse:
     properties:
       accessToken:
         type: string
@@ -295,7 +295,7 @@ definitions:
     - accessToken
     - refreshToken
     type: object
-  internal_handlers.RegisterRequest:
+  handlers.RegisterRequest:
     properties:
       avatar_url:
         type: string
@@ -312,12 +312,12 @@ definitions:
     - email
     - password
     type: object
-  internal_handlers.ReservationDetailsResponse:
+  handlers.ReservationDetailsResponse:
     properties:
       expires_at:
         type: string
       gift_item:
-        $ref: '#/definitions/internal_handlers.GiftItemSummary'
+        $ref: '#/definitions/handlers.GiftItemSummary'
       id:
         type: string
       reserved_at:
@@ -325,7 +325,7 @@ definitions:
       status:
         type: string
       wishlist:
-        $ref: '#/definitions/internal_handlers.WishListSummary'
+        $ref: '#/definitions/handlers.WishListSummary'
     required:
     - gift_item
     - id
@@ -333,7 +333,7 @@ definitions:
     - status
     - wishlist
     type: object
-  internal_handlers.ReservationStatusResponse:
+  handlers.ReservationStatusResponse:
     properties:
       is_reserved:
         type: boolean
@@ -347,7 +347,7 @@ definitions:
     - is_reserved
     - status
     type: object
-  internal_handlers.UpdateGiftItemRequest:
+  handlers.UpdateGiftItemRequest:
     properties:
       description:
         type: string
@@ -371,7 +371,7 @@ definitions:
         minimum: 0
         type: integer
     type: object
-  internal_handlers.UpdateProfileRequest:
+  handlers.UpdateProfileRequest:
     properties:
       avatar_url:
         type: string
@@ -380,7 +380,7 @@ definitions:
       last_name:
         type: string
     type: object
-  internal_handlers.UpdateWishListRequest:
+  handlers.UpdateWishListRequest:
     properties:
       description:
         type: string
@@ -396,18 +396,18 @@ definitions:
         maxLength: 200
         type: string
     type: object
-  internal_handlers.UserReservationsResponse:
+  handlers.UserReservationsResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/internal_handlers.ReservationDetailsResponse'
+          $ref: '#/definitions/handlers.ReservationDetailsResponse'
         type: array
       pagination: {}
     required:
     - data
     - pagination
     type: object
-  internal_handlers.UserResponse:
+  handlers.UserResponse:
     properties:
       avatar_url:
         type: string
@@ -423,7 +423,7 @@ definitions:
     - email
     - id
     type: object
-  internal_handlers.WishListResponse:
+  handlers.WishListResponse:
     properties:
       created_at:
         type: string
@@ -433,6 +433,9 @@ definitions:
         type: string
       is_public:
         type: boolean
+      item_count:
+        example: 5
+        type: integer
       occasion:
         type: string
       occasion_date:
@@ -457,7 +460,7 @@ definitions:
     - updated_at
     - view_count
     type: object
-  internal_handlers.WishListSummary:
+  handlers.WishListSummary:
     properties:
       id:
         type: string
@@ -497,14 +500,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.ChangeEmailRequest'
+          $ref: '#/definitions/handlers.ChangeEmailRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Email changed successfully
           schema:
-            $ref: '#/definitions/internal_handlers.MessageResponse'
+            $ref: '#/definitions/handlers.MessageResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -547,14 +550,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.ChangePasswordRequest'
+          $ref: '#/definitions/handlers.ChangePasswordRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Password changed successfully
           schema:
-            $ref: '#/definitions/internal_handlers.MessageResponse'
+            $ref: '#/definitions/handlers.MessageResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -590,14 +593,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.ExchangeRequest'
+          $ref: '#/definitions/handlers.ExchangeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Code exchanged successfully
           schema:
-            $ref: '#/definitions/internal_handlers.ExchangeResponse'
+            $ref: '#/definitions/handlers.ExchangeResponse'
         "400":
           description: Invalid request body
           schema:
@@ -636,14 +639,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.LoginRequest'
+          $ref: '#/definitions/handlers.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Login successful
           schema:
-            $ref: '#/definitions/internal_handlers.AuthResponse'
+            $ref: '#/definitions/handlers.AuthResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -676,7 +679,7 @@ paths:
         "200":
           description: Logout successful
           schema:
-            $ref: '#/definitions/internal_handlers.MessageResponse'
+            $ref: '#/definitions/handlers.MessageResponse'
       security:
       - BearerAuth: []
       summary: Logout user
@@ -694,7 +697,7 @@ paths:
         "200":
           description: Handoff code generated
           schema:
-            $ref: '#/definitions/internal_handlers.HandoffResponse'
+            $ref: '#/definitions/handlers.HandoffResponse'
         "401":
           description: Not authenticated
           schema:
@@ -729,14 +732,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.OAuthCodeRequest'
+          $ref: '#/definitions/handlers.OAuthCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Authentication successful
           schema:
-            $ref: '#/definitions/internal_handlers.AuthResponse'
+            $ref: '#/definitions/handlers.AuthResponse'
         "400":
           description: Invalid request
           schema:
@@ -763,14 +766,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.OAuthCodeRequest'
+          $ref: '#/definitions/handlers.OAuthCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Authentication successful
           schema:
-            $ref: '#/definitions/internal_handlers.AuthResponse'
+            $ref: '#/definitions/handlers.AuthResponse'
         "400":
           description: Invalid request
           schema:
@@ -799,7 +802,7 @@ paths:
         "200":
           description: Token refreshed successfully
           schema:
-            $ref: '#/definitions/internal_handlers.RefreshResponse'
+            $ref: '#/definitions/handlers.RefreshResponse'
         "401":
           description: Invalid or expired refresh token
           schema:
@@ -820,14 +823,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.RegisterRequest'
+          $ref: '#/definitions/handlers.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: User created successfully
           schema:
-            $ref: '#/definitions/internal_handlers.AuthResponse'
+            $ref: '#/definitions/handlers.AuthResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -908,7 +911,7 @@ paths:
         "200":
           description: Gift item retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+            $ref: '#/definitions/handlers.GiftItemResponse'
         "403":
           description: Access denied
           schema:
@@ -942,14 +945,14 @@ paths:
         name: gift_item
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.UpdateGiftItemRequest'
+          $ref: '#/definitions/handlers.UpdateGiftItemRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Gift item updated successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+            $ref: '#/definitions/handlers.GiftItemResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1002,14 +1005,14 @@ paths:
         name: purchase_request
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.PurchaseRequest'
+          $ref: '#/definitions/handlers.PurchaseRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Gift item marked as purchased successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+            $ref: '#/definitions/handlers.GiftItemResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1055,11 +1058,11 @@ paths:
         "200":
           description: Application is healthy
           schema:
-            $ref: '#/definitions/internal_handlers.HealthResponse'
+            $ref: '#/definitions/handlers.HealthResponse'
         "503":
           description: Application is unhealthy
           schema:
-            $ref: '#/definitions/internal_handlers.HealthResponse'
+            $ref: '#/definitions/handlers.HealthResponse'
       summary: Health check endpoint
       tags:
       - Health
@@ -1131,7 +1134,7 @@ paths:
         "200":
           description: User profile
           schema:
-            $ref: '#/definitions/internal_handlers.UserResponse'
+            $ref: '#/definitions/handlers.UserResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1165,14 +1168,14 @@ paths:
         name: profile
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.UpdateProfileRequest'
+          $ref: '#/definitions/handlers.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Updated user profile
           schema:
-            $ref: '#/definitions/internal_handlers.UserResponse'
+            $ref: '#/definitions/handlers.UserResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1218,7 +1221,7 @@ paths:
         "200":
           description: Public wish list retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.WishListResponse'
+            $ref: '#/definitions/handlers.WishListResponse'
         "404":
           description: Wish list not found
           schema:
@@ -1252,7 +1255,7 @@ paths:
         "200":
           description: Gift items retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GetGiftItemsResponse'
+            $ref: '#/definitions/handlers.GetGiftItemsResponse'
         "404":
           description: Wish list not found or not public
           schema:
@@ -1289,7 +1292,7 @@ paths:
         "200":
           description: Reservation status retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.ReservationStatusResponse'
+            $ref: '#/definitions/handlers.ReservationStatusResponse'
         "500":
           description: Internal server error
           schema:
@@ -1317,7 +1320,7 @@ paths:
         "200":
           description: List of user reservations retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.UserReservationsResponse'
+            $ref: '#/definitions/handlers.UserReservationsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1351,7 +1354,7 @@ paths:
           description: List of guest reservations retrieved successfully
           schema:
             items:
-              $ref: '#/definitions/internal_handlers.ReservationDetailsResponse'
+              $ref: '#/definitions/handlers.ReservationDetailsResponse'
             type: array
         "400":
           description: Invalid request parameters
@@ -1413,15 +1416,16 @@ paths:
       - S3 Upload
   /wishlists:
     get:
-      description: Get all wish lists owned by the currently authenticated user
+      description: Get all wish lists owned by the currently authenticated user. Includes
+        item_count for each wishlist.
       produces:
       - application/json
       responses:
         "200":
-          description: List of wish lists retrieved successfully
+          description: List of wish lists retrieved successfully (includes item_count)
           schema:
             items:
-              $ref: '#/definitions/internal_handlers.WishListResponse'
+              $ref: '#/definitions/handlers.WishListResponse'
             type: array
         "401":
           description: Unauthorized
@@ -1450,14 +1454,14 @@ paths:
         name: wish_list
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.CreateWishListRequest'
+          $ref: '#/definitions/handlers.CreateWishListRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Wish list created successfully
           schema:
-            $ref: '#/definitions/internal_handlers.WishListResponse'
+            $ref: '#/definitions/handlers.WishListResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1534,7 +1538,7 @@ paths:
         "200":
           description: Wish list retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.WishListResponse'
+            $ref: '#/definitions/handlers.WishListResponse'
         "403":
           description: Access denied
           schema:
@@ -1568,14 +1572,14 @@ paths:
         name: wish_list
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.UpdateWishListRequest'
+          $ref: '#/definitions/handlers.UpdateWishListRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Wish list updated successfully
           schema:
-            $ref: '#/definitions/internal_handlers.WishListResponse'
+            $ref: '#/definitions/handlers.WishListResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1635,7 +1639,7 @@ paths:
         "200":
           description: List of gift items retrieved successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GetGiftItemsResponse'
+            $ref: '#/definitions/handlers.GetGiftItemsResponse'
         "403":
           description: Access denied
           schema:
@@ -1675,14 +1679,14 @@ paths:
         name: gift_item
         required: true
         schema:
-          $ref: '#/definitions/internal_handlers.CreateGiftItemRequest'
+          $ref: '#/definitions/handlers.CreateGiftItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Gift item created successfully
           schema:
-            $ref: '#/definitions/internal_handlers.GiftItemResponse'
+            $ref: '#/definitions/handlers.GiftItemResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1739,14 +1743,14 @@ paths:
         in: body
         name: cancel_request
         schema:
-          $ref: '#/definitions/internal_handlers.CancelReservationRequest'
+          $ref: '#/definitions/handlers.CancelReservationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Reservation canceled successfully
           schema:
-            $ref: '#/definitions/internal_handlers.CreateReservationResponse'
+            $ref: '#/definitions/handlers.CreateReservationResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1790,14 +1794,14 @@ paths:
         in: body
         name: reservation_request
         schema:
-          $ref: '#/definitions/internal_handlers.CreateReservationRequest'
+          $ref: '#/definitions/handlers.CreateReservationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Reservation created successfully
           schema:
-            $ref: '#/definitions/internal_handlers.CreateReservationResponse'
+            $ref: '#/definitions/handlers.CreateReservationResponse'
         "400":
           description: Invalid request body or validation error
           schema:

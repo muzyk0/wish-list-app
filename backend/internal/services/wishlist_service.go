@@ -98,6 +98,7 @@ type WishListOutput struct {
 	IsPublic     bool
 	PublicSlug   string
 	ViewCount    int64
+	ItemCount    int64 // Number of gift items in this wishlist
 	CreatedAt    string
 	UpdatedAt    string
 }
@@ -302,26 +303,28 @@ func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string
 		return nil, errors.New("invalid user id")
 	}
 
-	wishLists, err := s.wishListRepo.GetByOwner(ctx, id)
+	// Use the efficient method that gets wishlists with item counts in a single query
+	wishLists, err := s.wishListRepo.GetByOwnerWithItemCount(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get wish lists by owner from repository: %w", err)
+		return nil, fmt.Errorf("failed to get wish lists by owner with item count from repository: %w", err)
 	}
 
 	var outputs []*WishListOutput
-	for _, wishList := range wishLists {
+	for _, wishListWithCount := range wishLists {
 		output := &WishListOutput{
-			ID:           wishList.ID.String(),
-			OwnerID:      wishList.OwnerID.String(),
-			Title:        wishList.Title,
-			Description:  wishList.Description.String,
-			Occasion:     wishList.Occasion.String,
-			OccasionDate: wishList.OccasionDate.Time.Format(time.RFC3339),
-			TemplateID:   wishList.TemplateID,
-			IsPublic:     wishList.IsPublic.Bool,
-			PublicSlug:   wishList.PublicSlug.String,
-			ViewCount:    int64(wishList.ViewCount.Int32),
-			CreatedAt:    wishList.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt:    wishList.UpdatedAt.Time.Format(time.RFC3339),
+			ID:           wishListWithCount.ID.String(),
+			OwnerID:      wishListWithCount.OwnerID.String(),
+			Title:        wishListWithCount.Title,
+			Description:  wishListWithCount.Description.String,
+			Occasion:     wishListWithCount.Occasion.String,
+			OccasionDate: wishListWithCount.OccasionDate.Time.Format(time.RFC3339),
+			TemplateID:   wishListWithCount.TemplateID,
+			IsPublic:     wishListWithCount.IsPublic.Bool,
+			PublicSlug:   wishListWithCount.PublicSlug.String,
+			ViewCount:    int64(wishListWithCount.ViewCount.Int32),
+			ItemCount:    wishListWithCount.ItemCount,
+			CreatedAt:    wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt:    wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
 		}
 		outputs = append(outputs, output)
 	}

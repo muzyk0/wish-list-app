@@ -47,7 +47,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.ChangeEmailRequest"
+                            "$ref": "#/definitions/handlers.ChangeEmailRequest"
                         }
                     }
                 ],
@@ -55,7 +55,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Email changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.MessageResponse"
+                            "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     },
                     "400": {
@@ -122,7 +122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.ChangePasswordRequest"
+                            "$ref": "#/definitions/handlers.ChangePasswordRequest"
                         }
                     }
                 ],
@@ -130,7 +130,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Password changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.MessageResponse"
+                            "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     },
                     "400": {
@@ -183,7 +183,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.ExchangeRequest"
+                            "$ref": "#/definitions/handlers.ExchangeRequest"
                         }
                     }
                 ],
@@ -191,7 +191,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Code exchanged successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.ExchangeResponse"
+                            "$ref": "#/definitions/handlers.ExchangeResponse"
                         }
                     },
                     "400": {
@@ -253,7 +253,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.LoginRequest"
+                            "$ref": "#/definitions/handlers.LoginRequest"
                         }
                     }
                 ],
@@ -261,7 +261,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Login successful",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.AuthResponse"
+                            "$ref": "#/definitions/handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -316,7 +316,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Logout successful",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.MessageResponse"
+                            "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     }
                 }
@@ -344,7 +344,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Handoff code generated",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.HandoffResponse"
+                            "$ref": "#/definitions/handlers.HandoffResponse"
                         }
                     },
                     "401": {
@@ -397,7 +397,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -405,7 +405,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.AuthResponse"
+                            "$ref": "#/definitions/handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -449,7 +449,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -457,7 +457,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.AuthResponse"
+                            "$ref": "#/definitions/handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -498,7 +498,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Token refreshed successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.RefreshResponse"
+                            "$ref": "#/definitions/handlers.RefreshResponse"
                         }
                     },
                     "401": {
@@ -533,7 +533,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.RegisterRequest"
+                            "$ref": "#/definitions/handlers.RegisterRequest"
                         }
                     }
                 ],
@@ -541,7 +541,7 @@ const docTemplate = `{
                     "201": {
                         "description": "User created successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.AuthResponse"
+                            "$ref": "#/definitions/handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -602,7 +602,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
+                            "$ref": "#/definitions/handlers.GiftItemResponse"
                         }
                     },
                     "403": {
@@ -656,7 +656,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UpdateGiftItemRequest"
+                            "$ref": "#/definitions/handlers.UpdateGiftItemRequest"
                         }
                     }
                 ],
@@ -664,7 +664,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
+                            "$ref": "#/definitions/handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -812,7 +812,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.PurchaseRequest"
+                            "$ref": "#/definitions/handlers.PurchaseRequest"
                         }
                     }
                 ],
@@ -820,7 +820,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item marked as purchased successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
+                            "$ref": "#/definitions/handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -885,13 +885,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Application is healthy",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.HealthResponse"
+                            "$ref": "#/definitions/handlers.HealthResponse"
                         }
                     },
                     "503": {
                         "description": "Application is unhealthy",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.HealthResponse"
+                            "$ref": "#/definitions/handlers.HealthResponse"
                         }
                     }
                 }
@@ -1006,7 +1006,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User profile",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UserResponse"
+                            "$ref": "#/definitions/handlers.UserResponse"
                         }
                     },
                     "401": {
@@ -1062,7 +1062,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UpdateProfileRequest"
+                            "$ref": "#/definitions/handlers.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -1070,7 +1070,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated user profile",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UserResponse"
+                            "$ref": "#/definitions/handlers.UserResponse"
                         }
                     },
                     "400": {
@@ -1135,7 +1135,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Public wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.WishListResponse"
+                            "$ref": "#/definitions/handlers.WishListResponse"
                         }
                     },
                     "404": {
@@ -1185,7 +1185,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift items retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GetGiftItemsResponse"
+                            "$ref": "#/definitions/handlers.GetGiftItemsResponse"
                         }
                     },
                     "404": {
@@ -1239,7 +1239,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation status retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.ReservationStatusResponse"
+                            "$ref": "#/definitions/handlers.ReservationStatusResponse"
                         }
                     },
                     "500": {
@@ -1287,7 +1287,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of user reservations retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UserReservationsResponse"
+                            "$ref": "#/definitions/handlers.UserReservationsResponse"
                         }
                     },
                     "401": {
@@ -1336,7 +1336,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_handlers.ReservationDetailsResponse"
+                                "$ref": "#/definitions/handlers.ReservationDetailsResponse"
                             }
                         }
                     },
@@ -1435,7 +1435,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all wish lists owned by the currently authenticated user",
+                "description": "Get all wish lists owned by the currently authenticated user. Includes item_count for each wishlist.",
                 "produces": [
                     "application/json"
                 ],
@@ -1445,11 +1445,11 @@ const docTemplate = `{
                 "summary": "Get all wish lists owned by the authenticated user",
                 "responses": {
                     "200": {
-                        "description": "List of wish lists retrieved successfully",
+                        "description": "List of wish lists retrieved successfully (includes item_count)",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_handlers.WishListResponse"
+                                "$ref": "#/definitions/handlers.WishListResponse"
                             }
                         }
                     },
@@ -1497,7 +1497,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateWishListRequest"
+                            "$ref": "#/definitions/handlers.CreateWishListRequest"
                         }
                     }
                 ],
@@ -1505,7 +1505,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Wish list created successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.WishListResponse"
+                            "$ref": "#/definitions/handlers.WishListResponse"
                         }
                     },
                     "400": {
@@ -1566,7 +1566,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.WishListResponse"
+                            "$ref": "#/definitions/handlers.WishListResponse"
                         }
                     },
                     "403": {
@@ -1620,7 +1620,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.UpdateWishListRequest"
+                            "$ref": "#/definitions/handlers.UpdateWishListRequest"
                         }
                     }
                 ],
@@ -1628,7 +1628,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Wish list updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.WishListResponse"
+                            "$ref": "#/definitions/handlers.WishListResponse"
                         }
                     },
                     "400": {
@@ -1775,7 +1775,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of gift items retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GetGiftItemsResponse"
+                            "$ref": "#/definitions/handlers.GetGiftItemsResponse"
                         }
                     },
                     "403": {
@@ -1838,7 +1838,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateGiftItemRequest"
+                            "$ref": "#/definitions/handlers.CreateGiftItemRequest"
                         }
                     }
                 ],
@@ -1846,7 +1846,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Gift item created successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
+                            "$ref": "#/definitions/handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -1935,7 +1935,7 @@ const docTemplate = `{
                         "name": "reservation_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateReservationRequest"
+                            "$ref": "#/definitions/handlers.CreateReservationRequest"
                         }
                     }
                 ],
@@ -1943,7 +1943,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation created successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/handlers.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -2012,7 +2012,7 @@ const docTemplate = `{
                         "name": "cancel_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CancelReservationRequest"
+                            "$ref": "#/definitions/handlers.CancelReservationRequest"
                         }
                     }
                 ],
@@ -2020,7 +2020,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation canceled successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/handlers.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -2055,7 +2055,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_handlers.AuthResponse": {
+        "handlers.AuthResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2075,13 +2075,13 @@ const docTemplate = `{
                     "description": "User information",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/internal_handlers.UserResponse"
+                            "$ref": "#/definitions/handlers.UserResponse"
                         }
                     ]
                 }
             }
         },
-        "internal_handlers.CancelReservationRequest": {
+        "handlers.CancelReservationRequest": {
             "type": "object",
             "properties": {
                 "reservation_token": {
@@ -2089,7 +2089,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ChangeEmailRequest": {
+        "handlers.ChangeEmailRequest": {
             "type": "object",
             "required": [
                 "current_password",
@@ -2105,7 +2105,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ChangePasswordRequest": {
+        "handlers.ChangePasswordRequest": {
             "type": "object",
             "required": [
                 "current_password",
@@ -2122,7 +2122,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.CreateGiftItemRequest": {
+        "handlers.CreateGiftItemRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -2159,7 +2159,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.CreateReservationRequest": {
+        "handlers.CreateReservationRequest": {
             "type": "object",
             "properties": {
                 "guest_email": {
@@ -2171,7 +2171,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.CreateReservationResponse": {
+        "handlers.CreateReservationResponse": {
             "type": "object",
             "required": [
                 "gift_item_id",
@@ -2220,7 +2220,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.CreateWishListRequest": {
+        "handlers.CreateWishListRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2248,7 +2248,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ExchangeRequest": {
+        "handlers.ExchangeRequest": {
             "type": "object",
             "required": [
                 "code"
@@ -2259,7 +2259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ExchangeResponse": {
+        "handlers.ExchangeResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2274,11 +2274,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/internal_handlers.UserResponse"
+                    "$ref": "#/definitions/handlers.UserResponse"
                 }
             }
         },
-        "internal_handlers.GetGiftItemsResponse": {
+        "handlers.GetGiftItemsResponse": {
             "type": "object",
             "required": [
                 "items",
@@ -2291,7 +2291,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal_handlers.GiftItemResponse"
+                        "$ref": "#/definitions/handlers.GiftItemResponse"
                     }
                 },
                 "limit": {
@@ -2308,7 +2308,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.GiftItemResponse": {
+        "handlers.GiftItemResponse": {
             "type": "object",
             "required": [
                 "created_at",
@@ -2371,7 +2371,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.GiftItemSummary": {
+        "handlers.GiftItemSummary": {
             "type": "object",
             "required": [
                 "id",
@@ -2392,7 +2392,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.HandoffResponse": {
+        "handlers.HandoffResponse": {
             "type": "object",
             "required": [
                 "code",
@@ -2409,7 +2409,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.HealthResponse": {
+        "handlers.HealthResponse": {
             "type": "object",
             "required": [
                 "status"
@@ -2429,7 +2429,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.LoginRequest": {
+        "handlers.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2445,7 +2445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.MessageResponse": {
+        "handlers.MessageResponse": {
             "type": "object",
             "required": [
                 "message"
@@ -2456,7 +2456,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.OAuthCodeRequest": {
+        "handlers.OAuthCodeRequest": {
             "type": "object",
             "required": [
                 "code"
@@ -2467,7 +2467,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.PurchaseRequest": {
+        "handlers.PurchaseRequest": {
             "type": "object",
             "properties": {
                 "purchased_price": {
@@ -2475,7 +2475,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.RefreshResponse": {
+        "handlers.RefreshResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2490,7 +2490,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.RegisterRequest": {
+        "handlers.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2515,7 +2515,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ReservationDetailsResponse": {
+        "handlers.ReservationDetailsResponse": {
             "type": "object",
             "required": [
                 "gift_item",
@@ -2529,7 +2529,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gift_item": {
-                    "$ref": "#/definitions/internal_handlers.GiftItemSummary"
+                    "$ref": "#/definitions/handlers.GiftItemSummary"
                 },
                 "id": {
                     "type": "string"
@@ -2541,11 +2541,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "wishlist": {
-                    "$ref": "#/definitions/internal_handlers.WishListSummary"
+                    "$ref": "#/definitions/handlers.WishListSummary"
                 }
             }
         },
-        "internal_handlers.ReservationStatusResponse": {
+        "handlers.ReservationStatusResponse": {
             "type": "object",
             "required": [
                 "is_reserved",
@@ -2566,7 +2566,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.UpdateGiftItemRequest": {
+        "handlers.UpdateGiftItemRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2600,7 +2600,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.UpdateProfileRequest": {
+        "handlers.UpdateProfileRequest": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -2614,7 +2614,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.UpdateWishListRequest": {
+        "handlers.UpdateWishListRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2638,7 +2638,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.UserReservationsResponse": {
+        "handlers.UserReservationsResponse": {
             "type": "object",
             "required": [
                 "data",
@@ -2648,13 +2648,13 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal_handlers.ReservationDetailsResponse"
+                        "$ref": "#/definitions/handlers.ReservationDetailsResponse"
                     }
                 },
                 "pagination": {}
             }
         },
-        "internal_handlers.UserResponse": {
+        "handlers.UserResponse": {
             "type": "object",
             "required": [
                 "email",
@@ -2678,7 +2678,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.WishListResponse": {
+        "handlers.WishListResponse": {
             "type": "object",
             "required": [
                 "created_at",
@@ -2700,6 +2700,10 @@ const docTemplate = `{
                 },
                 "is_public": {
                     "type": "boolean"
+                },
+                "item_count": {
+                    "type": "integer",
+                    "example": 5
                 },
                 "occasion": {
                     "type": "string"
@@ -2727,7 +2731,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.WishListSummary": {
+        "handlers.WishListSummary": {
             "type": "object",
             "required": [
                 "id",

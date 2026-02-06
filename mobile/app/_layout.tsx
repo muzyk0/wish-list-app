@@ -8,7 +8,7 @@ import Providers from '@/app/providers';
 import { exchangeCodeForTokens } from '@/lib/api/auth';
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  initialRouteName: 'splash',
 };
 
 export default function RootLayout() {
@@ -116,6 +116,20 @@ export default function RootLayout() {
   return (
     <Providers>
       <Stack>
+        <Stack.Screen
+          name="splash"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
+        <Stack.Screen
+          name="onboarding"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
         <Stack.Screen
           name="(tabs)"
           options={{

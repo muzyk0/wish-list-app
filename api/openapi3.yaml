@@ -1054,10 +1054,11 @@ paths:
         - S3 Upload
   /wishlists:
     get:
-      description: Get all wish lists owned by the currently authenticated user
+      description: Get all wish lists owned by the currently authenticated user.
+        Includes item_count for each wishlist.
       responses:
         "200":
-          description: List of wish lists retrieved successfully
+          description: List of wish lists retrieved successfully (includes item_count)
           content:
             application/json:
               schema:
@@ -1966,6 +1967,9 @@ components:
           type: string
         is_public:
           type: boolean
+        item_count:
+          example: 5
+          type: integer
         occasion:
           type: string
         occasion_date:

@@ -50,15 +50,19 @@ export default defineConfig({
             use: {...devices['Desktop Safari']},
         },
 
-        /* Test against mobile viewports. */
-        // {
-        //   name: 'Mobile Chrome',
-        //   use: { ...devices['Pixel 5'] },
-        // },
-        // {
-        //   name: 'Mobile Safari',
-        //   use: { ...devices['iPhone 12'] },
-        // },
+        /* Test against mobile viewports for mobile app testing */
+        {
+            name: 'Mobile Chrome',
+            use: {...devices['Pixel 5']},
+        },
+        {
+            name: 'Mobile Safari',
+            use: {...devices['iPhone 12']},
+        },
+        {
+            name: 'Tablet',
+            use: {...devices['iPad Pro']},
+        },
 
         /* Test against branded browsers. */
         // {
@@ -76,6 +80,12 @@ export default defineConfig({
         {
             command: 'cd ./backend && go run ./cmd/server',
             url: 'http://localhost:8080/healthz',
+            timeout: 120 * 1000,
+            reuseExistingServer: !process.env.CI,
+        },
+        {
+            command: 'cd ./mobile && pnpm web',
+            url: 'http://localhost:8081',
             timeout: 120 * 1000,
             reuseExistingServer: !process.env.CI,
         }
