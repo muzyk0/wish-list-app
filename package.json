@@ -4,14 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
     "@redocly/cli": "^2.15.0",
+    "@types/node": "^25.2.0",
     "shadcn": "^3.6.3",
     "swagger2openapi": "^7.0.8"
   }

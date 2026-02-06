@@ -1,0 +1,52 @@
+@startuml Infinite Recursion Problem (Wrong Approach)
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+actor User
+participant "ApiClient" as client
+participant "refreshMiddleware" as refresh
+participant "refreshAccessToken()" as refreshFunc
+participant "baseClient\n(WITH middleware)" as base #FF6B6B
+
+User -> client: getProfile()
+activate client
+
+client -> client: GET /protected/profile
+note right: Authorization: Bearer <expired_token>
+
+client -> refresh: 401 Unauthorized
+activate refresh
+
+refresh -> refreshFunc: refreshAccessToken()
+activate refreshFunc
+
+refreshFunc -> base: POST /auth/refresh
+activate base
+note right #FF6B6B: ❌ PROBLEM:\nbaseClient now has\nrefreshMiddleware!
+
+base -> refresh: 401 Unauthorized\n(refresh token expired)
+activate refresh #FF6B6B
+
+refresh -> refreshFunc: refreshAccessToken()
+activate refreshFunc #FF6B6B
+
+refreshFunc -> base: POST /auth/refresh
+activate base #FF6B6B
+
+base -> refresh: 401 Unauthorized
+activate refresh #FF6B6B
+
+refresh -> refreshFunc: refreshAccessToken()
+activate refreshFunc #FF6B6B
+
+note over refresh, base #FF6B6B
+  💥 INFINITE RECURSION
+
+  Each 401 triggers another
+  refresh attempt, which
+  triggers another 401...
+
+  Stack overflow!
+end note
+
+@enduml

@@ -29,7 +29,7 @@ import (
 	"wish-list/internal/services"
 	"wish-list/internal/validation"
 
-	_ "wish-list/docs" // Import generated docs
+	_ "wish-list/internal/handlers/docs" // Import generated docs
 )
 
 //	@title			Wish List API
@@ -85,6 +85,11 @@ func main() {
 
 	// Initialize JWT token manager
 	tokenManager := auth.NewTokenManager(cfg.JWTSecret)
+
+	// Initialize code store for mobile handoff
+	codeStore := auth.NewCodeStore()
+	stopCleanup := codeStore.StartCleanupRoutine()
+	defer stopCleanup()
 
 	// Initialize S3 client
 	s3Client, err := aws.NewS3Client(cfg.AWSRegion, cfg.AWSAccessKeyID, cfg.AWSSecretAccessKey, cfg.AWSS3BucketName)
@@ -190,6 +195,16 @@ func main() {
 	// Initialize handlers with analytics integration
 	healthHandler := handlers.NewHealthHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
+	authHandler := handlers.NewAuthHandler(userService, tokenManager, codeStore)
+	oauthHandler := handlers.NewOAuthHandler(
+		userRepo,
+		tokenManager,
+		cfg.GoogleClientID,
+		cfg.GoogleClientSecret,
+		cfg.FacebookClientID,
+		cfg.FacebookClientSecret,
+		cfg.OAuthRedirectURL,
+	)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 
@@ -203,7 +218,7 @@ func main() {
 	accountCleanupService.StartScheduledCleanup(appCtx)
 
 	// Initialize routes
-	setupRoutes(e, healthHandler, userHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
+	setupRoutes(e, healthHandler, userHandler, authHandler, oauthHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
 
 	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
@@ -250,17 +265,29 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Health check endpoint
-	e.GET("/health", healthHandler.Health)
+	e.GET("/healthz", healthHandler.Health)
 
 	// User authentication endpoints
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/register", userHandler.Register)
 	authGroup.POST("/login", userHandler.Login)
+	authGroup.POST("/refresh", authHandler.Refresh)
+	authGroup.POST("/exchange", authHandler.Exchange)
+
+	// OAuth endpoints
+	authGroup.POST("/oauth/google", oauthHandler.GoogleOAuth)
+	authGroup.POST("/oauth/facebook", oauthHandler.FacebookOAuth)
+
+	// Protected auth endpoints (require authentication)
+	authGroup.POST("/mobile-handoff", authHandler.MobileHandoff, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/logout", authHandler.Logout, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/change-email", authHandler.ChangeEmail, auth.JWTMiddleware(tokenManager))
+	authGroup.POST("/change-password", authHandler.ChangePassword, auth.JWTMiddleware(tokenManager))
 
 	// Example protected route using JWT
 	protected := e.Group("/api/protected")
@@ -286,6 +313,7 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	wishListGroup.GET("/:id", wishListHandler.GetWishList)
 	wishListGroup.PUT("/:id", wishListHandler.UpdateWishList)
 	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
+	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
 	wishListGroup.GET("", wishListHandler.GetWishListsByOwner)
 
 	// Gift item endpoints
@@ -299,8 +327,9 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	giftItemGroup.POST("/:id/mark-purchased", wishListHandler.MarkGiftItemAsPurchased)
 
 	// Public wish list endpoints
-	publicListGroup := e.Group("/api/public/lists")
-	publicListGroup.GET("/:slug", wishListHandler.GetWishListByPublicSlug)
+	publicWishlistGroup := e.Group("/api/public/wishlists")
+	publicWishlistGroup.GET("/:slug", wishListHandler.GetWishListByPublicSlug)
+	publicWishlistGroup.GET("/:slug/gift-items", wishListHandler.GetGiftItemsByPublicSlug)
 
 	// Reservation endpoints
 	reservationGroup := e.Group("/api/reservations")

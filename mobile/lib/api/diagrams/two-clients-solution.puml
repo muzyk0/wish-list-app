@@ -1,0 +1,53 @@
+@startuml Two Clients Solution (Correct Approach)
+!theme plain
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+rectangle "Wrong Approach ❌" #FFE6E6 {
+  rectangle "baseClient\nWITH middleware" as wrong #FF6B6B {
+    rectangle "authMiddleware"
+    rectangle "refreshMiddleware"
+  }
+
+  rectangle "auth.ts" as wrongAuth
+  rectangle "api.ts" as wrongApi
+
+  wrongAuth -down-> wrong : uses same\nclient
+  wrongApi -down-> wrong : uses same\nclient
+
+  note bottom of wrong
+    💥 PROBLEM:
+    • Middleware applied to ALL requests
+    • Infinite recursion on refresh
+    • Cannot separate concerns
+  end note
+}
+
+rectangle "Correct Approach ✅" #E8F5E9 {
+  rectangle "baseClient\nNO middleware" as correct #90EE90 {
+    rectangle "Clean HTTP client"
+  }
+
+  rectangle "ApiClient.client\nWITH middleware" as correctApi #90EE90 {
+    rectangle "authMiddleware" as authMid
+    rectangle "refreshMiddleware" as refMid
+  }
+
+  rectangle "auth.ts" as correctAuth
+  rectangle "api.ts" as correctApiTs
+
+  correctAuth -down-> correct : uses\nbaseClient
+  correctApiTs -down-> correctApi : creates\nNEW client
+
+  note bottom of correct
+    ✅ SOLUTION:
+    • Clean baseClient for auth
+    • Separate client with middleware
+    • No recursion possible
+    • Clear separation of concerns
+  end note
+}
+
+@enduml

@@ -72,6 +72,14 @@ func (m *MockWishListRepository) IncrementViewCount(ctx context.Context, id pgty
 	return args.Error(0)
 }
 
+func (m *MockWishListRepository) GetByOwnerWithItemCount(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishListWithItemCount, error) {
+	args := m.Called(ctx, ownerID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*db.WishListWithItemCount), args.Error(1)
+}
+
 func TestWishListService_CreateWishList(t *testing.T) {
 	tests := []struct {
 		name          string

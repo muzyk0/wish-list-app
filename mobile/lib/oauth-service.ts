@@ -27,10 +27,24 @@ const googleDiscovery: AuthSession.DiscoveryDocument = {
   revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
 };
 
+// OAuth response from backend
+interface OAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    avatar_url?: string;
+  };
+}
+
 // Google OAuth flow
 export const startGoogleOAuth = async (): Promise<{
   success: boolean;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
   error?: string;
 }> => {
   try {
@@ -85,9 +99,33 @@ export const startGoogleOAuth = async (): Promise<{
       const { code } = result.params;
 
       if (code) {
-        // In a real implementation, you would exchange the code for tokens
-        // The code is now extracted automatically by AuthRequest
-        return { success: true, token: code };
+        // Exchange code with backend
+        const response = await fetch(
+          `${OAUTH_CONFIG.backendUrl}/api/auth/oauth/google`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          return {
+            success: false,
+            error: errorData || 'Failed to authenticate with backend',
+          };
+        }
+
+        const data: OAuthResponse = await response.json();
+
+        return {
+          success: true,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        };
       } else {
         return { success: false, error: 'Authorization code not received' };
       }
@@ -120,7 +158,8 @@ const facebookDiscovery: AuthSession.DiscoveryDocument = {
 // Facebook OAuth flow
 export const startFacebookOAuth = async (): Promise<{
   success: boolean;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
   error?: string;
 }> => {
   try {
@@ -164,9 +203,33 @@ export const startFacebookOAuth = async (): Promise<{
       const { code } = result.params;
 
       if (code) {
-        // In a real implementation, you would exchange the code for tokens
-        // The code is now extracted automatically by AuthRequest
-        return { success: true, token: code };
+        // Exchange code with backend
+        const response = await fetch(
+          `${OAUTH_CONFIG.backendUrl}/api/auth/oauth/facebook`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          return {
+            success: false,
+            error: errorData || 'Failed to authenticate with backend',
+          };
+        }
+
+        const data: OAuthResponse = await response.json();
+
+        return {
+          success: true,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        };
       } else {
         return { success: false, error: 'Authorization code not received' };
       }
@@ -193,7 +256,8 @@ export const startFacebookOAuth = async (): Promise<{
 // Apple OAuth flow (iOS only)
 export const startAppleOAuth = async (): Promise<{
   success: boolean;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
   error?: string;
 }> => {
   // Apple Sign In requires additional setup and is iOS-specific
@@ -207,6 +271,7 @@ export const startAppleOAuth = async (): Promise<{
 
   // For now, return a mock response
   // In a real implementation, you'd use expo-apple-authentication
+  // and send the identityToken to backend at /api/auth/oauth/apple
   return {
     success: false,
     error:

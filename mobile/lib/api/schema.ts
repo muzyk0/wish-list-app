@@ -4,6 +4,259 @@
  */
 
 export interface paths {
+    "/auth/change-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change user email
+         * @description Change the authenticated user's email address with password verification. Requires current password to prevent unauthorized changes.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Email change request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.ChangeEmailRequest"];
+                };
+            };
+            responses: {
+                /** @description Email changed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.MessageResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized or incorrect password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Email already in use */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change user password
+         * @description Change the authenticated user's password with current password verification. This will invalidate all existing sessions except the current one.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Password change request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.ChangePasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description Password changed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.MessageResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized or incorrect password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchange handoff code for tokens
+         * @description Exchange a handoff code received from Frontend redirect for access and refresh tokens. Code can only be used once.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Exchange request */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.ExchangeRequest"];
+                };
+            };
+            responses: {
+                /** @description Code exchanged successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.ExchangeResponse"];
+                    };
+                };
+                /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Invalid or expired code */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Rate limit exceeded (10 requests/minute) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -64,6 +317,299 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout user
+         * @description Clear refresh token cookie and invalidate session
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Logout successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.MessageResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/mobile-handoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate mobile handoff code
+         * @description Generate a short-lived (60 second) one-time code for transferring authentication from Frontend to Mobile app.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Handoff code generated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.HandoffResponse"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Rate limit exceeded (10 requests/minute per user) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/oauth/facebook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Facebook OAuth authentication
+         * @description Exchange Facebook authorization code for access and refresh tokens
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Authorization code from Facebook */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.OAuthCodeRequest"];
+                };
+            };
+            responses: {
+                /** @description Authentication successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.AuthResponse"];
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/oauth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google OAuth authentication
+         * @description Exchange Google authorization code for access and refresh tokens
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Authorization code from Google */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["internal_handlers.OAuthCodeRequest"];
+                };
+            };
+            responses: {
+                /** @description Authentication successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.AuthResponse"];
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh access token
+         * @description Exchange refresh token for a new access token. Accepts refresh token via httpOnly cookie (web clients) or Authorization Bearer header (mobile clients). Implements token rotation - returns new refresh token on success.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Token refreshed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.RefreshResponse"];
+                    };
+                };
+                /** @description Invalid or expired refresh token */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -478,7 +1024,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health": {
+    "/healthz": {
         parameters: {
             query?: never;
             header?: never;
@@ -843,6 +1389,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/wishlists/{slug}/gift-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get gift items for a public wish list by slug
+         * @description Get all gift items for a public wish list by its public slug with pagination support.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (default 1) */
+                    page?: number;
+                    /** @description Items per page (default 10, max 100) */
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Public Slug */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Gift items retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["internal_handlers.GetGiftItemsResponse"];
+                    };
+                };
+                /** @description Wish list not found or not public */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/wishlists/{slug}/gift-items/{itemId}/reservation-status": {
         parameters: {
             query?: never;
@@ -1121,7 +1736,7 @@ export interface paths {
         };
         /**
          * Get all wish lists owned by the authenticated user
-         * @description Get all wish lists owned by the currently authenticated user
+         * @description Get all wish lists owned by the currently authenticated user. Includes item_count for each wishlist.
          */
         get: {
             parameters: {
@@ -1132,7 +1747,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of wish lists retrieved successfully */
+                /** @description List of wish lists retrieved successfully (includes item_count) */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1760,13 +2375,23 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         "internal_handlers.AuthResponse": {
-            /** @description Authentication token */
-            token: string;
+            /** @description Access token (short-lived, 15 minutes) */
+            accessToken: string;
+            /** @description Refresh token (long-lived, 7 days) - also set as httpOnly cookie */
+            refreshToken: string;
             /** @description User information */
             user: components["schemas"]["internal_handlers.UserResponse"];
         };
         "internal_handlers.CancelReservationRequest": {
             reservation_token?: string;
+        };
+        "internal_handlers.ChangeEmailRequest": {
+            current_password: string;
+            new_email: string;
+        };
+        "internal_handlers.ChangePasswordRequest": {
+            current_password: string;
+            new_password: string;
         };
         "internal_handlers.CreateGiftItemRequest": {
             description?: string;
@@ -1805,6 +2430,14 @@ export interface components {
             template_id: string;
             title: string;
         };
+        "internal_handlers.ExchangeRequest": {
+            code: string;
+        };
+        "internal_handlers.ExchangeResponse": {
+            accessToken: string;
+            refreshToken: string;
+            user: components["schemas"]["internal_handlers.UserResponse"];
+        };
         "internal_handlers.GetGiftItemsResponse": {
             items: components["schemas"]["internal_handlers.GiftItemResponse"][];
             limit: number;
@@ -1837,6 +2470,12 @@ export interface components {
             name: string;
             price?: string;
         };
+        "internal_handlers.HandoffResponse": {
+            /** @example a1b2c3d4e5f6... */
+            code: string;
+            /** @example 60 */
+            expiresIn: number;
+        };
         "internal_handlers.HealthResponse": {
             checks?: {
                 [key: string]: string;
@@ -1848,8 +2487,18 @@ export interface components {
             email: string;
             password: string;
         };
+        "internal_handlers.MessageResponse": {
+            message: string;
+        };
+        "internal_handlers.OAuthCodeRequest": {
+            code: string;
+        };
         "internal_handlers.PurchaseRequest": {
             purchased_price?: number;
+        };
+        "internal_handlers.RefreshResponse": {
+            accessToken: string;
+            refreshToken: string;
         };
         "internal_handlers.RegisterRequest": {
             avatar_url?: string;
@@ -1884,10 +2533,8 @@ export interface components {
         };
         "internal_handlers.UpdateProfileRequest": {
             avatar_url?: string;
-            email?: string;
             first_name?: string;
             last_name?: string;
-            password?: string;
         };
         "internal_handlers.UpdateWishListRequest": {
             description?: string;
@@ -1913,6 +2560,8 @@ export interface components {
             description?: string;
             id: string;
             is_public?: boolean;
+            /** @example 5 */
+            item_count?: number;
             occasion?: string;
             occasion_date?: string;
             owner_id: string;
@@ -1937,16 +2586,24 @@ export interface components {
 }
 export type SchemaInternalHandlersAuthResponse = components['schemas']['internal_handlers.AuthResponse'];
 export type SchemaInternalHandlersCancelReservationRequest = components['schemas']['internal_handlers.CancelReservationRequest'];
+export type SchemaInternalHandlersChangeEmailRequest = components['schemas']['internal_handlers.ChangeEmailRequest'];
+export type SchemaInternalHandlersChangePasswordRequest = components['schemas']['internal_handlers.ChangePasswordRequest'];
 export type SchemaInternalHandlersCreateGiftItemRequest = components['schemas']['internal_handlers.CreateGiftItemRequest'];
 export type SchemaInternalHandlersCreateReservationRequest = components['schemas']['internal_handlers.CreateReservationRequest'];
 export type SchemaInternalHandlersCreateReservationResponse = components['schemas']['internal_handlers.CreateReservationResponse'];
 export type SchemaInternalHandlersCreateWishListRequest = components['schemas']['internal_handlers.CreateWishListRequest'];
+export type SchemaInternalHandlersExchangeRequest = components['schemas']['internal_handlers.ExchangeRequest'];
+export type SchemaInternalHandlersExchangeResponse = components['schemas']['internal_handlers.ExchangeResponse'];
 export type SchemaInternalHandlersGetGiftItemsResponse = components['schemas']['internal_handlers.GetGiftItemsResponse'];
 export type SchemaInternalHandlersGiftItemResponse = components['schemas']['internal_handlers.GiftItemResponse'];
 export type SchemaInternalHandlersGiftItemSummary = components['schemas']['internal_handlers.GiftItemSummary'];
+export type SchemaInternalHandlersHandoffResponse = components['schemas']['internal_handlers.HandoffResponse'];
 export type SchemaInternalHandlersHealthResponse = components['schemas']['internal_handlers.HealthResponse'];
 export type SchemaInternalHandlersLoginRequest = components['schemas']['internal_handlers.LoginRequest'];
+export type SchemaInternalHandlersMessageResponse = components['schemas']['internal_handlers.MessageResponse'];
+export type SchemaInternalHandlersOAuthCodeRequest = components['schemas']['internal_handlers.OAuthCodeRequest'];
 export type SchemaInternalHandlersPurchaseRequest = components['schemas']['internal_handlers.PurchaseRequest'];
+export type SchemaInternalHandlersRefreshResponse = components['schemas']['internal_handlers.RefreshResponse'];
 export type SchemaInternalHandlersRegisterRequest = components['schemas']['internal_handlers.RegisterRequest'];
 export type SchemaInternalHandlersReservationDetailsResponse = components['schemas']['internal_handlers.ReservationDetailsResponse'];
 export type SchemaInternalHandlersReservationStatusResponse = components['schemas']['internal_handlers.ReservationStatusResponse'];

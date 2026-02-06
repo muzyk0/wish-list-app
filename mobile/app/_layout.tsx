@@ -5,9 +5,10 @@ import * as Linking from 'expo-linking';
 import 'react-native-reanimated';
 
 import Providers from '@/app/providers';
+import { exchangeCodeForTokens } from '@/lib/api/auth';
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  initialRouteName: 'splash',
 };
 
 export default function RootLayout() {
@@ -15,8 +16,22 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Handle deep links
-    const handleDeepLink = (event: { url: string }) => {
+    const handleDeepLink = async (event: { url: string }) => {
       const { path, queryParams } = Linking.parse(event.url);
+
+      // Handle auth deep link: wishlistapp://auth?code=xxx
+      if (path === 'auth' && queryParams?.code) {
+        try {
+          await exchangeCodeForTokens(queryParams.code as string);
+          // Navigate to home after successful authentication
+          router.replace('/(tabs)');
+        } catch (error) {
+          console.error('Failed to exchange auth code:', error);
+          // Navigate to login on error
+          router.replace('/auth/login');
+        }
+        return;
+      }
 
       if (path) {
         // Map web paths to mobile routes
@@ -101,6 +116,20 @@ export default function RootLayout() {
   return (
     <Providers>
       <Stack>
+        <Stack.Screen
+          name="splash"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
+        <Stack.Screen
+          name="onboarding"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
         <Stack.Screen
           name="(tabs)"
           options={{

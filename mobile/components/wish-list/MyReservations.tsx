@@ -1,6 +1,8 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Card, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Text } from 'react-native-paper';
+import { BlurView } from 'expo-blur';
 import { ReservationItem } from './ReservationItem';
 
 interface Reservation {
@@ -23,7 +25,6 @@ interface Reservation {
 }
 
 export function MyReservations() {
-  const theme = useTheme();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -77,14 +78,8 @@ export function MyReservations() {
 
   if (loading) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
-        <ActivityIndicator
-          animating={true}
-          color={theme.colors.primary}
-          size="large"
-        />
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#FFD700" />
         <Text style={styles.loadingText}>Loading reservations...</Text>
       </View>
     );
@@ -92,28 +87,20 @@ export function MyReservations() {
 
   if (reservations.length === 0) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
-        <Card
-          style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}
-        >
-          <Card.Content>
-            <Text style={styles.emptyText}>You have no reservations yet.</Text>
-          </Card.Content>
-        </Card>
+      <View style={styles.centerContainer}>
+        <BlurView intensity={20} style={styles.emptyCard}>
+          <MaterialCommunityIcons name="bookmark-outline" size={64} color="#FFD700" />
+          <Text style={styles.emptyTitle}>No reservations yet</Text>
+          <Text style={styles.emptyText}>
+            When you reserve items, they'll appear here
+          </Text>
+        </BlurView>
       </View>
     );
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <Text variant="headlineMedium" style={styles.title}>
-        My Reservations
-      </Text>
-
+    <View style={styles.container}>
       <FlatList
         data={reservations}
         keyExtractor={(item) => item.id}
@@ -121,12 +108,12 @@ export function MyReservations() {
           <ReservationItem reservation={item} onRefresh={fetchReservations} />
         )}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.surface}
+            tintColor="#FFD700"
           />
         }
       />
@@ -137,25 +124,42 @@ export function MyReservations() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  title: {
-    marginBottom: 16,
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   listContent: {
-    paddingBottom: 16,
+    paddingBottom: 100,
   },
   loadingText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.7)',
     marginTop: 16,
-    textAlign: 'center',
   },
   emptyCard: {
-    margin: 16,
-    padding: 24,
-    borderRadius: 12,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 40,
+    alignItems: 'center',
+    maxWidth: 400,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
-    fontSize: 16,
+    lineHeight: 20,
   },
 });

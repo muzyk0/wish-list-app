@@ -14,6 +14,7 @@ import (
 var (
 	ErrUserAlreadyExists = errors.New("user with this email already exists")
 	ErrUserNotFound      = errors.New("user not found")
+	ErrInvalidPassword   = errors.New("invalid password")
 )
 
 // UserServiceInterface defines the interface for user-related operations
@@ -21,7 +22,9 @@ type UserServiceInterface interface {
 	Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error)
 	Login(ctx context.Context, input LoginUserInput) (*UserOutput, error)
 	GetUser(ctx context.Context, userID string) (*UserOutput, error)
-	UpdateUser(ctx context.Context, userID string, input UpdateUserInput) (*UserOutput, error)
+	UpdateProfile(ctx context.Context, userID string, input UpdateProfileInput) (*UserOutput, error)
+	ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error
+	ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error
 	DeleteUser(ctx context.Context, userID string) error
 }
 
@@ -51,6 +54,12 @@ type LoginUserInput struct {
 type UpdateUserInput struct {
 	Email     *string
 	Password  *string
+	FirstName *string
+	LastName  *string
+	AvatarUrl *string
+}
+
+type UpdateProfileInput struct {
 	FirstName *string
 	LastName  *string
 	AvatarUrl *string
@@ -185,7 +194,17 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 	return output, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, userID string, input UpdateUserInput) (*UserOutput, error) {
+func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
+	id := pgtype.UUID{}
+	if err := id.Scan(userID); err != nil {
+		return errors.New("invalid user id")
+	}
+
+	return s.repo.Delete(ctx, id)
+}
+
+// UpdateProfile updates only non-sensitive profile information (firstName, lastName, avatarUrl)
+func (s *UserService) UpdateProfile(ctx context.Context, userID string, input UpdateProfileInput) (*UserOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return nil, errors.New("invalid user id")
@@ -196,15 +215,7 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, input Updat
 		return nil, err
 	}
 
-	// Update fields if provided
-	if input.Email != nil && *input.Email != "" {
-		// Check if the new email is already used by another account
-		existingUser, err := s.repo.GetByEmail(ctx, *input.Email)
-		if err == nil && existingUser.ID != user.ID {
-			return nil, errors.New("email already in use by another account")
-		}
-		user.Email = *input.Email
-	}
+	// Update only profile fields (no email or password)
 	if input.FirstName != nil {
 		user.FirstName = pgtype.Text{
 			String: *input.FirstName,
@@ -220,18 +231,6 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, input Updat
 	if input.AvatarUrl != nil {
 		user.AvatarUrl = pgtype.Text{
 			String: *input.AvatarUrl,
-			Valid:  true,
-		}
-	}
-
-	// If password is provided, hash and update it
-	if input.Password != nil && *input.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*input.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return nil, errors.New("failed to hash password")
-		}
-		user.PasswordHash = pgtype.Text{
-			String: string(hashedPassword),
 			Valid:  true,
 		}
 	}
@@ -252,11 +251,81 @@ func (s *UserService) UpdateUser(ctx context.Context, userID string, input Updat
 	return output, nil
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
+// ChangeEmail changes the user's email address with password verification
+func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
 		return errors.New("invalid user id")
 	}
 
-	return s.repo.Delete(ctx, id)
+	// Get current user
+	user, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password
+	if !user.PasswordHash.Valid {
+		return ErrInvalidPassword
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(currentPassword)); err != nil {
+		return ErrInvalidPassword
+	}
+
+	// Check if new email is already in use by another account
+	existingUser, err := s.repo.GetByEmail(ctx, newEmail)
+	if err == nil && existingUser.ID != user.ID {
+		return ErrUserAlreadyExists
+	}
+
+	// Update email
+	user.Email = newEmail
+
+	_, err = s.repo.Update(ctx, *user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ChangePassword changes the user's password with current password verification
+func (s *UserService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
+	id := pgtype.UUID{}
+	if err := id.Scan(userID); err != nil {
+		return errors.New("invalid user id")
+	}
+
+	// Get current user
+	user, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password
+	if !user.PasswordHash.Valid {
+		return ErrInvalidPassword
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(currentPassword)); err != nil {
+		return ErrInvalidPassword
+	}
+
+	// Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("failed to hash password")
+	}
+
+	// Update password
+	user.PasswordHash = pgtype.Text{
+		String: string(hashedPassword),
+		Valid:  true,
+	}
+
+	_, err = s.repo.Update(ctx, *user)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

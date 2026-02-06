@@ -73,6 +73,7 @@ type WishListResponse struct {
 	IsPublic     bool   `json:"is_public"`
 	PublicSlug   string `json:"public_slug"`
 	ViewCount    string `json:"view_count" validate:"required"`
+	ItemCount    int    `json:"item_count" example:"5"`
 	CreatedAt    string `json:"created_at" validate:"required"`
 	UpdatedAt    string `json:"updated_at" validate:"required"`
 }
@@ -126,6 +127,7 @@ func (h *WishListHandler) toWishListResponse(wl *services.WishListOutput) *WishL
 		IsPublic:     wl.IsPublic,
 		PublicSlug:   wl.PublicSlug,
 		ViewCount:    fmt.Sprintf("%d", wl.ViewCount),
+		ItemCount:    int(wl.ItemCount),
 		CreatedAt:    wl.CreatedAt,
 		UpdatedAt:    wl.UpdatedAt,
 	}
@@ -277,10 +279,10 @@ func (h *WishListHandler) GetWishList(c echo.Context) error {
 // GetWishListsByOwner godoc
 //
 //	@Summary		Get all wish lists owned by the authenticated user
-//	@Description	Get all wish lists owned by the currently authenticated user
+//	@Description	Get all wish lists owned by the currently authenticated user. Includes item_count for each wishlist.
 //	@Tags			Wish Lists
 //	@Produce		json
-//	@Success		200	{array}		WishListResponse	"List of wish lists retrieved successfully"
+//	@Success		200	{array}		WishListResponse	"List of wish lists retrieved successfully (includes item_count)"
 //	@Failure		401	{object}	map[string]string	"Unauthorized"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth
@@ -868,4 +870,84 @@ func (h *WishListHandler) GetWishListByPublicSlug(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, h.toWishListResponse(wishList))
+}
+
+// GetGiftItemsByPublicSlug godoc
+//
+//	@Summary		Get gift items for a public wish list by slug
+//	@Description	Get all gift items for a public wish list by its public slug with pagination support.
+//	@Tags			Gift Items
+//	@Produce		json
+//	@Param			slug	path		string					true	"Public Slug"
+//	@Param			page	query		int						false	"Page number (default 1)"
+//	@Param			limit	query		int						false	"Items per page (default 10, max 100)"
+//	@Success		200		{object}	GetGiftItemsResponse	"Gift items retrieved successfully"
+//	@Failure		404		{object}	map[string]string		"Wish list not found or not public"
+//	@Failure		500		{object}	map[string]string		"Internal server error"
+//	@Router			/public/wishlists/{slug}/gift-items [get]
+func (h *WishListHandler) GetGiftItemsByPublicSlug(c echo.Context) error {
+	publicSlug := c.Param("slug")
+
+	pageStr := c.QueryParam("page")
+	limitStr := c.QueryParam("limit")
+
+	page := 1
+	if pageStr != "" {
+		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
+	}
+
+	limit := 10
+	if limitStr != "" {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
+			limit = parsedLimit
+		}
+	}
+
+	ctx := c.Request().Context()
+
+	// Get the wishlist by public slug to verify it's public
+	wishList, err := h.service.GetWishListByPublicSlug(ctx, publicSlug)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Wish list not found or not public",
+		})
+	}
+
+	// Get all gift items for this wishlist
+	giftItems, err := h.service.GetGiftItemsByWishList(ctx, wishList.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": fmt.Errorf("failed to get gift items: %w", err).Error(),
+		})
+	}
+
+	if giftItems == nil {
+		giftItems = []*services.GiftItemOutput{}
+	}
+
+	// Apply pagination
+	total := len(giftItems)
+	start := (page - 1) * limit
+	end := min(start+limit, total)
+
+	// Handle out of bounds
+	if start > total {
+		start = total
+		end = total
+	}
+
+	paginatedItems := giftItems[start:end]
+
+	// Calculate total pages
+	pages := (total + limit - 1) / limit
+
+	return c.JSON(http.StatusOK, GetGiftItemsResponse{
+		Items: h.toGiftItemResponses(paginatedItems),
+		Total: total,
+		Page:  page,
+		Limit: limit,
+		Pages: pages,
+	})
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 	"wish-list/internal/analytics"
 	"wish-list/internal/auth"
 	"wish-list/internal/services"
@@ -42,8 +43,6 @@ type LoginRequest struct {
 }
 
 type UpdateProfileRequest struct {
-	Email     *string `json:"email" validate:"email"`
-	Password  *string `json:"password" validate:"min=6"`
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
 	AvatarUrl *string `json:"avatar_url"`
@@ -61,8 +60,10 @@ type UserResponse struct {
 type AuthResponse struct {
 	// User information
 	User *UserResponse `json:"user" validate:"required"`
-	// Authentication token
-	Token string `json:"token" validate:"required"`
+	// Access token (short-lived, 15 minutes)
+	AccessToken string `json:"accessToken" validate:"required"`
+	// Refresh token (long-lived, 7 days) - also set as httpOnly cookie
+	RefreshToken string `json:"refreshToken" validate:"required"`
 }
 
 type ProfileResponse struct {
@@ -135,20 +136,41 @@ func (h *UserHandler) Register(c echo.Context) error {
 		})
 	}
 
-	// Generate JWT token using token manager
-	tokenString, err := h.tokenManager.GenerateToken(user.ID, user.Email, "user", 72) // 72 hours expiry
+	// Generate access token (15 minutes)
+	accessToken, err := h.tokenManager.GenerateAccessToken(user.ID, user.Email, "user")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Could not generate token",
+			"error": "Could not generate access token",
 		})
 	}
+
+	// Generate refresh token (7 days)
+	tokenID := fmt.Sprintf("%s-%d", user.ID, time.Now().Unix())
+	refreshToken, err := h.tokenManager.GenerateRefreshToken(user.ID, user.Email, "user", tokenID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Could not generate refresh token",
+		})
+	}
+
+	// Set refresh token as httpOnly cookie
+	c.SetCookie(&http.Cookie{
+		Name:     "refreshToken",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		MaxAge:   7 * 24 * 60 * 60, // 7 days
+	})
 
 	// Track user registration analytics
 	_ = h.analyticsService.TrackUserRegistration(ctx, user.ID, user.Email)
 
 	response := AuthResponse{
-		User:  h.toUserResponse(user),
-		Token: tokenString,
+		User:         h.toUserResponse(user),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	return c.JSON(http.StatusCreated, response)
@@ -198,20 +220,41 @@ func (h *UserHandler) Login(c echo.Context) error {
 		})
 	}
 
-	// Generate JWT token using token manager
-	tokenString, err := h.tokenManager.GenerateToken(user.ID, user.Email, "user", 72) // 72 hours expiry
+	// Generate access token (15 minutes)
+	accessToken, err := h.tokenManager.GenerateAccessToken(user.ID, user.Email, "user")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Could not generate token",
+			"error": "Could not generate access token",
 		})
 	}
+
+	// Generate refresh token (7 days)
+	tokenID := fmt.Sprintf("%s-%d", user.ID, time.Now().Unix())
+	refreshToken, err := h.tokenManager.GenerateRefreshToken(user.ID, user.Email, "user", tokenID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Could not generate refresh token",
+		})
+	}
+
+	// Set refresh token as httpOnly cookie
+	c.SetCookie(&http.Cookie{
+		Name:     "refreshToken",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		MaxAge:   7 * 24 * 60 * 60, // 7 days
+	})
 
 	// Track user login analytics
 	_ = h.analyticsService.TrackUserLogin(ctx, user.ID)
 
 	response := AuthResponse{
-		User:  h.toUserResponse(user),
-		Token: tokenString,
+		User:         h.toUserResponse(user),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	return c.JSON(http.StatusOK, response)
@@ -297,9 +340,7 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	user, err := h.service.UpdateUser(ctx, userID, services.UpdateUserInput{
-		Email:     req.Email,
-		Password:  req.Password,
+	user, err := h.service.UpdateProfile(ctx, userID, services.UpdateProfileInput{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		AvatarUrl: req.AvatarUrl,

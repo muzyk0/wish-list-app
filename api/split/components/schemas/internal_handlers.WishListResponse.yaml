@@ -7,6 +7,9 @@ properties:
     type: string
   is_public:
     type: boolean
+  item_count:
+    example: 5
+    type: integer
   occasion:
     type: string
   occasion_date:

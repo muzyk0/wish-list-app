@@ -84,3 +84,9 @@ type WishList struct {
 	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
+
+// WishListWithItemCount extends WishList with item count (from JOIN query)
+type WishListWithItemCount struct {
+	WishList
+	ItemCount int64 `db:"item_count" json:"item_count"`
+}

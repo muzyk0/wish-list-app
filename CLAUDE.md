@@ -742,3 +742,9 @@ feat(api)!: change authentication header format
 BREAKING CHANGE: The Authorization header now expects "Bearer " prefix
 instead of "JWT ".
 ```
+
+## Active Technologies
+- PostgreSQL (users, tokens metadata), In-memory (handoff codes) (002-cross-domain-implementation)
+
+## Recent Changes
+- 002-cross-domain-implementation: Added PostgreSQL (users, tokens metadata), In-memory (handoff codes)

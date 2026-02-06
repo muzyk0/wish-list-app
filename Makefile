@@ -141,12 +141,12 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 		echo "Installing swag..."; \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
-	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/internal/handlers/docs --parseDependency --parseInternal
 	@echo "✓ Swagger 2.0 generated"
 	@echo ""
 	@echo "Step 2/4: Converting to OpenAPI 3.0..."
-	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
-	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
+	@pnpm exec swagger2openapi backend/internal/handlers/docs/swagger.json -o api/openapi3.json
+	@pnpm exec swagger2openapi backend/internal/handlers/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "✓ OpenAPI 3.0 converted"
 	@echo ""
 	@echo "Step 3/4: Splitting into organized files..."

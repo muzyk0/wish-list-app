@@ -1,0 +1,30 @@
+1. INTRO Each app might have a different set of screens. One onboarding
+   flow might take 10 screens, and another might take 2. Understanding your app's UX and industry best practices is crucial
+   for success. Here are the screens that every app must have.
+
+2. Welcome Screen
+Welcome screens are the first thing users see when they launch an app. Keep them minimal, with just the name, logo, or slogan. Center
+all elements.
+Display it for only 1-3 seconds or add a loading indicator.
+
+3.    LOGIN SCREEN (already exists)
+Keep login screens simple and clear. Include username and
+   password fields plus a confirmation button. Always try to offer Google or Apple sign-in options. This takes extra
+   setup time but greatly reduces user friction.
+
+4. ONBOARDING SCREENS
+Focus on communicating core value quickly and minimize required actions. Consider using progress indicators to show users how far they've come in the setup process. The best onboarding experiences feel helpful rather than obstructive, setting users up for
+   success with the minimum necessary friction.
+
+5. HOME SCREEN
+ Home screen is the main hub for user interaction. It must address two critical states: the empty state (when users have no content yet) with a clear call-to-action guiding them to the app's primary function, and the content state for returning users that displays
+   personalized information and quick access to main features.
+
+6. USER PROFILES
+Profiles personalize the app experience and connect users to the community. Keep profile pages clean with limited, relevant information. Use intuitive flows to lead to secondary info without
+   confusing the users.
+
+7. SETTINGS
+Organize options into logical categories, maintain a clean layout,
+   and make actions visible. Group settings into sections to avoid overwhelm, and add a search
+   function if your settings consist of a more complex flow.

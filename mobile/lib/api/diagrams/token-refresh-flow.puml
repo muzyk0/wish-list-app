@@ -1,0 +1,84 @@
+@startuml Token Refresh Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+actor User
+participant "ApiClient" as client
+participant "authMiddleware" as auth
+participant "refreshMiddleware" as refresh
+participant "refreshAccessToken()" as refreshFunc
+participant "baseClient" as base
+participant "Backend" as backend
+
+User -> client: getProfile()
+activate client
+
+client -> auth: onRequest()
+activate auth
+auth -> auth: getAccessToken()
+auth -> auth: Add Authorization header
+auth --> client: Modified request
+deactivate auth
+
+client -> backend: GET /protected/profile\nAuthorization: Bearer <expired_token>
+activate backend
+backend -> backend: Validate token
+backend --> client: 401 Unauthorized
+deactivate backend
+
+client -> refresh: onResponse()
+activate refresh
+refresh -> refresh: Detect 401
+refresh -> refresh: Check !isRefreshing
+
+alt First concurrent request
+  refresh -> refresh: isRefreshing = true
+  refresh -> refresh: Create refreshPromise
+
+  refresh -> refreshFunc: refreshAccessToken()
+  activate refreshFunc
+
+  refreshFunc -> base: POST /auth/refresh\nAuthorization: Bearer <refresh_token>
+  activate base
+  note right: Uses baseClient\nWITHOUT middleware
+  base -> backend: POST /auth/refresh
+  activate backend
+  backend -> backend: Validate refresh token
+  backend --> base: 200 OK\n{ accessToken, refreshToken }
+  deactivate backend
+
+  base --> refreshFunc: New tokens
+  deactivate base
+
+  refreshFunc -> refreshFunc: Store new tokens
+  refreshFunc --> refresh: New access token
+  deactivate refreshFunc
+
+  refresh -> refresh: Clone original request
+  refresh -> refresh: Set new Authorization header
+
+  refresh -> backend: GET /protected/profile\nAuthorization: Bearer <new_token>
+  activate backend
+  backend -> backend: Validate new token
+  backend --> refresh: 200 OK\n{ user data }
+  deactivate backend
+
+  refresh -> refresh: isRefreshing = false
+  refresh -> refresh: refreshPromise = null
+  refresh --> client: Success response
+  deactivate refresh
+
+  client --> User: User profile data
+  deactivate client
+else Concurrent requests
+  refresh -> refresh: Await existing refreshPromise
+  note right: Reuse same refresh\noperation (singleton)
+end
+
+note over User, backend
+  ✅ Token refreshed automatically
+  User doesn't notice anything
+  Seamless UX experience
+end note
+
+@enduml

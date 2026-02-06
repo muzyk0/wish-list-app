@@ -37,7 +37,7 @@ type HealthResponse struct {
 //	@Produce		json
 //	@Success		200	{object}	HealthResponse	"Application is healthy"
 //	@Failure		503	{object}	HealthResponse	"Application is unhealthy"
-//	@Router			/health [get]
+//	@Router			/healthz [get]
 //
 // Health checks the health of the application and its dependencies
 func (h *HealthHandler) Health(c echo.Context) error {

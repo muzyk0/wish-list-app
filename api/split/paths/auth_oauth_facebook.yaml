@@ -1,0 +1,35 @@
+post:
+  description: Exchange Facebook authorization code for access and refresh tokens
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.OAuthCodeRequest.yaml
+    description: Authorization code from Facebook
+    required: true
+  responses:
+    '200':
+      description: Authentication successful
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+    '400':
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Facebook OAuth authentication
+  tags:
+    - Auth

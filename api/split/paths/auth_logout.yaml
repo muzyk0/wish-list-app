@@ -1,0 +1,14 @@
+post:
+  description: Clear refresh token cookie and invalidate session
+  responses:
+    '200':
+      description: Logout successful
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.MessageResponse.yaml
+  security:
+    - BearerAuth: []
+  summary: Logout user
+  tags:
+    - Authentication

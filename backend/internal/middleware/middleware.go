@@ -119,17 +119,6 @@ func RecoverMiddleware() echo.MiddlewareFunc {
 	})
 }
 
-// CORSMiddleware sets up CORS headers
-func CORSMiddleware(allowedOrigins []string) echo.MiddlewareFunc {
-	return middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:  allowedOrigins,
-		AllowMethods:  []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-		AllowHeaders:  []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		ExposeHeaders: []string{echo.HeaderAuthorization},
-		MaxAge:        3600, // 1 hour
-	})
-}
-
 // TimeoutMiddleware adds a timeout to requests
 func TimeoutMiddleware(timeout time.Duration) echo.MiddlewareFunc {
 	return middleware.ContextTimeoutWithConfig(middleware.ContextTimeoutConfig{

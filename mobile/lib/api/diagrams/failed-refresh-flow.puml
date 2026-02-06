@@ -1,0 +1,72 @@
+@startuml Failed Refresh Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+actor User
+participant "ApiClient" as client
+participant "authMiddleware" as auth
+participant "refreshMiddleware" as refresh
+participant "refreshAccessToken()" as refreshFunc
+participant "baseClient" as base
+participant "Backend" as backend
+participant "App" as app
+
+User -> client: getProfile()
+activate client
+
+client -> auth: onRequest()
+activate auth
+auth -> auth: getAccessToken()
+auth -> auth: Add Authorization header
+auth --> client: Modified request
+deactivate auth
+
+client -> backend: GET /protected/profile\nAuthorization: Bearer <expired_token>
+activate backend
+backend -> backend: Validate token
+backend --> client: 401 Unauthorized
+deactivate backend
+
+client -> refresh: onResponse()
+activate refresh
+refresh -> refresh: Detect 401
+refresh -> refresh: isRefreshing = true
+
+refresh -> refreshFunc: refreshAccessToken()
+activate refreshFunc
+
+refreshFunc -> base: POST /auth/refresh\nAuthorization: Bearer <refresh_token>
+activate base
+base -> backend: POST /auth/refresh
+activate backend
+backend -> backend: Validate refresh token
+backend --> base: 401 Unauthorized\n(Refresh token expired)
+deactivate backend
+
+base --> refreshFunc: Error
+deactivate base
+
+refreshFunc -> refreshFunc: Clear all tokens
+refreshFunc --> refresh: null (refresh failed)
+deactivate refreshFunc
+
+refresh -> refresh: isRefreshing = false
+refresh -> refresh: refreshPromise = null
+refresh --> client: Return original 401
+deactivate refresh
+
+client --> User: 401 error
+deactivate client
+
+User -> app: Handle 401
+activate app
+app -> app: Redirect to login screen
+deactivate app
+
+note over User, app
+  ❌ Refresh failed
+  Both tokens expired
+  User must re-authenticate
+end note
+
+@enduml

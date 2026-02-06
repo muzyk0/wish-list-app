@@ -1,0 +1,53 @@
+post:
+  description: >-
+    Exchange a handoff code received from Frontend redirect for access and
+    refresh tokens. Code can only be used once.
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.ExchangeRequest.yaml
+    description: Exchange request
+    required: true
+  responses:
+    '200':
+      description: Code exchanged successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.ExchangeResponse.yaml
+    '400':
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Invalid or expired code
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '429':
+      description: Rate limit exceeded (10 requests/minute)
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Exchange handoff code for tokens
+  tags:
+    - Authentication
