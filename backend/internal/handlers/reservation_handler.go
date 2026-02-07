@@ -97,7 +97,7 @@ type UserReservationsResponse struct {
 //	@Failure		401					{object}	map[string]string			"Unauthorized (guests need name and email)"
 //	@Failure		500					{object}	map[string]string			"Internal server error"
 //	@Security		BearerAuth
-//	@Router			/wishlists/{wishlistId}/gift-items/{itemId}/reservation [post]
+//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [post]
 func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -214,7 +214,7 @@ func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 //	@Failure		401				{object}	map[string]string			"Unauthorized (guests need reservation token)"
 //	@Failure		500				{object}	map[string]string			"Internal server error"
 //	@Security		BearerAuth
-//	@Router			/wishlists/{wishlistId}/gift-items/{itemId}/reservation [delete]
+//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
 func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -335,7 +335,7 @@ func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 //	@Failure		401		{object}	map[string]string			"Unauthorized"
 //	@Failure		500		{object}	map[string]string			"Internal server error"
 //	@Security		BearerAuth
-//	@Router			/reservations [get]
+//	@Router			/reservations/user [get]
 func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 	pageStr := c.QueryParam("page")
 	limitStr := c.QueryParam("limit")
@@ -461,7 +461,7 @@ func (h *ReservationHandler) GetUserReservations(c echo.Context) error {
 //	@Success		200		{array}		ReservationDetailsResponse	"List of guest reservations retrieved successfully"
 //	@Failure		400		{object}	map[string]string			"Invalid request parameters"
 //	@Failure		500		{object}	map[string]string			"Internal server error"
-//	@Router			/reservations/guest [get]
+//	@Router			/guest/reservations [get]
 func (h *ReservationHandler) GetGuestReservations(c echo.Context) error {
 	tokenStr := c.QueryParam("token")
 	if tokenStr == "" {
@@ -543,7 +543,7 @@ func (h *ReservationHandler) GetGuestReservations(c echo.Context) error {
 //	@Param			itemId	path		string						true	"Gift Item ID"
 //	@Success		200		{object}	ReservationStatusResponse	"Reservation status retrieved successfully"
 //	@Failure		500		{object}	map[string]string			"Internal server error"
-//	@Router			/public/wishlists/{slug}/gift-items/{itemId}/reservation-status [get]
+//	@Router			/public/reservations/list/{slug}/item/{itemId} [get]
 func (h *ReservationHandler) GetReservationStatus(c echo.Context) error {
 	publicSlug := c.Param("slug")
 	giftItemID := c.Param("itemId")

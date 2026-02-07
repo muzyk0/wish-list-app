@@ -78,16 +78,22 @@ export default defineConfig({
     /* Run your local dev server before starting the tests */
     webServer: [
         {
+
+            // command: 'cd ./backend && go run ./cmd/migrate/main.go -action down && go run ./cmd/migrate/main.go -action up && go run ./cmd/server',
             command: 'cd ./backend && go run ./cmd/server',
             url: 'http://localhost:8080/healthz',
             timeout: 120 * 1000,
-            reuseExistingServer: !process.env.CI,
+            reuseExistingServer: !process.env.CI, // Reuse server for faster tests
+            stderr: 'ignore', // Ignore stderr to avoid test failures from warnings
+            stdout: 'ignore', // Ignore stdout for cleaner output
         },
         {
-            command: 'cd ./mobile && pnpm web',
+            command: 'cd ./mobile && pnpm web 2>&1',
             url: 'http://localhost:8081',
             timeout: 120 * 1000,
             reuseExistingServer: !process.env.CI,
+            stderr: 'ignore', // Ignore stderr to avoid test failures from Expo warnings
+            stdout: 'ignore', // Ignore stdout for cleaner output
         }
     ],
 });

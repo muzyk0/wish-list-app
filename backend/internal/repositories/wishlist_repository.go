@@ -11,6 +11,11 @@ import (
 	db "wish-list/internal/db/models"
 )
 
+// Sentinel errors for wishlist repository
+var (
+	ErrWishListNotFound = errors.New("wishlist not found")
+)
+
 // WishListRepositoryInterface defines the interface for wishlist database operations
 type WishListRepositoryInterface interface {
 	Create(ctx context.Context, wishList db.WishList) (*db.WishList, error)
@@ -28,7 +33,7 @@ type WishListRepository struct {
 	db *db.DB
 }
 
-func NewWishListRepository(database *db.DB) *WishListRepository {
+func NewWishListRepository(database *db.DB) WishListRepositoryInterface {
 	return &WishListRepository{
 		db: database,
 	}
@@ -54,7 +59,7 @@ func (r *WishListRepository) Create(ctx context.Context, wishList db.WishList) (
 		wishList.OccasionDate,
 		wishList.TemplateID,
 		wishList.IsPublic,
-		db.TextToString(wishList.PublicSlug),
+		wishList.PublicSlug, // Pass pgtype.Text directly to preserve NULL
 	).StructScan(&createdWishList)
 
 	if err != nil {
@@ -77,7 +82,7 @@ func (r *WishListRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.W
 	err := r.db.GetContext(ctx, &wishList, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("wishlist not found")
+			return nil, ErrWishListNotFound
 		}
 		return nil, fmt.Errorf("failed to get wishlist: %w", err)
 	}
@@ -98,7 +103,7 @@ func (r *WishListRepository) GetByPublicSlug(ctx context.Context, publicSlug str
 	err := r.db.GetContext(ctx, &wishList, query, publicSlug)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("wishlist not found")
+			return nil, ErrWishListNotFound
 		}
 		return nil, fmt.Errorf("failed to get wishlist by public slug: %w", err)
 	}
@@ -152,12 +157,12 @@ func (r *WishListRepository) Update(ctx context.Context, wishList db.WishList) (
 		wishList.OccasionDate,
 		wishList.TemplateID,
 		wishList.IsPublic,
-		db.TextToString(wishList.PublicSlug),
+		wishList.PublicSlug, // Pass pgtype.Text directly to preserve NULL
 	).StructScan(&updatedWishList)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("wishlist not found")
+			return nil, ErrWishListNotFound
 		}
 		return nil, fmt.Errorf("failed to update wishlist: %w", err)
 	}
@@ -185,7 +190,7 @@ func (r *WishListRepository) DeleteWithExecutor(ctx context.Context, executor db
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("wishlist not found")
+		return ErrWishListNotFound
 	}
 
 	return nil
@@ -206,7 +211,7 @@ func (r *WishListRepository) IncrementViewCount(ctx context.Context, id pgtype.U
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("wishlist not found")
+		return ErrWishListNotFound
 	}
 
 	return nil
@@ -219,7 +224,8 @@ func (r *WishListRepository) GetByOwnerWithItemCount(ctx context.Context, ownerI
 			w.id, w.owner_id, w.title, w.description, w.occasion, w.occasion_date, w.template_id, w.is_public, w.public_slug, w.view_count, w.created_at, w.updated_at,
 			COUNT(gi.id) AS item_count
 		FROM wishlists w
-		LEFT JOIN gift_items gi ON gi.wishlist_id = w.id
+		LEFT JOIN wishlist_items wi ON wi.wishlist_id = w.id
+		LEFT JOIN gift_items gi ON gi.id = wi.gift_item_id AND gi.archived_at IS NULL
 		WHERE w.owner_id = $1
 		GROUP BY w.id, w.owner_id, w.title, w.description, w.occasion, w.occasion_date, w.template_id, w.is_public, w.public_slug, w.view_count, w.created_at, w.updated_at
 		ORDER BY w.created_at DESC

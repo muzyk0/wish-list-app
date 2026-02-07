@@ -36,7 +36,7 @@ func NewS3Handler(s3Client *aws.S3Client) *S3Handler {
 //	@Failure		401		{object}	map[string]string	"Unauthorized"
 //	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth
-//	@Router			/s3/upload [post]
+//	@Router			/images/upload [post]
 func (h *S3Handler) UploadImage(c echo.Context) error {
 	// Get user from context to ensure they're authenticated
 	_, _, _, err := auth.GetUserFromContext(c)

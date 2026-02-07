@@ -36,7 +36,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			},
 			mockReturn: &db.GiftItem{
 				ID:          pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
-				WishlistID:  pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17}, Valid: true},
+				OwnerID:     pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17}, Valid: true},
 				Name:        "Test Gift",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Link:        pgtype.Text{String: "https://example.com/test-gift", Valid: true},
@@ -128,7 +128,7 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 			giftItemID: "12345678-1234-5678-9abc-def012345678",
 			mockReturn: &db.GiftItem{
 				ID:          testUUID,
-				WishlistID:  testUUID,
+				OwnerID:     testUUID,
 				Name:        "Test Gift",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Link:        pgtype.Text{String: "https://example.com/test-gift", Valid: true},

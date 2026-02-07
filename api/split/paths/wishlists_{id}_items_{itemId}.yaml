@@ -1,0 +1,57 @@
+delete:
+  description: >-
+    Remove a gift item from a wishlist. The item itself is not deleted, only the
+    association is removed.
+  parameters:
+    - description: Wishlist ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    - description: Item ID
+      in: path
+      name: itemId
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Item detached successfully
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Wishlist or item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Detach item from wishlist
+  tags:
+    - Wishlists

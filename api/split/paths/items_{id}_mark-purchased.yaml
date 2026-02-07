@@ -1,0 +1,70 @@
+post:
+  description: >-
+    Mark a gift item as purchased with the actual purchased price. This is a
+    global status.
+  parameters:
+    - description: Item ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.MarkPurchasedRequest.yaml
+    description: Purchase details
+    required: true
+  responses:
+    '200':
+      description: Item marked as purchased
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+    '400':
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Mark gift item as purchased
+  tags:
+    - Items

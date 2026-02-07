@@ -105,6 +105,43 @@ func (m *MockGiftItemRepository) DeleteWithReservationNotification(ctx context.C
 	return args.Get(0).([]*db.Reservation), args.Error(1)
 }
 
+func (m *MockGiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters repositories.ItemFilters) (*repositories.PaginatedResult, error) {
+	args := m.Called(ctx, ownerID, filters)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*repositories.PaginatedResult), args.Error(1)
+}
+
+func (m *MockGiftItemRepository) SoftDelete(ctx context.Context, id pgtype.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockGiftItemRepository) GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*db.GiftItem, error) {
+	args := m.Called(ctx, ownerID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*db.GiftItem), args.Error(1)
+}
+
+func (m *MockGiftItemRepository) CreateWithOwner(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error) {
+	args := m.Called(ctx, giftItem)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*db.GiftItem), args.Error(1)
+}
+
+func (m *MockGiftItemRepository) UpdateWithNewSchema(ctx context.Context, giftItem *db.GiftItem) (*db.GiftItem, error) {
+	args := m.Called(ctx, giftItem)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*db.GiftItem), args.Error(1)
+}
+
 // MockReservationRepository is a mock implementation of ReservationRepositoryInterface
 type MockReservationRepository struct {
 	mock.Mock

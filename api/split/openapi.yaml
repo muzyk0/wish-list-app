@@ -34,38 +34,44 @@ paths:
     $ref: paths/auth_refresh.yaml
   /auth/register:
     $ref: paths/auth_register.yaml
-  /gift-items/{id}:
-    $ref: paths/gift-items_{id}.yaml
-  /gift-items/{id}/purchase:
-    $ref: paths/gift-items_{id}_purchase.yaml
+  /guest/reservations:
+    $ref: paths/guest_reservations.yaml
   /healthz:
     $ref: paths/healthz.yaml
+  /images/upload:
+    $ref: paths/images_upload.yaml
+  /items:
+    $ref: paths/items.yaml
+  /items/{id}:
+    $ref: paths/items_{id}.yaml
+  /items/{id}/mark-purchased:
+    $ref: paths/items_{id}_mark-purchased.yaml
   /protected/account:
     $ref: paths/protected_account.yaml
   /protected/export-data:
     $ref: paths/protected_export-data.yaml
   /protected/profile:
     $ref: paths/protected_profile.yaml
+  /public/reservations/list/{slug}/item/{itemId}:
+    $ref: paths/public_reservations_list_{slug}_item_{itemId}.yaml
   /public/wishlists/{slug}:
     $ref: paths/public_wishlists_{slug}.yaml
   /public/wishlists/{slug}/gift-items:
     $ref: paths/public_wishlists_{slug}_gift-items.yaml
-  /public/wishlists/{slug}/gift-items/{itemId}/reservation-status:
-    $ref: paths/public_wishlists_{slug}_gift-items_{itemId}_reservation-status.yaml
-  /reservations:
-    $ref: paths/reservations.yaml
-  /reservations/guest:
-    $ref: paths/reservations_guest.yaml
-  /s3/upload:
-    $ref: paths/s3_upload.yaml
+  /reservations/user:
+    $ref: paths/reservations_user.yaml
+  /reservations/wishlist/{wishlistId}/item/{itemId}:
+    $ref: paths/reservations_wishlist_{wishlistId}_item_{itemId}.yaml
   /wishlists:
     $ref: paths/wishlists.yaml
   /wishlists/{id}:
     $ref: paths/wishlists_{id}.yaml
-  /wishlists/{wishlistId}/gift-items:
-    $ref: paths/wishlists_{wishlistId}_gift-items.yaml
-  /wishlists/{wishlistId}/gift-items/{itemId}/reservation:
-    $ref: paths/wishlists_{wishlistId}_gift-items_{itemId}_reservation.yaml
+  /wishlists/{id}/items:
+    $ref: paths/wishlists_{id}_items.yaml
+  /wishlists/{id}/items/{itemId}:
+    $ref: paths/wishlists_{id}_items_{itemId}.yaml
+  /wishlists/{id}/items/new:
+    $ref: paths/wishlists_{id}_items_new.yaml
 servers:
   - url: //localhost:8080/api
 components:

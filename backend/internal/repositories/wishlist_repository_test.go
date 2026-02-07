@@ -233,19 +233,18 @@ func TestWishListRepository_Delete(t *testing.T) {
 		}
 	})
 
-	t.Run("delete should cascade to gift items", func(t *testing.T) {
-		// This is enforced by database foreign key constraints:
-		// gift_items.wishlist_id REFERENCES wishlists(id) ON DELETE CASCADE
+	t.Run("delete should cascade to wishlist_items", func(t *testing.T) {
+		// With the many-to-many schema, cascade is through wishlist_items junction table:
+		// wishlist_items.wishlist_id REFERENCES wishlists(id) ON DELETE CASCADE
 
-		// Verify the relationship exists
 		wishListID := pgtype.UUID{Valid: true}
-		giftItem := db.GiftItem{
+		wishlistItem := db.WishlistItem{
 			WishlistID: wishListID,
-			Name:       "Test Gift",
+			GiftItemID: pgtype.UUID{Valid: true},
 		}
 
-		if giftItem.WishlistID != wishListID {
-			t.Error("gift item should reference valid wishlist")
+		if wishlistItem.WishlistID != wishListID {
+			t.Error("wishlist_item should reference valid wishlist")
 		}
 	})
 }

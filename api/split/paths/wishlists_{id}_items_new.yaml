@@ -1,30 +1,23 @@
 post:
-  description: >-
-    Mark a gift item as purchased with an optional purchased price. The user
-    must be the owner of the parent wish list.
+  description: Create a new gift item and immediately attach it to the specified wishlist
   parameters:
-    - description: Gift Item ID
+    - description: Wishlist ID
       in: path
       name: id
       required: true
       schema:
         type: string
   requestBody:
-    content:
-      application/json:
-        schema:
-          $ref: ../components/schemas/internal_handlers.PurchaseRequest.yaml
-    description: Purchase information
-    required: true
+    $ref: ../components/requestBodies/internal_handlers.CreateItemRequest.yaml
   responses:
-    '200':
-      description: Gift item marked as purchased successfully
+    '201':
+      description: Item created and attached successfully
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.GiftItemResponse.yaml
+            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
     '400':
-      description: Invalid request body or validation error
+      description: Invalid request body
       content:
         application/json:
           schema:
@@ -32,7 +25,7 @@ post:
               type: string
             type: object
     '401':
-      description: Unauthorized
+      description: Not authenticated
       content:
         application/json:
           schema:
@@ -40,7 +33,7 @@ post:
               type: string
             type: object
     '403':
-      description: Forbidden
+      description: Access denied
       content:
         application/json:
           schema:
@@ -48,7 +41,7 @@ post:
               type: string
             type: object
     '404':
-      description: Gift item or wishlist not found
+      description: Wishlist not found
       content:
         application/json:
           schema:
@@ -65,6 +58,6 @@ post:
             type: object
   security:
     - BearerAuth: []
-  summary: Mark a gift item as purchased
+  summary: Create item in wishlist
   tags:
-    - Gift Items
+    - Wishlists

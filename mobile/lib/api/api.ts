@@ -322,7 +322,7 @@ class ApiClient {
   // Gift item methods
   async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
     const { data, error } = await this.client.GET(
-      '/wishlists/{wishlistId}/gift-items',
+      '/gift-items/wishlist/{wishlistId}',
       {
         params: { path: { wishlistId } },
       },
@@ -332,7 +332,7 @@ class ApiClient {
       throw new Error((error as any)?.error || 'Failed to fetch gift items');
     }
 
-    return ((data as any).data || data) as GiftItem[];
+    return data.items;
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
@@ -344,7 +344,7 @@ class ApiClient {
       throw new Error((error as any)?.error || 'Failed to fetch gift item');
     }
 
-    return data as GiftItem;
+    return data;
   }
 
   async createGiftItem(

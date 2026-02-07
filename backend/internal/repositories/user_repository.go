@@ -13,6 +13,11 @@ import (
 	"wish-list/internal/encryption"
 )
 
+// Sentinel errors for user repository
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
 // UserRepositoryInterface defines the interface for user database operations
 type UserRepositoryInterface interface {
 	Create(ctx context.Context, user db.User) (*db.User, error)
@@ -31,7 +36,7 @@ type UserRepository struct {
 	encryptionEnabled bool
 }
 
-func NewUserRepository(database *db.DB) *UserRepository {
+func NewUserRepository(database *db.DB) UserRepositoryInterface {
 	return &UserRepository{
 		db:                database,
 		encryptionEnabled: false, // Encryption disabled by default for backward compatibility
@@ -39,7 +44,7 @@ func NewUserRepository(database *db.DB) *UserRepository {
 }
 
 // NewUserRepositoryWithEncryption creates a new UserRepository with encryption enabled
-func NewUserRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) *UserRepository {
+func NewUserRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) UserRepositoryInterface {
 	return &UserRepository{
 		db:                database,
 		encryptionSvc:     encryptionSvc,
@@ -177,7 +182,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.User,
 	err := r.db.GetContext(ctx, &user, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -205,7 +210,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*db.User
 	err := r.db.GetContext(ctx, &user, query, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to get user by email: %w", err)
 	}
@@ -256,7 +261,7 @@ func (r *UserRepository) Update(ctx context.Context, user db.User) (*db.User, er
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
@@ -289,7 +294,7 @@ func (r *UserRepository) DeleteWithExecutor(ctx context.Context, executor db.Exe
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("user not found")
+		return ErrUserNotFound
 	}
 
 	return nil

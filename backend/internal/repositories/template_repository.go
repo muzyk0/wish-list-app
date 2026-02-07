@@ -9,6 +9,12 @@ import (
 	db "wish-list/internal/db/models"
 )
 
+// Sentinel errors for template repository
+var (
+	ErrTemplateNotFound        = errors.New("template not found")
+	ErrDefaultTemplateNotFound = errors.New("default template not found")
+)
+
 // TemplateRepositoryInterface defines the interface for template database operations
 type TemplateRepositoryInterface interface {
 	GetByID(ctx context.Context, id string) (*db.Template, error)
@@ -23,7 +29,7 @@ type TemplateRepository struct {
 	db *db.DB
 }
 
-func NewTemplateRepository(database *db.DB) *TemplateRepository {
+func NewTemplateRepository(database *db.DB) TemplateRepositoryInterface {
 	return &TemplateRepository{
 		db: database,
 	}
@@ -42,7 +48,7 @@ func (r *TemplateRepository) GetByID(ctx context.Context, id string) (*db.Templa
 	err := r.db.GetContext(ctx, &template, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("template not found")
+			return nil, ErrTemplateNotFound
 		}
 		return nil, fmt.Errorf("failed to get template: %w", err)
 	}
@@ -82,7 +88,7 @@ func (r *TemplateRepository) GetDefault(ctx context.Context) (*db.Template, erro
 	err := r.db.GetContext(ctx, &template, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("default template not found")
+			return nil, ErrDefaultTemplateNotFound
 		}
 		return nil, fmt.Errorf("failed to get default template: %w", err)
 	}
@@ -145,7 +151,7 @@ func (r *TemplateRepository) Update(ctx context.Context, template db.Template) (
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("template not found")
+			return nil, ErrTemplateNotFound
 		}
 		return nil, fmt.Errorf("failed to update template: %w", err)
 	}
@@ -168,7 +174,7 @@ func (r *TemplateRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("template not found")
+		return ErrTemplateNotFound
 	}
 
 	return nil

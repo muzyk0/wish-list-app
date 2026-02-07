@@ -6,7 +6,7 @@ import (
 
 type GiftItem struct {
 	ID                pgtype.UUID        `db:"id" json:"id"`
-	WishlistID        pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"`
+	OwnerID           pgtype.UUID        `db:"owner_id" json:"owner_id"` // Items belong to users, not wishlists
 	Name              string             `db:"name" json:"name"`
 	Description       pgtype.Text        `db:"description" json:"description"`
 	Link              pgtype.Text        `db:"link" json:"link"`
@@ -20,12 +20,21 @@ type GiftItem struct {
 	PurchasedPrice    pgtype.Numeric     `db:"purchased_price" json:"purchased_price"`
 	Notes             pgtype.Text        `db:"notes" json:"notes"`
 	Position          pgtype.Int4        `db:"position" json:"position"`
+	ArchivedAt        pgtype.Timestamptz `db:"archived_at" json:"archived_at"` // Soft delete
 	CreatedAt         pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+// WishlistItem represents the many-to-many relationship between wishlists and items
+type WishlistItem struct {
+	WishlistID pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"`
+	GiftItemID pgtype.UUID        `db:"gift_item_id" json:"gift_item_id"`
+	AddedAt    pgtype.Timestamptz `db:"added_at" json:"added_at"`
+}
+
 type Reservation struct {
 	ID                  pgtype.UUID        `db:"id" json:"id"`
+	WishlistID          pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"` // Reservation is for item in specific wishlist
 	GiftItemID          pgtype.UUID        `db:"gift_item_id" json:"gift_item_id"`
 	ReservedByUserID    pgtype.UUID        `db:"reserved_by_user_id" json:"reserved_by_user_id"`
 	GuestName           pgtype.Text        `db:"guest_name" json:"guest_name"`

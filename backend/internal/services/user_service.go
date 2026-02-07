@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+
 	db "wish-list/internal/db/models"
 	"wish-list/internal/repositories"
 
@@ -83,7 +84,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 	existingUser, err := s.repo.GetByEmail(ctx, input.Email)
 	if err != nil {
 		// If error is "user not found", continue with registration
-		if err.Error() != "user not found" {
+		if !errors.Is(err, repositories.ErrUserNotFound) {
 			// Surface other database errors
 			return nil, err
 		}
@@ -176,8 +177,7 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		// Check for user not found error from repository
-		if err.Error() == "user not found" {
+		if errors.Is(err, repositories.ErrUserNotFound) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err

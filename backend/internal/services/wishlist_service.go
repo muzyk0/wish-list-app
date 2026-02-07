@@ -127,7 +127,7 @@ type UpdateGiftItemInput struct {
 
 type GiftItemOutput struct {
 	ID                string
-	WishlistID        string
+	OwnerID           string // Items now belong to users, not wishlists
 	Name              string
 	Description       string
 	Link              string
@@ -522,7 +522,7 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 
 	// Create gift item
 	giftItem := db.GiftItem{
-		WishlistID:  listID,
+		OwnerID:     listID,
 		Name:        input.Name,
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
@@ -549,7 +549,7 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 
 	output := &GiftItemOutput{
 		ID:          createdGiftItem.ID.String(),
-		WishlistID:  createdGiftItem.WishlistID.String(),
+		OwnerID:     createdGiftItem.OwnerID.String(),
 		Name:        createdGiftItem.Name,
 		Description: createdGiftItem.Description.String,
 		Link:        createdGiftItem.Link.String,
@@ -587,7 +587,7 @@ func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*
 
 	output := &GiftItemOutput{
 		ID:          giftItem.ID.String(),
-		WishlistID:  giftItem.WishlistID.String(),
+		OwnerID:     giftItem.OwnerID.String(),
 		Name:        giftItem.Name,
 		Description: giftItem.Description.String,
 		Link:        giftItem.Link.String,
@@ -632,7 +632,7 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 
 		output := &GiftItemOutput{
 			ID:          giftItem.ID.String(),
-			WishlistID:  giftItem.WishlistID.String(),
+			OwnerID:     giftItem.OwnerID.String(),
 			Name:        giftItem.Name,
 			Description: giftItem.Description.String,
 			Link:        giftItem.Link.String,
@@ -709,7 +709,7 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 
 	// Invalidate wishlist cache if cache is available
 	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, updated.WishlistID)
+		wishList, err := s.wishListRepo.GetByID(ctx, updated.OwnerID)
 		if err == nil && wishList.PublicSlug.Valid {
 			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
 			_ = s.cache.Delete(ctx, cacheKey)
@@ -727,7 +727,7 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 
 	output := &GiftItemOutput{
 		ID:          updated.ID.String(),
-		WishlistID:  updated.WishlistID.String(),
+		OwnerID:     updated.OwnerID.String(),
 		Name:        updated.Name,
 		Description: updated.Description.String,
 		Link:        updated.Link.String,
@@ -763,7 +763,7 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 
 	// Invalidate wishlist cache if cache is available
 	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.WishlistID)
+		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.OwnerID)
 		if err == nil && wishList.PublicSlug.Valid {
 			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
 			_ = s.cache.Delete(ctx, cacheKey)
@@ -773,7 +773,7 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 	// If there were active reservations, send notifications to the reservation holders
 	if len(activeReservations) > 0 {
 		// Get the wish list details using the gift item we fetched before deletion
-		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.WishlistID)
+		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.OwnerID)
 		if err != nil {
 			// Log the error but continue with the notifications
 			fmt.Printf("Warning: failed to get wish list details for notification: %v\n", err)
@@ -843,7 +843,7 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 		reservation, err := s.reservationRepo.GetActiveReservationForGiftItem(ctx, updatedGiftItem.ID)
 		if err == nil && reservation != nil {
 			// Get the wishlist details for the email
-			wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.WishlistID)
+			wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.OwnerID)
 			if err == nil {
 				var recipientEmail, guestName string
 
@@ -865,7 +865,7 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 
 	// Invalidate wishlist cache if cache is available
 	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.WishlistID)
+		wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.OwnerID)
 		if err == nil && wishList.PublicSlug.Valid {
 			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
 			_ = s.cache.Delete(ctx, cacheKey)
@@ -875,7 +875,7 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 	// Convert to output format
 	output := &GiftItemOutput{
 		ID:                updatedGiftItem.ID.String(),
-		WishlistID:        updatedGiftItem.WishlistID.String(),
+		OwnerID:           updatedGiftItem.OwnerID.String(),
 		Name:              updatedGiftItem.Name,
 		Description:       updatedGiftItem.Description.String,
 		Link:              updatedGiftItem.Link.String,

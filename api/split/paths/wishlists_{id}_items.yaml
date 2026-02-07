@@ -1,11 +1,11 @@
 get:
   description: >-
-    Get all gift items in a wish list. If the wish list is private, the user
-    must be the owner.
+    Get all gift items in a specific wishlist with pagination. Public wishlists
+    are accessible without auth.
   parameters:
-    - description: Wish List ID
+    - description: Wishlist ID
       in: path
-      name: wishlistId
+      name: id
       required: true
       schema:
         type: string
@@ -21,11 +21,20 @@ get:
         type: integer
   responses:
     '200':
-      description: List of gift items retrieved successfully
+      description: List of items in wishlist
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.GetGiftItemsResponse.yaml
+            $ref: >-
+              ../components/schemas/internal_handlers.PaginatedItemsResponse.yaml
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
     '403':
       description: Access denied
       content:
@@ -52,17 +61,17 @@ get:
             type: object
   security:
     - BearerAuth: []
-  summary: Get all gift items in a wish list
+  summary: Get items in wishlist
   tags:
-    - Gift Items
+    - Wishlists
 post:
   description: >-
-    Create a new gift item in a wish list. The user must be the owner of the
-    wish list.
+    Attach an existing gift item to a wishlist. Both item and wishlist must be
+    owned by the authenticated user.
   parameters:
-    - description: Wish List ID
+    - description: Wishlist ID
       in: path
-      name: wishlistId
+      name: id
       required: true
       schema:
         type: string
@@ -70,18 +79,14 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.CreateGiftItemRequest.yaml
-    description: Gift item creation information
+          $ref: ../components/schemas/internal_handlers.AttachItemRequest.yaml
+    description: Item to attach
     required: true
   responses:
-    '201':
-      description: Gift item created successfully
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/internal_handlers.GiftItemResponse.yaml
+    '204':
+      description: Item attached successfully
     '400':
-      description: Invalid request body or validation error
+      description: Invalid request body
       content:
         application/json:
           schema:
@@ -89,7 +94,7 @@ post:
               type: string
             type: object
     '401':
-      description: Unauthorized
+      description: Not authenticated
       content:
         application/json:
           schema:
@@ -97,7 +102,7 @@ post:
               type: string
             type: object
     '403':
-      description: Forbidden
+      description: Access denied
       content:
         application/json:
           schema:
@@ -105,7 +110,15 @@ post:
               type: string
             type: object
     '404':
-      description: Wishlist not found
+      description: Wishlist or item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '409':
+      description: Item already attached
       content:
         application/json:
           schema:
@@ -122,6 +135,6 @@ post:
             type: object
   security:
     - BearerAuth: []
-  summary: Create a new gift item
+  summary: Attach item to wishlist
   tags:
-    - Gift Items
+    - Wishlists

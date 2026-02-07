@@ -1,4 +1,0 @@
-properties:
-  purchased_price:
-    type: number
-type: object

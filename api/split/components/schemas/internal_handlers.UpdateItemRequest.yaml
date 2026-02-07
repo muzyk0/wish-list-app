@@ -1,25 +1,23 @@
 properties:
   description:
+    maxLength: 2000
     type: string
-  image_url:
+  imageUrl:
     type: string
   link:
     type: string
-  name:
-    maxLength: 255
-    type: string
   notes:
+    maxLength: 1000
     type: string
-  position:
-    minimum: 0
-    type: integer
   price:
     minimum: 0
     type: number
   priority:
-    maximum: 10
+    maximum: 5
     minimum: 0
     type: integer
-required:
-  - name
+  title:
+    maxLength: 255
+    minLength: 1
+    type: string
 type: object

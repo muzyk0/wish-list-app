@@ -12,8 +12,9 @@ import (
 	"wish-list/internal/encryption"
 )
 
+// Sentinel errors for reservation repository
 var (
-	// ErrNoActiveReservation indicates no active reservation was found for a gift item
+	ErrReservationNotFound = errors.New("reservation not found")
 	ErrNoActiveReservation = errors.New("no active reservation found")
 )
 
@@ -62,7 +63,7 @@ type ReservationRepository struct {
 	encryptionEnabled bool
 }
 
-func NewReservationRepository(database *db.DB) *ReservationRepository {
+func NewReservationRepository(database *db.DB) ReservationRepositoryInterface {
 	return &ReservationRepository{
 		db:                database,
 		encryptionEnabled: false, // Encryption disabled by default for backward compatibility
@@ -70,7 +71,7 @@ func NewReservationRepository(database *db.DB) *ReservationRepository {
 }
 
 // NewReservationRepositoryWithEncryption creates a new ReservationRepository with encryption enabled
-func NewReservationRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) *ReservationRepository {
+func NewReservationRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) ReservationRepositoryInterface {
 	return &ReservationRepository{
 		db:                database,
 		encryptionSvc:     encryptionSvc,
@@ -172,18 +173,19 @@ func (r *ReservationRepository) Create(ctx context.Context, reservation db.Reser
 
 	query := `
 		INSERT INTO reservations (
-			gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, status, reserved_at, expires_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 		) RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
 
 	var createdReservation db.Reservation
 	err := r.db.QueryRowxContext(ctx, query,
+		reservation.WishlistID,
 		reservation.GiftItemID,
 		reservation.ReservedByUserID,
 		reservation.GuestName,
@@ -211,7 +213,7 @@ func (r *ReservationRepository) Create(ctx context.Context, reservation db.Reser
 func (r *ReservationRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
@@ -222,7 +224,7 @@ func (r *ReservationRepository) GetByID(ctx context.Context, id pgtype.UUID) (*d
 	err := r.db.GetContext(ctx, &reservation, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("reservation not found")
+			return nil, ErrReservationNotFound
 		}
 		return nil, fmt.Errorf("failed to get reservation: %w", err)
 	}
@@ -239,7 +241,7 @@ func (r *ReservationRepository) GetByID(ctx context.Context, id pgtype.UUID) (*d
 func (r *ReservationRepository) GetByToken(ctx context.Context, token pgtype.UUID) (*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
@@ -250,7 +252,7 @@ func (r *ReservationRepository) GetByToken(ctx context.Context, token pgtype.UUI
 	err := r.db.GetContext(ctx, &reservation, query, token)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("reservation not found")
+			return nil, ErrReservationNotFound
 		}
 		return nil, fmt.Errorf("failed to get reservation by token: %w", err)
 	}
@@ -267,7 +269,7 @@ func (r *ReservationRepository) GetByToken(ctx context.Context, token pgtype.UUI
 func (r *ReservationRepository) GetByGiftItem(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
@@ -295,7 +297,7 @@ func (r *ReservationRepository) GetByGiftItem(ctx context.Context, giftItemID pg
 func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error) {
 	query := `
 		SELECT
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 		FROM reservations
@@ -323,12 +325,11 @@ func (r *ReservationRepository) GetActiveReservationForGiftItem(ctx context.Cont
 // GetReservationsByUser retrieves reservations made by a user
 func (r *ReservationRepository) GetReservationsByUser(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]*db.Reservation, error) {
 	query := `
-		SELECT r.id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.encrypted_guest_name,
+		SELECT r.id, r.wishlist_id, r.gift_item_id, r.reserved_by_user_id, r.guest_name, r.encrypted_guest_name,
 			r.guest_email, r.encrypted_guest_email, r.reservation_token, r.status, r.reserved_at,
 			r.expires_at, r.canceled_at, r.cancel_reason, r.notification_sent, r.updated_at
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
-		JOIN wishlists w ON gi.wishlist_id = w.id
 		WHERE r.reserved_by_user_id = $1 AND r.status = 'active'
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
@@ -360,7 +361,7 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 			updated_at = NOW()
 		WHERE id = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
@@ -375,7 +376,7 @@ func (r *ReservationRepository) UpdateStatus(ctx context.Context, reservationID 
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("reservation not found")
+			return nil, ErrReservationNotFound
 		}
 		return nil, fmt.Errorf("failed to update reservation status: %w", err)
 	}
@@ -398,7 +399,7 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 			updated_at = NOW()
 		WHERE reservation_token = $1
 		RETURNING
-			id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
+			id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, encrypted_guest_name,
 			guest_email, encrypted_guest_email, reservation_token, status, reserved_at,
 			expires_at, canceled_at, cancel_reason, notification_sent, updated_at
 	`
@@ -413,7 +414,7 @@ func (r *ReservationRepository) UpdateStatusByToken(ctx context.Context, token p
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("reservation not found")
+			return nil, ErrReservationNotFound
 		}
 		return nil, fmt.Errorf("failed to update reservation status by token: %w", err)
 	}
@@ -453,7 +454,8 @@ func (r *ReservationRepository) ListUserReservationsWithDetails(ctx context.Cont
 			u.last_name as owner_last_name
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
-		JOIN wishlists w ON gi.wishlist_id = w.id
+		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		JOIN wishlists w ON wi.wishlist_id = w.id
 		LEFT JOIN users u ON w.owner_id = u.id
 		WHERE r.reserved_by_user_id = $1 AND r.status IN ('active', 'cancelled')
 		ORDER BY r.reserved_at DESC
@@ -503,7 +505,8 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 			u.last_name as owner_last_name
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
-		JOIN wishlists w ON gi.wishlist_id = w.id
+		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		JOIN wishlists w ON wi.wishlist_id = w.id
 		LEFT JOIN users u ON w.owner_id = u.id
 		WHERE r.reservation_token = $1 AND r.status IN ('active', 'cancelled')
 		ORDER BY r.reserved_at DESC

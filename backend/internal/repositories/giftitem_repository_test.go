@@ -11,7 +11,7 @@ import (
 func TestGiftItemRepository_Create(t *testing.T) {
 	t.Run("validate gift item creation fields", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			WishlistID:  pgtype.UUID{Valid: true},
+			OwnerID:     pgtype.UUID{Valid: true},
 			Name:        "Nintendo Switch",
 			Description: pgtype.Text{String: "The latest gaming console", Valid: true},
 			Link:        pgtype.Text{String: "https://example.com/switch", Valid: true},
@@ -25,15 +25,15 @@ func TestGiftItemRepository_Create(t *testing.T) {
 		if giftItem.Name == "" {
 			t.Error("name should not be empty")
 		}
-		if !giftItem.WishlistID.Valid {
-			t.Error("wishlist_id should be valid")
+		if !giftItem.OwnerID.Valid {
+			t.Error("owner_id should be valid")
 		}
 	})
 
 	t.Run("create gift item with minimal fields", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			WishlistID: pgtype.UUID{Valid: true},
-			Name:       "Minimal Gift",
+			OwnerID: pgtype.UUID{Valid: true},
+			Name:    "Minimal Gift",
 		}
 
 		// Verify optional fields can be omitted
@@ -53,8 +53,8 @@ func TestGiftItemRepository_Create(t *testing.T) {
 
 	t.Run("gift item initial state is available", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			WishlistID: pgtype.UUID{Valid: true},
-			Name:       "Available Gift",
+			OwnerID: pgtype.UUID{Valid: true},
+			Name:    "Available Gift",
 		}
 
 		// New items should not be reserved or purchased
@@ -72,7 +72,7 @@ func TestGiftItemRepository_GetByID(t *testing.T) {
 		// Simulate a retrieved gift item
 		giftItem := db.GiftItem{
 			ID:          pgtype.UUID{Valid: true},
-			WishlistID:  pgtype.UUID{Valid: true},
+			OwnerID:     pgtype.UUID{Valid: true},
 			Name:        "Test Gift",
 			Description: pgtype.Text{String: "Test description", Valid: true},
 			Priority:    pgtype.Int4{Int32: 5, Valid: true},
@@ -83,8 +83,8 @@ func TestGiftItemRepository_GetByID(t *testing.T) {
 		if !giftItem.ID.Valid {
 			t.Error("id should be valid")
 		}
-		if !giftItem.WishlistID.Valid {
-			t.Error("wishlist_id should be valid")
+		if !giftItem.OwnerID.Valid {
+			t.Error("owner_id should be valid")
 		}
 		if giftItem.Name == "" {
 			t.Error("name should not be empty")
@@ -129,7 +129,7 @@ func TestGiftItemRepository_Update(t *testing.T) {
 
 		giftItem := db.GiftItem{
 			ID:          originalID,
-			WishlistID:  pgtype.UUID{Valid: true},
+			OwnerID:     pgtype.UUID{Valid: true},
 			Name:        "Updated Gift",
 			Description: pgtype.Text{String: "Updated description", Valid: true},
 			Price:       pgtype.Numeric{Valid: true},
@@ -143,10 +143,10 @@ func TestGiftItemRepository_Update(t *testing.T) {
 
 	t.Run("update can change position", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			ID:         pgtype.UUID{Valid: true},
-			WishlistID: pgtype.UUID{Valid: true},
-			Name:       "Reorderable Gift",
-			Position:   pgtype.Int4{Int32: 0, Valid: true},
+			ID:       pgtype.UUID{Valid: true},
+			OwnerID:  pgtype.UUID{Valid: true},
+			Name:     "Reorderable Gift",
+			Position: pgtype.Int4{Int32: 0, Valid: true},
 		}
 
 		// Change position
@@ -186,9 +186,9 @@ func TestGiftItemRepository_Delete(t *testing.T) {
 func TestGiftItemRepository_Reserve(t *testing.T) {
 	t.Run("reserve available gift item", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			ID:         pgtype.UUID{Valid: true},
-			WishlistID: pgtype.UUID{Valid: true},
-			Name:       "Available Gift",
+			ID:      pgtype.UUID{Valid: true},
+			OwnerID: pgtype.UUID{Valid: true},
+			Name:    "Available Gift",
 		}
 
 		// Reserve the item
@@ -522,7 +522,7 @@ func TestGiftItemRepository_EdgeCases(t *testing.T) {
 
 	t.Run("handle null optional fields", func(t *testing.T) {
 		giftItem := db.GiftItem{
-			WishlistID:  pgtype.UUID{Valid: true},
+			OwnerID:     pgtype.UUID{Valid: true},
 			Name:        "Minimal Gift",
 			Description: pgtype.Text{Valid: false},
 			Link:        pgtype.Text{Valid: false},
