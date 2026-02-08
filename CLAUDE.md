@@ -641,6 +641,62 @@ make clean                    # Clean build artifacts
   - Single source of truth for database logic
   - No layer violations (service → repository → database)
 
+### Repository Constructor Best Practices
+- **Interface-based Dependency Injection**: Constructors must return interfaces, not concrete types
+  ```go
+  // WRONG - returns concrete type
+  func NewUserRepository(database *db.DB) *UserRepository {
+      return &UserRepository{db: database}
+  }
+
+  // CORRECT - returns interface
+  func NewUserRepository(database *db.DB) UserRepositoryInterface {
+      return &UserRepository{db: database}
+  }
+  ```
+- **Why this matters**: Interface return types enable proper dependency injection and make mocking easier in tests
+- **Apply consistently**: All repository constructors should follow this pattern across the codebase
+- **Multiple constructors**: If you have variants (e.g., `NewUserRepositoryWithEncryption`), all must return the interface
+
+### Schema Evolution and Migration Impact
+- **Migration 000005 Example**: When `gift_items.wishlist_id` was removed and replaced with many-to-many via `wishlist_items`:
+  - **All SQL queries must be updated**: Any JOIN from `gift_items` to `wishlists` must go through the junction table
+  - **Reservation queries affected**: `reservations` gained its own `wishlist_id` column (NOT NULL)
+  - **Insert statements need updates**: New columns must be added to INSERT and SELECT/RETURNING clauses
+
+- **Common migration pitfalls**:
+  ```go
+  // BROKEN - gi.wishlist_id no longer exists after migration 000005
+  LEFT JOIN wishlists w ON gi.wishlist_id = w.id
+
+  // CORRECT - use junction table
+  LEFT JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+  LEFT JOIN wishlists w ON wi.wishlist_id = w.id
+  ```
+
+- **Verification checklist after schema migrations**:
+  1. Search codebase for old column names (e.g., `git grep "gi.wishlist_id"`)
+  2. Update all JOIN clauses in repositories
+  3. Add new columns to INSERT statements
+  4. Add new columns to SELECT and RETURNING clauses
+  5. Update struct field mappings in service layer
+  6. Run all tests to catch compilation errors
+  7. Check handler tests for obsolete field references
+
+### Test Maintenance After Refactoring
+- **Remove obsolete tests promptly**: When handlers/methods are moved or deleted, remove their tests immediately
+- **Dead code causes compile errors in Go**:
+  - Unused helper functions (`stringPtr`, `float64Ptr`) must be deleted if no callers exist
+  - Go compiler will fail on unused functions in test files
+- **Mock methods can stay**: Even if no tests call them, mock methods satisfying interfaces won't cause errors
+- **Field name changes propagate**: Schema changes (e.g., `WishlistID` → `OwnerID`) break tests referencing old fields
+- **Test cleanup pattern**:
+  1. Identify tests for moved/deleted functionality
+  2. Add comment explaining why tests were removed
+  3. Remove entire test functions, not just mark as skipped
+  4. Remove unused helper functions and types
+  5. Verify build and tests pass
+
 ### Logging Best Practices
 - **Conditional success logging**: Only log success when operations actually succeed
   ```go
