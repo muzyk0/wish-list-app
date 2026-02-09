@@ -5,7 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 )
 
 func TestGiftItemRepository_Create(t *testing.T) {

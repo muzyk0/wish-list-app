@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 )
 

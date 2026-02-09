@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"

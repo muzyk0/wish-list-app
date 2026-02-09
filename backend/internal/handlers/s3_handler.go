@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"wish-list/internal/auth"
-	"wish-list/internal/aws"
+	"wish-list/internal/shared/aws"
 
 	"github.com/labstack/echo/v4"
 )

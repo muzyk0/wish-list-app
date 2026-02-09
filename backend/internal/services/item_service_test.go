@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 
 	"github.com/google/uuid"

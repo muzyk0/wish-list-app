@@ -10,16 +10,16 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 
-	"wish-list/internal/analytics"
+	"wish-list/internal/shared/analytics"
 	"wish-list/internal/auth"
-	"wish-list/internal/aws"
-	"wish-list/internal/cache"
-	"wish-list/internal/config"
-	"wish-list/internal/encryption"
-	"wish-list/internal/middleware"
+	"wish-list/internal/shared/aws"
+	"wish-list/internal/shared/cache"
+	"wish-list/internal/shared/config"
+	"wish-list/internal/shared/encryption"
+	"wish-list/internal/shared/middleware"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,7 @@ import (
 
 	"wish-list/internal/handlers"
 	"wish-list/internal/services"
-	"wish-list/internal/validation"
+	"wish-list/internal/shared/validation"
 
 	_ "wish-list/internal/handlers/docs" // Import generated docs
 )

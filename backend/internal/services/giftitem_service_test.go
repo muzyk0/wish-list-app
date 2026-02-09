@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"

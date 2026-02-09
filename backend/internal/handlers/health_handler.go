@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 
 	"github.com/labstack/echo/v4"
 )

@@ -9,9 +9,9 @@ import (
 	"math/big"
 	"strings"
 	"time"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 
-	"wish-list/internal/cache"
+	"wish-list/internal/shared/cache"
 	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"

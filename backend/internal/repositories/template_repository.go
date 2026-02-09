@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 )
 
 // Sentinel errors for template repository
