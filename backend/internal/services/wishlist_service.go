@@ -13,6 +13,7 @@ import (
 
 	"wish-list/internal/shared/cache"
 	"wish-list/internal/repositories"
+	reservationRepos "wish-list/internal/domains/reservations/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -57,7 +58,7 @@ type WishListService struct {
 	giftItemRepo    repositories.GiftItemRepositoryInterface
 	templateRepo    repositories.TemplateRepositoryInterface
 	emailService    EmailServiceInterface
-	reservationRepo repositories.ReservationRepositoryInterface
+	reservationRepo reservationRepos.ReservationRepositoryInterface
 	cache           cache.CacheInterface
 }
 
@@ -66,7 +67,7 @@ func NewWishListService(
 	giftItemRepo repositories.GiftItemRepositoryInterface,
 	templateRepo repositories.TemplateRepositoryInterface,
 	emailService EmailServiceInterface,
-	reservationRepo repositories.ReservationRepositoryInterface,
+	reservationRepo reservationRepos.ReservationRepositoryInterface,
 	cacheService cache.CacheInterface,
 ) *WishListService {
 	return &WishListService{

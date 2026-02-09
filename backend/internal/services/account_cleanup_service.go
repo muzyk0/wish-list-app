@@ -9,6 +9,7 @@ import (
 	"time"
 	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
+	reservationRepos "wish-list/internal/domains/reservations/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -19,7 +20,7 @@ type AccountCleanupService struct {
 	userRepo        repositories.UserRepositoryInterface
 	wishListRepo    repositories.WishListRepositoryInterface
 	giftItemRepo    repositories.GiftItemRepositoryInterface
-	reservationRepo repositories.ReservationRepositoryInterface
+	reservationRepo reservationRepos.ReservationRepositoryInterface
 	emailService    EmailServiceInterface
 	ticker          *time.Ticker
 }
@@ -30,7 +31,7 @@ func NewAccountCleanupService(
 	userRepo repositories.UserRepositoryInterface,
 	wishListRepo repositories.WishListRepositoryInterface,
 	giftItemRepo repositories.GiftItemRepositoryInterface,
-	reservationRepo repositories.ReservationRepositoryInterface,
+	reservationRepo reservationRepos.ReservationRepositoryInterface,
 	emailService EmailServiceInterface,
 ) *AccountCleanupService {
 	return &AccountCleanupService{
