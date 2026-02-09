@@ -7,7 +7,7 @@ import (
 	"time"
 
 	db "wish-list/internal/shared/db/models"
-	"wish-list/internal/domains/reservations/repositories"
+	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"

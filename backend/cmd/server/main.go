@@ -10,11 +10,11 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"wish-list/internal/repositories"
 	db "wish-list/internal/shared/db/models"
+	"wish-list/internal/repositories"
 
-	"wish-list/internal/auth"
 	"wish-list/internal/shared/analytics"
+	"wish-list/internal/auth"
 	"wish-list/internal/shared/aws"
 	"wish-list/internal/shared/cache"
 	"wish-list/internal/shared/config"
@@ -31,8 +31,6 @@ import (
 
 	healthDomain "wish-list/internal/domains/health"
 	healthHandlers "wish-list/internal/domains/health/handlers"
-	reservationsDomain "wish-list/internal/domains/reservations"
-	reservationsHandlers "wish-list/internal/domains/reservations/handlers"
 	storageDomain "wish-list/internal/domains/storage"
 
 	_ "wish-list/internal/handlers/docs" // Import generated docs
@@ -184,17 +182,22 @@ func main() {
 	wishlistItemRepo := repositories.NewWishlistItemRepository(sqlxDB)
 	templateRepo := repositories.NewTemplateRepository(sqlxDB)
 
-	// Note: reservationRepo is now created inside the reservations domain
-	// TODO: Refactor services to not depend on reservation repo directly
+	var reservationRepo repositories.ReservationRepositoryInterface
+	if encryptionService != nil {
+		reservationRepo = repositories.NewReservationRepositoryWithEncryption(sqlxDB, encryptionService)
+	} else {
+		reservationRepo = repositories.NewReservationRepository(sqlxDB)
+	}
 
 	// Initialize services
 	analyticsService := analytics.NewAnalyticsService(cfg.AnalyticsEnabled)
 	emailService := services.NewEmailService()
 	userService := services.NewUserService(userRepo)
-	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, templateRepo, emailService, nil, redisCache)
+	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, templateRepo, emailService, reservationRepo, redisCache)
 	itemService := services.NewItemService(giftItemRepo, wishlistItemRepo)
 	wishlistItemService := services.NewWishlistItemService(wishListRepo, giftItemRepo, wishlistItemRepo)
-	accountCleanupService := services.NewAccountCleanupService(sqlxDB, userRepo, wishListRepo, giftItemRepo, nil, emailService)
+	reservationService := services.NewReservationService(reservationRepo, giftItemRepo)
+	accountCleanupService := services.NewAccountCleanupService(sqlxDB, userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
 	// Initialize handlers with analytics integration
 	healthHandler := healthDomain.NewHealthHandler(sqlxDB)
@@ -212,7 +215,7 @@ func main() {
 	wishListHandler := handlers.NewWishListHandler(wishListService)
 	itemHandler := handlers.NewItemHandler(itemService)
 	wishlistItemHandler := handlers.NewWishlistItemHandler(wishlistItemService)
-	reservationHandler := reservationsDomain.NewReservationHandler(sqlxDB, giftItemRepo)
+	reservationHandler := handlers.NewReservationHandler(reservationService)
 
 	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
 
@@ -271,7 +274,7 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *healthHandlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, itemHandler *handlers.ItemHandler, wishlistItemHandler handlers.WishlistItemHandlerInterface, reservationHandler *reservationsHandlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *healthHandlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, itemHandler *handlers.ItemHandler, wishlistItemHandler handlers.WishlistItemHandlerInterface, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 

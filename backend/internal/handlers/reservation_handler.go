@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"wish-list/internal/auth"
-	"wish-list/internal/domains/reservations/services"
+	"wish-list/internal/services"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"

@@ -7,8 +7,7 @@ import (
 	"time"
 	db "wish-list/internal/shared/db/models"
 
-	"wish-list/internal/domains/reservations/repositories"
-	oldRepositories "wish-list/internal/repositories"
+	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -36,12 +35,12 @@ type ReservationServiceInterface interface {
 
 type ReservationService struct {
 	repo         repositories.ReservationRepositoryInterface
-	giftItemRepo oldRepositories.GiftItemRepositoryInterface
+	giftItemRepo repositories.GiftItemRepositoryInterface
 }
 
 func NewReservationService(
 	reservationRepo repositories.ReservationRepositoryInterface,
-	giftItemRepo oldRepositories.GiftItemRepositoryInterface,
+	giftItemRepo repositories.GiftItemRepositoryInterface,
 ) *ReservationService {
 	return &ReservationService{
 		repo:         reservationRepo,
