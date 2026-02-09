@@ -321,22 +321,19 @@ class ApiClient {
 
   // Gift item methods
   async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
-    const { data, error } = await this.client.GET(
-      '/gift-items/wishlist/{wishlistId}',
-      {
-        params: { path: { wishlistId } },
-      },
-    );
+    const { data, error } = await this.client.GET('/wishlists/{id}/items', {
+      params: { path: { id: wishlistId } },
+    });
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch gift items');
     }
 
-    return data.items;
+    return (data as any).items || [];
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
-    const { data, error } = await this.client.GET('/gift-items/{id}', {
+    const { data, error } = await this.client.GET('/items/{id}', {
       params: { path: { id: itemId } },
     });
 
@@ -344,7 +341,7 @@ class ApiClient {
       throw new Error((error as any)?.error || 'Failed to fetch gift item');
     }
 
-    return data;
+    return data as GiftItem;
   }
 
   async createGiftItem(
@@ -352,9 +349,9 @@ class ApiClient {
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
     const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items',
+      '/wishlists/{id}/items/new',
       {
-        params: { path: { wishlistId } },
+        params: { path: { id: wishlistId } },
         body: data,
       },
     );
@@ -371,13 +368,10 @@ class ApiClient {
     itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
-    const { data: responseData, error } = await this.client.PUT(
-      '/gift-items/{id}',
-      {
-        params: { path: { id: itemId } },
-        body: data,
-      },
-    );
+    const { data: responseData, error } = await this.client.PUT('/items/{id}', {
+      params: { path: { id: itemId } },
+      body: data,
+    });
 
     if (error || !responseData) {
       throw new Error((error as any)?.error || 'Failed to update gift item');
@@ -387,7 +381,7 @@ class ApiClient {
   }
 
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
-    const { error } = await this.client.DELETE('/gift-items/{id}', {
+    const { error } = await this.client.DELETE('/items/{id}', {
       params: { path: { id: itemId } },
     });
 
@@ -402,10 +396,10 @@ class ApiClient {
     purchasedPrice: number,
   ): Promise<GiftItem> {
     const { data, error } = await this.client.POST(
-      '/gift-items/{id}/purchase',
+      '/items/{id}/mark-purchased',
       {
         params: { path: { id: itemId } },
-        body: { purchased_price: purchasedPrice },
+        body: { purchasedPrice },
       },
     );
 
@@ -425,7 +419,7 @@ class ApiClient {
     data: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
@@ -440,7 +434,7 @@ class ApiClient {
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    const { data, error } = await this.client.GET('/reservations', {});
+    const { data, error } = await this.client.GET('/reservations/user', {});
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch reservations');
@@ -451,7 +445,7 @@ class ApiClient {
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     const { error } = await this.client.DELETE(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
       },
