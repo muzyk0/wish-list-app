@@ -98,11 +98,7 @@ const GiftItemCard = ({
 
           {item.priority && item.priority > 0 && (
             <View style={styles.priorityBadge}>
-              <MaterialCommunityIcons
-                name="star"
-                size={14}
-                color="#FFD700"
-              />
+              <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
               <Text style={styles.priorityText}>{item.priority}/10</Text>
             </View>
           )}
@@ -287,11 +283,7 @@ export default function WishListScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={24}
-            color="#ffffff"
-          />
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#ffffff" />
         </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {wishList.title}
@@ -324,14 +316,14 @@ export default function WishListScreen() {
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {giftItems?.length || 0}
+                  {giftItems?.items?.length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Items</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValueSecondary}>
-                  {giftItems?.filter((item) => item.reserved_by_user_id)
+                  {giftItems?.items?.filter((item) => item.reserved_by_user_id)
                     .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Reserved</Text>
@@ -339,7 +331,7 @@ export default function WishListScreen() {
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {giftItems?.filter((item) => item.purchased_by_user_id)
+                  {giftItems?.items?.filter((item) => item.purchased_by_user_id)
                     .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Purchased</Text>
@@ -360,9 +352,9 @@ export default function WishListScreen() {
             />
           }
         >
-          {giftItems && giftItems.length > 0 ? (
+          {giftItems?.items && giftItems?.items?.length > 0 ? (
             <View style={styles.listContainer}>
-              {giftItems.map((item) => (
+              {giftItems.items.map((item) => (
                 <GiftItemCard
                   key={item.id}
                   item={item}

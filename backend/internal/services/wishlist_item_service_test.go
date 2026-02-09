@@ -97,7 +97,7 @@ func TestGetWishlistItems_Success_Owner(t *testing.T) {
 	assert.Equal(t, 1, result.Page)
 	assert.Equal(t, 10, result.Limit)
 	assert.Equal(t, 1, result.TotalPages)
-	assert.Equal(t, "Test Item", result.Items[0].Title)
+	assert.Equal(t, "Test Item", result.Items[0].Name)
 }
 
 func TestGetWishlistItems_Success_PublicWishlist_NonOwner(t *testing.T) {
@@ -653,7 +653,7 @@ func TestCreateItemInWishlist_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, "New Item", result.Title)
+	assert.Equal(t, "New Item", result.Name)
 	assert.Equal(t, 3, result.Priority)
 	assert.Len(t, itemRepo.CreateWithOwnerCalls(), 1)
 	assert.Len(t, wiRepo.AttachCalls(), 1)
@@ -713,7 +713,7 @@ func TestCreateItemInWishlist_Success_WithAllFields(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, "Full Item", result.Title)
+	assert.Equal(t, "Full Item", result.Name)
 	// Verify captured item has correct owner and fields
 	assert.Equal(t, uuidToPg(t, ownerID), capturedItem.OwnerID)
 	assert.Equal(t, "Full Item", capturedItem.Name)

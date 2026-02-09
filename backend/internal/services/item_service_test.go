@@ -97,7 +97,7 @@ func TestItemService_GetMyItems_Success(t *testing.T) {
 	require.NotNil(t, result)
 	assert.Equal(t, int64(1), result.TotalCount)
 	assert.Len(t, result.Items, 1)
-	assert.Equal(t, item.Name, result.Items[0].Title)
+	assert.Equal(t, item.Name, result.Items[0].Name)
 	assert.Equal(t, 10, result.Limit)
 	assert.Equal(t, 1, result.Page)
 	assert.Equal(t, 1, result.TotalPages)
@@ -251,7 +251,7 @@ func TestItemService_CreateItem_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, returnedItem.Name, result.Title)
+	assert.Equal(t, returnedItem.Name, result.Name)
 	assert.Len(t, itemRepo.CreateCalls(), 1)
 }
 
@@ -368,7 +368,7 @@ func TestItemService_GetItem_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	assert.Equal(t, item.Name, result.Title)
+	assert.Equal(t, item.Name, result.Name)
 	assert.Equal(t, ownerID.String(), result.OwnerID)
 	assert.Len(t, itemRepo.GetByIDCalls(), 1)
 }
@@ -846,7 +846,7 @@ func TestItemService_ConvertToOutput_NullableFields(t *testing.T) {
 	result, err := svc.GetItem(context.Background(), item.ID.String(), ownerStr)
 
 	require.NoError(t, err)
-	assert.Equal(t, "Minimal", result.Title)
+	assert.Equal(t, "Minimal", result.Name)
 	assert.Equal(t, "", result.Description)
 	assert.Equal(t, "", result.Link)
 	assert.Equal(t, "", result.ImageURL)

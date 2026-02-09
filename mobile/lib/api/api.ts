@@ -43,7 +43,10 @@ type ItemResponse = {
   updatedAt?: string;
 };
 
-function convertItemResponseToGiftItem(item: ItemResponse, wishlistId?: string): GiftItem {
+function convertItemResponseToGiftItem(
+  item: ItemResponse,
+  wishlistId?: string,
+): GiftItem {
   return {
     created_at: item.createdAt || '',
     description: item.description,
@@ -391,7 +394,7 @@ class ApiClient {
   }
 
   // Gift item methods
-  async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
+  async getGiftItems(wishlistId: string) {
     const { data, error } = await this.client.GET('/wishlists/{id}/items', {
       params: { path: { id: wishlistId } },
     });
@@ -400,13 +403,7 @@ class ApiClient {
       throw error;
     }
 
-    if (!data) {
-      return [];
-    }
-
-    // Type assertion needed because response structure may vary
-    type ItemsResponse = { items?: GiftItem[] };
-    return (data as ItemsResponse).items || [];
+    return data;
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {

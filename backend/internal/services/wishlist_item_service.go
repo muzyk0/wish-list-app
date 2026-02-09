@@ -287,7 +287,7 @@ func (s *WishlistItemService) convertItemToOutput(item *db.GiftItem) *ItemOutput
 	output := &ItemOutput{
 		ID:          item.ID.String(),
 		OwnerID:     item.OwnerID.String(),
-		Title:       item.Name,
+		Name:        item.Name,
 		Description: "",
 		Link:        "",
 		ImageURL:    "",

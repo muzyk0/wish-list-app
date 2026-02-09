@@ -97,10 +97,10 @@ func (r *WishlistItemRepository) GetByWishlist(ctx context.Context, wishlistID p
 
 	query := `
 		SELECT
-			gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
+			gi.name, gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
 			gi.price, gi.priority, gi.reserved_by_user_id, gi.reserved_at,
 			gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
-			gi.notes, gi.position, gi.archived_at, gi.created_at, gi.updated_at
+			gi.notes, gi.position, gi.archived_at, gi.created_at, gi.updated_at,gi.purchased_by_user_id, gi.reserved_by_user_id
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		WHERE wi.wishlist_id = $1

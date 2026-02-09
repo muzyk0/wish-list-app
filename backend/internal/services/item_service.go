@@ -14,8 +14,8 @@ import (
 
 // Sentinel errors for items
 var (
-	ErrItemNotFound    = errors.New("item not found")
-	ErrItemForbidden   = errors.New("not authorized to access this item")
+	ErrItemNotFound      = errors.New("item not found")
+	ErrItemForbidden     = errors.New("not authorized to access this item")
 	ErrInvalidItemUser   = errors.New("invalid user id")
 	ErrItemTitleRequired = errors.New("title is required")
 )
@@ -75,7 +75,7 @@ type UpdateItemInput struct {
 type ItemOutput struct {
 	ID          string
 	OwnerID     string
-	Title       string
+	Name        string
 	Description string
 	Link        string
 	ImageURL    string
@@ -342,7 +342,7 @@ func (s *ItemService) convertToOutput(item *db.GiftItem) *ItemOutput {
 	output := &ItemOutput{
 		ID:          item.ID.String(),
 		OwnerID:     item.OwnerID.String(),
-		Title:       item.Name,
+		Name:        item.Name,
 		Description: "",
 		Link:        "",
 		ImageURL:    "",
