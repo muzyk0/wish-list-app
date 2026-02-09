@@ -50,6 +50,8 @@ type PaginatedResult struct {
 	TotalCount int64
 }
 
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_giftitem_repository_test.go -pkg services . GiftItemRepositoryInterface
+
 // GiftItemRepositoryInterface defines the interface for gift item database operations
 type GiftItemRepositoryInterface interface {
 	// CRUD

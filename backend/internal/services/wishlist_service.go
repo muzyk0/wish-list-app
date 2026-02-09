@@ -19,8 +19,18 @@ import (
 
 // Sentinel errors
 var (
-	ErrWishListNotFound  = errors.New("wishlist not found")
-	ErrWishListForbidden = errors.New("not authorized to access this wishlist")
+	ErrWishListNotFound         = errors.New("wishlist not found")
+	ErrWishListForbidden        = errors.New("not authorized to access this wishlist")
+	ErrWishListTitleRequired    = errors.New("title is required")
+	ErrInvalidWishListUserID    = errors.New("invalid user id")
+	ErrInvalidWishListID        = errors.New("invalid wishlist id")
+	ErrInvalidWishListGiftItem  = errors.New("invalid gift item id")
+	ErrActiveReservationsExist  = errors.New("cannot delete wishlist with active reservations - please remove or cancel all reservations first")
+	ErrNameRequired             = errors.New("name is required")
+	ErrPriorityOutOfRange       = errors.New("priority value out of int32 range")
+	ErrPositionOutOfRange       = errors.New("position value out of int32 range")
+	ErrGiftItemIDRequired       = errors.New("gift item ID is required")
+	ErrUserIDRequired           = errors.New("user ID is required")
 )
 
 // WishListServiceInterface defines the interface for wishlist-related operations
@@ -159,13 +169,13 @@ type TemplateOutput struct {
 func (s *WishListService) CreateWishList(ctx context.Context, userID string, input CreateWishListInput) (*WishListOutput, error) {
 	// Validate input
 	if input.Title == "" {
-		return nil, errors.New("title is required")
+		return nil, ErrWishListTitleRequired
 	}
 
 	// Parse user ID
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidWishListUserID
 	}
 
 	// Generate public slug if public
@@ -232,7 +242,7 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 func (s *WishListService) GetWishList(ctx context.Context, wishListID string) (*WishListOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(wishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishListID
 	}
 
 	wishList, err := s.wishListRepo.GetByID(ctx, id)
@@ -300,7 +310,7 @@ func (s *WishListService) GetWishListByPublicSlug(ctx context.Context, publicSlu
 func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string) ([]*WishListOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidWishListUserID
 	}
 
 	// Use the efficient method that gets wishlists with item counts in a single query
@@ -335,7 +345,7 @@ func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string
 func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID string, input UpdateWishListInput) (*WishListOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(wishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishListID
 	}
 
 	// Verify ownership
@@ -346,7 +356,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidWishListUserID
 	}
 
 	if wishList.OwnerID != ownerID {
@@ -449,7 +459,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 func (s *WishListService) DeleteWishList(ctx context.Context, wishListID, userID string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(wishListID); err != nil {
-		return errors.New("invalid wishlist id")
+		return ErrInvalidWishListID
 	}
 
 	// Verify ownership
@@ -460,7 +470,7 @@ func (s *WishListService) DeleteWishList(ctx context.Context, wishListID, userID
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidWishListUserID
 	}
 
 	if wishList.OwnerID != ownerID {
@@ -484,7 +494,7 @@ func (s *WishListService) DeleteWishList(ctx context.Context, wishListID, userID
 	}
 
 	if hasActiveReservations {
-		return errors.New("cannot delete wishlist with active reservations - please remove or cancel all reservations first")
+		return ErrActiveReservationsExist
 	}
 
 	// Invalidate cache if cache is available
@@ -499,21 +509,21 @@ func (s *WishListService) DeleteWishList(ctx context.Context, wishListID, userID
 func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string, input CreateGiftItemInput) (*GiftItemOutput, error) {
 	// Validate input
 	if input.Name == "" {
-		return nil, errors.New("name is required")
+		return nil, ErrNameRequired
 	}
 
 	// Validate int32 bounds for Priority and Position
 	if input.Priority < math.MinInt32 || input.Priority > math.MaxInt32 {
-		return nil, errors.New("priority value out of int32 range")
+		return nil, ErrPriorityOutOfRange
 	}
 	if input.Position < math.MinInt32 || input.Position > math.MaxInt32 {
-		return nil, errors.New("position value out of int32 range")
+		return nil, ErrPositionOutOfRange
 	}
 
 	// Parse wishlist ID
 	listID := pgtype.UUID{}
 	if err := listID.Scan(wishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishListID
 	}
 
 	// Create price numeric
@@ -568,7 +578,7 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*GiftItemOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(giftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidWishListGiftItem
 	}
 
 	giftItem, err := s.giftItemRepo.GetByID(ctx, id)
@@ -606,7 +616,7 @@ func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*
 func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID string) ([]*GiftItemOutput, error) {
 	listID := pgtype.UUID{}
 	if err := listID.Scan(wishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishListID
 	}
 
 	giftItems, err := s.giftItemRepo.GetByWishList(ctx, listID)
@@ -654,18 +664,18 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 	// Validate int32 bounds for Priority and Position if provided
 	if input.Priority != nil {
 		if *input.Priority < math.MinInt32 || *input.Priority > math.MaxInt32 {
-			return nil, errors.New("priority value out of int32 range")
+			return nil, ErrPriorityOutOfRange
 		}
 	}
 	if input.Position != nil {
 		if *input.Position < math.MinInt32 || *input.Position > math.MaxInt32 {
-			return nil, errors.New("position value out of int32 range")
+			return nil, ErrPositionOutOfRange
 		}
 	}
 
 	id := pgtype.UUID{}
 	if err := id.Scan(giftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidWishListGiftItem
 	}
 
 	giftItem, err := s.giftItemRepo.GetByID(ctx, id)
@@ -746,7 +756,7 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(giftItemID); err != nil {
-		return errors.New("invalid gift item id")
+		return ErrInvalidWishListGiftItem
 	}
 
 	// Get gift item before deletion to get wishlist ID for cache invalidation
@@ -808,10 +818,10 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemID, userID string, purchasedPrice float64) (*GiftItemOutput, error) {
 	// Validate input
 	if giftItemID == "" {
-		return nil, errors.New("gift item ID is required")
+		return nil, ErrGiftItemIDRequired
 	}
 	if userID == "" {
-		return nil, errors.New("user ID is required")
+		return nil, ErrUserIDRequired
 	}
 
 	// Parse UUIDs

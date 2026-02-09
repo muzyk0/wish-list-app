@@ -14,8 +14,12 @@ import (
 
 // Sentinel errors for wishlist-item operations
 var (
-	ErrItemAlreadyAttached = errors.New("item already attached to this wishlist")
-	ErrItemNotInWishlist   = errors.New("item not found in this wishlist")
+	ErrItemAlreadyAttached      = errors.New("item already attached to this wishlist")
+	ErrItemNotInWishlist        = errors.New("item not found in this wishlist")
+	ErrInvalidWishlistItemWLID   = errors.New("invalid wishlist id")
+	ErrInvalidWishlistItemID     = errors.New("invalid item id")
+	ErrInvalidWishlistItemUser   = errors.New("invalid user id")
+	ErrWishlistItemTitleRequired = errors.New("title is required")
 )
 
 // WishlistItemServiceInterface defines operations for wishlist-item relationships
@@ -51,12 +55,12 @@ func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID s
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishlistItemWLID
 	}
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidWishlistItemUser
 	}
 
 	// Get wishlist to check ownership/access
@@ -115,17 +119,17 @@ func (s *WishlistItemService) AttachItem(ctx context.Context, wishlistID string,
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
-		return errors.New("invalid wishlist id")
+		return ErrInvalidWishlistItemWLID
 	}
 
 	itID := pgtype.UUID{}
 	if err := itID.Scan(itemID); err != nil {
-		return errors.New("invalid item id")
+		return ErrInvalidWishlistItemID
 	}
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidWishlistItemUser
 	}
 
 	// Get wishlist to check ownership
@@ -172,18 +176,18 @@ func (s *WishlistItemService) AttachItem(ctx context.Context, wishlistID string,
 func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlistID string, userID string, input CreateItemInput) (*ItemOutput, error) {
 	// Validate input
 	if input.Title == "" {
-		return nil, errors.New("title is required")
+		return nil, ErrWishlistItemTitleRequired
 	}
 
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidWishlistItemWLID
 	}
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidWishlistItemUser
 	}
 
 	// Get wishlist to check ownership
@@ -236,17 +240,17 @@ func (s *WishlistItemService) DetachItem(ctx context.Context, wishlistID string,
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
-		return errors.New("invalid wishlist id")
+		return ErrInvalidWishlistItemWLID
 	}
 
 	itID := pgtype.UUID{}
 	if err := itID.Scan(itemID); err != nil {
-		return errors.New("invalid item id")
+		return ErrInvalidWishlistItemID
 	}
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidWishlistItemUser
 	}
 
 	// Get wishlist to check ownership

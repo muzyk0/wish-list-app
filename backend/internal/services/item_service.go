@@ -14,8 +14,10 @@ import (
 
 // Sentinel errors for items
 var (
-	ErrItemNotFound  = errors.New("item not found")
-	ErrItemForbidden = errors.New("not authorized to access this item")
+	ErrItemNotFound    = errors.New("item not found")
+	ErrItemForbidden   = errors.New("not authorized to access this item")
+	ErrInvalidItemUser   = errors.New("invalid user id")
+	ErrItemTitleRequired = errors.New("title is required")
 )
 
 // ItemServiceInterface defines the interface for item-related operations
@@ -100,7 +102,7 @@ func (s *ItemService) GetMyItems(ctx context.Context, userID string, filters rep
 	// Parse user ID
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidItemUser
 	}
 
 	// Set defaults
@@ -147,13 +149,13 @@ func (s *ItemService) GetMyItems(ctx context.Context, userID string, filters rep
 func (s *ItemService) CreateItem(ctx context.Context, userID string, input CreateItemInput) (*ItemOutput, error) {
 	// Validate input
 	if input.Title == "" {
-		return nil, errors.New("title is required")
+		return nil, ErrItemTitleRequired
 	}
 
 	// Parse user ID
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidItemUser
 	}
 
 	// Create item model
@@ -193,7 +195,7 @@ func (s *ItemService) GetItem(ctx context.Context, itemID string, userID string)
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidItemUser
 	}
 
 	// Get item from repository
@@ -220,7 +222,7 @@ func (s *ItemService) UpdateItem(ctx context.Context, itemID string, userID stri
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidItemUser
 	}
 
 	// Get existing item
@@ -278,7 +280,7 @@ func (s *ItemService) SoftDeleteItem(ctx context.Context, itemID string, userID 
 
 	ownerID := pgtype.UUID{}
 	if err := ownerID.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidItemUser
 	}
 
 	// Get existing item
@@ -310,7 +312,7 @@ func (s *ItemService) MarkPurchased(ctx context.Context, itemID string, userID s
 
 	purchasedByUserID := pgtype.UUID{}
 	if err := purchasedByUserID.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidItemUser
 	}
 
 	// Get existing item

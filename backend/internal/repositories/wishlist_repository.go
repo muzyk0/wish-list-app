@@ -16,6 +16,8 @@ var (
 	ErrWishListNotFound = errors.New("wishlist not found")
 )
 
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_wishlist_repository_test.go -pkg services . WishListRepositoryInterface
+
 // WishListRepositoryInterface defines the interface for wishlist database operations
 type WishListRepositoryInterface interface {
 	Create(ctx context.Context, wishList db.WishList) (*db.WishList, error)

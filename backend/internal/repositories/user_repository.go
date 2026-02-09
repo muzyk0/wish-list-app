@@ -18,6 +18,8 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 )
 
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_user_repository_test.go -pkg services . UserRepositoryInterface
+
 // UserRepositoryInterface defines the interface for user database operations
 type UserRepositoryInterface interface {
 	Create(ctx context.Context, user db.User) (*db.User, error)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -156,6 +157,21 @@ func (h *ReservationHandler) CreateReservation(c echo.Context) error {
 	}
 
 	if err != nil {
+		if errors.Is(err, services.ErrInvalidGiftItemID) || errors.Is(err, services.ErrInvalidReservationWishlist) || errors.Is(err, services.ErrGuestInfoRequired) {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+		}
+		if errors.Is(err, services.ErrGiftItemNotInWishlist) {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": err.Error(),
+			})
+		}
+		if errors.Is(err, services.ErrGiftItemAlreadyReserved) {
+			return c.JSON(http.StatusConflict, map[string]string{
+				"error": err.Error(),
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to create reservation: %w", err).Error(),
 		})
@@ -280,6 +296,16 @@ func (h *ReservationHandler) CancelReservation(c echo.Context) error {
 	}
 
 	if err != nil {
+		if errors.Is(err, services.ErrInvalidGiftItemID) || errors.Is(err, services.ErrInvalidReservationWishlist) || errors.Is(err, services.ErrMissingUserOrToken) {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+		}
+		if errors.Is(err, services.ErrGiftItemNotInWishlist) || errors.Is(err, services.ErrReservationNotFound) {
+			return c.JSON(http.StatusNotFound, map[string]string{
+				"error": err.Error(),
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to cancel reservation: %w", err).Error(),
 		})

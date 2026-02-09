@@ -16,6 +16,8 @@ var (
 	ErrItemNotInWishlist = errors.New("item not found in wishlist")
 )
 
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_wishlistitem_repository_test.go -pkg services . WishlistItemRepositoryInterface
+
 // WishlistItemRepositoryInterface defines the interface for wishlist-item association operations
 type WishlistItemRepositoryInterface interface {
 	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error

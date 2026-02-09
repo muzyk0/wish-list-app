@@ -13,9 +13,12 @@ import (
 
 // Sentinel errors
 var (
-	ErrUserAlreadyExists = errors.New("user with this email already exists")
-	ErrUserNotFound      = errors.New("user not found")
-	ErrInvalidPassword   = errors.New("invalid password")
+	ErrUserAlreadyExists  = errors.New("user with this email already exists")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrInvalidPassword    = errors.New("invalid password")
+	ErrCredentialsRequired = errors.New("email and password are required")
+	ErrInvalidCredentials  = errors.New("invalid email or password")
+	ErrInvalidUserID       = errors.New("invalid user id")
 )
 
 // UserServiceInterface defines the interface for user-related operations
@@ -77,7 +80,7 @@ type UserOutput struct {
 func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error) {
 	// Validate input
 	if input.Email == "" || input.Password == "" {
-		return nil, errors.New("email and password are required")
+		return nil, ErrCredentialsRequired
 	}
 
 	// Check if user already exists
@@ -139,23 +142,23 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 func (s *UserService) Login(ctx context.Context, input LoginUserInput) (*UserOutput, error) {
 	// Validate input
 	if input.Email == "" || input.Password == "" {
-		return nil, errors.New("email and password are required")
+		return nil, ErrCredentialsRequired
 	}
 
 	// Get user by email
 	user, err := s.repo.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, ErrInvalidCredentials
 	}
 
 	// Check if password hash is valid
 	if !user.PasswordHash.Valid {
-		return nil, errors.New("invalid email or password")
+		return nil, ErrInvalidCredentials
 	}
 
 	// Compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(input.Password)); err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, ErrInvalidCredentials
 	}
 
 	output := &UserOutput{
@@ -172,7 +175,7 @@ func (s *UserService) Login(ctx context.Context, input LoginUserInput) (*UserOut
 func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidUserID
 	}
 
 	user, err := s.repo.GetByID(ctx, id)
@@ -197,7 +200,7 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidUserID
 	}
 
 	return s.repo.Delete(ctx, id)
@@ -207,7 +210,7 @@ func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
 func (s *UserService) UpdateProfile(ctx context.Context, userID string, input UpdateProfileInput) (*UserOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return nil, errors.New("invalid user id")
+		return nil, ErrInvalidUserID
 	}
 
 	user, err := s.repo.GetByID(ctx, id)
@@ -255,7 +258,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID string, input Up
 func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, newEmail string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidUserID
 	}
 
 	// Get current user
@@ -293,7 +296,7 @@ func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, 
 func (s *UserService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidUserID
 	}
 
 	// Get current user

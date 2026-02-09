@@ -8,77 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-// MockWishListRepository is a mock implementation of WishListRepositoryInterface
-type MockWishListRepository struct {
-	mock.Mock
-}
-
-func (m *MockWishListRepository) Create(ctx context.Context, wishList db.WishList) (*db.WishList, error) {
-	args := m.Called(ctx, wishList)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*db.WishList), args.Error(1)
-}
-
-func (m *MockWishListRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.WishList, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*db.WishList), args.Error(1)
-}
-
-func (m *MockWishListRepository) GetByOwner(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishList, error) {
-	args := m.Called(ctx, ownerID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]*db.WishList), args.Error(1)
-}
-
-func (m *MockWishListRepository) GetByPublicSlug(ctx context.Context, publicSlug string) (*db.WishList, error) {
-	args := m.Called(ctx, publicSlug)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*db.WishList), args.Error(1)
-}
-
-func (m *MockWishListRepository) Update(ctx context.Context, wishList db.WishList) (*db.WishList, error) {
-	args := m.Called(ctx, wishList)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*db.WishList), args.Error(1)
-}
-
-func (m *MockWishListRepository) Delete(ctx context.Context, id pgtype.UUID) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}
-
-func (m *MockWishListRepository) DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error {
-	args := m.Called(ctx, executor, id)
-	return args.Error(0)
-}
-
-func (m *MockWishListRepository) IncrementViewCount(ctx context.Context, id pgtype.UUID) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}
-
-func (m *MockWishListRepository) GetByOwnerWithItemCount(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishListWithItemCount, error) {
-	args := m.Called(ctx, ownerID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]*db.WishListWithItemCount), args.Error(1)
-}
 
 func TestWishListService_CreateWishList(t *testing.T) {
 	tests := []struct {
@@ -147,11 +78,13 @@ func TestWishListService_CreateWishList(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockWishListRepo := new(MockWishListRepository)
-			mockGiftItemRepo := new(MockGiftItemRepository)
+			mockWishListRepo := &WishListRepositoryInterfaceMock{}
+			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockWishListRepo.On("Create", mock.Anything, mock.AnythingOfType("db.WishList")).Return(tt.mockReturn, tt.mockError)
+				mockWishListRepo.CreateFunc = func(ctx context.Context, wl db.WishList) (*db.WishList, error) {
+					return tt.mockReturn, tt.mockError
+				}
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
@@ -168,14 +101,11 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				assert.Equal(t, tt.mockReturn.TemplateID, result.TemplateID)
 				assert.Equal(t, tt.mockReturn.IsPublic.Bool, result.IsPublic)
 			}
-
-			mockWishListRepo.AssertExpectations(t)
 		})
 	}
 }
 
 func TestWishListService_GetWishList(t *testing.T) {
-	// Create a valid UUID for testing
 	testUUID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 
 	tests := []struct {
@@ -218,11 +148,13 @@ func TestWishListService_GetWishList(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockWishListRepo := new(MockWishListRepository)
-			mockGiftItemRepo := new(MockGiftItemRepository)
+			mockWishListRepo := &WishListRepositoryInterfaceMock{}
+			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockWishListRepo.On("GetByID", mock.Anything, mock.AnythingOfType("pgtype.UUID")).Return(tt.mockReturn, tt.mockError)
+				mockWishListRepo.GetByIDFunc = func(ctx context.Context, id pgtype.UUID) (*db.WishList, error) {
+					return tt.mockReturn, tt.mockError
+				}
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
@@ -237,8 +169,6 @@ func TestWishListService_GetWishList(t *testing.T) {
 				assert.Equal(t, tt.mockReturn.Description.String, result.Description)
 				assert.Equal(t, tt.mockReturn.Occasion.String, result.Occasion)
 			}
-
-			mockWishListRepo.AssertExpectations(t)
 		})
 	}
 }
