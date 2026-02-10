@@ -120,11 +120,9 @@ func (a *App) initializeDomains() {
     itemRepo := itemrepository.New(a.db)
     wishlistItemRepo := wishlistitemrepository.New(a.db)
     reservationRepo := reservationrepository.New(a.db)
-    templateRepo := wishlistrepository.NewTemplateRepository(a.db)
-
     // Services (depend on repositories, cross-domain via interfaces)
     userService := userservice.New(userRepo)
-    wishlistService := wishlistservice.New(wishlistRepo, itemRepo, templateRepo, a.emailService, reservationRepo, a.cache)
+    wishlistService := wishlistservice.New(wishlistRepo, itemRepo, reservationRepo, a.cache)
     itemService := itemservice.New(itemRepo, wishlistItemRepo)
     wishlistItemService := wishlistitemservice.New(wishlistRepo, itemRepo, wishlistItemRepo)
     reservationService := reservationservice.New(reservationRepo, itemRepo)

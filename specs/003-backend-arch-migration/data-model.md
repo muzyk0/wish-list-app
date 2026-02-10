@@ -86,10 +86,11 @@ domain/{name}/
 
 ### wishlist
 
-**Purpose**: Wishlist CRUD, template-based creation
+**Purpose**: Wishlist CRUD
 **Entities**: `WishList` struct (id, owner_id, title, description, is_public, created_at, updated_at)
 **Repository**: Full CRUD + owner listing + public access
-**Cross-domain deps**: Needs `GiftItemRepositoryInterface`, `ReservationRepositoryInterface`, `TemplateRepositoryInterface`, `CacheInterface` (all injected)
+**Cross-domain deps**: Needs `GiftItemRepositoryInterface`, `ReservationRepositoryInterface`, `CacheInterface` (all injected)
+**Note**: Template repository and template methods deleted per business decision
 
 ### item
 
@@ -142,8 +143,7 @@ wishlist domain exports:
 reservation domain exports:
   → ReservationRepositoryInterface (consumed by wishlist domain)
 
-template (part of wishlist domain):
-  → TemplateRepositoryInterface (consumed within wishlist domain)
+template: DELETED (template_repository.go removed per business decision)
 ```
 
 All interfaces are defined in the consuming domain's service package (not the providing domain), following the Go idiom of "accept interfaces, return structs."
@@ -186,6 +186,10 @@ All interfaces are defined in the consuming domain's service package (not the pr
 | `repositories/giftitem_repository.go` | `domain/item/repository/giftitem_repository.go` |
 | `repositories/wishlistitem_repository.go` | `domain/wishlist_item/repository/wishlistitem_repository.go` |
 | `repositories/reservation_repository.go` | `domain/reservation/repository/reservation_repository.go` |
-| `repositories/template_repository.go` | `domain/wishlist/repository/template_repository.go` |
+| `repositories/template_repository.go` | **DELETED** (template feature removed) |
+| `services/wishlist_service_template_methods.go` | **DELETED** (template feature removed) |
 | `domains/health/*` | `domain/health/delivery/http/*` |
 | `domains/storage/*` | `domain/storage/delivery/http/*` |
+| `handlers/test_helpers_test.go` | `pkg/helpers/testutil.go` (converted from _test.go to importable) |
+| `services/mock_*_repository_test.go` (5 files) | Each domain's `service/` directory |
+| `services/giftitem_service_test.go` | `domain/item/service/giftitem_service_test.go` |

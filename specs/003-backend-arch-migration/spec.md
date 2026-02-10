@@ -117,7 +117,7 @@ After the migration is complete, all existing unit tests, integration tests, and
 - **FR-001**: System MUST reorganize all domain-specific code (auth, users, wishlists, items, wishlist-items, reservations, health, storage) into self-contained modules under a domain directory. Health and storage are lightweight domains that serve HTTP endpoints. Background jobs (account cleanup) and cross-cutting services (email) MUST reside in the application layer, not as domains.
 - **FR-002**: Each domain module MUST contain its own delivery (handler + DTOs + routes), service, repository, and models sub-packages.
 - **FR-003**: System MUST extract application infrastructure (config, database, server, router, documentation) into a dedicated application directory.
-- **FR-004**: System MUST extract shared libraries (auth middleware, response helpers, validation, encryption, logging) into a shared packages directory.
+- **FR-004**: System MUST extract shared libraries (auth middleware, response helpers, validation, encryption) into a shared packages directory.
 - **FR-005**: All existing API endpoints MUST maintain their exact URLs, request formats, and response formats after migration.
 - **FR-006**: All existing database migrations MUST remain functional and accessible from their designated location.
 - **FR-007**: Domain modules MUST NOT import from other domain modules' internal packages; cross-domain communication MUST use interface injection at the application layer, where each domain defines its own service interfaces and the application startup wires dependencies between domains.
@@ -138,7 +138,7 @@ After the migration is complete, all existing unit tests, integration tests, and
 
 ### Key Entities
 
-- **Domain Module**: A self-contained business capability area (auth, user, wishlist, item, wishlist-item, reservation) with its own handler, service, repository, model, and DTO layers.
+- **Domain Module**: A self-contained business capability area (auth, user, wishlist, item, wishlist-item, reservation, health, storage) with its own handler, service, repository, model, and DTO layers.
 - **Application Package**: Infrastructure code that supports all domains: configuration loading, database connection management, server setup, route registration, and API documentation.
 - **Shared Library**: Reusable utility packages (auth middleware, response formatting, input validation, encryption, logging) that any domain can import without coupling to another domain.
 - **Delivery Layer**: The interface of a domain, containing the handler (request processing), DTOs (request/response contracts), and routes (endpoint registration).

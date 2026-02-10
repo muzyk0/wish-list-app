@@ -111,8 +111,6 @@ backend/
 │       │   │       │   ├── requests.go
 │       │   │       │   └── responses.go
 │       │   │       └── routes.go         # Route registration (NEW)
-│       │   ├── service/
-│       │   │   └── auth_service.go       # Auth business logic (extracted from user_service auth parts)
 │       │   └── models/
 │       │       └── auth.go               # Auth-specific models (tokens, sessions)
 │       │
@@ -143,7 +141,8 @@ backend/
 │       │   │       └── routes.go
 │       │   ├── service/
 │       │   │   ├── wishlist_service.go   # (from services/wishlist_service.go)
-│       │   │   └── wishlist_service_test.go
+│       │   │   ├── wishlist_service_test.go
+│       │   │   └── mock_wishlist_repository_test.go
 │       │   ├── repository/
 │       │   │   ├── wishlist_repository.go # (from repositories/wishlist_repository.go)
 │       │   │   └── wishlist_repository_test.go
@@ -241,6 +240,8 @@ Create application infrastructure and shared library packages first, since all d
 - Move `shared/db/migrations/` → `app/database/migrations/`
 - Move `shared/middleware/` → `app/middleware/`
 - Create `app/server/` (server.go, router.go) — extract from main.go
+- Move `services/account_cleanup_service.go` → `app/jobs/account_cleanup.go`
+- Move `services/email_service.go` → `app/jobs/email_service.go`
 - Create `app/app.go` — application factory
 
 **Step A2**: Create `internal/pkg/` structure
@@ -267,7 +268,7 @@ Each domain follows the same pattern: create directory → move files → extrac
 3. **user** — core entity, other domains reference user
 4. **item** — referenced by wishlist and reservation
 5. **wishlist_item** — junction table, depends on item and wishlist interfaces
-6. **wishlist** — depends on item, template, reservation interfaces + cache
+6. **wishlist** — depends on item, reservation interfaces + cache
 7. **reservation** — depends on item interface
 8. **auth** — depends on user service interface, token manager
 
@@ -285,29 +286,24 @@ Each domain follows the same pattern: create directory → move files → extrac
 
 ### Phase C: Application Wiring & Cleanup
 
-**Step C1**: Move background services to app layer
-- Move `account_cleanup_service.go` → `app/jobs/account_cleanup.go`
-- Move `email_service.go` → `app/jobs/email_service.go`
-- Wire via interface injection at startup
-
-**Step C2**: Update `cmd/server/main.go`
+**Step C1**: Update `cmd/server/main.go`
 - Delegate initialization to `app.New()` and `app.Run()`
 - Keep main.go minimal (load config, create app, run)
 
-**Step C3**: Update router
+**Step C2**: Update router
 - Create `app/server/router.go` that calls each domain's `RegisterRoutes()`
 - Remove all domain-specific route definitions from central location
 
-**Step C4**: Update Swagger
+**Step C3**: Update Swagger
 - Update `swag init` source path for new handler locations
 - Regenerate Swagger docs, verify identical output
 
-**Step C5**: Update Dockerfile
+**Step C4**: Update Dockerfile
 - Update build paths if any entry point changes
 - Update migration file copy path
 - Verify Docker build passes
 
-**Step C6**: Delete old directories
+**Step C5**: Delete old directories
 - Remove `internal/handlers/` (empty after migration)
 - Remove `internal/services/` (empty after migration)
 - Remove `internal/repositories/` (empty after migration)
@@ -315,7 +311,7 @@ Each domain follows the same pattern: create directory → move files → extrac
 - Remove `internal/auth/` (moved to pkg/auth/)
 - Remove `internal/domains/` (moved to domain/)
 
-**Step C7**: Final verification
+**Step C6**: Final verification
 - `go build ./...` — compilation passes
 - `go test ./...` — all tests pass
 - `go vet ./...` — no warnings
@@ -327,7 +323,7 @@ Based on the clarification: **interface injection at startup**.
 
 | Domain | Needs From | Resolution |
 |--------|-----------|------------|
-| wishlist | item repo, reservation repo, template repo, cache | Interfaces injected via service constructor |
+| wishlist | item repo, reservation repo, cache | Interfaces injected via service constructor |
 | wishlist_item | wishlist repo, item repo | Interfaces injected via service constructor |
 | reservation | item repo | Interface injected via service constructor |
 | auth | user service | Interface injected via handler constructor |

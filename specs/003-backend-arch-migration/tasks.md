@@ -57,7 +57,7 @@
 
 **Goal**: Extract all reusable utility packages into `internal/pkg/` with zero domain dependencies
 
-**Independent Test**: `go build ./internal/pkg/...` compiles with no imports from `internal/domain/` or `internal/app/` (except `app/database` for Executor)
+**Independent Test**: `go build ./internal/pkg/...` compiles with no imports from `internal/domain/` or `internal/app/`
 
 ### Implementation for US3
 
@@ -75,7 +75,7 @@
 - [ ] T028 [US3] Update all remaining imports across codebase referencing old `internal/auth/` and `internal/shared/` paths to new `internal/pkg/` paths
 - [ ] T029 [US3] Verify `go build ./...` passes and `go vet ./...` clean after all pkg/ moves
 
-**Checkpoint**: All shared libraries in `internal/pkg/`. No pkg/ file imports domain/ or app/ (except Executor). Build passes.
+**Checkpoint**: All shared libraries in `internal/pkg/`. No pkg/ file imports domain/ or app/. Build passes.
 
 ---
 
@@ -92,13 +92,14 @@
 - [ ] T030 [US1] Move `backend/internal/domains/health/handlers/health_handler.go` → `backend/internal/domain/health/delivery/http/handler.go`, update package to `http` (under health delivery)
 - [ ] T031 [P] [US1] Move `backend/internal/domains/health/handlers/health_handler_test.go` → `backend/internal/domain/health/delivery/http/handler_test.go`, update package and imports
 - [ ] T032 [US5] Create `backend/internal/domain/health/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler)` function extracting health route definitions
-- [ ] T033 [US1] Create `backend/internal/domain/health/models/health.go` — health status model (if needed, or minimal placeholder)
+- [ ] T032a [US1] Inline `backend/internal/domains/health/health.go` factory function into handler constructor or routes.go, then delete the factory file
+- [ ] T033 [US1] Create `backend/internal/domain/health/models/health.go` — health check response model if handler uses custom types, otherwise skip
 - [ ] T034 [US1] Update `backend/internal/app/server/router.go` to call `health.RegisterRoutes()`, verify `go build ./...` passes
 
 ### 4B: Storage Domain (lightweight, depends on pkg/aws)
 
-- [ ] T035 [US1] Move `backend/internal/domains/storage/handlers/storage_handler.go` → `backend/internal/domain/storage/delivery/http/handler.go`, update package and imports to use `internal/pkg/aws`
-- [ ] T036 [P] [US1] Move storage handler test (if exists) → `backend/internal/domain/storage/delivery/http/handler_test.go`
+- [ ] T035 [US1] Move `backend/internal/domains/storage/handlers/s3_handler.go` → `backend/internal/domain/storage/delivery/http/handler.go`, update package and imports to use `internal/pkg/aws`
+- [ ] T036 [P] [US1] Move `backend/internal/domains/storage/handlers/s3_handler_test.go` → `backend/internal/domain/storage/delivery/http/handler_test.go`, update package and imports
 - [ ] T037 [US4] Create `backend/internal/domain/storage/delivery/http/dto/requests.go` and `responses.go` — extract upload request/response types from handler
 - [ ] T038 [US5] Create `backend/internal/domain/storage/delivery/http/routes.go` — `RegisterRoutes()` function for storage endpoints
 - [ ] T039 [US1] Create `backend/internal/domain/storage/models/storage.go` — upload metadata model
@@ -110,9 +111,11 @@
 - [ ] T042 [US1] Move `backend/internal/repositories/user_repository.go` → `backend/internal/domain/user/repository/user_repository.go`, update package, update model imports to `domain/user/models`, update DB/Executor imports to `app/database`
 - [ ] T043 [P] [US1] Move `backend/internal/repositories/user_repository_test.go` (if exists) → `backend/internal/domain/user/repository/user_repository_test.go`, update imports
 - [ ] T044 [US1] Move `backend/internal/services/user_service.go` → `backend/internal/domain/user/service/user_service.go`, update package, update repository/model imports
-- [ ] T045 [P] [US1] Move `backend/internal/services/user_service_test.go` (if exists) → `backend/internal/domain/user/service/user_service_test.go`, update imports
+- [ ] T045 [P] [US1] Move `backend/internal/services/user_service_test.go` → `backend/internal/domain/user/service/user_service_test.go`, update imports
+- [ ] T045a [P] [US1] Move `backend/internal/services/mock_user_repository_test.go` → `backend/internal/domain/user/service/mock_user_repository_test.go`, update package declaration
 - [ ] T046 [US1] Move `backend/internal/handlers/user_handler.go` → `backend/internal/domain/user/delivery/http/handler.go`, update package, update service/model imports
-- [ ] T047 [P] [US1] Move `backend/internal/handlers/user_handler_test.go` (if exists) → `backend/internal/domain/user/delivery/http/handler_test.go`, update imports
+- [ ] T047 [P] [US1] Move `backend/internal/handlers/user_handler_test.go` → `backend/internal/domain/user/delivery/http/handler_test.go`, update imports
+- [ ] T047a [US1] Convert `backend/internal/handlers/test_helpers_test.go` → `backend/internal/pkg/helpers/testutil.go` (rename from `_test.go` to regular file so it can be imported by domain handler tests), update package to `helpers`
 - [ ] T048 [US4] Create `backend/internal/domain/user/delivery/http/dto/requests.go` — extract request binding structs from user handler into DTO types with `ToDomain()` methods
 - [ ] T049 [US4] Create `backend/internal/domain/user/delivery/http/dto/responses.go` — extract response structs from user handler into DTO types with `FromDomain()` methods
 - [ ] T050 [US5] Create `backend/internal/domain/user/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler, authMiddleware echo.MiddlewareFunc)` with user endpoints
@@ -124,9 +127,11 @@
 - [ ] T053 [US1] Move `backend/internal/repositories/giftitem_repository.go` → `backend/internal/domain/item/repository/giftitem_repository.go`, update package, model imports, DB imports
 - [ ] T054 [P] [US1] Move giftitem repository test (if exists) → `backend/internal/domain/item/repository/giftitem_repository_test.go`, update imports
 - [ ] T055 [US1] Move `backend/internal/services/item_service.go` → `backend/internal/domain/item/service/item_service.go`, update package and imports
-- [ ] T056 [P] [US1] Move item service test (if exists) → `backend/internal/domain/item/service/item_service_test.go`, update imports
+- [ ] T056 [P] [US1] Move `backend/internal/services/item_service_test.go` → `backend/internal/domain/item/service/item_service_test.go`, update imports
+- [ ] T056a [P] [US1] Move `backend/internal/services/giftitem_service_test.go` → `backend/internal/domain/item/service/giftitem_service_test.go`, update imports
+- [ ] T056b [P] [US1] Move `backend/internal/services/mock_giftitem_repository_test.go` → `backend/internal/domain/item/service/mock_giftitem_repository_test.go`, update package declaration
 - [ ] T057 [US1] Move `backend/internal/handlers/item_handler.go` → `backend/internal/domain/item/delivery/http/handler.go`, update package and imports
-- [ ] T058 [P] [US1] Move item handler test (if exists) → `backend/internal/domain/item/delivery/http/handler_test.go`, update imports
+- [ ] T058 [P] [US1] Skip — no item handler test file exists (no `item_handler_test.go` in handlers/)
 - [ ] T059 [US4] Create `backend/internal/domain/item/delivery/http/dto/requests.go` and `responses.go` — extract item DTOs with conversion methods
 - [ ] T060 [US5] Create `backend/internal/domain/item/delivery/http/routes.go` — `RegisterRoutes()` for item endpoints
 - [ ] T061 [US1] Update router, verify build and `go test ./internal/domain/item/...` pass
@@ -137,21 +142,24 @@
 - [ ] T063 [US1] Move `backend/internal/repositories/wishlistitem_repository.go` → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository.go`, update package, model/DB imports
 - [ ] T064 [P] [US1] Move wishlistitem repository test (if exists) → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository_test.go`, update imports
 - [ ] T065 [US1] Move `backend/internal/services/wishlist_item_service.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service.go`, update package and imports; define `WishListRepositoryInterface` and `GiftItemRepositoryInterface` in service package for cross-domain deps
-- [ ] T066 [P] [US1] Move wishlist_item service test (if exists) → `backend/internal/domain/wishlist_item/service/wishlist_item_service_test.go`, update imports
+- [ ] T066 [P] [US1] Move `backend/internal/services/wishlist_item_service_test.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service_test.go`, update imports
+- [ ] T066a [P] [US1] Move `backend/internal/services/mock_wishlistitem_repository_test.go` → `backend/internal/domain/wishlist_item/service/mock_wishlistitem_repository_test.go`, update package declaration
 - [ ] T067 [US1] Move `backend/internal/handlers/wishlist_item_handler.go` → `backend/internal/domain/wishlist_item/delivery/http/handler.go`, update package and imports
-- [ ] T068 [P] [US1] Move wishlist_item handler test (if exists) → `backend/internal/domain/wishlist_item/delivery/http/handler_test.go`, update imports
+- [ ] T068 [P] [US1] Skip — no wishlist_item handler test file exists (no `wishlist_item_handler_test.go` in handlers/)
 - [ ] T069 [US4] Create `backend/internal/domain/wishlist_item/delivery/http/dto/requests.go` and `responses.go` — extract DTOs with conversion methods
 - [ ] T070 [US5] Create `backend/internal/domain/wishlist_item/delivery/http/routes.go` — `RegisterRoutes()` for wishlist_item endpoints
 - [ ] T071 [US1] Update router, verify build and `go test ./internal/domain/wishlist_item/...` pass
 
-### 4F: Wishlist Domain (depends on item, template, reservation, cache interfaces)
+### 4F: Wishlist Domain (depends on item, reservation, cache interfaces)
 
 - [ ] T072 [US1] Extract `WishList` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/wishlist/models/wishlist.go`
 - [ ] T073 [US1] Move `backend/internal/repositories/wishlist_repository.go` → `backend/internal/domain/wishlist/repository/wishlist_repository.go`, update package, model/DB imports
-- [ ] T074 [P] [US1] Move wishlist repository test (if exists) → `backend/internal/domain/wishlist/repository/wishlist_repository_test.go`, update imports
-- [ ] T075 [US1] Move `backend/internal/repositories/template_repository.go` → `backend/internal/domain/wishlist/repository/template_repository.go`, update package and imports
-- [ ] T076 [US1] Move `backend/internal/services/wishlist_service.go` → `backend/internal/domain/wishlist/service/wishlist_service.go`, update package and imports; define `GiftItemRepositoryInterface`, `ReservationRepositoryInterface`, `TemplateRepositoryInterface`, `CacheInterface` in service package for cross-domain deps
-- [ ] T077 [P] [US1] Move wishlist service test (if exists) → `backend/internal/domain/wishlist/service/wishlist_service_test.go`, update imports
+- [ ] T074 [P] [US1] Move `backend/internal/repositories/wishlist_repository_test.go` → `backend/internal/domain/wishlist/repository/wishlist_repository_test.go`, update imports
+- [ ] T075 [US1] Delete `backend/internal/repositories/template_repository.go` — template feature removed per business decision. Remove `TemplateRepositoryInterface` references and `templateRepo` field from `wishlist_service.go`, remove `templateRepo` parameter from `NewWishListService()` constructor, update all callers
+- [ ] T075a [US1] Delete `backend/internal/services/wishlist_service_template_methods.go` — all template methods (`GetTemplates`, `GetDefaultTemplate`, `UpdateWishListTemplate`) removed along with template repository
+- [ ] T076 [US1] Move `backend/internal/services/wishlist_service.go` → `backend/internal/domain/wishlist/service/wishlist_service.go`, update package and imports; define `GiftItemRepositoryInterface`, `ReservationRepositoryInterface`, `CacheInterface` in service package for cross-domain deps
+- [ ] T077 [P] [US1] Move `backend/internal/services/wishlist_service_test.go` → `backend/internal/domain/wishlist/service/wishlist_service_test.go`, update imports (remove template-related test cases if any)
+- [ ] T077a [P] [US1] Move `backend/internal/services/mock_wishlist_repository_test.go` → `backend/internal/domain/wishlist/service/mock_wishlist_repository_test.go`, update package declaration
 - [ ] T078 [US1] Move `backend/internal/handlers/wishlist_handler.go` → `backend/internal/domain/wishlist/delivery/http/handler.go`, update package and imports
 - [ ] T079 [P] [US1] Move wishlist handler test (if exists) → `backend/internal/domain/wishlist/delivery/http/handler_test.go`, update imports
 - [ ] T080 [US4] Create `backend/internal/domain/wishlist/delivery/http/dto/requests.go` and `responses.go` — extract wishlist DTOs with conversion methods
@@ -164,7 +172,8 @@
 - [ ] T084 [US1] Move `backend/internal/repositories/reservation_repository.go` → `backend/internal/domain/reservation/repository/reservation_repository.go`, update package, model/DB imports
 - [ ] T085 [P] [US1] Move reservation repository test (if exists) → `backend/internal/domain/reservation/repository/reservation_repository_test.go`, update imports
 - [ ] T086 [US1] Move `backend/internal/services/reservation_service.go` → `backend/internal/domain/reservation/service/reservation_service.go`, update package and imports; define `GiftItemRepositoryInterface` in service package
-- [ ] T087 [P] [US1] Move reservation service test (if exists) → `backend/internal/domain/reservation/service/reservation_service_test.go`, update imports
+- [ ] T087 [P] [US1] Move `backend/internal/services/reservation_service_test.go` → `backend/internal/domain/reservation/service/reservation_service_test.go`, update imports
+- [ ] T087a [P] [US1] Move `backend/internal/services/mock_reservation_repository_test.go` → `backend/internal/domain/reservation/service/mock_reservation_repository_test.go`, update package declaration
 - [ ] T088 [US1] Move `backend/internal/handlers/reservation_handler.go` → `backend/internal/domain/reservation/delivery/http/handler.go`, update package and imports
 - [ ] T089 [P] [US1] Move reservation handler test (if exists) → `backend/internal/domain/reservation/delivery/http/handler_test.go`, update imports
 - [ ] T090 [US4] Create `backend/internal/domain/reservation/delivery/http/dto/requests.go` and `responses.go` — extract reservation DTOs with conversion methods
@@ -175,9 +184,9 @@
 
 - [ ] T093 [US1] Create `backend/internal/domain/auth/models/auth.go` — auth-specific models (token responses, session types) extracted from handler structs
 - [ ] T094 [US1] Move `backend/internal/handlers/auth_handler.go` → `backend/internal/domain/auth/delivery/http/handler.go`, update package, import `internal/pkg/auth` for token manager, define `UserServiceInterface` in handler or service package
-- [ ] T095 [P] [US1] Move auth handler test (if exists) → `backend/internal/domain/auth/delivery/http/handler_test.go`, update imports
+- [ ] T095 [P] [US1] Skip — no auth handler test file exists (no `auth_handler_test.go` in handlers/)
 - [ ] T096 [US1] Move `backend/internal/handlers/oauth_handler.go` → `backend/internal/domain/auth/delivery/http/oauth_handler.go`, update package and imports
-- [ ] T097 [P] [US1] Move oauth handler test (if exists) → `backend/internal/domain/auth/delivery/http/oauth_handler_test.go`, update imports
+- [ ] T097 [P] [US1] Skip — no oauth handler test file exists (no `oauth_handler_test.go` in handlers/)
 - [ ] T098 [US4] Create `backend/internal/domain/auth/delivery/http/dto/requests.go` and `responses.go` — extract auth/oauth request and response DTOs with conversion methods
 - [ ] T099 [US5] Create `backend/internal/domain/auth/delivery/http/routes.go` — `RegisterRoutes()` for auth and oauth endpoints
 - [ ] T100 [US1] Update router, verify build and `go test ./internal/domain/auth/...` pass
@@ -216,7 +225,7 @@
 - [ ] T111 [P] Delete `backend/internal/shared/` directory (split into app/ and pkg/)
 - [ ] T112 [P] Delete `backend/internal/auth/` directory (moved to pkg/auth/)
 - [ ] T113 [P] Delete `backend/internal/domains/` directory (moved to domain/)
-- [ ] T114 Remove entity structs from `backend/internal/shared/db/models/models.go` that were extracted to domain models (User, WishList, GiftItem, Reservation, WishlistItem) — if file is now empty, delete it
+- [ ] T114 Remove entity structs from `backend/internal/shared/db/models/models.go` that were extracted to domain models (User, WishList, GiftItem, Reservation, WishlistItem) and Template — if file is now empty, delete it
 - [ ] T115 Run `go build ./...` and `go test ./...` after all deletions to confirm nothing was missed
 
 **Checkpoint**: Old directory structure fully removed. Only new structure remains.
@@ -237,6 +246,7 @@
 - [ ] T123 Verify startup time (SC-005): compare server startup time before and after migration, confirm no measurable regression
 - [ ] T124 Update `CLAUDE.md` backend structure section to reflect new `internal/app/`, `internal/pkg/`, `internal/domain/` layout
 - [ ] T125 Run quickstart.md validation — confirm all example paths in quickstart.md are accurate
+- [ ] T126 [P] Update version identifiers per CR-005 — increment patch version in API docs (`@version` annotation) and any version constants to reflect structural refactor
 
 ---
 
@@ -252,7 +262,7 @@
   - 4C (user): Can start after Phase 3
   - 4D (item): Can start after Phase 3
   - 4E (wishlist_item): Can start after 4D (needs item models for interface definition)
-  - 4F (wishlist): Can start after 4D and 4G (needs item and reservation interfaces)
+  - 4F (wishlist): Can start after 4D and 4G (needs item and reservation interfaces); template repo deleted in T075/T075a before domain move
   - 4G (reservation): Can start after 4D (needs item interface)
   - 4H (auth): Can start after 4C (needs user service interface)
 - **US6 - Wiring & Verification (Phase 5)**: Depends on ALL Phase 4 sub-phases
@@ -326,4 +336,7 @@ Within Phase 4, migrate one domain at a time:
 - SC-002: Cross-domain isolation verified in Phase 7 (T120)
 - SC-006: Import direction verified in Phase 7 (T119)
 - SC-007: Router cleanliness verified in Phase 7 (T121)
-- Total: 125 tasks across 7 phases covering all 6 user stories and 7 success criteria
+- Template deletion: T075/T075a remove template_repository.go and wishlist_service_template_methods.go per business decision (not a structural move)
+- Shared test helpers: T047a converts handlers/test_helpers_test.go to importable pkg/helpers/testutil.go
+- Mock files: Each mock_*_repository_test.go moves with its consuming service's test package
+- Total: 135 tasks across 7 phases covering all 6 user stories and 7 success criteria
