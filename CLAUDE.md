@@ -801,6 +801,8 @@ instead of "JWT ".
 
 ## Active Technologies
 - PostgreSQL (users, tokens metadata), In-memory (handoff codes) (002-cross-domain-implementation)
+- Go 1.25.5 + Echo v4.15.0, sqlx v1.4.0, pgx/v5 v5.8.0, golang-jwt/v5 v5.3.1, AWS SDK v2 (003-backend-arch-migration)
+- PostgreSQL (via pgx/sqlx), Redis (caching), AWS S3 (file uploads), AWS KMS (encryption) (003-backend-arch-migration)
 
 ## Recent Changes
 - 002-cross-domain-implementation: Added PostgreSQL (users, tokens metadata), In-memory (handoff codes)
