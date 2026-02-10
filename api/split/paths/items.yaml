@@ -1,0 +1,117 @@
+get:
+  description: >-
+    Get all gift items owned by the authenticated user with pagination and
+    filters
+  parameters:
+    - description: Page number (default 1)
+      in: query
+      name: page
+      schema:
+        type: integer
+    - description: Items per page (default 10, max 100)
+      in: query
+      name: limit
+      schema:
+        type: integer
+    - description: Sort field (created_at, updated_at, title, price)
+      in: query
+      name: sort
+      schema:
+        type: string
+    - description: Sort order (asc, desc)
+      in: query
+      name: order
+      schema:
+        type: string
+    - description: Filter items not attached to any wishlist
+      in: query
+      name: unattached
+      schema:
+        type: boolean
+    - description: Include archived items (default false)
+      in: query
+      name: include_archived
+      schema:
+        type: boolean
+    - description: Search in title and description
+      in: query
+      name: search
+      schema:
+        type: string
+  responses:
+    '200':
+      description: List of items retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/internal_handlers.PaginatedItemsResponse.yaml
+    '400':
+      description: Invalid query parameters
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Get my gift items
+  tags:
+    - Items
+post:
+  description: Create a new gift item without attaching it to a wishlist
+  requestBody:
+    $ref: ../components/requestBodies/internal_handlers.CreateItemRequest.yaml
+  responses:
+    '201':
+      description: Item created successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+    '400':
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Create gift item
+  tags:
+    - Items

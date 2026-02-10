@@ -16,7 +16,7 @@ import (
 	"golang.org/x/oauth2/google"
 
 	"wish-list/internal/auth"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 )
 
@@ -95,7 +95,7 @@ type FacebookUserInfo struct {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        request body OAuthCodeRequest true "Authorization code from Google"
+// @Param			request	body	OAuthCodeRequest	true	"Authorization code from Google"
 // @Success      200 {object} AuthResponse "Authentication successful"
 // @Failure      400 {object} map[string]string "Invalid request"
 // @Failure      500 {object} map[string]string "Internal server error"
@@ -193,7 +193,7 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        request body OAuthCodeRequest true "Authorization code from Facebook"
+// @Param			request	body	OAuthCodeRequest	true	"Authorization code from Facebook"
 // @Success      200 {object} AuthResponse "Authentication successful"
 // @Failure      400 {object} map[string]string "Invalid request"
 // @Failure      500 {object} map[string]string "Internal server error"

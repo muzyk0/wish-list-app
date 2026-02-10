@@ -9,9 +9,16 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	db "wish-list/internal/db/models"
-	"wish-list/internal/encryption"
+	db "wish-list/internal/shared/db/models"
+	"wish-list/internal/shared/encryption"
 )
+
+// Sentinel errors for user repository
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_user_repository_test.go -pkg services . UserRepositoryInterface
 
 // UserRepositoryInterface defines the interface for user database operations
 type UserRepositoryInterface interface {
@@ -31,7 +38,7 @@ type UserRepository struct {
 	encryptionEnabled bool
 }
 
-func NewUserRepository(database *db.DB) *UserRepository {
+func NewUserRepository(database *db.DB) UserRepositoryInterface {
 	return &UserRepository{
 		db:                database,
 		encryptionEnabled: false, // Encryption disabled by default for backward compatibility
@@ -39,7 +46,7 @@ func NewUserRepository(database *db.DB) *UserRepository {
 }
 
 // NewUserRepositoryWithEncryption creates a new UserRepository with encryption enabled
-func NewUserRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) *UserRepository {
+func NewUserRepositoryWithEncryption(database *db.DB, encryptionSvc *encryption.Service) UserRepositoryInterface {
 	return &UserRepository{
 		db:                database,
 		encryptionSvc:     encryptionSvc,
@@ -177,7 +184,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.User,
 	err := r.db.GetContext(ctx, &user, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -205,7 +212,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*db.User
 	err := r.db.GetContext(ctx, &user, query, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to get user by email: %w", err)
 	}
@@ -256,7 +263,7 @@ func (r *UserRepository) Update(ctx context.Context, user db.User) (*db.User, er
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
@@ -289,7 +296,7 @@ func (r *UserRepository) DeleteWithExecutor(ctx context.Context, executor db.Exe
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("user not found")
+		return ErrUserNotFound
 	}
 
 	return nil

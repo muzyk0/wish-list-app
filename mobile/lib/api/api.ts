@@ -26,6 +26,48 @@ import type {
 // Routes that don't require authentication
 const UNPROTECTED_ROUTES = ['/auth/login', '/auth/register'];
 
+// Type converter: ItemResponse (camelCase from API) -> GiftItem (snake_case for UI)
+type ItemResponse = {
+  createdAt?: string;
+  description?: string;
+  id?: string;
+  imageUrl?: string;
+  isArchived?: boolean;
+  isPurchased?: boolean;
+  link?: string;
+  notes?: string;
+  ownerId?: string;
+  price?: number;
+  priority?: number;
+  title?: string;
+  updatedAt?: string;
+};
+
+function convertItemResponseToGiftItem(
+  item: ItemResponse,
+  wishlistId?: string,
+): GiftItem {
+  return {
+    created_at: item.createdAt || '',
+    description: item.description,
+    id: item.id || '',
+    image_url: item.imageUrl,
+    link: item.link,
+    name: item.title || '',
+    notes: item.notes,
+    position: undefined,
+    price: item.price,
+    priority: item.priority,
+    purchased_at: undefined,
+    purchased_by_user_id: undefined,
+    purchased_price: undefined,
+    reserved_at: undefined,
+    reserved_by_user_id: undefined,
+    updated_at: item.updatedAt || '',
+    wishlist_id: wishlistId || '',
+  };
+}
+
 class ApiClient {
   private client: ReturnType<typeof createClient<paths>>;
   private refreshPromise: Promise<string | null> | null = null;
@@ -121,11 +163,12 @@ class ApiClient {
       body: credentials,
     });
 
-    if (error || !data) {
-      throw new Error(
-        // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
-        (error as any)?.error || 'Login failed',
-      );
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from login');
     }
 
     // Store both access and refresh tokens from response
@@ -138,11 +181,12 @@ class ApiClient {
       body: userData,
     });
 
-    if (error || !data) {
-      throw new Error(
-        // biome-ignore lint/suspicious/noExplicitAny: OpenAPI error type
-        (error as any)?.error || 'Registration failed',
-      );
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from registration');
     }
 
     // Store both access and refresh tokens from response
@@ -165,11 +209,15 @@ class ApiClient {
   async getProfile(): Promise<User> {
     const { data, error } = await this.client.GET('/protected/profile', {});
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to fetch profile');
+    if (error) {
+      throw error;
     }
 
-    return data as User;
+    if (!data) {
+      throw new Error('No data received from profile');
+    }
+
+    return data;
   }
 
   async updateProfile(userData: {
@@ -181,18 +229,22 @@ class ApiClient {
       body: userData,
     });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to update profile');
+    if (error) {
+      throw error;
     }
 
-    return data as User;
+    if (!data) {
+      throw new Error('No data received from profile update');
+    }
+
+    return data;
   }
 
   async deleteAccount(): Promise<void> {
     const { error } = await this.client.DELETE('/protected/account', {});
 
     if (error) {
-      throw new Error((error as any)?.error || 'Failed to delete account');
+      throw error;
     }
 
     // Clear tokens after successful account deletion
@@ -213,11 +265,15 @@ class ApiClient {
       },
     });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to change email');
+    if (error) {
+      throw error;
     }
 
-    return data as { message: string };
+    if (!data) {
+      throw new Error('No data received from email change');
+    }
+
+    return data;
   }
 
   async changePassword({
@@ -234,11 +290,15 @@ class ApiClient {
       },
     });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to change password');
+    if (error) {
+      throw error;
     }
 
-    return data as { message: string };
+    if (!data) {
+      throw new Error('No data received from password change');
+    }
+
+    return data;
   }
 
   // Wishlist methods
@@ -246,7 +306,7 @@ class ApiClient {
     const { data, error } = await this.client.GET('/wishlists', {});
 
     if (error) {
-      throw new Error((error as any)?.error || 'Failed to fetch wish lists');
+      throw error;
     }
 
     return data ?? [];
@@ -257,11 +317,15 @@ class ApiClient {
       params: { path: { id } },
     });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to fetch wish list');
+    if (error) {
+      throw error;
     }
 
-    return data as WishList;
+    if (!data) {
+      throw new Error('No data received from wishlist');
+    }
+
+    return data;
   }
 
   async getPublicWishList(slug: string): Promise<WishList> {
@@ -269,13 +333,15 @@ class ApiClient {
       params: { path: { slug } },
     });
 
-    if (error || !data) {
-      throw new Error(
-        (error as any)?.error || 'Failed to fetch public wish list',
-      );
+    if (error) {
+      throw error;
     }
 
-    return data as WishList;
+    if (!data) {
+      throw new Error('No data received from public wishlist');
+    }
+
+    return data;
   }
 
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
@@ -283,11 +349,15 @@ class ApiClient {
       body: data,
     });
 
-    if (error || !responseData) {
-      throw new Error((error as any)?.error || 'Failed to create wish list');
+    if (error) {
+      throw error;
     }
 
-    return responseData as WishList;
+    if (!responseData) {
+      throw new Error('No data received from wishlist creation');
+    }
+
+    return responseData;
   }
 
   async updateWishList(
@@ -302,11 +372,15 @@ class ApiClient {
       },
     );
 
-    if (error || !responseData) {
-      throw new Error((error as any)?.error || 'Failed to update wish list');
+    if (error) {
+      throw error;
     }
 
-    return responseData as WishList;
+    if (!responseData) {
+      throw new Error('No data received from wishlist update');
+    }
+
+    return responseData;
   }
 
   async deleteWishList(id: string): Promise<void> {
@@ -315,36 +389,37 @@ class ApiClient {
     });
 
     if (error) {
-      throw new Error((error as any)?.error || 'Failed to delete wish list');
+      throw error;
     }
   }
 
   // Gift item methods
-  async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
-    const { data, error } = await this.client.GET(
-      '/wishlists/{wishlistId}/gift-items',
-      {
-        params: { path: { wishlistId } },
-      },
-    );
+  async getGiftItems(wishlistId: string) {
+    const { data, error } = await this.client.GET('/wishlists/{id}/items', {
+      params: { path: { id: wishlistId } },
+    });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to fetch gift items');
+    if (error) {
+      throw error;
     }
 
-    return ((data as any).data || data) as GiftItem[];
+    return data;
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
-    const { data, error } = await this.client.GET('/gift-items/{id}', {
+    const { data, error } = await this.client.GET('/items/{id}', {
       params: { path: { id: itemId } },
     });
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to fetch gift item');
+    if (error) {
+      throw error;
     }
 
-    return data as GiftItem;
+    if (!data) {
+      throw new Error('No data received from gift item');
+    }
+
+    return convertItemResponseToGiftItem(data, wishlistId);
   }
 
   async createGiftItem(
@@ -352,18 +427,22 @@ class ApiClient {
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
     const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items',
+      '/wishlists/{id}/items/new',
       {
-        params: { path: { wishlistId } },
+        params: { path: { id: wishlistId } },
         body: data,
       },
     );
 
-    if (error || !responseData) {
-      throw new Error((error as any)?.error || 'Failed to create gift item');
+    if (error) {
+      throw error;
     }
 
-    return responseData as GiftItem;
+    if (!responseData) {
+      throw new Error('No data received from gift item creation');
+    }
+
+    return convertItemResponseToGiftItem(responseData, wishlistId);
   }
 
   async updateGiftItem(
@@ -371,28 +450,29 @@ class ApiClient {
     itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
-    const { data: responseData, error } = await this.client.PUT(
-      '/gift-items/{id}',
-      {
-        params: { path: { id: itemId } },
-        body: data,
-      },
-    );
+    const { data: responseData, error } = await this.client.PUT('/items/{id}', {
+      params: { path: { id: itemId } },
+      body: data,
+    });
 
-    if (error || !responseData) {
-      throw new Error((error as any)?.error || 'Failed to update gift item');
+    if (error) {
+      throw error;
     }
 
-    return responseData as GiftItem;
+    if (!responseData) {
+      throw new Error('No data received from gift item update');
+    }
+
+    return convertItemResponseToGiftItem(responseData, wishlistId);
   }
 
-  async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
-    const { error } = await this.client.DELETE('/gift-items/{id}', {
+  async deleteGiftItem(_wishlistId: string, itemId: string): Promise<void> {
+    const { error } = await this.client.DELETE('/items/{id}', {
       params: { path: { id: itemId } },
     });
 
     if (error) {
-      throw new Error((error as any)?.error || 'Failed to delete gift item');
+      throw error;
     }
   }
 
@@ -402,20 +482,22 @@ class ApiClient {
     purchasedPrice: number,
   ): Promise<GiftItem> {
     const { data, error } = await this.client.POST(
-      '/gift-items/{id}/purchase',
+      '/items/{id}/mark-purchased',
       {
         params: { path: { id: itemId } },
-        body: { purchased_price: purchasedPrice },
+        body: { purchasedPrice },
       },
     );
 
-    if (error || !data) {
-      throw new Error(
-        (error as any)?.error || 'Failed to mark gift item as purchased',
-      );
+    if (error) {
+      throw error;
     }
 
-    return data as GiftItem;
+    if (!data) {
+      throw new Error('No data received from mark purchased');
+    }
+
+    return convertItemResponseToGiftItem(data, wishlistId);
   }
 
   // Reservation methods
@@ -425,40 +507,54 @@ class ApiClient {
     data: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data: responseData, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
       },
     );
 
-    if (error || !responseData) {
-      throw new Error((error as any)?.error || 'Failed to create reservation');
+    if (error) {
+      throw error;
     }
 
-    return responseData as Reservation;
+    if (!responseData) {
+      throw new Error('No data received from reservation creation');
+    }
+
+    return responseData;
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    const { data, error } = await this.client.GET('/reservations', {});
+    const { data, error } = await this.client.GET('/reservations/user', {});
 
-    if (error || !data) {
-      throw new Error((error as any)?.error || 'Failed to fetch reservations');
+    if (error) {
+      throw error;
     }
 
-    return ((data as any).data || data) as Reservation[];
+    if (!data) {
+      return [];
+    }
+
+    // Response is wrapped in { data: [...], pagination: {...} }
+    if ('data' in data && Array.isArray(data.data)) {
+      return data.data as unknown as Reservation[];
+    }
+
+    // Fallback if response is direct array
+    return data as unknown as Reservation[];
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     const { error } = await this.client.DELETE(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
       },
     );
 
     if (error) {
-      throw new Error((error as any)?.error || 'Failed to cancel reservation');
+      throw error;
     }
   }
 }

@@ -5,11 +5,22 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 
 	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
+)
+
+var (
+	ErrInvalidGiftItemID          = errors.New("invalid gift item id")
+	ErrInvalidReservationWishlist  = errors.New("invalid wishlist id")
+	ErrGiftItemNotInWishlist      = errors.New("gift item not found in the specified wishlist")
+	ErrGiftItemAlreadyReserved    = errors.New("gift item is already reserved")
+	ErrGuestInfoRequired          = errors.New("guest name and email are required for guest reservations")
+	ErrReservationNotFound        = errors.New("no reservation found for this user and gift item")
+	ErrMissingUserOrToken         = errors.New("either user ID or reservation token must be provided")
+	ErrGiftItemNotInPublicWishlist = errors.New("gift item not found in the specified public wishlist")
 )
 
 // ReservationServiceInterface defines the interface for reservation-related operations
@@ -78,12 +89,12 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	// Validate gift item exists and belongs to the specified wishlist
 	giftItemID := pgtype.UUID{}
 	if err := giftItemID.Scan(input.GiftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidGiftItemID
 	}
 
 	wishlistID := pgtype.UUID{}
 	if err := wishlistID.Scan(input.WishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidReservationWishlist
 	}
 
 	// Verify ownership: get all gift items for this wishlist and check if our item is among them
@@ -102,7 +113,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	}
 
 	if giftItem == nil {
-		return nil, errors.New("gift item not found in the specified wishlist")
+		return nil, ErrGiftItemNotInWishlist
 	}
 
 	// Handle reservation based on user type (authenticated vs guest)
@@ -115,6 +126,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 
 		// Now create the reservation record
 		reservation := repositories.ReservationDetail{
+			WishlistID:       wishlistID,
 			GiftItemID:       giftItemID,
 			ReservedByUserID: input.UserID,
 			Status:           "active",
@@ -137,16 +149,17 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	}
 
 	if activeReservation != nil {
-		return nil, errors.New("gift item is already reserved")
+		return nil, ErrGiftItemAlreadyReserved
 	}
 
 	// Create the guest reservation
 	if input.GuestName == nil || input.GuestEmail == nil {
-		return nil, errors.New("guest name and email are required for guest reservations")
+		return nil, ErrGuestInfoRequired
 	}
 
 	// Attempt to create the reservation record atomically
 	reservation := repositories.ReservationDetail{
+		WishlistID: wishlistID,
 		GiftItemID: giftItemID,
 		GuestName:  pgtype.Text{String: *input.GuestName, Valid: true},
 		GuestEmail: pgtype.Text{String: *input.GuestEmail, Valid: true},
@@ -170,12 +183,12 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 	// Validate gift item belongs to the specified wishlist
 	giftItemID := pgtype.UUID{}
 	if err := giftItemID.Scan(input.GiftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidGiftItemID
 	}
 
 	wishlistID := pgtype.UUID{}
 	if err := wishlistID.Scan(input.WishListID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidReservationWishlist
 	}
 
 	// Verify ownership: get all gift items for this wishlist and check if our item is among them
@@ -194,7 +207,7 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 	}
 
 	if !itemFound {
-		return nil, errors.New("gift item not found in the specified wishlist")
+		return nil, ErrGiftItemNotInWishlist
 	}
 
 	// Determine which reservation to cancel based on input
@@ -215,7 +228,7 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 		}
 
 		if reservationToCancel == nil {
-			return nil, errors.New("no reservation found for this user and gift item")
+			return nil, ErrReservationNotFound
 		}
 
 		// Update the reservation status
@@ -237,7 +250,7 @@ func (s *ReservationService) CancelReservation(ctx context.Context, input Cancel
 
 		return s.mapToOutput(updatedReservation), nil
 	}
-	return nil, errors.New("either user ID or reservation token must be provided")
+	return nil, ErrMissingUserOrToken
 }
 
 func (s *ReservationService) GetUserReservations(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]repositories.ReservationDetail, error) {
@@ -257,12 +270,12 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 	// Validate gift item exists and belongs to the specified wishlist
 	itemID := pgtype.UUID{}
 	if err := itemID.Scan(giftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidGiftItemID
 	}
 
 	wishlistUUID := pgtype.UUID{}
 	if err := wishlistUUID.Scan(wishlistID); err != nil {
-		return nil, errors.New("invalid wishlist id")
+		return nil, ErrInvalidReservationWishlist
 	}
 
 	// Verify ownership: get all gift items for this wishlist and check if our item is among them
@@ -281,7 +294,7 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 	}
 
 	if giftItem == nil {
-		return nil, errors.New("gift item not found in the specified wishlist")
+		return nil, ErrGiftItemNotInWishlist
 	}
 
 	// Check if gift item is already reserved using atomic operation
@@ -291,11 +304,12 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 	}
 
 	if activeReservation != nil {
-		return nil, errors.New("gift item is already reserved")
+		return nil, ErrGiftItemAlreadyReserved
 	}
 
 	// Create the guest reservation
 	reservation := repositories.ReservationDetail{
+		WishlistID: wishlistUUID,
 		GiftItemID: itemID,
 		GuestName:  pgtype.Text{String: guestName, Valid: true},
 		GuestEmail: pgtype.Text{String: guestEmail, Valid: true},
@@ -318,7 +332,7 @@ func (s *ReservationService) GetReservationStatus(ctx context.Context, publicSlu
 	// First, validate that the gift item exists and belongs to the public wishlist
 	itemID := pgtype.UUID{}
 	if err := itemID.Scan(giftItemID); err != nil {
-		return nil, errors.New("invalid gift item id")
+		return nil, ErrInvalidGiftItemID
 	}
 
 	// Verify ownership: get all gift items for this public wishlist and check if our item is among them
@@ -337,7 +351,7 @@ func (s *ReservationService) GetReservationStatus(ctx context.Context, publicSlu
 	}
 
 	if !itemFound {
-		return nil, errors.New("gift item not found in the specified public wishlist")
+		return nil, ErrGiftItemNotInPublicWishlist
 	}
 
 	// Check if there's an active reservation for this gift item
@@ -438,6 +452,7 @@ func (s *ReservationService) CleanupExpiredReservations(ctx context.Context) err
 func (s *ReservationService) mapToDbReservation(detail repositories.ReservationDetail) *db.Reservation {
 	return &db.Reservation{
 		ID:               detail.ID,
+		WishlistID:       detail.WishlistID,
 		GiftItemID:       detail.GiftItemID,
 		ReservedByUserID: detail.ReservedByUserID,
 		GuestName:        detail.GuestName,

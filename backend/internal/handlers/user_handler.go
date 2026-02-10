@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"wish-list/internal/analytics"
+	"wish-list/internal/shared/analytics"
 	"wish-list/internal/auth"
 	"wish-list/internal/services"
 

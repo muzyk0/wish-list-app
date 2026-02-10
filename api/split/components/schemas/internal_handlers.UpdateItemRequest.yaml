@@ -1,0 +1,23 @@
+properties:
+  description:
+    maxLength: 2000
+    type: string
+  imageUrl:
+    type: string
+  link:
+    type: string
+  notes:
+    maxLength: 1000
+    type: string
+  price:
+    minimum: 0
+    type: number
+  priority:
+    maximum: 5
+    minimum: 0
+    type: integer
+  title:
+    maxLength: 255
+    minLength: 1
+    type: string
+type: object

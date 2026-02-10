@@ -72,7 +72,7 @@ export default function RootLayout() {
           const match = path.match(/^public\/([^\/]+)/);
           if (match && match[1]) {
             router.navigate({
-              pathname: '/public/[slug]',
+              pathname: '/public/[slug]' as any,
               params: { slug: match[1] },
             });
           }
@@ -93,7 +93,7 @@ export default function RootLayout() {
         // Handle mapped routes (static routes)
         const targetRoute = routeMap[path];
         if (targetRoute) {
-          router.push(targetRoute);
+          router.push(targetRoute as any);
         }
       }
     };

@@ -10,16 +10,16 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 
-	"wish-list/internal/analytics"
+	"wish-list/internal/shared/analytics"
 	"wish-list/internal/auth"
-	"wish-list/internal/aws"
-	"wish-list/internal/cache"
-	"wish-list/internal/config"
-	"wish-list/internal/encryption"
-	"wish-list/internal/middleware"
+	"wish-list/internal/shared/aws"
+	"wish-list/internal/shared/cache"
+	"wish-list/internal/shared/config"
+	"wish-list/internal/shared/encryption"
+	"wish-list/internal/shared/middleware"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,11 @@ import (
 
 	"wish-list/internal/handlers"
 	"wish-list/internal/services"
-	"wish-list/internal/validation"
+	"wish-list/internal/shared/validation"
+
+	healthDomain "wish-list/internal/domains/health"
+	healthHandlers "wish-list/internal/domains/health/handlers"
+	storageDomain "wish-list/internal/domains/storage"
 
 	_ "wish-list/internal/handlers/docs" // Import generated docs
 )
@@ -175,6 +179,7 @@ func main() {
 
 	wishListRepo := repositories.NewWishListRepository(sqlxDB)
 	giftItemRepo := repositories.NewGiftItemRepository(sqlxDB)
+	wishlistItemRepo := repositories.NewWishlistItemRepository(sqlxDB)
 	templateRepo := repositories.NewTemplateRepository(sqlxDB)
 
 	var reservationRepo repositories.ReservationRepositoryInterface
@@ -189,11 +194,13 @@ func main() {
 	emailService := services.NewEmailService()
 	userService := services.NewUserService(userRepo)
 	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, templateRepo, emailService, reservationRepo, redisCache)
+	itemService := services.NewItemService(giftItemRepo, wishlistItemRepo)
+	wishlistItemService := services.NewWishlistItemService(wishListRepo, giftItemRepo, wishlistItemRepo)
 	reservationService := services.NewReservationService(reservationRepo, giftItemRepo)
 	accountCleanupService := services.NewAccountCleanupService(sqlxDB, userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
 	// Initialize handlers with analytics integration
-	healthHandler := handlers.NewHealthHandler(sqlxDB)
+	healthHandler := healthDomain.NewHealthHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
 	authHandler := handlers.NewAuthHandler(userService, tokenManager, codeStore)
 	oauthHandler := handlers.NewOAuthHandler(
@@ -206,6 +213,8 @@ func main() {
 		cfg.OAuthRedirectURL,
 	)
 	wishListHandler := handlers.NewWishListHandler(wishListService)
+	itemHandler := handlers.NewItemHandler(itemService)
+	wishlistItemHandler := handlers.NewWishlistItemHandler(wishlistItemService)
 	reservationHandler := handlers.NewReservationHandler(reservationService)
 
 	// --- SERVER STARTUP AND SHUTDOWN ORCHESTRATION ---
@@ -218,7 +227,7 @@ func main() {
 	accountCleanupService.StartScheduledCleanup(appCtx)
 
 	// Initialize routes
-	setupRoutes(e, healthHandler, userHandler, authHandler, oauthHandler, wishListHandler, reservationHandler, tokenManager, s3Client)
+	setupRoutes(e, healthHandler, userHandler, authHandler, oauthHandler, wishListHandler, itemHandler, wishlistItemHandler, reservationHandler, tokenManager, s3Client)
 
 	// Channel for server startup errors
 	serverErrors := make(chan error, 1)
@@ -265,7 +274,7 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *healthHandlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, itemHandler *handlers.ItemHandler, wishlistItemHandler handlers.WishlistItemHandlerInterface, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
@@ -299,7 +308,7 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 
 	// Example image upload endpoint (requires S3 client)
 	if s3Client != nil {
-		s3Handler := handlers.NewS3Handler(s3Client)
+		s3Handler := storageDomain.NewS3Handler(s3Client)
 
 		imageUpload := e.Group("/api/images")
 		imageUpload.Use(auth.JWTMiddleware(tokenManager))
@@ -313,18 +322,23 @@ func setupRoutes(e *echo.Echo, healthHandler *handlers.HealthHandler, userHandle
 	wishListGroup.GET("/:id", wishListHandler.GetWishList)
 	wishListGroup.PUT("/:id", wishListHandler.UpdateWishList)
 	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
-	wishListGroup.DELETE("/:id", wishListHandler.DeleteWishList)
 	wishListGroup.GET("", wishListHandler.GetWishListsByOwner)
 
-	// Gift item endpoints
-	giftItemGroup := e.Group("/api/gift-items")
-	giftItemGroup.Use(auth.JWTMiddleware(tokenManager))
-	giftItemGroup.POST("/wishlist/:wishlistId", wishListHandler.CreateGiftItem)
-	giftItemGroup.GET("/:id", wishListHandler.GetGiftItem)
-	giftItemGroup.GET("/wishlist/:wishlistId", wishListHandler.GetGiftItemsByWishList)
-	giftItemGroup.PUT("/:id", wishListHandler.UpdateGiftItem)
-	giftItemGroup.DELETE("/:id", wishListHandler.DeleteGiftItem)
-	giftItemGroup.POST("/:id/mark-purchased", wishListHandler.MarkGiftItemAsPurchased)
+	// Wishlist-Item relationship endpoints (many-to-many)
+	wishListGroup.GET("/:id/items", wishlistItemHandler.GetWishlistItems)
+	wishListGroup.POST("/:id/items", wishlistItemHandler.AttachItemToWishlist)
+	wishListGroup.POST("/:id/items/new", wishlistItemHandler.CreateItemInWishlist)
+	wishListGroup.DELETE("/:id/items/:itemId", wishlistItemHandler.DetachItemFromWishlist)
+
+	// Independent item endpoints
+	itemGroup := e.Group("/api/items")
+	itemGroup.Use(auth.JWTMiddleware(tokenManager))
+	itemGroup.GET("", itemHandler.GetMyItems)
+	itemGroup.POST("", itemHandler.CreateItem)
+	itemGroup.GET("/:id", itemHandler.GetItem)
+	itemGroup.PUT("/:id", itemHandler.UpdateItem)
+	itemGroup.DELETE("/:id", itemHandler.DeleteItem)
+	itemGroup.POST("/:id/mark-purchased", itemHandler.MarkItemAsPurchased)
 
 	// Public wish list endpoints
 	publicWishlistGroup := e.Group("/api/public/wishlists")

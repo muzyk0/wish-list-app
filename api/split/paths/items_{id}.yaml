@@ -1,0 +1,164 @@
+delete:
+  description: >-
+    Archive a gift item by setting archived_at timestamp. Item is removed from
+    all queries but data is preserved.
+  parameters:
+    - description: Item ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Item archived successfully
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Delete gift item (soft delete)
+  tags:
+    - Items
+get:
+  description: Get a specific gift item by ID
+  parameters:
+    - description: Item ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Item retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Get gift item
+  tags:
+    - Items
+put:
+  description: Update a gift item by ID
+  parameters:
+    - description: Item ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/internal_handlers.UpdateItemRequest.yaml
+    description: Updated item data
+    required: true
+  responses:
+    '200':
+      description: Item updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+    '400':
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Update gift item
+  tags:
+    - Items

@@ -27,9 +27,9 @@ export type UpdateWishListRequest =
 export type GiftItem =
   components['schemas']['internal_handlers.GiftItemResponse'];
 export type CreateGiftItemRequest =
-  components['schemas']['internal_handlers.CreateGiftItemRequest'];
+  components['schemas']['internal_handlers.CreateItemRequest'];
 export type UpdateGiftItemRequest =
-  components['schemas']['internal_handlers.UpdateGiftItemRequest'];
+  components['schemas']['internal_handlers.UpdateItemRequest'];
 
 // Reservation types
 export type Reservation =

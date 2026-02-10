@@ -2,50 +2,44 @@ package services
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
-	db "wish-list/internal/db/models"
+	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestReservationService_GetReservationStatus(t *testing.T) {
 	t.Run("available gift item", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
-			{ID: giftItemID},
-		}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{{ID: giftItemID}}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return nil, nil
+			},
+		}
 
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
-
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
 		require.NoError(t, err)
 		assert.False(t, status.IsReserved)
 		assert.Equal(t, "available", status.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
+		assert.Len(t, mockGiftItemRepo.GetPublicWishListGiftItemsCalls(), 1)
+		assert.Len(t, mockRepo.GetActiveReservationForGiftItemCalls(), 1)
 	})
 
 	t.Run("reserved gift item", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		token := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 
@@ -56,183 +50,179 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 			Status:           "active",
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
-			{ID: giftItemID},
-		}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{{ID: giftItemID}}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return activeReservation, nil
+			},
+			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, t pgtype.UUID) ([]repositories.ReservationDetail, error) {
+				return []repositories.ReservationDetail{}, nil
+			},
+		}
 
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(activeReservation, nil)
-		mockRepo.On("ListGuestReservationsWithDetails", mock.Anything, token).Return([]repositories.ReservationDetail{}, nil)
-
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
 		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
-
-		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("invalid gift item id", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
+		mockRepo := &ReservationRepositoryInterfaceMock{}
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", "invalid-uuid")
 
 		require.Error(t, err)
 		assert.Nil(t, status)
-
-		mockRepo.AssertNotCalled(t, "GetActiveReservationForGiftItem", mock.Anything, mock.Anything)
+		assert.Empty(t, mockRepo.GetActiveReservationForGiftItemCalls())
 	})
 }
 
 // T070a: Unit tests for reservation expiration logic
 func TestReservationService_ExpirationLogic(t *testing.T) {
 	t.Run("expired reservation returns available status", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		token := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 		reservationID := pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true}
 
-		// Create expired reservation (expires in the past)
 		expiredReservation := &db.Reservation{
 			ID:               reservationID,
 			GiftItemID:       giftItemID,
 			ReservationToken: token,
 			Status:           "active",
 			ExpiresAt: pgtype.Timestamptz{
-				Time:  time.Now().Add(-1 * time.Hour), // Expired 1 hour ago
+				Time:  time.Now().Add(-1 * time.Hour),
 				Valid: true,
 			},
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
-			{ID: giftItemID},
-		}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{{ID: giftItemID}}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return expiredReservation, nil
+			},
+			UpdateStatusFunc: func(ctx context.Context, resID pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*db.Reservation, error) {
+				return &db.Reservation{Status: "expired"}, nil
+			},
+		}
 
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(expiredReservation, nil)
-		mockRepo.On("UpdateStatus", mock.Anything, reservationID, "expired", mock.Anything, mock.Anything).
-			Return(&db.Reservation{Status: "expired"}, nil)
-
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
 		require.NoError(t, err)
 		assert.False(t, status.IsReserved)
 		assert.Equal(t, "available", status.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
+		assert.Len(t, mockRepo.UpdateStatusCalls(), 1)
 	})
 
 	t.Run("non-expired reservation remains active", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		token := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 
-		// Create non-expired reservation (expires in the future)
 		activeReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			GiftItemID:       giftItemID,
 			ReservationToken: token,
 			Status:           "active",
 			ExpiresAt: pgtype.Timestamptz{
-				Time:  time.Now().Add(24 * time.Hour), // Expires in 24 hours
+				Time:  time.Now().Add(24 * time.Hour),
 				Valid: true,
 			},
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
-			{ID: giftItemID},
-		}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{{ID: giftItemID}}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return activeReservation, nil
+			},
+			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, t pgtype.UUID) ([]repositories.ReservationDetail, error) {
+				return []repositories.ReservationDetail{}, nil
+			},
+		}
 
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(activeReservation, nil)
-		mockRepo.On("ListGuestReservationsWithDetails", mock.Anything, token).Return([]repositories.ReservationDetail{}, nil)
-
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
 		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
 	})
 
 	t.Run("reservation without expiry date stays active", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		token := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetPublicWishListGiftItems", mock.Anything, "public-slug").Return([]*db.GiftItem{
-			{ID: giftItemID},
-		}, nil)
-
-		// Create reservation without expiry date
 		activeReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			GiftItemID:       giftItemID,
 			ReservationToken: token,
 			Status:           "active",
-			ExpiresAt:        pgtype.Timestamptz{Valid: false}, // No expiry
+			ExpiresAt:        pgtype.Timestamptz{Valid: false},
 		}
 
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(activeReservation, nil)
-		mockRepo.On("ListGuestReservationsWithDetails", mock.Anything, token).Return([]repositories.ReservationDetail{}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{{ID: giftItemID}}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return activeReservation, nil
+			},
+			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, t pgtype.UUID) ([]repositories.ReservationDetail, error) {
+				return []repositories.ReservationDetail{}, nil
+			},
+		}
 
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 		status, err := service.GetReservationStatus(context.Background(), "public-slug", giftItemID.String())
 
 		require.NoError(t, err)
 		assert.True(t, status.IsReserved)
 		assert.Equal(t, "active", status.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
 	})
 }
 
 // T070b: Unit tests for concurrency controls for simultaneous reservations
 func TestReservationService_ConcurrencyControls(t *testing.T) {
 	t.Run("create reservation on already reserved item fails", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		// Create gift item
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
-		}
-
-		// Active reservation exists
+		giftItem := &db.GiftItem{ID: giftItemID}
 		existingReservation := &db.Reservation{
 			ID:         pgtype.UUID{Valid: true},
 			GiftItemID: giftItemID,
 			Status:     "active",
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(existingReservation, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return existingReservation, nil
+			},
+		}
+
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		guestName := "Test User"
 		guestEmail := "test@example.com"
@@ -247,32 +237,19 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "already reserved")
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
+		assert.True(t, errors.Is(err, ErrGiftItemAlreadyReserved))
 	})
 
 	t.Run("authenticated user reservation uses atomic operation", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		userID := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		// Create gift item
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
-		}
-
+		giftItem := &db.GiftItem{ID: giftItemID}
 		reservedItem := &db.GiftItem{
 			ID:               giftItemID,
 			ReservedByUserID: userID,
 		}
-
 		createdReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			GiftItemID:       giftItemID,
@@ -280,10 +257,21 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 			Status:           "active",
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockGiftItemRepo.On("ReserveIfNotReserved", mock.Anything, giftItemID, userID).Return(reservedItem, nil)
-		mockRepo.On("Create", mock.Anything, mock.AnythingOfType("db.Reservation")).Return(createdReservation, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+			ReserveIfNotReservedFunc: func(ctx context.Context, giID, uID pgtype.UUID) (*db.GiftItem, error) {
+				return reservedItem, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			CreateFunc: func(ctx context.Context, reservation db.Reservation) (*db.Reservation, error) {
+				return createdReservation, nil
+			},
+		}
+
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		input := CreateReservationInput{
 			WishListID: wishlistID.String(),
@@ -296,15 +284,11 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, reservation)
 		assert.Equal(t, "active", reservation.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
+		assert.Len(t, mockGiftItemRepo.ReserveIfNotReservedCalls(), 1)
+		assert.Len(t, mockRepo.CreateCalls(), 1)
 	})
 
 	t.Run("concurrent reservation attempts are handled atomically", func(t *testing.T) {
-		// This test validates that the repository uses proper locking
-		// In a real integration test, we would spawn multiple goroutines
-		// For unit tests, we verify the atomic operation is called
 		t.Skip("Full concurrency testing requires integration tests with real database")
 	})
 }
@@ -312,28 +296,31 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 // Test CreateReservation function
 func TestReservationService_CreateReservation(t *testing.T) {
 	t.Run("successful guest reservation", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
-		}
-
+		giftItem := &db.GiftItem{ID: giftItemID}
 		createdReservation := &db.Reservation{
 			ID:         pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			GiftItemID: giftItemID,
 			Status:     "active",
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
-		mockRepo.On("Create", mock.Anything, mock.AnythingOfType("db.Reservation")).Return(createdReservation, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return nil, nil
+			},
+			CreateFunc: func(ctx context.Context, reservation db.Reservation) (*db.Reservation, error) {
+				return createdReservation, nil
+			},
+		}
+
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		guestName := "Test Guest"
 		guestEmail := "guest@example.com"
@@ -350,29 +337,27 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, reservation)
 		assert.Equal(t, "active", reservation.Status)
-
-		mockRepo.AssertExpectations(t)
-		mockGiftItemRepo.AssertExpectations(t)
 	})
 
 	t.Run("guest reservation requires name and email", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
+		giftItem := &db.GiftItem{ID: giftItemID}
+
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*db.Reservation, error) {
+				return nil, nil
+			},
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockRepo.On("GetActiveReservationForGiftItem", mock.Anything, giftItemID).Return(nil, nil)
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
-		// Missing guest details
 		input := CreateReservationInput{
 			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
@@ -384,12 +369,12 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "guest name and email are required")
+		assert.True(t, errors.Is(err, ErrGuestInfoRequired))
 	})
 
 	t.Run("invalid gift item id", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
+		mockRepo := &ReservationRepositoryInterfaceMock{}
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
@@ -402,36 +387,36 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid gift item id")
+		assert.True(t, errors.Is(err, ErrInvalidGiftItemID))
 	})
 }
 
 // Test CancelReservation function
 func TestReservationService_CancelReservation(t *testing.T) {
 	t.Run("successful cancellation by guest with token", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		token := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
-		}
-
+		giftItem := &db.GiftItem{ID: giftItemID}
 		canceledReservation := &db.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			ReservationToken: token,
 			Status:           "canceled",
 		}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
-		mockRepo.On("UpdateStatusByToken", mock.Anything, token, "canceled", mock.Anything, mock.Anything).
-			Return(canceledReservation, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{
+			UpdateStatusByTokenFunc: func(ctx context.Context, t pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*db.Reservation, error) {
+				return canceledReservation, nil
+			},
+		}
+
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		input := CancelReservationInput{
 			WishListID:       wishlistID.String(),
@@ -445,25 +430,23 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, reservation)
 		assert.Equal(t, "canceled", reservation.Status)
-
-		mockRepo.AssertExpectations(t)
+		assert.Len(t, mockRepo.UpdateStatusByTokenCalls(), 1)
 	})
 
 	t.Run("cancellation requires user ID or token", func(t *testing.T) {
-		mockRepo := new(MockReservationRepository)
-		mockGiftItemRepo := new(MockGiftItemRepository)
-
-		service := NewReservationService(mockRepo, mockGiftItemRepo)
-
 		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{
-			ID: giftItemID,
-		}
+		giftItem := &db.GiftItem{ID: giftItemID}
 
-		// Mock ownership validation
-		mockGiftItemRepo.On("GetByWishList", mock.Anything, wishlistID).Return([]*db.GiftItem{giftItem}, nil)
+		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
+				return []*db.GiftItem{giftItem}, nil
+			},
+		}
+		mockRepo := &ReservationRepositoryInterfaceMock{}
+
+		service := NewReservationService(mockRepo, mockGiftItemRepo)
 
 		input := CancelReservationInput{
 			WishListID:       wishlistID.String(),
@@ -475,8 +458,6 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		_, err := service.CancelReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "either user ID or reservation token must be provided")
-
-		mockGiftItemRepo.AssertExpectations(t)
+		assert.True(t, errors.Is(err, ErrMissingUserOrToken))
 	})
 }

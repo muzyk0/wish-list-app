@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	db "wish-list/internal/db/models"
-	"wish-list/internal/encryption"
+	db "wish-list/internal/shared/db/models"
+	"wish-list/internal/shared/encryption"
 )
 
 // setupTestUserRepository creates a test repository with mock database

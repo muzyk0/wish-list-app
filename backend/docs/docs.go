@@ -47,7 +47,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ChangeEmailRequest"
+                            "$ref": "#/definitions/internal_handlers.ChangeEmailRequest"
                         }
                     }
                 ],
@@ -55,7 +55,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Email changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/internal_handlers.MessageResponse"
                         }
                     },
                     "400": {
@@ -122,7 +122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ChangePasswordRequest"
+                            "$ref": "#/definitions/internal_handlers.ChangePasswordRequest"
                         }
                     }
                 ],
@@ -130,7 +130,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Password changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/internal_handlers.MessageResponse"
                         }
                     },
                     "400": {
@@ -183,7 +183,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ExchangeRequest"
+                            "$ref": "#/definitions/internal_handlers.ExchangeRequest"
                         }
                     }
                 ],
@@ -191,7 +191,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Code exchanged successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ExchangeResponse"
+                            "$ref": "#/definitions/internal_handlers.ExchangeResponse"
                         }
                     },
                     "400": {
@@ -253,7 +253,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginRequest"
+                            "$ref": "#/definitions/internal_handlers.LoginRequest"
                         }
                     }
                 ],
@@ -261,7 +261,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Login successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/internal_handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -316,7 +316,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Logout successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/internal_handlers.MessageResponse"
                         }
                     }
                 }
@@ -344,7 +344,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Handoff code generated",
                         "schema": {
-                            "$ref": "#/definitions/handlers.HandoffResponse"
+                            "$ref": "#/definitions/internal_handlers.HandoffResponse"
                         }
                     },
                     "401": {
@@ -397,7 +397,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/internal_handlers.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -405,7 +405,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/internal_handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -449,7 +449,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/internal_handlers.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -457,7 +457,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/internal_handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -498,7 +498,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Token refreshed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.RefreshResponse"
+                            "$ref": "#/definitions/internal_handlers.RefreshResponse"
                         }
                     },
                     "401": {
@@ -533,7 +533,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterRequest"
+                            "$ref": "#/definitions/internal_handlers.RegisterRequest"
                         }
                     }
                 ],
@@ -541,7 +541,7 @@ const docTemplate = `{
                     "201": {
                         "description": "User created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/internal_handlers.AuthResponse"
                         }
                     },
                     "400": {
@@ -555,6 +555,79 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "User with this email already exists",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gift-items/wishlist/{wishlistId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all gift items in a wish list. If the wish list is private, the user must be the owner.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gift Items"
+                ],
+                "summary": "Get all gift items in a wish list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of gift items retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.GetGiftItemsResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -602,7 +675,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GiftItemResponse"
+                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
                         }
                     },
                     "403": {
@@ -656,7 +729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateGiftItemRequest"
+                            "$ref": "#/definitions/internal_handlers.UpdateGiftItemRequest"
                         }
                     }
                 ],
@@ -664,7 +737,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GiftItemResponse"
+                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -812,7 +885,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.PurchaseRequest"
+                            "$ref": "#/definitions/internal_handlers.PurchaseRequest"
                         }
                     }
                 ],
@@ -820,7 +893,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift item marked as purchased successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GiftItemResponse"
+                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -885,13 +958,479 @@ const docTemplate = `{
                     "200": {
                         "description": "Application is healthy",
                         "schema": {
-                            "$ref": "#/definitions/handlers.HealthResponse"
+                            "$ref": "#/definitions/internal_handlers.HealthResponse"
                         }
                     },
                     "503": {
                         "description": "Application is unhealthy",
                         "schema": {
-                            "$ref": "#/definitions/handlers.HealthResponse"
+                            "$ref": "#/definitions/internal_handlers.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all gift items owned by the authenticated user with pagination and filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get my gift items",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field (created_at, updated_at, title, price)",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order (asc, desc)",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter items not attached to any wishlist",
+                        "name": "unattached",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include archived items (default false)",
+                        "name": "include_archived",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search in title and description",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of items retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.PaginatedItemsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new gift item without attaching it to a wishlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Create gift item",
+                "parameters": [
+                    {
+                        "description": "Item data",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.CreateItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Item created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/items/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific gift item by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get gift item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ItemResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a gift item by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Update gift item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated item data",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.UpdateItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Archive a gift item by setting archived_at timestamp. Item is removed from all queries but data is preserved.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Delete gift item (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Item archived successfully"
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/items/{id}/mark-purchased": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a gift item as purchased with the actual purchased price. This is a global status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Mark gift item as purchased",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Purchase details",
+                        "name": "purchase",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.MarkPurchasedRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item marked as purchased",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1006,7 +1545,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User profile",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserResponse"
+                            "$ref": "#/definitions/internal_handlers.UserResponse"
                         }
                     },
                     "401": {
@@ -1062,7 +1601,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateProfileRequest"
+                            "$ref": "#/definitions/internal_handlers.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -1070,7 +1609,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated user profile",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserResponse"
+                            "$ref": "#/definitions/internal_handlers.UserResponse"
                         }
                     },
                     "400": {
@@ -1135,7 +1674,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Public wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/internal_handlers.WishListResponse"
                         }
                     },
                     "404": {
@@ -1185,7 +1724,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Gift items retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GetGiftItemsResponse"
+                            "$ref": "#/definitions/internal_handlers.GetGiftItemsResponse"
                         }
                     },
                     "404": {
@@ -1239,7 +1778,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation status retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ReservationStatusResponse"
+                            "$ref": "#/definitions/internal_handlers.ReservationStatusResponse"
                         }
                     },
                     "500": {
@@ -1287,7 +1826,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of user reservations retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserReservationsResponse"
+                            "$ref": "#/definitions/internal_handlers.UserReservationsResponse"
                         }
                     },
                     "401": {
@@ -1336,7 +1875,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.ReservationDetailsResponse"
+                                "$ref": "#/definitions/internal_handlers.ReservationDetailsResponse"
                             }
                         }
                     },
@@ -1449,7 +1988,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.WishListResponse"
+                                "$ref": "#/definitions/internal_handlers.WishListResponse"
                             }
                         }
                     },
@@ -1497,7 +2036,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateWishListRequest"
+                            "$ref": "#/definitions/internal_handlers.CreateWishListRequest"
                         }
                     }
                 ],
@@ -1505,7 +2044,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Wish list created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/internal_handlers.WishListResponse"
                         }
                     },
                     "400": {
@@ -1566,7 +2105,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/internal_handlers.WishListResponse"
                         }
                     },
                     "403": {
@@ -1620,7 +2159,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateWishListRequest"
+                            "$ref": "#/definitions/internal_handlers.UpdateWishListRequest"
                         }
                     }
                 ],
@@ -1628,7 +2167,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Wish list updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/internal_handlers.WishListResponse"
                         }
                     },
                     "400": {
@@ -1735,26 +2274,26 @@ const docTemplate = `{
                 }
             }
         },
-        "/wishlists/{wishlistId}/gift-items": {
+        "/wishlists/{id}/items": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all gift items in a wish list. If the wish list is private, the user must be the owner.",
+                "description": "Get all gift items in a specific wishlist with pagination. Public wishlists are accessible without auth.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Gift Items"
+                    "Wishlists"
                 ],
-                "summary": "Get all gift items in a wish list",
+                "summary": "Get items in wishlist",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Wish List ID",
-                        "name": "wishlistId",
+                        "description": "Wishlist ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -1773,9 +2312,18 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of gift items retrieved successfully",
+                        "description": "List of items in wishlist",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GetGiftItemsResponse"
+                            "$ref": "#/definitions/internal_handlers.PaginatedItemsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "403": {
@@ -1813,6 +2361,268 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
+                "description": "Attach an existing gift item to a wishlist. Both item and wishlist must be owned by the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wishlists"
+                ],
+                "summary": "Attach item to wishlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wishlist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Item to attach",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.AttachItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Item attached successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist or item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Item already attached",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{id}/items/new": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new gift item and immediately attach it to the specified wishlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wishlists"
+                ],
+                "summary": "Create item in wishlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wishlist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Item data",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.CreateItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Item created and attached successfully",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handlers.ItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{id}/items/{itemId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove a gift item from a wishlist. The item itself is not deleted, only the association is removed.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wishlists"
+                ],
+                "summary": "Detach item from wishlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wishlist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Item detached successfully"
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist or item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{wishlistId}/gift-items": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new gift item in a wish list. The user must be the owner of the wish list.",
                 "consumes": [
                     "application/json"
@@ -1838,7 +2648,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateGiftItemRequest"
+                            "$ref": "#/definitions/internal_handlers.CreateGiftItemRequest"
                         }
                     }
                 ],
@@ -1846,7 +2656,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Gift item created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GiftItemResponse"
+                            "$ref": "#/definitions/internal_handlers.GiftItemResponse"
                         }
                     },
                     "400": {
@@ -1935,7 +2745,7 @@ const docTemplate = `{
                         "name": "reservation_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationRequest"
+                            "$ref": "#/definitions/internal_handlers.CreateReservationRequest"
                         }
                     }
                 ],
@@ -1943,7 +2753,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/internal_handlers.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -2012,7 +2822,7 @@ const docTemplate = `{
                         "name": "cancel_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CancelReservationRequest"
+                            "$ref": "#/definitions/internal_handlers.CancelReservationRequest"
                         }
                     }
                 ],
@@ -2020,7 +2830,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Reservation canceled successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/internal_handlers.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -2055,7 +2865,19 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.AuthResponse": {
+        "internal_handlers.AttachItemRequest": {
+            "type": "object",
+            "required": [
+                "itemId"
+            ],
+            "properties": {
+                "itemId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "internal_handlers.AuthResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2075,13 +2897,13 @@ const docTemplate = `{
                     "description": "User information",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/handlers.UserResponse"
+                            "$ref": "#/definitions/internal_handlers.UserResponse"
                         }
                     ]
                 }
             }
         },
-        "handlers.CancelReservationRequest": {
+        "internal_handlers.CancelReservationRequest": {
             "type": "object",
             "properties": {
                 "reservation_token": {
@@ -2089,7 +2911,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ChangeEmailRequest": {
+        "internal_handlers.ChangeEmailRequest": {
             "type": "object",
             "required": [
                 "current_password",
@@ -2105,7 +2927,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ChangePasswordRequest": {
+        "internal_handlers.ChangePasswordRequest": {
             "type": "object",
             "required": [
                 "current_password",
@@ -2122,7 +2944,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CreateGiftItemRequest": {
+        "internal_handlers.CreateGiftItemRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -2159,7 +2981,50 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CreateReservationRequest": {
+        "internal_handlers.CreateItemRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000,
+                    "example": "256GB, Blue Titanium"
+                },
+                "imageUrl": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://apple.com/iphone-15-pro"
+                },
+                "notes": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "Preferred color: Blue"
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 999.99
+                },
+                "priority": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 0,
+                    "example": 3
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "example": "iPhone 15 Pro"
+                }
+            }
+        },
+        "internal_handlers.CreateReservationRequest": {
             "type": "object",
             "properties": {
                 "guest_email": {
@@ -2171,7 +3036,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CreateReservationResponse": {
+        "internal_handlers.CreateReservationResponse": {
             "type": "object",
             "required": [
                 "gift_item_id",
@@ -2220,7 +3085,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CreateWishListRequest": {
+        "internal_handlers.CreateWishListRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2248,7 +3113,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ExchangeRequest": {
+        "internal_handlers.ExchangeRequest": {
             "type": "object",
             "required": [
                 "code"
@@ -2259,7 +3124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ExchangeResponse": {
+        "internal_handlers.ExchangeResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2274,11 +3139,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/handlers.UserResponse"
+                    "$ref": "#/definitions/internal_handlers.UserResponse"
                 }
             }
         },
-        "handlers.GetGiftItemsResponse": {
+        "internal_handlers.GetGiftItemsResponse": {
             "type": "object",
             "required": [
                 "items",
@@ -2291,7 +3156,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.GiftItemResponse"
+                        "$ref": "#/definitions/internal_handlers.GiftItemResponse"
                     }
                 },
                 "limit": {
@@ -2308,7 +3173,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.GiftItemResponse": {
+        "internal_handlers.GiftItemResponse": {
             "type": "object",
             "required": [
                 "created_at",
@@ -2371,7 +3236,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.GiftItemSummary": {
+        "internal_handlers.GiftItemSummary": {
             "type": "object",
             "required": [
                 "id",
@@ -2392,7 +3257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.HandoffResponse": {
+        "internal_handlers.HandoffResponse": {
             "type": "object",
             "required": [
                 "code",
@@ -2409,7 +3274,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.HealthResponse": {
+        "internal_handlers.HealthResponse": {
             "type": "object",
             "required": [
                 "status"
@@ -2429,7 +3294,64 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.LoginRequest": {
+        "internal_handlers.ItemResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "256GB, Blue Titanium"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "imageUrl": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
+                },
+                "isArchived": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "isPurchased": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://apple.com/iphone-15-pro"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "Preferred color: Blue"
+                },
+                "ownerId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "price": {
+                    "type": "number",
+                    "example": 999.99
+                },
+                "priority": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "title": {
+                    "type": "string",
+                    "example": "iPhone 15 Pro"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        },
+        "internal_handlers.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2445,7 +3367,20 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.MessageResponse": {
+        "internal_handlers.MarkPurchasedRequest": {
+            "type": "object",
+            "required": [
+                "purchasedPrice"
+            ],
+            "properties": {
+                "purchasedPrice": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 899.99
+                }
+            }
+        },
+        "internal_handlers.MessageResponse": {
             "type": "object",
             "required": [
                 "message"
@@ -2456,7 +3391,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.OAuthCodeRequest": {
+        "internal_handlers.OAuthCodeRequest": {
             "type": "object",
             "required": [
                 "code"
@@ -2467,7 +3402,34 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.PurchaseRequest": {
+        "internal_handlers.PaginatedItemsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_handlers.ItemResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "totalCount": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "totalPages": {
+                    "type": "integer",
+                    "example": 5
+                }
+            }
+        },
+        "internal_handlers.PurchaseRequest": {
             "type": "object",
             "properties": {
                 "purchased_price": {
@@ -2475,7 +3437,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.RefreshResponse": {
+        "internal_handlers.RefreshResponse": {
             "type": "object",
             "required": [
                 "accessToken",
@@ -2490,7 +3452,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.RegisterRequest": {
+        "internal_handlers.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2515,7 +3477,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ReservationDetailsResponse": {
+        "internal_handlers.ReservationDetailsResponse": {
             "type": "object",
             "required": [
                 "gift_item",
@@ -2529,7 +3491,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gift_item": {
-                    "$ref": "#/definitions/handlers.GiftItemSummary"
+                    "$ref": "#/definitions/internal_handlers.GiftItemSummary"
                 },
                 "id": {
                     "type": "string"
@@ -2541,11 +3503,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "wishlist": {
-                    "$ref": "#/definitions/handlers.WishListSummary"
+                    "$ref": "#/definitions/internal_handlers.WishListSummary"
                 }
             }
         },
-        "handlers.ReservationStatusResponse": {
+        "internal_handlers.ReservationStatusResponse": {
             "type": "object",
             "required": [
                 "is_reserved",
@@ -2566,7 +3528,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.UpdateGiftItemRequest": {
+        "internal_handlers.UpdateGiftItemRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2600,7 +3562,40 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.UpdateProfileRequest": {
+        "internal_handlers.UpdateItemRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "priority": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 0
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "internal_handlers.UpdateProfileRequest": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -2614,7 +3609,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.UpdateWishListRequest": {
+        "internal_handlers.UpdateWishListRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2638,7 +3633,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.UserReservationsResponse": {
+        "internal_handlers.UserReservationsResponse": {
             "type": "object",
             "required": [
                 "data",
@@ -2648,13 +3643,13 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.ReservationDetailsResponse"
+                        "$ref": "#/definitions/internal_handlers.ReservationDetailsResponse"
                     }
                 },
                 "pagination": {}
             }
         },
-        "handlers.UserResponse": {
+        "internal_handlers.UserResponse": {
             "type": "object",
             "required": [
                 "email",
@@ -2678,7 +3673,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.WishListResponse": {
+        "internal_handlers.WishListResponse": {
             "type": "object",
             "required": [
                 "created_at",
@@ -2731,7 +3726,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.WishListSummary": {
+        "internal_handlers.WishListSummary": {
             "type": "object",
             "required": [
                 "id",

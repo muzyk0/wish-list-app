@@ -60,26 +60,24 @@ export default function GiftItemForm({
       if (existingItem) {
         // Update existing item
         return apiClient.updateGiftItem(wishlistId, existingItem.id, {
-          name: data.name,
+          title: data.name,
           description: data.description,
           link: data.link,
-          image_url: data.image_url,
+          imageUrl: data.image_url,
           price: !isNaN(parsedPrice) ? parsedPrice : undefined,
           priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
-          position: !isNaN(parsedPosition) ? parsedPosition : undefined,
         });
       } else {
         // Create new item
         return apiClient.createGiftItem(wishlistId, {
-          name: data.name,
+          title: data.name,
           description: data.description,
           link: data.link,
-          image_url: data.image_url,
+          imageUrl: data.image_url,
           price: !isNaN(parsedPrice) ? parsedPrice : undefined,
           priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
-          position: !isNaN(parsedPosition) ? parsedPosition : undefined,
         });
       }
     },

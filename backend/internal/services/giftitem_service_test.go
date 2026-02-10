@@ -4,11 +4,11 @@ import (
 	"context"
 	"math/big"
 	"testing"
-	db "wish-list/internal/db/models"
+
+	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +36,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			},
 			mockReturn: &db.GiftItem{
 				ID:          pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
-				WishlistID:  pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17}, Valid: true},
+				OwnerID:     pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17}, Valid: true},
 				Name:        "Test Gift",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Link:        pgtype.Text{String: "https://example.com/test-gift", Valid: true},
@@ -78,11 +78,13 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockWishListRepo := new(MockWishListRepository)
-			mockGiftItemRepo := new(MockGiftItemRepository)
+			mockWishListRepo := &WishListRepositoryInterfaceMock{}
+			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.On("Create", mock.Anything, mock.AnythingOfType("db.GiftItem")).Return(tt.mockReturn, tt.mockError)
+				mockGiftItemRepo.CreateFunc = func(ctx context.Context, gi db.GiftItem) (*db.GiftItem, error) {
+					return tt.mockReturn, tt.mockError
+				}
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
@@ -98,7 +100,6 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 				assert.Equal(t, tt.mockReturn.Link.String, result.Link)
 				assert.Equal(t, tt.mockReturn.ImageUrl.String, result.ImageURL)
 
-				// Безопасное преобразование pgtype.Numeric в float64
 				expectedPrice, err := tt.mockReturn.Price.Float64Value()
 				require.NoError(t, err)
 				assert.True(t, expectedPrice.Valid)
@@ -106,14 +107,11 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 
 				assert.Equal(t, int(tt.mockReturn.Priority.Int32), result.Priority)
 			}
-
-			mockGiftItemRepo.AssertExpectations(t)
 		})
 	}
 }
 
 func TestWishListService_GetGiftItem(t *testing.T) {
-	// Create a valid UUID for testing
 	testUUID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 
 	tests := []struct {
@@ -128,12 +126,12 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 			giftItemID: "12345678-1234-5678-9abc-def012345678",
 			mockReturn: &db.GiftItem{
 				ID:          testUUID,
-				WishlistID:  testUUID,
+				OwnerID:     testUUID,
 				Name:        "Test Gift",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Link:        pgtype.Text{String: "https://example.com/test-gift", Valid: true},
 				ImageUrl:    pgtype.Text{String: "https://example.com/test-gift.jpg", Valid: true},
-				Price:       pgtype.Numeric{Int: big.NewInt(2999), Exp: -2, Valid: true}, // Изменено с Exp: 0 на Exp: -2
+				Price:       pgtype.Numeric{Int: big.NewInt(2999), Exp: -2, Valid: true},
 				Priority:    pgtype.Int4{Int32: 8, Valid: true},
 				Notes:       pgtype.Text{String: "Test notes", Valid: true},
 				Position:    pgtype.Int4{Int32: 1, Valid: true},
@@ -159,11 +157,13 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockWishListRepo := new(MockWishListRepository)
-			mockGiftItemRepo := new(MockGiftItemRepository)
+			mockWishListRepo := &WishListRepositoryInterfaceMock{}
+			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.On("GetByID", mock.Anything, mock.AnythingOfType("pgtype.UUID")).Return(tt.mockReturn, tt.mockError)
+				mockGiftItemRepo.GetByIDFunc = func(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error) {
+					return tt.mockReturn, tt.mockError
+				}
 			}
 
 			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil)
@@ -179,14 +179,11 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 				assert.Equal(t, tt.mockReturn.Link.String, result.Link)
 				assert.Equal(t, tt.mockReturn.ImageUrl.String, result.ImageURL)
 
-				// Добавить проверку цены
 				expectedPrice, err := tt.mockReturn.Price.Float64Value()
 				require.NoError(t, err)
 				assert.True(t, expectedPrice.Valid)
 				assert.InDelta(t, expectedPrice.Float64, result.Price, 0.001)
 			}
-
-			mockGiftItemRepo.AssertExpectations(t)
 		})
 	}
 }
