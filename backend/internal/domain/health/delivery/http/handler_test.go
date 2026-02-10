@@ -1,13 +1,13 @@
-package handlers
+package http
 
 import (
 	"database/sql"
 	"encoding/json"
-	"net/http"
+	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
 
-	db "wish-list/internal/shared/db/models"
+	"wish-list/internal/app/database"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHealthHandler_Health(t *testing.T) {
+func TestHandler_Health(t *testing.T) {
 	t.Run("returns healthy when database is connected", func(t *testing.T) {
 		// Create mock database
 		mockDB, mock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
@@ -24,22 +24,22 @@ func TestHealthHandler_Health(t *testing.T) {
 		defer mockDB.Close()
 
 		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
-		dbWrapper := &db.DB{DB: sqlxDB}
+		dbWrapper := &database.DB{DB: sqlxDB}
 
-		handler := NewHealthHandler(dbWrapper)
+		handler := NewHandler(dbWrapper)
 
 		// Expect ping to succeed
 		mock.ExpectPing()
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		err = handler.Health(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, nethttp.StatusOK, rec.Code)
 
 		var response HealthResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
@@ -57,22 +57,22 @@ func TestHealthHandler_Health(t *testing.T) {
 		defer mockDB.Close()
 
 		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
-		dbWrapper := &db.DB{DB: sqlxDB}
+		dbWrapper := &database.DB{DB: sqlxDB}
 
-		handler := NewHealthHandler(dbWrapper)
+		handler := NewHandler(dbWrapper)
 
 		// Expect ping to fail
 		mock.ExpectPing().WillReturnError(sql.ErrConnDone)
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		err = handler.Health(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusServiceUnavailable, rec.Code)
+		assert.Equal(t, nethttp.StatusServiceUnavailable, rec.Code)
 
 		var response HealthResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
@@ -90,22 +90,22 @@ func TestHealthHandler_Health(t *testing.T) {
 		defer mockDB.Close()
 
 		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
-		dbWrapper := &db.DB{DB: sqlxDB}
+		dbWrapper := &database.DB{DB: sqlxDB}
 
-		handler := NewHealthHandler(dbWrapper)
+		handler := NewHandler(dbWrapper)
 
 		// Expect ping
 		mock.ExpectPing()
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		err = handler.Health(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, nethttp.StatusOK, rec.Code)
 
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})

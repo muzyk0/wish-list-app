@@ -29,8 +29,7 @@ import (
 	"wish-list/internal/services"
 	"wish-list/internal/pkg/validation"
 
-	healthDomain "wish-list/internal/domains/health"
-	healthHandlers "wish-list/internal/domains/health/handlers"
+	healthhttp "wish-list/internal/domain/health/delivery/http"
 	storageDomain "wish-list/internal/domains/storage"
 
 	_ "wish-list/internal/handlers/docs" // Import generated docs
@@ -200,7 +199,7 @@ func main() {
 	accountCleanupService := services.NewAccountCleanupService(sqlxDB, userRepo, wishListRepo, giftItemRepo, reservationRepo, emailService)
 
 	// Initialize handlers with analytics integration
-	healthHandler := healthDomain.NewHealthHandler(sqlxDB)
+	healthHandler := healthhttp.NewHandler(sqlxDB)
 	userHandler := handlers.NewUserHandler(userService, tokenManager, accountCleanupService, analyticsService)
 	authHandler := handlers.NewAuthHandler(userService, tokenManager, codeStore)
 	oauthHandler := handlers.NewOAuthHandler(
@@ -274,7 +273,7 @@ func main() {
 	log.Println("✅ Server stopped gracefully")
 }
 
-func setupRoutes(e *echo.Echo, healthHandler *healthHandlers.HealthHandler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, itemHandler *handlers.ItemHandler, wishlistItemHandler handlers.WishlistItemHandlerInterface, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
+func setupRoutes(e *echo.Echo, healthHandler *healthhttp.Handler, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, oauthHandler *handlers.OAuthHandler, wishListHandler *handlers.WishListHandler, itemHandler *handlers.ItemHandler, wishlistItemHandler handlers.WishlistItemHandlerInterface, reservationHandler *handlers.ReservationHandler, tokenManager *auth.TokenManager, s3Client *aws.S3Client) {
 	// Swagger documentation endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
