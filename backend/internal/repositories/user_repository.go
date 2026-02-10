@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	db "wish-list/internal/shared/db/models"
-	"wish-list/internal/shared/encryption"
+	"wish-list/internal/pkg/encryption"
 )
 
 // Sentinel errors for user repository

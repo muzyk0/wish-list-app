@@ -15,7 +15,7 @@ import (
 	"golang.org/x/oauth2/facebook"
 	"golang.org/x/oauth2/google"
 
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/auth"
 	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
 )

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/auth"
 	"wish-list/internal/repositories"
 	"wish-list/internal/services"
 

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/auth"
 	"wish-list/internal/services"
 
 	"github.com/jackc/pgx/v5/pgtype"

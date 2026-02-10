@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/auth"
 	"wish-list/internal/services"
 
 	"github.com/labstack/echo/v4"

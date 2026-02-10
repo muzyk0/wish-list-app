@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	"wish-list/internal/auth"
-	"wish-list/internal/shared/aws"
+	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/aws"
 
 	"github.com/labstack/echo/v4"
 )

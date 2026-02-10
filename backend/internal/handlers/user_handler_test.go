@@ -8,10 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"wish-list/internal/shared/analytics"
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/analytics"
+	"wish-list/internal/pkg/auth"
 	"wish-list/internal/services"
-	"wish-list/internal/shared/validation"
+	"wish-list/internal/pkg/validation"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

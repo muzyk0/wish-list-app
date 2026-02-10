@@ -2,7 +2,7 @@ package storage
 
 import (
 	"wish-list/internal/domains/storage/handlers"
-	"wish-list/internal/shared/aws"
+	"wish-list/internal/pkg/aws"
 )
 
 // NewS3Handler creates a new S3 handler for file upload endpoints

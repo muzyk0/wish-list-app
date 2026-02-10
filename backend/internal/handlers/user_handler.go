@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"wish-list/internal/shared/analytics"
-	"wish-list/internal/auth"
+	"wish-list/internal/pkg/analytics"
+	"wish-list/internal/pkg/auth"
 	"wish-list/internal/services"
 
 	"github.com/labstack/echo/v4"

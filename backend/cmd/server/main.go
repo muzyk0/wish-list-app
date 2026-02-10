@@ -10,16 +10,16 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	db "wish-list/internal/shared/db/models"
+	database "wish-list/internal/app/database"
 	"wish-list/internal/repositories"
 
-	"wish-list/internal/shared/analytics"
-	"wish-list/internal/auth"
-	"wish-list/internal/shared/aws"
-	"wish-list/internal/shared/cache"
-	"wish-list/internal/shared/config"
-	"wish-list/internal/shared/encryption"
-	"wish-list/internal/shared/middleware"
+	"wish-list/internal/pkg/analytics"
+	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/aws"
+	"wish-list/internal/pkg/cache"
+	"wish-list/internal/app/config"
+	"wish-list/internal/pkg/encryption"
+	"wish-list/internal/app/middleware"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,7 @@ import (
 
 	"wish-list/internal/handlers"
 	"wish-list/internal/services"
-	"wish-list/internal/shared/validation"
+	"wish-list/internal/pkg/validation"
 
 	healthDomain "wish-list/internal/domains/health"
 	healthHandlers "wish-list/internal/domains/health/handlers"
@@ -76,7 +76,7 @@ func main() {
 	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer dbCancel()
 
-	sqlxDB, err := db.New(dbCtx, cfg.DatabaseURL)
+	sqlxDB, err := database.New(dbCtx, cfg.DatabaseURL)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
