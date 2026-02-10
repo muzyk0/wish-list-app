@@ -30,7 +30,7 @@ import (
 	"wish-list/internal/pkg/validation"
 
 	healthhttp "wish-list/internal/domain/health/delivery/http"
-	storageDomain "wish-list/internal/domains/storage"
+	storagehttp "wish-list/internal/domain/storage/delivery/http"
 
 	_ "wish-list/internal/handlers/docs" // Import generated docs
 )
@@ -305,9 +305,9 @@ func setupRoutes(e *echo.Echo, healthHandler *healthhttp.Handler, userHandler *h
 	protected.DELETE("/account", userHandler.DeleteAccount)
 	protected.GET("/export-data", userHandler.ExportUserData)
 
-	// Example image upload endpoint (requires S3 client)
+	// Image upload endpoint (requires S3 client)
 	if s3Client != nil {
-		s3Handler := storageDomain.NewS3Handler(s3Client)
+		s3Handler := storagehttp.NewHandler(s3Client)
 
 		imageUpload := e.Group("/api/images")
 		imageUpload.Use(auth.JWTMiddleware(tokenManager))

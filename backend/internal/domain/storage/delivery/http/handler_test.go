@@ -1,9 +1,9 @@
-package handlers
+package http
 
 import (
 	"bytes"
 	"mime/multipart"
-	"net/http"
+	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -12,16 +12,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// T039a: Unit tests for image upload endpoint (valid file, oversized file, unsupported format, animated GIF)
-
-func TestS3Handler_UploadImage_ValidFile(t *testing.T) {
+func TestHandler_UploadImage_ValidFile(t *testing.T) {
 	t.Skip("Requires S3 mock setup - S3Client depends on AWS SDK")
 
 	// Test case: Valid image upload with proper format and size
 	// Expected: Returns 200 with URL
 }
 
-func TestS3Handler_UploadImage_OversizedFile(t *testing.T) {
+func TestHandler_UploadImage_OversizedFile(t *testing.T) {
 	// Test case: File larger than 10MB limit
 	e := echo.New()
 
@@ -41,7 +39,7 @@ func TestS3Handler_UploadImage_OversizedFile(t *testing.T) {
 	err = writer.Close()
 	require.NoError(t, err)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/upload/image", body)
+	req := httptest.NewRequest(nethttp.MethodPost, "/api/upload/image", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec) // Used for context setup in full implementation
@@ -51,7 +49,7 @@ func TestS3Handler_UploadImage_OversizedFile(t *testing.T) {
 	t.Log("Test validates that files >10MB are rejected")
 }
 
-func TestS3Handler_UploadImage_UnsupportedFormat(t *testing.T) {
+func TestHandler_UploadImage_UnsupportedFormat(t *testing.T) {
 	// Test case: Unsupported file format (e.g., .exe, .txt)
 	e := echo.New()
 
@@ -68,7 +66,7 @@ func TestS3Handler_UploadImage_UnsupportedFormat(t *testing.T) {
 	err = writer.Close()
 	require.NoError(t, err)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/upload/image", body)
+	req := httptest.NewRequest(nethttp.MethodPost, "/api/upload/image", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -78,7 +76,7 @@ func TestS3Handler_UploadImage_UnsupportedFormat(t *testing.T) {
 	t.Log("Test validates that non-image file types are rejected")
 }
 
-func TestS3Handler_UploadImage_AnimatedGIF(t *testing.T) {
+func TestHandler_UploadImage_AnimatedGIF(t *testing.T) {
 	// Test case: Animated GIF file upload
 	// Per FR-011, animated GIFs should be allowed
 	t.Skip("Requires S3 mock setup - S3Client depends on AWS SDK")
@@ -87,7 +85,7 @@ func TestS3Handler_UploadImage_AnimatedGIF(t *testing.T) {
 	t.Log("Animated GIFs are allowed per FR-011 specification")
 }
 
-func TestS3Handler_UploadImage_NoFile(t *testing.T) {
+func TestHandler_UploadImage_NoFile(t *testing.T) {
 	// Test case: Request without a file
 	e := echo.New()
 
@@ -96,7 +94,7 @@ func TestS3Handler_UploadImage_NoFile(t *testing.T) {
 	err := writer.Close()
 	require.NoError(t, err)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/upload/image", body)
+	req := httptest.NewRequest(nethttp.MethodPost, "/api/upload/image", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -107,7 +105,7 @@ func TestS3Handler_UploadImage_NoFile(t *testing.T) {
 	t.Log("Test validates that missing file returns bad request error")
 }
 
-func TestS3Handler_UploadImage_Unauthorized(t *testing.T) {
+func TestHandler_UploadImage_Unauthorized(t *testing.T) {
 	// Test case: Unauthenticated user attempting upload
 	e := echo.New()
 
@@ -122,7 +120,7 @@ func TestS3Handler_UploadImage_Unauthorized(t *testing.T) {
 	err = writer.Close()
 	require.NoError(t, err)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/upload/image", body)
+	req := httptest.NewRequest(nethttp.MethodPost, "/api/upload/image", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -133,49 +131,39 @@ func TestS3Handler_UploadImage_Unauthorized(t *testing.T) {
 	t.Log("Test validates that unauthenticated requests are rejected")
 }
 
-// T040a: Unit tests for S3 integration (upload, retrieve, delete, presigned URL generation)
-// Note: These tests are skipped because they require a real S3 client or proper mocking
-
+// S3 integration tests
 func TestS3Integration_Upload(t *testing.T) {
 	t.Skip("Requires S3 mock - see aws/s3_test.go for validation tests")
-	// Test validates that files are correctly uploaded to S3
 }
 
 func TestS3Integration_Retrieve(t *testing.T) {
 	t.Skip("Requires S3 mock - see aws/s3_test.go for validation tests")
-	// Test validates that files can be retrieved from S3
 }
 
 func TestS3Integration_Delete(t *testing.T) {
 	t.Skip("Requires S3 mock - see aws/s3_test.go for validation tests")
-	// Test validates that files can be deleted from S3
 }
 
 func TestS3Integration_PresignedURL(t *testing.T) {
 	t.Skip("Requires S3 mock - see aws/s3_test.go for validation tests")
-	// Test validates that presigned URLs are generated correctly
 }
 
-// Additional validation tests for image handling
+// Image validation tests
 func TestImageValidation_ValidExtensions(t *testing.T) {
-	// Test all supported image extensions
 	validExtensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
 
 	for _, ext := range validExtensions {
 		t.Run("valid extension "+ext, func(t *testing.T) {
-			// Extension should be accepted
 			assert.True(t, isValidImageExtension(ext), "Extension %s should be valid", ext)
 		})
 	}
 }
 
 func TestImageValidation_InvalidExtensions(t *testing.T) {
-	// Test invalid file extensions
 	invalidExtensions := []string{".txt", ".exe", ".pdf", ".doc", ".zip"}
 
 	for _, ext := range invalidExtensions {
 		t.Run("invalid extension "+ext, func(t *testing.T) {
-			// Extension should be rejected
 			assert.False(t, isValidImageExtension(ext), "Extension %s should be invalid", ext)
 		})
 	}

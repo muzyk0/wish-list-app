@@ -1,10 +1,10 @@
-package handlers
+package http
 
 import (
 	"io"
 	"log"
 	"mime/multipart"
-	"net/http"
+	nethttp "net/http"
 	"path/filepath"
 	"strings"
 	"wish-list/internal/pkg/auth"
@@ -13,12 +13,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type S3Handler struct {
+// Handler handles S3 storage operations
+type Handler struct {
 	s3Client *aws.S3Client
 }
 
-func NewS3Handler(s3Client *aws.S3Client) *S3Handler {
-	return &S3Handler{
+// NewHandler creates a new storage handler
+func NewHandler(s3Client *aws.S3Client) *Handler {
+	return &Handler{
 		s3Client: s3Client,
 	}
 }
@@ -37,33 +39,33 @@ func NewS3Handler(s3Client *aws.S3Client) *S3Handler {
 //	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/images/upload [post]
-func (h *S3Handler) UploadImage(c echo.Context) error {
+func (h *Handler) UploadImage(c echo.Context) error {
 	// Get user from context to ensure they're authenticated
 	_, _, _, err := auth.GetUserFromContext(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+		return echo.NewHTTPError(nethttp.StatusUnauthorized, "Unauthorized")
 	}
 
 	// Get the file from the form data
 	file, err := c.FormFile("image")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to get uploaded file")
+		return echo.NewHTTPError(nethttp.StatusBadRequest, "Failed to get uploaded file")
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open uploaded file")
+		return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to open uploaded file")
 	}
 	defer src.Close()
 
 	// Validate file type
 	if !aws.IsValidImageExtension(file.Filename) || !aws.IsValidImageContentType(file.Header.Get("Content-Type")) {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file type. Only images are allowed.")
+		return echo.NewHTTPError(nethttp.StatusBadRequest, "Invalid file type. Only images are allowed.")
 	}
 
 	// Validate file size (max 10MB)
 	if file.Size > 10*1024*1024 { // 10MB in bytes
-		return echo.NewHTTPError(http.StatusBadRequest, "File too large. Maximum size is 10MB.")
+		return echo.NewHTTPError(nethttp.StatusBadRequest, "File too large. Maximum size is 10MB.")
 	}
 
 	// Handle GIF file processing
@@ -74,16 +76,16 @@ func (h *S3Handler) UploadImage(c echo.Context) error {
 	// Upload to S3
 	url, err := h.s3Client.UploadFile(c.Request().Context(), src, file.Filename, file.Header.Get("Content-Type"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to upload image to S3")
+		return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to upload image to S3")
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
+	return c.JSON(nethttp.StatusOK, map[string]string{
 		"url": url,
 	})
 }
 
 // processGifFile handles GIF-specific processing (animation check)
-func (h *S3Handler) processGifFile(src multipart.File, filename string) error {
+func (h *Handler) processGifFile(src multipart.File, filename string) error {
 	ext := strings.ToLower(filepath.Ext(filename))
 	if ext != ".gif" {
 		return nil // Not a GIF, nothing to process
@@ -96,7 +98,7 @@ func (h *S3Handler) processGifFile(src multipart.File, filename string) error {
 		if seeker, ok := src.(io.Seeker); ok {
 			_, seekErr := seeker.Seek(0, 0)
 			if seekErr != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to process image file")
+				return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to process image file")
 			}
 		}
 		// Non-fatal error, continue with upload
