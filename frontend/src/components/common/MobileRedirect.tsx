@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from '@/constants/domains';
 
 interface MobileRedirectProps {
   redirectPath?: string; // Specific path to redirect to in the mobile app
@@ -9,14 +13,14 @@ interface MobileRedirectProps {
 }
 
 export default function MobileRedirect({
-  redirectPath = '',
-  fallbackUrl = 'https://lk.domain.com',
+  redirectPath = MOBILE_APP_REDIRECT_PATHS.HOME,
+  fallbackUrl = DOMAIN_CONSTANTS.MOBILE_APP_BASE_URL,
   children,
 }: MobileRedirectProps) {
   useEffect(() => {
     const redirectToMobile = () => {
       // Construct the app-specific URL scheme
-      const appScheme = `wishlistapp://${redirectPath || 'home'}`;
+      const appScheme = `wishlistapp://${redirectPath}`;
 
       // Fallback URL for web version
       const webFallback = fallbackUrl;

@@ -1,5 +1,3 @@
-import { Text } from 'react-native';
+import { HomeScreen } from '@/components/home/HomeScreen';
 
-export default function HomeScreen() {
-  return <Text>HomeScreen</Text>;
-}
+export default HomeScreen;

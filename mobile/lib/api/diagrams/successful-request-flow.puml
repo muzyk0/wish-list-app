@@ -1,0 +1,34 @@
+@startuml Successful Request Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+actor User
+participant "ApiClient" as client
+participant "authMiddleware" as auth
+participant "Backend" as backend
+
+User -> client: getProfile()
+activate client
+
+client -> auth: onRequest()
+activate auth
+auth -> auth: getAccessToken()
+auth -> auth: Add Authorization header
+auth --> client: Modified request
+deactivate auth
+
+client -> backend: GET /protected/profile\nAuthorization: Bearer <token>
+activate backend
+backend -> backend: Validate token
+backend --> client: 200 OK\n{ user data }
+deactivate backend
+
+client --> User: User profile data
+deactivate client
+
+note over User, backend
+  ✅ Success: Token is valid
+  No middleware intervention needed
+end note
+
+@enduml

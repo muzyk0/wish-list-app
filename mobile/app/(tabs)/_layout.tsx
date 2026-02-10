@@ -1,22 +1,37 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
-import { useTheme } from 'react-native-paper';
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Platform, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
-  const { colors } = useTheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.onSurfaceVariant,
+        tabBarActiveTintColor: '#FFD700',
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
         headerShown: false,
-        tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.outlineVariant,
-          elevation: 8,
+          position: 'absolute',
+          backgroundColor:
+            Platform.OS === 'ios' ? 'transparent' : 'rgba(26, 10, 46, 0.95)',
+          borderTopWidth: 0,
+          elevation: 0,
+          height: 85,
+          paddingBottom: 25,
+          paddingTop: 10,
+        },
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView
+              intensity={80}
+              style={StyleSheet.absoluteFill}
+              tint="dark"
+            />
+          ) : null,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginTop: 4,
         },
       }}
     >
@@ -25,22 +40,9 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 32 : 28}
-              name="house.fill"
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 32 : 28}
-              name="paperplane.fill"
+            <MaterialCommunityIcons
+              name={focused ? 'home' : 'home-outline'}
+              size={focused ? 28 : 24}
               color={color}
             />
           ),
@@ -51,9 +53,9 @@ export default function TabLayout() {
         options={{
           title: 'Lists',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 32 : 28}
-              name="purchased"
+            <MaterialCommunityIcons
+              name={focused ? 'gift' : 'gift-outline'}
+              size={focused ? 28 : 24}
               color={color}
             />
           ),
@@ -64,9 +66,9 @@ export default function TabLayout() {
         options={{
           title: 'Reservations',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 32 : 28}
-              name="bookmark.fill"
+            <MaterialCommunityIcons
+              name={focused ? 'bookmark' : 'bookmark-outline'}
+              size={focused ? 28 : 24}
               color={color}
             />
           ),
@@ -77,9 +79,9 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={focused ? 32 : 28}
-              name="person.fill"
+            <MaterialCommunityIcons
+              name={focused ? 'account' : 'account-outline'}
+              size={focused ? 28 : 24}
               color={color}
             />
           ),

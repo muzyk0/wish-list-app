@@ -12,7 +12,8 @@ import (
 type Claims struct {
 	UserID   string `json:"user_id"`
 	Email    string `json:"email"`
-	UserType string `json:"user_type"` // "user" or "guest"
+	UserType string `json:"user_type"`          // "user" or "guest"
+	TokenID  string `json:"token_id,omitempty"` // For refresh tokens only (enables rotation/blacklisting)
 	jwt.RegisteredClaims
 }
 
@@ -26,29 +27,6 @@ func NewTokenManager(secret string) *TokenManager {
 	return &TokenManager{
 		secret: []byte(secret),
 	}
-}
-
-// GenerateToken generates a new JWT token
-func (tm *TokenManager) GenerateToken(userID, email, userType string, expiryHours int) (string, error) {
-	expiry := time.Now().Add(time.Hour * time.Duration(expiryHours))
-
-	claims := Claims{
-		UserID:   userID,
-		Email:    email,
-		UserType: userType,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiry),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "wish-list-app",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString(tm.secret)
-	if err != nil {
-		return "", fmt.Errorf("failed to sign token: %w", err)
-	}
-	return signedToken, nil
 }
 
 // GenerateGuestToken generates a JWT token for guest users
@@ -92,17 +70,51 @@ func (tm *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
 	return nil, errors.New("invalid token")
 }
 
-// RefreshToken refreshes an existing token
-func (tm *TokenManager) RefreshToken(tokenString string, newExpiryHours int) (string, error) {
-	claims, err := tm.ValidateToken(tokenString)
-	if err != nil {
-		return "", err
+// GenerateAccessToken generates a short-lived access token (15 minutes)
+// for API authentication.
+func (tm *TokenManager) GenerateAccessToken(userID, email, userType string) (string, error) {
+	expiry := time.Now().Add(15 * time.Minute)
+
+	claims := Claims{
+		UserID:   userID,
+		Email:    email,
+		UserType: userType,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiry),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "wish-list-app",
+		},
 	}
 
-	// Generate a new token with the same claims but extended expiry
-	token, err := tm.GenerateToken(claims.UserID, claims.Email, claims.UserType, newExpiryHours)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString(tm.secret)
 	if err != nil {
-		return "", fmt.Errorf("failed to refresh token: %w", err)
+		return "", fmt.Errorf("failed to sign access token: %w", err)
 	}
-	return token, nil
+	return signedToken, nil
+}
+
+// GenerateRefreshToken generates a long-lived refresh token (7 days)
+// with a unique token ID for rotation support.
+func (tm *TokenManager) GenerateRefreshToken(userID, email, userType, tokenID string) (string, error) {
+	expiry := time.Now().Add(7 * 24 * time.Hour)
+
+	claims := Claims{
+		UserID:   userID,
+		Email:    email,
+		UserType: userType,
+		TokenID:  tokenID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiry),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "wish-list-app",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString(tm.secret)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign refresh token: %w", err)
+	}
+	return signedToken, nil
 }

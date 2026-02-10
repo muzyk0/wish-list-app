@@ -1,30 +1,143 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  Alert,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import {
-  ActivityIndicator,
-  Appbar,
-  Button,
-  Card,
-  Chip,
-  List,
-  Text,
-  useTheme,
-} from 'react-native-paper';
+import { Alert, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Chip, Text } from 'react-native-paper';
+import { TabsLayout } from '@/components/TabsLayout';
 import { apiClient } from '@/lib/api';
 import type { WishList } from '@/lib/api/types';
+
+const { width } = Dimensions.get('window');
+
+interface WishListCardProps {
+  item: WishList;
+  onDelete: (id: string) => void;
+}
+
+const WishListCard: React.FC<WishListCardProps> = ({ item, onDelete }) => {
+  return (
+    <Pressable
+      onPress={() =>
+        router.push({
+          pathname: '/lists/[id]',
+          params: { id: item.id },
+        })
+      }
+    >
+      <BlurView intensity={20} style={styles.card}>
+        <View style={styles.cardInner}>
+          {/* Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.titleRow}>
+              <LinearGradient
+                colors={['#6B4EE6', '#9B6DFF']}
+                style={styles.iconContainer}
+              >
+                <MaterialCommunityIcons name="gift" size={24} color="#ffffff" />
+              </LinearGradient>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                {item.occasion && (
+                  <Text style={styles.occasion} numberOfLines={1}>
+                    {item.occasion}
+                  </Text>
+                )}
+              </View>
+            </View>
+            {item.is_public && (
+              <Chip
+                mode="flat"
+                style={styles.publicChip}
+                textStyle={styles.publicChipText}
+                icon={() => (
+                  <MaterialCommunityIcons
+                    name="earth"
+                    size={14}
+                    color="#FFD700"
+                  />
+                )}
+              >
+                Public
+              </Chip>
+            )}
+          </View>
+
+          {/* Description */}
+          {item.description && (
+            <Text style={styles.description} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <View style={styles.stat}>
+              <MaterialCommunityIcons
+                name="eye-outline"
+                size={16}
+                color="rgba(255, 255, 255, 0.5)"
+              />
+              <Text style={styles.statText}>
+                {item.view_count !== '0' ? item.view_count : '0'} views
+              </Text>
+            </View>
+            {item.occasion_date && (
+              <View style={styles.stat}>
+                <MaterialCommunityIcons
+                  name="calendar"
+                  size={16}
+                  color="rgba(255, 255, 255, 0.5)"
+                />
+                <Text style={styles.statText}>{item.occasion_date}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Actions */}
+          <View style={styles.actions}>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: '/lists/[id]/edit',
+                  params: { id: item.id },
+                })
+              }
+              style={{ flex: 1 }}
+            >
+              <View style={[styles.actionButton, styles.editButton]}>
+                <MaterialCommunityIcons
+                  name="pencil"
+                  size={18}
+                  color="#FFD700"
+                />
+                <Text style={styles.editButtonText}>Edit</Text>
+              </View>
+            </Pressable>
+            <Pressable onPress={() => onDelete(item.id)} style={{ flex: 1 }}>
+              <View style={[styles.actionButton, styles.deleteButton]}>
+                <MaterialCommunityIcons
+                  name="delete-outline"
+                  size={18}
+                  color="#FF6B6B"
+                />
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+      </BlurView>
+    </Pressable>
+  );
+};
 
 export default function ListsTab() {
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
-  const { colors } = useTheme();
 
   const {
     data: wishLists,
@@ -46,7 +159,7 @@ export default function ListsTab() {
   const handleDelete = (id: string) => {
     Alert.alert(
       'Confirm Delete',
-      'Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.',
+      'Are you sure you want to delete this wishlist? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -57,7 +170,6 @@ export default function ListsTab() {
               await apiClient.deleteWishList(id);
               Alert.alert('Success', 'Wishlist deleted successfully!');
               queryClient.invalidateQueries({ queryKey: ['wishlists'] });
-              // biome-ignore lint/suspicious/noExplicitAny: Error type
             } catch (error: any) {
               Alert.alert(
                 'Error',
@@ -70,317 +182,249 @@ export default function ListsTab() {
     );
   };
 
-  const renderWishList = ({ item }: { item: WishList }) => (
-    <Card style={[styles.listItem, { backgroundColor: colors.surface }]}>
-      <Card.Content style={styles.cardContent}>
-        <View style={styles.listHeader}>
-          <View style={styles.titleContainer}>
-            <Text
-              variant="titleMedium"
-              style={[styles.listTitle, { color: colors.onSurface }]}
-              numberOfLines={1}
-            >
-              {item.title}
-            </Text>
-            {item.is_public && (
-              <Chip
-                mode="outlined"
-                style={styles.publicBadge}
-                textStyle={{ fontSize: 12 }}
-              >
-                Public
-              </Chip>
-            )}
-          </View>
-
-          {item.occasion && (
-            <Text
-              variant="bodyMedium"
-              style={[styles.listOccasion, { color: colors.outline }]}
-              numberOfLines={1}
-            >
-              {item.occasion}
-            </Text>
-          )}
-
-          {item.description && (
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.listDescription,
-                { color: colors.onSurfaceVariant },
-              ]}
-              numberOfLines={2}
-            >
-              {item.description}
-            </Text>
-          )}
-        </View>
-
-        <View style={styles.listStats}>
-          <Text
-            variant="bodySmall"
-            style={[styles.listStat, { color: colors.outline }]}
-          >
-            {item.view_count !== '0'
-              ? `${item.view_count} views`
-              : 'Not viewed'}
-          </Text>
-          <Text
-            variant="bodySmall"
-            style={[styles.listStat, { color: colors.outline }]}
-          >
-            {item.occasion_date || 'No date set'}
-          </Text>
-        </View>
-
-        <View style={styles.listActions}>
-          <Button
-            mode="contained-tonal"
-            onPress={() =>
-              router.push({
-                pathname: '/lists/[id]/edit',
-                params: { id: item.id },
-              })
-            }
-            style={styles.actionButton}
-            labelStyle={styles.actionButtonText}
-          >
-            Edit
-          </Button>
-          <Button
-            mode="contained-tonal"
-            onPress={() => handleDelete(item.id)}
-            style={[
-              styles.actionButton,
-              { backgroundColor: colors.errorContainer },
-            ]}
-            labelStyle={[
-              styles.actionButtonText,
-              { color: colors.onErrorContainer },
-            ]}
-          >
-            Delete
-          </Button>
-        </View>
-      </Card.Content>
-
-      <Card.Actions style={styles.cardActions}>
-        <Button
-          onPress={() =>
-            router.push({
-              pathname: '/lists/[id]',
-              params: { id: item.id },
-            })
-          }
-          mode="contained"
-          style={styles.viewButton}
-          labelStyle={styles.viewButtonText}
-        >
-          View List
-        </Button>
-      </Card.Actions>
-    </Card>
-  );
-
   if (isLoading) {
     return (
-      <View
-        style={[styles.centerContainer, { backgroundColor: colors.background }]}
-      >
-        <ActivityIndicator size="large" animating={true} />
-        <Text
-          variant="bodyLarge"
-          style={{ marginTop: 10, color: colors.onSurface }}
-        >
-          Loading wishlists...
-        </Text>
-      </View>
+      <TabsLayout title="My Lists" subtitle="All your wishlists">
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Loading wishlists...</Text>
+        </View>
+      </TabsLayout>
     );
   }
 
   if (isError) {
     return (
-      <View
-        style={[styles.centerContainer, { backgroundColor: colors.background }]}
-      >
-        <Text
-          variant="headlineSmall"
-          style={{ color: colors.error, marginBottom: 10 }}
-        >
-          Error loading wishlists
-        </Text>
-        <Button
-          mode="contained"
-          onPress={() => refetch()}
-          style={styles.retryButton}
-        >
-          Retry
-        </Button>
-      </View>
+      <TabsLayout title="My Lists" subtitle="All your wishlists">
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={64}
+            color="rgba(255, 107, 107, 0.5)"
+          />
+          <Text style={styles.errorText}>Failed to load wishlists</Text>
+          <Pressable onPress={() => refetch()}>
+            <View style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </View>
+          </Pressable>
+        </View>
+      </TabsLayout>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Appbar.Header style={{ backgroundColor: colors.primary }}>
-        <Appbar.Content
-          title="My Wish Lists"
-          titleStyle={{ color: colors.onPrimary }}
-        />
-        <Appbar.Action
-          icon="plus"
-          onPress={() => router.push('/lists/create')}
-          color={colors.onPrimary}
-        />
-      </Appbar.Header>
-
-      <ScrollView
-        contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.surface}
-          />
-        }
+    <TabsLayout
+      title="My Lists"
+      subtitle="All your wishlists"
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    >
+      {/* Create New Button */}
+      <Pressable
+        onPress={() => router.push('/lists/create')}
+        style={{ marginBottom: 24 }}
       >
-        {wishLists && wishLists.length > 0 ? (
-          wishLists.map((item) => (
-            <View key={item.id} style={styles.listItemContainer}>
-              {renderWishList({ item })}
-            </View>
-          ))
-        ) : (
-          <View style={styles.emptyContainer}>
-            <List.Icon icon="playlist-star" />
-            <Text
-              variant="headlineSmall"
-              style={{ color: colors.onSurface, textAlign: 'center' }}
-            >
-              No wish lists yet
-            </Text>
-            <Text
-              variant="bodyMedium"
-              style={{
-                color: colors.onSurfaceVariant,
-                textAlign: 'center',
-                marginTop: 8,
-              }}
-            >
-              Create your first wish list to get started
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => router.push('/lists/create')}
-              style={styles.createButton}
-              labelStyle={styles.createButtonText}
-            >
-              Create List
-            </Button>
-          </View>
-        )}
-      </ScrollView>
-    </View>
+        <LinearGradient
+          colors={['#FFD700', '#FFA500']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.createButton}
+        >
+          <MaterialCommunityIcons name="plus" size={24} color="#000000" />
+          <Text style={styles.createButtonText}>Create New List</Text>
+        </LinearGradient>
+      </Pressable>
+
+      {/* Lists */}
+      {wishLists && wishLists.length > 0 ? (
+        <View style={styles.listsContainer}>
+          {wishLists.map((list) => (
+            <WishListCard key={list.id} item={list} onDelete={handleDelete} />
+          ))}
+        </View>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <MaterialCommunityIcons
+            name="gift-outline"
+            size={64}
+            color="rgba(255, 255, 255, 0.3)"
+          />
+          <Text style={styles.emptyText}>No wishlists yet</Text>
+          <Text style={styles.emptySubtext}>
+            Create your first wishlist to get started
+          </Text>
+        </View>
+      )}
+    </TabsLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  loadingContainer: {
+    paddingVertical: 60,
     alignItems: 'center',
   },
-  listContainer: {
-    padding: 16,
+  loadingText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginTop: 16,
   },
-  listItemContainer: {
-    marginBottom: 12,
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 8,
   },
-  listItem: {
-    borderRadius: 12,
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  createButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000000',
   },
-  cardContent: {
-    padding: 16,
+  listsContainer: {
+    gap: 16,
   },
-  listHeader: {
-    marginBottom: 12,
+  card: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  titleContainer: {
+  cardInner: {
+    padding: 20,
+  },
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  listTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  publicBadge: {
-    alignSelf: 'flex-start',
-    marginLeft: 8,
-    marginTop: 2,
-  },
-  listOccasion: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  listDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  listStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 12,
   },
-  listStat: {
-    fontSize: 12,
-  },
-  listActions: {
+  titleRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-  },
-  actionButton: {
-    borderRadius: 8,
-    minWidth: 70,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  cardActions: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  viewButton: {
-    borderRadius: 8,
+    alignItems: 'center',
     flex: 1,
+    marginRight: 12,
   },
-  viewButtonText: {
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    flex: 1,
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 50,
+    marginRight: 12,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 2,
+  },
+  occasion: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  publicChip: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+  },
+  publicChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFD700',
+  },
+  description: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  stat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 6,
+  },
+  editButton: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+  },
+  editButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFD700',
+  },
+  deleteButton: {
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FF6B6B',
+  },
+  emptyContainer: {
+    paddingVertical: 80,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'rgba(255, 107, 107, 0.8)',
+    marginTop: 16,
   },
   retryButton: {
-    marginTop: 10,
-  },
-  createButton: {
-    marginTop: 20,
+    marginTop: 16,
+    paddingVertical: 12,
     paddingHorizontal: 24,
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.4)',
   },
-  createButtonText: {
+  retryButtonText: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#FFD700',
   },
 });

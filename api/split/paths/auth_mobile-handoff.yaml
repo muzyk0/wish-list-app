@@ -1,0 +1,40 @@
+post:
+  description: >-
+    Generate a short-lived (60 second) one-time code for transferring
+    authentication from Frontend to Mobile app.
+  responses:
+    '200':
+      description: Handoff code generated
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.HandoffResponse.yaml
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '429':
+      description: Rate limit exceeded (10 requests/minute per user)
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Generate mobile handoff code
+  tags:
+    - Authentication

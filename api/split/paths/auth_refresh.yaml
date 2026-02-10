@@ -1,0 +1,23 @@
+post:
+  description: >-
+    Exchange refresh token for a new access token. Accepts refresh token via
+    httpOnly cookie (web clients) or Authorization Bearer header (mobile
+    clients). Implements token rotation - returns new refresh token on success.
+  responses:
+    '200':
+      description: Token refreshed successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/internal_handlers.RefreshResponse.yaml
+    '401':
+      description: Invalid or expired refresh token
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  summary: Refresh access token
+  tags:
+    - Authentication

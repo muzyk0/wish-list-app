@@ -1,6 +1,12 @@
 // mobile/lib/api.ts
-import * as SecureStore from 'expo-secure-store';
-import createClient from 'openapi-fetch';
+import createClient, { type Middleware } from 'openapi-fetch';
+import {
+  clearTokens,
+  getAccessToken,
+  refreshAccessToken,
+  setTokens,
+} from './auth';
+import { API_BASE_URL } from './client';
 import type { paths } from './schema';
 import type {
   CreateGiftItemRequest,
@@ -17,53 +23,102 @@ import type {
   WishList,
 } from './types';
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';
+// Routes that don't require authentication
+const UNPROTECTED_ROUTES = ['/auth/login', '/auth/register'];
 
 class ApiClient {
-  private token: string | null = null;
-  private tokenReady: Promise<void>;
-  private resolveTokenReady!: () => void;
   private client: ReturnType<typeof createClient<paths>>;
+  private refreshPromise: Promise<string | null> | null = null;
+  private isRefreshing = false;
 
   constructor() {
-    // Initialize token ready promise
-    this.tokenReady = new Promise((resolve) => {
-      this.resolveTokenReady = resolve;
-    });
-
-    // Create openapi-fetch client
+    // Create NEW openapi-fetch client WITH middleware
+    // Note: We don't use baseClient from client.ts because:
+    // 1. baseClient is used by auth.ts WITHOUT middleware (prevents infinite recursion)
+    // 2. This client needs middleware for automatic auth & token refresh
+    // 3. Middleware should only apply to protected endpoints, not auth operations
     this.client = createClient<paths>({ baseUrl: API_BASE_URL });
 
-    // Load token from secure storage
-    this.loadToken();
+    // Register authentication middleware (adds Authorization header)
+    this.client.use(this.authMiddleware);
+
+    // Register token refresh middleware (handles 401 errors)
+    this.client.use(this.refreshMiddleware);
   }
 
-  private async loadToken() {
-    try {
-      this.token = await SecureStore.getItemAsync('auth_token');
-    } catch (error) {
-      console.error('Error loading token:', error);
-    } finally {
-      this.resolveTokenReady();
-    }
-  }
+  /**
+   * Authentication middleware - adds Authorization header to protected routes
+   */
+  private authMiddleware: Middleware = {
+    async onRequest({ request }) {
+      // Skip auth for unprotected routes
+      const url = new URL(request.url);
+      const isUnprotected = UNPROTECTED_ROUTES.some((route) =>
+        url.pathname.includes(route),
+      );
 
-  private getHeaders(): Record<string, string> {
-    const headers: Record<string, string> = {};
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-    return headers;
-  }
+      if (isUnprotected) {
+        return request;
+      }
+
+      // Add Authorization header for protected routes
+      const token = await getAccessToken();
+      if (token) {
+        request.headers.set('Authorization', `Bearer ${token}`);
+      }
+
+      return request;
+    },
+  };
+
+  /**
+   * Token refresh middleware - handles 401 errors and automatic token refresh
+   */
+  private refreshMiddleware: Middleware = {
+    onResponse: async ({ request, response }) => {
+      // Check for 401 Unauthorized
+      if (response.status === 401 && !this.isRefreshing) {
+        this.isRefreshing = true;
+
+        try {
+          // Attempt to refresh the token (singleton pattern prevents multiple concurrent refreshes)
+          if (!this.refreshPromise) {
+            this.refreshPromise = refreshAccessToken();
+          }
+
+          const newToken = await this.refreshPromise;
+
+          if (newToken) {
+            // Clone the original request with the new token
+            const retryRequest = request.clone();
+            retryRequest.headers.set('Authorization', `Bearer ${newToken}`);
+
+            // Retry the request with the new token
+            return await fetch(retryRequest);
+          }
+
+          // If refresh failed, clear tokens and return original 401 response
+          await clearTokens();
+          return response;
+        } catch (error) {
+          // If refresh throws an error, clear tokens and return original response
+          console.error('Token refresh failed:', error);
+          await clearTokens();
+          return response;
+        } finally {
+          this.isRefreshing = false;
+          this.refreshPromise = null;
+        }
+      }
+
+      return response;
+    },
+  };
 
   // Authentication methods
   async login(credentials: UserLogin): Promise<LoginResponse> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.POST('/auth/login', {
       body: credentials,
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -73,16 +128,14 @@ class ApiClient {
       );
     }
 
-    await this.setToken(data.token);
-    return data; // Fixed: was 'response' which was undefined
+    // Store both access and refresh tokens from response
+    await setTokens(data.accessToken, data.refreshToken);
+    return data;
   }
 
   async register(userData: UserRegistration): Promise<LoginResponse> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.POST('/auth/register', {
       body: userData,
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -92,35 +145,25 @@ class ApiClient {
       );
     }
 
-    await this.setToken(data.token);
-    return data; // Fixed: removed unnecessary cast and variable
+    // Store both access and refresh tokens from response
+    await setTokens(data.accessToken, data.refreshToken);
+    return data;
   }
 
   async logout(): Promise<void> {
-    this.token = null;
     try {
-      await SecureStore.deleteItemAsync('auth_token');
+      await this.client.POST('/auth/logout', {});
     } catch (error) {
-      console.error('Error removing token:', error);
-    }
-  }
-
-  private async setToken(token: string): Promise<void> {
-    this.token = token;
-    try {
-      await SecureStore.setItemAsync('auth_token', token);
-    } catch (error) {
-      console.error('Error saving token:', error);
+      console.error('Logout request failed:', error);
+    } finally {
+      // Always clear tokens locally
+      await clearTokens();
     }
   }
 
   // User methods
   async getProfile(): Promise<User> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/protected/profile', {
-      headers: this.getHeaders(),
-    });
+    const { data, error } = await this.client.GET('/protected/profile', {});
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch profile');
@@ -134,11 +177,8 @@ class ApiClient {
     last_name?: string;
     avatar_url?: string;
   }): Promise<User> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.PUT('/protected/profile', {
       body: userData,
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -149,38 +189,72 @@ class ApiClient {
   }
 
   async deleteAccount(): Promise<void> {
-    await this.tokenReady;
-
-    const { error } = await this.client.DELETE('/protected/account', {
-      headers: this.getHeaders(),
-    });
+    const { error } = await this.client.DELETE('/protected/account', {});
 
     if (error) {
       throw new Error((error as any)?.error || 'Failed to delete account');
     }
+
+    // Clear tokens after successful account deletion
+    await clearTokens();
+  }
+
+  async changeEmail({
+    currentPassword,
+    newEmail,
+  }: {
+    currentPassword: string;
+    newEmail: string;
+  }): Promise<{ message: string }> {
+    const { data, error } = await this.client.POST('/auth/change-email', {
+      body: {
+        current_password: currentPassword,
+        new_email: newEmail,
+      },
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to change email');
+    }
+
+    return data as { message: string };
+  }
+
+  async changePassword({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
+    const { data, error } = await this.client.POST('/auth/change-password', {
+      body: {
+        current_password: currentPassword,
+        new_password: newPassword,
+      },
+    });
+
+    if (error || !data) {
+      throw new Error((error as any)?.error || 'Failed to change password');
+    }
+
+    return data as { message: string };
   }
 
   // Wishlist methods
   async getWishLists(): Promise<WishList[]> {
-    await this.tokenReady;
+    const { data, error } = await this.client.GET('/wishlists', {});
 
-    const { data, error } = await this.client.GET('/wishlists', {
-      headers: this.getHeaders(),
-    });
-
-    if (error || !data) {
+    if (error) {
       throw new Error((error as any)?.error || 'Failed to fetch wish lists');
     }
 
-    return (data as any).data || [];
+    return data ?? [];
   }
 
   async getWishListById(id: string): Promise<WishList> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.GET('/wishlists/{id}', {
       params: { path: { id } },
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -191,11 +265,8 @@ class ApiClient {
   }
 
   async getPublicWishList(slug: string): Promise<WishList> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.GET('/public/wishlists/{slug}', {
       params: { path: { slug } },
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -208,11 +279,8 @@ class ApiClient {
   }
 
   async createWishList(data: CreateWishListRequest): Promise<WishList> {
-    await this.tokenReady;
-
     const { data: responseData, error } = await this.client.POST('/wishlists', {
       body: data,
-      headers: this.getHeaders(),
     });
 
     if (error || !responseData) {
@@ -226,14 +294,11 @@ class ApiClient {
     id: string,
     data: UpdateWishListRequest,
   ): Promise<WishList> {
-    await this.tokenReady;
-
     const { data: responseData, error } = await this.client.PUT(
       '/wishlists/{id}',
       {
         params: { path: { id } },
         body: data,
-        headers: this.getHeaders(),
       },
     );
 
@@ -245,11 +310,8 @@ class ApiClient {
   }
 
   async deleteWishList(id: string): Promise<void> {
-    await this.tokenReady;
-
     const { error } = await this.client.DELETE('/wishlists/{id}', {
       params: { path: { id } },
-      headers: this.getHeaders(),
     });
 
     if (error) {
@@ -259,13 +321,10 @@ class ApiClient {
 
   // Gift item methods
   async getGiftItems(wishlistId: string): Promise<GiftItem[]> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.GET(
       '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
-        headers: this.getHeaders(),
       },
     );
 
@@ -277,11 +336,8 @@ class ApiClient {
   }
 
   async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.GET('/gift-items/{id}', {
       params: { path: { id: itemId } },
-      headers: this.getHeaders(),
     });
 
     if (error || !data) {
@@ -295,14 +351,11 @@ class ApiClient {
     wishlistId: string,
     data: CreateGiftItemRequest,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
     const { data: responseData, error } = await this.client.POST(
       '/wishlists/{wishlistId}/gift-items',
       {
         params: { path: { wishlistId } },
         body: data,
-        headers: this.getHeaders(),
       },
     );
 
@@ -318,14 +371,11 @@ class ApiClient {
     itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
     const { data: responseData, error } = await this.client.PUT(
       '/gift-items/{id}',
       {
         params: { path: { id: itemId } },
         body: data,
-        headers: this.getHeaders(),
       },
     );
 
@@ -337,11 +387,8 @@ class ApiClient {
   }
 
   async deleteGiftItem(wishlistId: string, itemId: string): Promise<void> {
-    await this.tokenReady;
-
     const { error } = await this.client.DELETE('/gift-items/{id}', {
       params: { path: { id: itemId } },
-      headers: this.getHeaders(),
     });
 
     if (error) {
@@ -354,14 +401,11 @@ class ApiClient {
     itemId: string,
     purchasedPrice: number,
   ): Promise<GiftItem> {
-    await this.tokenReady;
-
     const { data, error } = await this.client.POST(
       '/gift-items/{id}/purchase',
       {
         params: { path: { id: itemId } },
         body: { purchased_price: purchasedPrice },
-        headers: this.getHeaders(),
       },
     );
 
@@ -380,14 +424,11 @@ class ApiClient {
     itemId: string,
     data: CreateReservationRequest,
   ): Promise<Reservation> {
-    await this.tokenReady;
-
     const { data: responseData, error } = await this.client.POST(
       '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
-        headers: this.getHeaders(),
       },
     );
 
@@ -399,11 +440,7 @@ class ApiClient {
   }
 
   async getReservationsByUser(): Promise<Reservation[]> {
-    await this.tokenReady;
-
-    const { data, error } = await this.client.GET('/reservations', {
-      headers: this.getHeaders(),
-    });
+    const { data, error } = await this.client.GET('/reservations', {});
 
     if (error || !data) {
       throw new Error((error as any)?.error || 'Failed to fetch reservations');
@@ -413,13 +450,10 @@ class ApiClient {
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
-    await this.tokenReady;
-
     const { error } = await this.client.DELETE(
       '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
       {
         params: { path: { wishlistId, itemId } },
-        headers: this.getHeaders(),
       },
     );
 

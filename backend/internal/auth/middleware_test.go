@@ -16,7 +16,7 @@ func TestJWTMiddleware(t *testing.T) {
 	tm := NewTokenManager("test-secret")
 
 	// Create a valid token
-	tokenString, err := tm.GenerateToken("user-123", "test@example.com", "user", 1)
+	tokenString, err := tm.GenerateAccessToken("user-123", "test@example.com", "user")
 	require.NoError(t, err)
 
 	// Create a request with valid token
@@ -130,7 +130,7 @@ func TestOptionalJWTMiddleware(t *testing.T) {
 	assert.Nil(t, c.Get("user_type"))
 
 	// Test with valid token
-	tokenString, err := tm.GenerateToken("user-123", "test@example.com", "user", 1)
+	tokenString, err := tm.GenerateAccessToken("user-123", "test@example.com", "user")
 	require.NoError(t, err)
 
 	req = httptest.NewRequest(http.MethodGet, "/", http.NoBody)

@@ -148,28 +148,98 @@ func TestRecoverMiddleware(t *testing.T) {
 }
 
 func TestCORSMiddleware(t *testing.T) {
-	e := echo.New()
-
 	allowedOrigins := []string{"http://localhost:3000", "http://localhost:19006"}
 
-	req := httptest.NewRequest(http.MethodOptions, "/", http.NoBody)
-	req.Header.Set("Origin", "http://localhost:3000")
-	req.Header.Set("Access-Control-Request-Method", "POST")
-	req.Header.Set("Access-Control-Request-Headers", "Content-Type")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	t.Run("Allowed origin receives CORS headers", func(t *testing.T) {
+		e := echo.New()
 
-	middleware := CORSMiddleware(allowedOrigins)
-	handler := middleware(func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		req := httptest.NewRequest(http.MethodOptions, "/", http.NoBody)
+		req.Header.Set("Origin", "http://localhost:3000")
+		req.Header.Set("Access-Control-Request-Method", "POST")
+		req.Header.Set("Access-Control-Request-Headers", "Content-Type")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		middleware := CORSMiddleware(allowedOrigins)
+		handler := middleware(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		require.NoError(t, err)
+
+		// Check CORS headers for allowed origin
+		assert.Equal(t, "http://localhost:3000", rec.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+		assert.Contains(t, rec.Header().Get("Access-Control-Allow-Methods"), "POST")
+		assert.Equal(t, "86400", rec.Header().Get("Access-Control-Max-Age"))
 	})
 
-	err := handler(c)
-	require.NoError(t, err)
+	t.Run("Disallowed origin does not receive CORS headers", func(t *testing.T) {
+		e := echo.New()
 
-	// Check CORS headers
-	assert.Equal(t, "http://localhost:3000", rec.Header().Get("Access-Control-Allow-Origin"))
-	assert.Contains(t, rec.Header().Get("Access-Control-Allow-Methods"), "POST")
+		req := httptest.NewRequest(http.MethodOptions, "/", http.NoBody)
+		req.Header.Set("Origin", "http://malicious-site.com")
+		req.Header.Set("Access-Control-Request-Method", "POST")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		middleware := CORSMiddleware(allowedOrigins)
+		handler := middleware(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		require.NoError(t, err)
+
+		// Disallowed origin should NOT receive Access-Control-Allow-Origin header
+		// The Echo CORS middleware will not set the header for disallowed origins
+		allowOriginHeader := rec.Header().Get("Access-Control-Allow-Origin")
+		assert.NotEqual(t, "http://malicious-site.com", allowOriginHeader)
+	})
+
+	t.Run("Multiple allowed origins work correctly", func(t *testing.T) {
+		e := echo.New()
+
+		// Test second allowed origin
+		req := httptest.NewRequest(http.MethodOptions, "/", http.NoBody)
+		req.Header.Set("Origin", "http://localhost:19006")
+		req.Header.Set("Access-Control-Request-Method", "GET")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		middleware := CORSMiddleware(allowedOrigins)
+		handler := middleware(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		require.NoError(t, err)
+
+		// Check CORS headers for second allowed origin
+		assert.Equal(t, "http://localhost:19006", rec.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+	})
+
+	t.Run("Credentials enabled for cross-domain cookies", func(t *testing.T) {
+		e := echo.New()
+
+		req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", http.NoBody)
+		req.Header.Set("Origin", "http://localhost:3000")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		middleware := CORSMiddleware(allowedOrigins)
+		handler := middleware(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		require.NoError(t, err)
+
+		// Credentials must be true for httpOnly cookies to work cross-domain
+		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+	})
 }
 
 func TestTimeoutMiddleware(t *testing.T) {

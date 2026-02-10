@@ -166,7 +166,7 @@ func (r *UserRepository) Create(ctx context.Context, user db.User) (*db.User, er
 func (r *UserRepository) GetByID(ctx context.Context, id pgtype.UUID) (*db.User, error) {
 	query := `
 		SELECT
-			id, email, encrypted_email, first_name, encrypted_first_name,
+			id, email, encrypted_email, password_hash, first_name, encrypted_first_name,
 			last_name, encrypted_last_name, avatar_url, is_verified,
 			created_at, updated_at, last_login_at, deactivated_at
 		FROM users

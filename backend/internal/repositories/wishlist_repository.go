@@ -17,6 +17,7 @@ type WishListRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*db.WishList, error)
 	GetByOwner(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishList, error)
 	GetByPublicSlug(ctx context.Context, publicSlug string) (*db.WishList, error)
+	GetByOwnerWithItemCount(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishListWithItemCount, error)
 	Update(ctx context.Context, wishList db.WishList) (*db.WishList, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
 	DeleteWithExecutor(ctx context.Context, executor db.Executor, id pgtype.UUID) error
@@ -209,4 +210,27 @@ func (r *WishListRepository) IncrementViewCount(ctx context.Context, id pgtype.U
 	}
 
 	return nil
+}
+
+// GetByOwnerWithItemCount retrieves wishlists by owner ID with item counts in a single query
+func (r *WishListRepository) GetByOwnerWithItemCount(ctx context.Context, ownerID pgtype.UUID) ([]*db.WishListWithItemCount, error) {
+	query := `
+		SELECT
+			w.id, w.owner_id, w.title, w.description, w.occasion, w.occasion_date, w.template_id, w.is_public, w.public_slug, w.view_count, w.created_at, w.updated_at,
+			COUNT(gi.id) AS item_count
+		FROM wishlists w
+		LEFT JOIN gift_items gi ON gi.wishlist_id = w.id
+		WHERE w.owner_id = $1
+		GROUP BY w.id, w.owner_id, w.title, w.description, w.occasion, w.occasion_date, w.template_id, w.is_public, w.public_slug, w.view_count, w.created_at, w.updated_at
+		ORDER BY w.created_at DESC
+		LIMIT 100
+	`
+
+	var wishLists []*db.WishListWithItemCount
+	err := r.db.SelectContext(ctx, &wishLists, query, ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get wishlists by owner with item count: %w", err)
+	}
+
+	return wishLists, nil
 }

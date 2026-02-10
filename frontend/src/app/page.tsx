@@ -6,11 +6,15 @@ import {
   AnnouncementBlock,
 } from '@/features/home';
 import { Header, Footer } from '@/widgets';
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from '@/constants/domains';
 
 export default function Home() {
   const handleMobileRedirect = () => {
-    const appScheme = 'wishlistapp://home';
-    const webFallback = 'https://lk.domain.com';
+    const appScheme = `wishlistapp://${MOBILE_APP_REDIRECT_PATHS.HOME}`;
+    const webFallback = DOMAIN_CONSTANTS.MOBILE_APP_BASE_URL;
 
     window.location.href = appScheme;
 
