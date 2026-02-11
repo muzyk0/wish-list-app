@@ -20,12 +20,14 @@ func SetupRoutes(e *echo.Echo, db *database.DB) {
 	healthHandler := healthhttp.NewHandler(db)
 	healthhttp.RegisterRoutes(e, healthHandler)
 
-	// Domain route registration will be added here during Phase 4/5:
-	// auth.RegisterRoutes(...)
-	// user.RegisterRoutes(...)
-	// wishlist.RegisterRoutes(...)
-	// item.RegisterRoutes(...)
-	// wishlist_item.RegisterRoutes(...)
-	// reservation.RegisterRoutes(...)
-	// storage.RegisterRoutes(...)
+	// User domain (Phase 4C) - requires service dependencies, wired in Phase 5:
+	// userhttp.RegisterRoutes(e, userHandler, authMiddleware)
+
+	// Remaining domain route registration (Phase 4D-4I, wired in Phase 5):
+	// authhttp.RegisterRoutes(...)
+	// wishlisthttp.RegisterRoutes(...)
+	// itemhttp.RegisterRoutes(...)
+	// wishlistitemhttp.RegisterRoutes(...)
+	// reservationhttp.RegisterRoutes(...)
+	// storagehttp.RegisterRoutes(...)
 }

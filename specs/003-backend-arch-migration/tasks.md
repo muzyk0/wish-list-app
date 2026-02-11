@@ -19,10 +19,10 @@
 
 **Purpose**: Create target directory structure and verify clean baseline
 
-- [ ] T001 Verify clean build baseline: run `go build ./...` and `go test ./...` from `backend/` to confirm green state before any changes
-- [ ] T002 Create `internal/app/` directory tree: `config/`, `database/migrations/`, `server/`, `middleware/`, `swagger/`, `jobs/`
-- [ ] T003 [P] Create `internal/pkg/` directory tree: `auth/`, `encryption/`, `aws/`, `cache/`, `validation/`, `analytics/`, `response/`, `helpers/`
-- [ ] T004 [P] Create `internal/domain/` directory tree for all 8 domains, each with `delivery/http/dto/`, `service/`, `repository/`, `models/` subdirectories
+- [X] T001 Verify clean build baseline: run `go build ./...` and `go test ./...` from `backend/` to confirm green state before any changes
+- [X] T002 Create `internal/app/` directory tree: `config/`, `database/migrations/`, `server/`, `middleware/`, `swagger/`, `jobs/`
+- [X] T003 [P] Create `internal/pkg/` directory tree: `auth/`, `encryption/`, `aws/`, `cache/`, `validation/`, `analytics/`, `response/`, `helpers/`
+- [X] T004 [P] Create `internal/domain/` directory tree for all 8 domains, each with `delivery/http/dto/`, `service/`, `repository/`, `models/` subdirectories
 
 **Checkpoint**: Empty directory structure ready. Build still green.
 
@@ -36,18 +36,18 @@
 
 ### Implementation for US2
 
-- [ ] T005 [US2] Move `backend/internal/shared/config/config.go` → `backend/internal/app/config/config.go`, update package declaration and all imports referencing `wish-list/internal/shared/config`
-- [ ] T006 [US2] Extract DB connection and pool from `backend/internal/shared/db/models/db.go` → `backend/internal/app/database/postgres.go`, update package to `database`
-- [ ] T007 [US2] Extract `Executor` interface from `backend/internal/shared/db/models/db.go` → `backend/internal/app/database/executor.go`
-- [ ] T008 [US2] Move SQL migration files from `backend/internal/shared/db/migrations/` → `backend/internal/app/database/migrations/` (file copy, no code changes)
-- [ ] T009 [US2] Move middleware files from `backend/internal/shared/middleware/` → `backend/internal/app/middleware/`, update package declaration and imports
-- [ ] T010 [US2] Create `backend/internal/app/server/server.go` — extract Echo server setup from `backend/cmd/server/main.go` (server creation, middleware pipeline, graceful shutdown)
-- [ ] T011 [US2] Create `backend/internal/app/server/router.go` — extract route registration skeleton from `main.go` (will be filled in during domain migration)
-- [ ] T012 [US2] Move Swagger initialization to `backend/internal/app/swagger/swagger.go`, update package and imports
-- [ ] T013 [US2] Move `backend/internal/services/account_cleanup_service.go` → `backend/internal/app/jobs/account_cleanup.go`, update package to `jobs`, update imports
-- [ ] T014 [US2] Move `backend/internal/services/email_service.go` → `backend/internal/app/jobs/email_service.go`, update package to `jobs`, update imports
-- [ ] T015 [US2] Create `backend/internal/app/app.go` — application factory struct with `New()`, `Run()`, `Shutdown()` methods, wiring repositories/services/handlers (initial skeleton, refined in Phase 5)
-- [ ] T016 [US2] Update `backend/cmd/server/main.go` to import from `internal/app/` paths, verify `go build ./...` passes
+- [X] T005 [US2] Move `backend/internal/shared/config/config.go` → `backend/internal/app/config/config.go`, update package declaration and all imports referencing `wish-list/internal/shared/config`
+- [X] T006 [US2] Extract DB connection and pool from `backend/internal/shared/db/models/db.go` → `backend/internal/app/database/postgres.go`, update package to `database`
+- [X] T007 [US2] Extract `Executor` interface from `backend/internal/shared/db/models/db.go` → `backend/internal/app/database/executor.go`
+- [X] T008 [US2] Move SQL migration files from `backend/internal/shared/db/migrations/` → `backend/internal/app/database/migrations/` (file copy, no code changes)
+- [X] T009 [US2] Move middleware files from `backend/internal/shared/middleware/` → `backend/internal/app/middleware/`, update package declaration and imports
+- [X] T010 [US2] Create `backend/internal/app/server/server.go` — extract Echo server setup from `backend/cmd/server/main.go` (server creation, middleware pipeline, graceful shutdown)
+- [X] T011 [US2] Create `backend/internal/app/server/router.go` — extract route registration skeleton from `main.go` (will be filled in during domain migration)
+- [X] T012 [US2] Move Swagger initialization to `backend/internal/app/swagger/swagger.go`, update package and imports
+- [X] T013 [US2] Move `backend/internal/services/account_cleanup_service.go` → `backend/internal/app/jobs/account_cleanup.go`, update package to `jobs`, update imports
+- [X] T014 [US2] Move `backend/internal/services/email_service.go` → `backend/internal/app/jobs/email_service.go`, update package to `jobs`, update imports
+- [X] T015 [US2] Create `backend/internal/app/app.go` — application factory struct with `New()`, `Run()`, `Shutdown()` methods, wiring repositories/services/handlers (initial skeleton, refined in Phase 5)
+- [X] T016 [US2] Update `backend/cmd/server/main.go` to import from `internal/app/` paths, verify `go build ./...` passes
 
 **Checkpoint**: All app infrastructure in `internal/app/`. Build passes. Old `shared/config`, `shared/db`, `shared/middleware` imports updated.
 
@@ -61,19 +61,19 @@
 
 ### Implementation for US3
 
-- [ ] T017 [P] [US3] Move `backend/internal/auth/token_manager.go` → `backend/internal/pkg/auth/token_manager.go`, update package to `auth` under pkg path
-- [ ] T018 [P] [US3] Move `backend/internal/auth/code_store.go` → `backend/internal/pkg/auth/code_store.go`, update package declaration
-- [ ] T019 [P] [US3] Move `backend/internal/auth/middleware.go` → `backend/internal/pkg/auth/middleware.go`, update package declaration
-- [ ] T020 [P] [US3] Move remaining `backend/internal/auth/*.go` files (if any) → `backend/internal/pkg/auth/`, update all package declarations
-- [ ] T021 [P] [US3] Move `backend/internal/shared/encryption/` → `backend/internal/pkg/encryption/`, update package declarations and imports
-- [ ] T022 [P] [US3] Move `backend/internal/shared/aws/` → `backend/internal/pkg/aws/`, update package declarations and imports
-- [ ] T023 [P] [US3] Move `backend/internal/shared/cache/` → `backend/internal/pkg/cache/`, update package declarations and imports
-- [ ] T024 [P] [US3] Move `backend/internal/shared/validation/` → `backend/internal/pkg/validation/`, update package declarations and imports
-- [ ] T025 [P] [US3] Move `backend/internal/shared/analytics/` → `backend/internal/pkg/analytics/`, update package declarations and imports
-- [ ] T026 [P] [US3] Move `backend/internal/shared/helpers/` → `backend/internal/pkg/helpers/`, update package declarations and imports
-- [ ] T027 [US3] Create `backend/internal/pkg/response/response.go` — extract standardized HTTP response helpers (Success, Error, ValidationError) from handler common patterns
-- [ ] T028 [US3] Update all remaining imports across codebase referencing old `internal/auth/` and `internal/shared/` paths to new `internal/pkg/` paths
-- [ ] T029 [US3] Verify `go build ./...` passes and `go vet ./...` clean after all pkg/ moves
+- [X] T017 [P] [US3] Move `backend/internal/auth/token_manager.go` → `backend/internal/pkg/auth/token_manager.go`, update package to `auth` under pkg path
+- [X] T018 [P] [US3] Move `backend/internal/auth/code_store.go` → `backend/internal/pkg/auth/code_store.go`, update package declaration
+- [X] T019 [P] [US3] Move `backend/internal/auth/middleware.go` → `backend/internal/pkg/auth/middleware.go`, update package declaration
+- [X] T020 [P] [US3] Move remaining `backend/internal/auth/*.go` files (if any) → `backend/internal/pkg/auth/`, update all package declarations
+- [X] T021 [P] [US3] Move `backend/internal/shared/encryption/` → `backend/internal/pkg/encryption/`, update package declarations and imports
+- [X] T022 [P] [US3] Move `backend/internal/shared/aws/` → `backend/internal/pkg/aws/`, update package declarations and imports
+- [X] T023 [P] [US3] Move `backend/internal/shared/cache/` → `backend/internal/pkg/cache/`, update package declarations and imports
+- [X] T024 [P] [US3] Move `backend/internal/shared/validation/` → `backend/internal/pkg/validation/`, update package declarations and imports
+- [X] T025 [P] [US3] Move `backend/internal/shared/analytics/` → `backend/internal/pkg/analytics/`, update package declarations and imports
+- [X] T026 [P] [US3] Move `backend/internal/shared/helpers/` → `backend/internal/pkg/helpers/`, update package declarations and imports
+- [X] T027 [US3] Create `backend/internal/pkg/response/response.go` — extract standardized HTTP response helpers (Success, Error, ValidationError) from handler common patterns
+- [X] T028 [US3] Update all remaining imports across codebase referencing old `internal/auth/` and `internal/shared/` paths to new `internal/pkg/` paths
+- [X] T029 [US3] Verify `go build ./...` passes and `go vet ./...` clean after all pkg/ moves
 
 **Checkpoint**: All shared libraries in `internal/pkg/`. No pkg/ file imports domain/ or app/. Build passes.
 
@@ -89,37 +89,37 @@
 
 ### 4A: Health Domain (lightweight, no dependencies)
 
-- [ ] T030 [US1] Move `backend/internal/domains/health/handlers/health_handler.go` → `backend/internal/domain/health/delivery/http/handler.go`, update package to `http` (under health delivery)
-- [ ] T031 [P] [US1] Move `backend/internal/domains/health/handlers/health_handler_test.go` → `backend/internal/domain/health/delivery/http/handler_test.go`, update package and imports
-- [ ] T032 [US5] Create `backend/internal/domain/health/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler)` function extracting health route definitions
-- [ ] T032a [US1] Inline `backend/internal/domains/health/health.go` factory function into handler constructor or routes.go, then delete the factory file
-- [ ] T033 [US1] Create `backend/internal/domain/health/models/health.go` — health check response model if handler uses custom types, otherwise skip
-- [ ] T034 [US1] Update `backend/internal/app/server/router.go` to call `health.RegisterRoutes()`, verify `go build ./...` passes
+- [x] T030 [US1] Move `backend/internal/domains/health/handlers/health_handler.go` → `backend/internal/domain/health/delivery/http/handler.go`, update package to `http` (under health delivery)
+- [x] T031 [P] [US1] Move `backend/internal/domains/health/handlers/health_handler_test.go` → `backend/internal/domain/health/delivery/http/handler_test.go`, update package and imports
+- [x] T032 [US5] Create `backend/internal/domain/health/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler)` function extracting health route definitions
+- [x] T032a [US1] Inline `backend/internal/domains/health/health.go` factory function into handler constructor or routes.go, then delete the factory file
+- [x] T033 [US1] Create `backend/internal/domain/health/models/health.go` — health check response model if handler uses custom types, otherwise skip
+- [x] T034 [US1] Update `backend/internal/app/server/router.go` to call `health.RegisterRoutes()`, verify `go build ./...` passes
 
 ### 4B: Storage Domain (lightweight, depends on pkg/aws)
 
-- [ ] T035 [US1] Move `backend/internal/domains/storage/handlers/s3_handler.go` → `backend/internal/domain/storage/delivery/http/handler.go`, update package and imports to use `internal/pkg/aws`
-- [ ] T036 [P] [US1] Move `backend/internal/domains/storage/handlers/s3_handler_test.go` → `backend/internal/domain/storage/delivery/http/handler_test.go`, update package and imports
-- [ ] T037 [US4] Create `backend/internal/domain/storage/delivery/http/dto/requests.go` and `responses.go` — extract upload request/response types from handler
-- [ ] T038 [US5] Create `backend/internal/domain/storage/delivery/http/routes.go` — `RegisterRoutes()` function for storage endpoints
-- [ ] T039 [US1] Create `backend/internal/domain/storage/models/storage.go` — upload metadata model
-- [ ] T040 [US1] Update router to call `storage.RegisterRoutes()`, verify `go build ./...` passes
+- [x] T035 [US1] Move `backend/internal/domains/storage/handlers/s3_handler.go` → `backend/internal/domain/storage/delivery/http/handler.go`, update package and imports to use `internal/pkg/aws`
+- [x] T036 [P] [US1] Move `backend/internal/domains/storage/handlers/s3_handler_test.go` → `backend/internal/domain/storage/delivery/http/handler_test.go`, update package and imports
+- [x] T037 [US4] Create `backend/internal/domain/storage/delivery/http/dto/requests.go` and `responses.go` — extract upload request/response types from handler
+- [x] T038 [US5] Create `backend/internal/domain/storage/delivery/http/routes.go` — `RegisterRoutes()` function for storage endpoints
+- [x] T039 [US1] Create `backend/internal/domain/storage/models/storage.go` — upload metadata model
+- [x] T040 [US1] Update router to call `storage.RegisterRoutes()`, verify `go build ./...` passes
 
 ### 4C: User Domain (core entity, other domains reference user)
 
-- [ ] T041 [US1] Extract `User` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/user/models/user.go`, update package to `models` (under user)
-- [ ] T042 [US1] Move `backend/internal/repositories/user_repository.go` → `backend/internal/domain/user/repository/user_repository.go`, update package, update model imports to `domain/user/models`, update DB/Executor imports to `app/database`
-- [ ] T043 [P] [US1] Move `backend/internal/repositories/user_repository_test.go` (if exists) → `backend/internal/domain/user/repository/user_repository_test.go`, update imports
-- [ ] T044 [US1] Move `backend/internal/services/user_service.go` → `backend/internal/domain/user/service/user_service.go`, update package, update repository/model imports
-- [ ] T045 [P] [US1] Move `backend/internal/services/user_service_test.go` → `backend/internal/domain/user/service/user_service_test.go`, update imports
-- [ ] T045a [P] [US1] Move `backend/internal/services/mock_user_repository_test.go` → `backend/internal/domain/user/service/mock_user_repository_test.go`, update package declaration
-- [ ] T046 [US1] Move `backend/internal/handlers/user_handler.go` → `backend/internal/domain/user/delivery/http/handler.go`, update package, update service/model imports
-- [ ] T047 [P] [US1] Move `backend/internal/handlers/user_handler_test.go` → `backend/internal/domain/user/delivery/http/handler_test.go`, update imports
-- [ ] T047a [US1] Convert `backend/internal/handlers/test_helpers_test.go` → `backend/internal/pkg/helpers/testutil.go` (rename from `_test.go` to regular file so it can be imported by domain handler tests), update package to `helpers`
-- [ ] T048 [US4] Create `backend/internal/domain/user/delivery/http/dto/requests.go` — extract request binding structs from user handler into DTO types with `ToDomain()` methods
-- [ ] T049 [US4] Create `backend/internal/domain/user/delivery/http/dto/responses.go` — extract response structs from user handler into DTO types with `FromDomain()` methods
-- [ ] T050 [US5] Create `backend/internal/domain/user/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler, authMiddleware echo.MiddlewareFunc)` with user endpoints
-- [ ] T051 [US1] Update router to call `user.RegisterRoutes()`, verify `go build ./...` and `go test ./internal/domain/user/...` pass
+- [x] T041 [US1] Extract `User` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/user/models/user.go`, update package to `models` (under user)
+- [x] T042 [US1] Move `backend/internal/repositories/user_repository.go` → `backend/internal/domain/user/repository/user_repository.go`, update package, update model imports to `domain/user/models`, update DB/Executor imports to `app/database`
+- [x] T043 [P] [US1] Move `backend/internal/repositories/user_repository_test.go` (if exists) → `backend/internal/domain/user/repository/user_repository_test.go`, update imports
+- [x] T044 [US1] Move `backend/internal/services/user_service.go` → `backend/internal/domain/user/service/user_service.go`, update package, update repository/model imports
+- [x] T045 [P] [US1] Move `backend/internal/services/user_service_test.go` → `backend/internal/domain/user/service/user_service_test.go`, update imports
+- [x] T045a [P] [US1] Move `backend/internal/services/mock_user_repository_test.go` → `backend/internal/domain/user/service/mock_user_repository_test.go`, update package declaration
+- [x] T046 [US1] Move `backend/internal/handlers/user_handler.go` → `backend/internal/domain/user/delivery/http/handler.go`, update package, update service/model imports
+- [x] T047 [P] [US1] Move `backend/internal/handlers/user_handler_test.go` → `backend/internal/domain/user/delivery/http/handler_test.go`, update imports
+- [x] T047a [US1] Convert `backend/internal/handlers/test_helpers_test.go` → `backend/internal/pkg/helpers/testutil.go` (rename from `_test.go` to regular file so it can be imported by domain handler tests), update package to `helpers`
+- [x] T048 [US4] Create `backend/internal/domain/user/delivery/http/dto/requests.go` — extract request binding structs from user handler into DTO types with `ToDomain()` methods
+- [x] T049 [US4] Create `backend/internal/domain/user/delivery/http/dto/responses.go` — extract response structs from user handler into DTO types with `FromDomain()` methods
+- [x] T050 [US5] Create `backend/internal/domain/user/delivery/http/routes.go` — `RegisterRoutes(g *echo.Group, h *Handler, authMiddleware echo.MiddlewareFunc)` with user endpoints
+- [x] T051 [US1] Update router to call `user.RegisterRoutes()`, verify `go build ./...` and `go test ./internal/domain/user/...` pass
 
 ### 4D: Item Domain (referenced by wishlist, wishlist_item, reservation)
 
