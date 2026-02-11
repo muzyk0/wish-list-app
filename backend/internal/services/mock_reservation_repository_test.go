@@ -7,8 +7,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
-	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/repositories"
+	db "wish-list/internal/shared/db/models"
 )
 
 // Ensure, that ReservationRepositoryInterfaceMock does implement repositories.ReservationRepositoryInterface.

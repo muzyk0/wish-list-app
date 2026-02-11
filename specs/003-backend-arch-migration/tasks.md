@@ -123,18 +123,18 @@
 
 ### 4D: Item Domain (referenced by wishlist, wishlist_item, reservation)
 
-- [ ] T052 [US1] Extract `GiftItem` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/item/models/item.go`
-- [ ] T053 [US1] Move `backend/internal/repositories/giftitem_repository.go` → `backend/internal/domain/item/repository/giftitem_repository.go`, update package, model imports, DB imports
-- [ ] T054 [P] [US1] Move giftitem repository test (if exists) → `backend/internal/domain/item/repository/giftitem_repository_test.go`, update imports
-- [ ] T055 [US1] Move `backend/internal/services/item_service.go` → `backend/internal/domain/item/service/item_service.go`, update package and imports
-- [ ] T056 [P] [US1] Move `backend/internal/services/item_service_test.go` → `backend/internal/domain/item/service/item_service_test.go`, update imports
-- [ ] T056a [P] [US1] Move `backend/internal/services/giftitem_service_test.go` → `backend/internal/domain/item/service/giftitem_service_test.go`, update imports
-- [ ] T056b [P] [US1] Move `backend/internal/services/mock_giftitem_repository_test.go` → `backend/internal/domain/item/service/mock_giftitem_repository_test.go`, update package declaration
-- [ ] T057 [US1] Move `backend/internal/handlers/item_handler.go` → `backend/internal/domain/item/delivery/http/handler.go`, update package and imports
-- [ ] T058 [P] [US1] Skip — no item handler test file exists (no `item_handler_test.go` in handlers/)
-- [ ] T059 [US4] Create `backend/internal/domain/item/delivery/http/dto/requests.go` and `responses.go` — extract item DTOs with conversion methods
-- [ ] T060 [US5] Create `backend/internal/domain/item/delivery/http/routes.go` — `RegisterRoutes()` for item endpoints
-- [ ] T061 [US1] Update router, verify build and `go test ./internal/domain/item/...` pass
+- [x] T052 [US1] Extract `GiftItem` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/item/models/item.go`
+- [x] T053 [US1] Move `backend/internal/repositories/giftitem_repository.go` → `backend/internal/domain/item/repository/giftitem_repository.go`, update package, model imports, DB imports
+- [x] T054 [P] [US1] Move giftitem repository test (if exists) → `backend/internal/domain/item/repository/giftitem_repository_test.go`, update imports
+- [x] T055 [US1] Move `backend/internal/services/item_service.go` → `backend/internal/domain/item/service/item_service.go`, update package and imports
+- [x] T056 [P] [US1] Move `backend/internal/services/item_service_test.go` → `backend/internal/domain/item/service/item_service_test.go`, update imports
+- [x] T056a [P] [US1] Skip — `giftitem_service_test.go` tests WishListService methods, belongs to Phase 4F (wishlist domain)
+- [x] T056b [P] [US1] Move `backend/internal/services/mock_giftitem_repository_test.go` → `backend/internal/domain/item/service/mock_giftitem_repository_test.go`, update package declaration
+- [x] T057 [US1] Move `backend/internal/handlers/item_handler.go` → `backend/internal/domain/item/delivery/http/handler.go`, update package and imports
+- [x] T058 [P] [US1] Skip — no item handler test file exists (no `item_handler_test.go` in handlers/)
+- [x] T059 [US4] Create `backend/internal/domain/item/delivery/http/dto/requests.go` and `responses.go` — extract item DTOs with conversion methods
+- [x] T060 [US5] Create `backend/internal/domain/item/delivery/http/routes.go` — `RegisterRoutes()` for item endpoints
+- [x] T061 [US1] Update router, verify build and `go test ./internal/domain/item/...` pass
 
 ### 4E: WishlistItem Domain (junction table, depends on item + wishlist interfaces)
 

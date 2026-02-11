@@ -5,11 +5,9 @@ package service
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
