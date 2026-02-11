@@ -1,3 +1,5 @@
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_reservation_repository_test.go -pkg services . ReservationRepositoryInterface
+
 package repositories
 
 import (
@@ -8,8 +10,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	db "wish-list/internal/shared/db/models"
 	"wish-list/internal/pkg/encryption"
+	db "wish-list/internal/shared/db/models"
 )
 
 // Sentinel errors for reservation repository
@@ -17,8 +19,6 @@ var (
 	ErrReservationNotFound = errors.New("reservation not found")
 	ErrNoActiveReservation = errors.New("no active reservation found")
 )
-
-//go:generate go run github.com/matryer/moq@latest -out ../services/mock_reservation_repository_test.go -pkg services . ReservationRepositoryInterface
 
 // ReservationRepositoryInterface defines the interface for reservation database operations
 type ReservationRepositoryInterface interface {

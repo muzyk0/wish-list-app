@@ -138,17 +138,17 @@
 
 ### 4E: WishlistItem Domain (junction table, depends on item + wishlist interfaces)
 
-- [ ] T062 [US1] Extract `WishlistItem` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/wishlist_item/models/wishlist_item.go`
-- [ ] T063 [US1] Move `backend/internal/repositories/wishlistitem_repository.go` → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository.go`, update package, model/DB imports
-- [ ] T064 [P] [US1] Move wishlistitem repository test (if exists) → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository_test.go`, update imports
-- [ ] T065 [US1] Move `backend/internal/services/wishlist_item_service.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service.go`, update package and imports; define `WishListRepositoryInterface` and `GiftItemRepositoryInterface` in service package for cross-domain deps
-- [ ] T066 [P] [US1] Move `backend/internal/services/wishlist_item_service_test.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service_test.go`, update imports
-- [ ] T066a [P] [US1] Move `backend/internal/services/mock_wishlistitem_repository_test.go` → `backend/internal/domain/wishlist_item/service/mock_wishlistitem_repository_test.go`, update package declaration
-- [ ] T067 [US1] Move `backend/internal/handlers/wishlist_item_handler.go` → `backend/internal/domain/wishlist_item/delivery/http/handler.go`, update package and imports
-- [ ] T068 [P] [US1] Skip — no wishlist_item handler test file exists (no `wishlist_item_handler_test.go` in handlers/)
-- [ ] T069 [US4] Create `backend/internal/domain/wishlist_item/delivery/http/dto/requests.go` and `responses.go` — extract DTOs with conversion methods
-- [ ] T070 [US5] Create `backend/internal/domain/wishlist_item/delivery/http/routes.go` — `RegisterRoutes()` for wishlist_item endpoints
-- [ ] T071 [US1] Update router, verify build and `go test ./internal/domain/wishlist_item/...` pass
+- [X] T062 [US1] Extract `WishlistItem` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/wishlist_item/models/wishlist_item.go`
+- [X] T063 [US1] Move `backend/internal/repositories/wishlistitem_repository.go` → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository.go`, update package, model/DB imports
+- [X] T064 [P] [US1] Move wishlistitem repository test (if exists) → `backend/internal/domain/wishlist_item/repository/wishlistitem_repository_test.go`, update imports
+- [X] T065 [US1] Move `backend/internal/services/wishlist_item_service.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service.go`, update package and imports; define `WishListRepositoryInterface` and `GiftItemRepositoryInterface` in service package for cross-domain deps
+- [X] T066 [P] [US1] Move `backend/internal/services/wishlist_item_service_test.go` → `backend/internal/domain/wishlist_item/service/wishlist_item_service_test.go`, update imports
+- [X] T066a [P] [US1] Regenerate `backend/internal/services/mock_wishlistitem_repository_test.go` → `backend/internal/domain/wishlist_item/service/mock_wishlistitem_repository_test.go` with go:generate annotation in backend/internal/repositories/wishlistitem_repository.go
+- [X] T067 [US1] Move `backend/internal/handlers/wishlist_item_handler.go` → `backend/internal/domain/wishlist_item/delivery/http/handler.go`, update package and imports
+- [X] T068 [P] [US1] Skip — no wishlist_item handler test file exists (no `wishlist_item_handler_test.go` in handlers/)
+- [X] T069 [US4] Create `backend/internal/domain/wishlist_item/delivery/http/dto/requests.go` and `responses.go` — extract DTOs with conversion methods
+- [X] T070 [US5] Create `backend/internal/domain/wishlist_item/delivery/http/routes.go` — `RegisterRoutes()` for wishlist_item endpoints
+- [X] T071 [US1] Update router, verify build and `go test ./internal/domain/wishlist_item/...` pass
 
 ### 4F: Wishlist Domain (depends on item, reservation, cache interfaces)
 
@@ -159,7 +159,7 @@
 - [ ] T075a [US1] Delete `backend/internal/services/wishlist_service_template_methods.go` — all template methods (`GetTemplates`, `GetDefaultTemplate`, `UpdateWishListTemplate`) removed along with template repository
 - [ ] T076 [US1] Move `backend/internal/services/wishlist_service.go` → `backend/internal/domain/wishlist/service/wishlist_service.go`, update package and imports; define `GiftItemRepositoryInterface`, `ReservationRepositoryInterface`, `CacheInterface` in service package for cross-domain deps
 - [ ] T077 [P] [US1] Move `backend/internal/services/wishlist_service_test.go` → `backend/internal/domain/wishlist/service/wishlist_service_test.go`, update imports (remove template-related test cases if any)
-- [ ] T077a [P] [US1] Move `backend/internal/services/mock_wishlist_repository_test.go` → `backend/internal/domain/wishlist/service/mock_wishlist_repository_test.go`, update package declaration
+- [ ] T077a [P] [US1] Regenerate `backend/internal/services/mock_wishlist_repository_test.go` → `backend/internal/domain/wishlist/service/mock_wishlist_repository_test.go` with go:generate annotation in backend/internal/repositories/wishlist_repository.go
 - [ ] T078 [US1] Move `backend/internal/handlers/wishlist_handler.go` → `backend/internal/domain/wishlist/delivery/http/handler.go`, update package and imports
 - [ ] T079 [P] [US1] Move wishlist handler test (if exists) → `backend/internal/domain/wishlist/delivery/http/handler_test.go`, update imports
 - [ ] T080 [US4] Create `backend/internal/domain/wishlist/delivery/http/dto/requests.go` and `responses.go` — extract wishlist DTOs with conversion methods
@@ -173,7 +173,7 @@
 - [ ] T085 [P] [US1] Move reservation repository test (if exists) → `backend/internal/domain/reservation/repository/reservation_repository_test.go`, update imports
 - [ ] T086 [US1] Move `backend/internal/services/reservation_service.go` → `backend/internal/domain/reservation/service/reservation_service.go`, update package and imports; define `GiftItemRepositoryInterface` in service package
 - [ ] T087 [P] [US1] Move `backend/internal/services/reservation_service_test.go` → `backend/internal/domain/reservation/service/reservation_service_test.go`, update imports
-- [ ] T087a [P] [US1] Move `backend/internal/services/mock_reservation_repository_test.go` → `backend/internal/domain/reservation/service/mock_reservation_repository_test.go`, update package declaration
+- [ ] T087a [P] [US1] Regenerate `backend/internal/services/mock_reservation_repository_test.go` → `backend/internal/domain/reservation/service/mock_reservation_repository_test.go` with go:generate annotation in with go:generate annotation in backend/internal/repositories/reservation_repository.go
 - [ ] T088 [US1] Move `backend/internal/handlers/reservation_handler.go` → `backend/internal/domain/reservation/delivery/http/handler.go`, update package and imports
 - [ ] T089 [P] [US1] Move reservation handler test (if exists) → `backend/internal/domain/reservation/delivery/http/handler_test.go`, update imports
 - [ ] T090 [US4] Create `backend/internal/domain/reservation/delivery/http/dto/requests.go` and `responses.go` — extract reservation DTOs with conversion methods

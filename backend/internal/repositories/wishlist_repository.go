@@ -1,3 +1,5 @@
+//go:generate go run github.com/matryer/moq@latest -out ../services/mock_wishlist_repository_test.go -pkg services . WishListRepositoryInterface
+
 package repositories
 
 import (
@@ -15,8 +17,6 @@ import (
 var (
 	ErrWishListNotFound = errors.New("wishlist not found")
 )
-
-//go:generate go run github.com/matryer/moq@latest -out ../services/mock_wishlist_repository_test.go -pkg services . WishListRepositoryInterface
 
 // WishListRepositoryInterface defines the interface for wishlist database operations
 type WishListRepositoryInterface interface {

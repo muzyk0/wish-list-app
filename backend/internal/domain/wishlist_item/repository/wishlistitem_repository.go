@@ -1,6 +1,6 @@
-//go:generate go run github.com/matryer/moq@latest -out ../services/mock_wishlistitem_repository_test.go -pkg services . WishlistItemRepositoryInterface
+//go:generate go run github.com/matryer/moq@latest -out ../service/mock_wishlistitem_repository_test.go -pkg service . WishlistItemRepositoryInterface
 
-package repositories
+package repository
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"wish-list/internal/app/database"
 	db "wish-list/internal/shared/db/models"
 )
 
@@ -31,13 +32,13 @@ type WishlistItemRepositoryInterface interface {
 
 // WishlistItemRepository implements WishlistItemRepositoryInterface
 type WishlistItemRepository struct {
-	db *db.DB
+	db *database.DB
 }
 
 // NewWishlistItemRepository creates a new WishlistItemRepository
-func NewWishlistItemRepository(database *db.DB) WishlistItemRepositoryInterface {
+func NewWishlistItemRepository(db *database.DB) WishlistItemRepositoryInterface {
 	return &WishlistItemRepository{
-		db: database,
+		db: db,
 	}
 }
 
