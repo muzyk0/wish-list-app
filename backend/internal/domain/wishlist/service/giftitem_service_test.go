@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	db "wish-list/internal/shared/db/models"
+	itemmodels "wish-list/internal/domain/item/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +17,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 		name          string
 		wishlistID    string
 		input         CreateGiftItemInput
-		mockReturn    *db.GiftItem
+		mockReturn    *itemmodels.GiftItem
 		mockError     error
 		expectedError bool
 	}{
@@ -34,7 +34,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 				Notes:       "Test notes",
 				Position:    1,
 			},
-			mockReturn: &db.GiftItem{
+			mockReturn: &itemmodels.GiftItem{
 				ID:          pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true},
 				OwnerID:     pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17}, Valid: true},
 				Name:        "Test Gift",
@@ -82,7 +82,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.CreateFunc = func(ctx context.Context, gi db.GiftItem) (*db.GiftItem, error) {
+				mockGiftItemRepo.CreateFunc = func(ctx context.Context, gi itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 					return tt.mockReturn, tt.mockError
 				}
 			}
@@ -117,14 +117,14 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 	tests := []struct {
 		name          string
 		giftItemID    string
-		mockReturn    *db.GiftItem
+		mockReturn    *itemmodels.GiftItem
 		mockError     error
 		expectedError bool
 	}{
 		{
 			name:       "successful retrieval",
 			giftItemID: "12345678-1234-5678-9abc-def012345678",
-			mockReturn: &db.GiftItem{
+			mockReturn: &itemmodels.GiftItem{
 				ID:          testUUID,
 				OwnerID:     testUUID,
 				Name:        "Test Gift",
@@ -161,7 +161,7 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.GetByIDFunc = func(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error) {
+				mockGiftItemRepo.GetByIDFunc = func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 					return tt.mockReturn, tt.mockError
 				}
 			}

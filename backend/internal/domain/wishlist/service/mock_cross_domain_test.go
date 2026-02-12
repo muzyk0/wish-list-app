@@ -7,7 +7,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
-	db "wish-list/internal/shared/db/models"
+	itemmodels "wish-list/internal/domain/item/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 // Ensure, that GiftItemRepositoryInterfaceMock does implement GiftItemRepositoryInterface.
@@ -20,22 +21,22 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //
 //		// make and configure a mocked GiftItemRepositoryInterface
 //		mockedGiftItemRepositoryInterface := &GiftItemRepositoryInterfaceMock{
-//			CreateFunc: func(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error) {
+//			CreateFunc: func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 //				panic("mock out the Create method")
 //			},
-//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
+//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
 //				panic("mock out the DeleteWithReservationNotification method")
 //			},
-//			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error) {
+//			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByID method")
 //			},
-//			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error) {
+//			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByWishList method")
 //			},
-//			MarkAsPurchasedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error) {
+//			MarkAsPurchasedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error) {
 //				panic("mock out the MarkAsPurchased method")
 //			},
-//			UpdateFunc: func(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error) {
+//			UpdateFunc: func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 //				panic("mock out the Update method")
 //			},
 //		}
@@ -46,22 +47,22 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //	}
 type GiftItemRepositoryInterfaceMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
+	CreateFunc func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 
 	// DeleteWithReservationNotificationFunc mocks the DeleteWithReservationNotification method.
-	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error)
+	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
 
 	// GetByIDFunc mocks the GetByID method.
-	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error)
+	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 
 	// GetByWishListFunc mocks the GetByWishList method.
-	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
+	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
 
 	// MarkAsPurchasedFunc mocks the MarkAsPurchased method.
-	MarkAsPurchasedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error)
+	MarkAsPurchasedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error)
 
 	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
+	UpdateFunc func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -70,7 +71,7 @@ type GiftItemRepositoryInterfaceMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// GiftItem is the giftItem argument value.
-			GiftItem db.GiftItem
+			GiftItem itemmodels.GiftItem
 		}
 		// DeleteWithReservationNotification holds details about calls to the DeleteWithReservationNotification method.
 		DeleteWithReservationNotification []struct {
@@ -109,7 +110,7 @@ type GiftItemRepositoryInterfaceMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// GiftItem is the giftItem argument value.
-			GiftItem db.GiftItem
+			GiftItem itemmodels.GiftItem
 		}
 	}
 	lockCreate                            sync.RWMutex
@@ -121,13 +122,13 @@ type GiftItemRepositoryInterfaceMock struct {
 }
 
 // Create calls CreateFunc.
-func (mock *GiftItemRepositoryInterfaceMock) Create(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) Create(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 	if mock.CreateFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.CreateFunc: method is nil but GiftItemRepositoryInterface.Create was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		GiftItem db.GiftItem
+		GiftItem itemmodels.GiftItem
 	}{
 		Ctx:      ctx,
 		GiftItem: giftItem,
@@ -144,11 +145,11 @@ func (mock *GiftItemRepositoryInterfaceMock) Create(ctx context.Context, giftIte
 //	len(mockedGiftItemRepositoryInterface.CreateCalls())
 func (mock *GiftItemRepositoryInterfaceMock) CreateCalls() []struct {
 	Ctx      context.Context
-	GiftItem db.GiftItem
+	GiftItem itemmodels.GiftItem
 } {
 	var calls []struct {
 		Ctx      context.Context
-		GiftItem db.GiftItem
+		GiftItem itemmodels.GiftItem
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create
@@ -157,7 +158,7 @@ func (mock *GiftItemRepositoryInterfaceMock) CreateCalls() []struct {
 }
 
 // DeleteWithReservationNotification calls DeleteWithReservationNotificationFunc.
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
+func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
 	if mock.DeleteWithReservationNotificationFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.DeleteWithReservationNotificationFunc: method is nil but GiftItemRepositoryInterface.DeleteWithReservationNotification was just called")
 	}
@@ -193,7 +194,7 @@ func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotificationCa
 }
 
 // GetByID calls GetByIDFunc.
-func (mock *GiftItemRepositoryInterfaceMock) GetByID(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 	if mock.GetByIDFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.GetByIDFunc: method is nil but GiftItemRepositoryInterface.GetByID was just called")
 	}
@@ -229,7 +230,7 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByIDCalls() []struct {
 }
 
 // GetByWishList calls GetByWishListFunc.
-func (mock *GiftItemRepositoryInterfaceMock) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
 	if mock.GetByWishListFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.GetByWishListFunc: method is nil but GiftItemRepositoryInterface.GetByWishList was just called")
 	}
@@ -265,7 +266,7 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 }
 
 // MarkAsPurchased calls MarkAsPurchasedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchased(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchased(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error) {
 	if mock.MarkAsPurchasedFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.MarkAsPurchasedFunc: method is nil but GiftItemRepositoryInterface.MarkAsPurchased was just called")
 	}
@@ -309,13 +310,13 @@ func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchasedCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *GiftItemRepositoryInterfaceMock) Update(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) Update(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 	if mock.UpdateFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.UpdateFunc: method is nil but GiftItemRepositoryInterface.Update was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		GiftItem db.GiftItem
+		GiftItem itemmodels.GiftItem
 	}{
 		Ctx:      ctx,
 		GiftItem: giftItem,
@@ -332,11 +333,11 @@ func (mock *GiftItemRepositoryInterfaceMock) Update(ctx context.Context, giftIte
 //	len(mockedGiftItemRepositoryInterface.UpdateCalls())
 func (mock *GiftItemRepositoryInterfaceMock) UpdateCalls() []struct {
 	Ctx      context.Context
-	GiftItem db.GiftItem
+	GiftItem itemmodels.GiftItem
 } {
 	var calls []struct {
 		Ctx      context.Context
-		GiftItem db.GiftItem
+		GiftItem itemmodels.GiftItem
 	}
 	mock.lockUpdate.RLock()
 	calls = mock.calls.Update
@@ -354,7 +355,7 @@ var _ ReservationRepositoryInterface = &ReservationRepositoryInterfaceMock{}
 //
 //		// make and configure a mocked ReservationRepositoryInterface
 //		mockedReservationRepositoryInterface := &ReservationRepositoryInterfaceMock{
-//			GetActiveReservationForGiftItemFunc: func(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error) {
+//			GetActiveReservationForGiftItemFunc: func(ctx context.Context, giftItemID pgtype.UUID) (*reservationmodels.Reservation, error) {
 //				panic("mock out the GetActiveReservationForGiftItem method")
 //			},
 //		}
@@ -365,7 +366,7 @@ var _ ReservationRepositoryInterface = &ReservationRepositoryInterfaceMock{}
 //	}
 type ReservationRepositoryInterfaceMock struct {
 	// GetActiveReservationForGiftItemFunc mocks the GetActiveReservationForGiftItem method.
-	GetActiveReservationForGiftItemFunc func(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error)
+	GetActiveReservationForGiftItemFunc func(ctx context.Context, giftItemID pgtype.UUID) (*reservationmodels.Reservation, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -381,7 +382,7 @@ type ReservationRepositoryInterfaceMock struct {
 }
 
 // GetActiveReservationForGiftItem calls GetActiveReservationForGiftItemFunc.
-func (mock *ReservationRepositoryInterfaceMock) GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error) {
+func (mock *ReservationRepositoryInterfaceMock) GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*reservationmodels.Reservation, error) {
 	if mock.GetActiveReservationForGiftItemFunc == nil {
 		panic("ReservationRepositoryInterfaceMock.GetActiveReservationForGiftItemFunc: method is nil but ReservationRepositoryInterface.GetActiveReservationForGiftItem was just called")
 	}

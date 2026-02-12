@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"wish-list/internal/domain/item/models"
-	db "wish-list/internal/shared/db/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 func TestGiftItemRepository_Create(t *testing.T) {
@@ -173,7 +173,7 @@ func TestGiftItemRepository_Delete(t *testing.T) {
 		// reservations.gift_item_id REFERENCES gift_items(id) ON DELETE CASCADE
 
 		giftItemID := pgtype.UUID{Valid: true}
-		reservation := db.Reservation{
+		reservation := reservationmodels.Reservation{
 			GiftItemID: giftItemID,
 			Status:     "active",
 		}

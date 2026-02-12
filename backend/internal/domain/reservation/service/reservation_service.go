@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
+	itemmodels "wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/reservation/repository"
-	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -19,9 +19,9 @@ import (
 
 // GiftItemRepositoryInterface defines gift item repository methods used by reservation service
 type GiftItemRepositoryInterface interface {
-	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
-	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*db.GiftItem, error)
-	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*db.GiftItem, error)
+	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
+	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
+	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error)
 }
 
 var (
@@ -116,7 +116,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	}
 
 	// Check if the gift item belongs to this wishlist
-	var giftItem *db.GiftItem
+	var giftItem *itemmodels.GiftItem
 	for _, item := range wishlistItems {
 		if item.ID == giftItemID {
 			giftItem = item
@@ -297,7 +297,7 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 	}
 
 	// Check if the gift item belongs to this wishlist
-	var giftItem *db.GiftItem
+	var giftItem *itemmodels.GiftItem
 	for _, item := range wishlistItems {
 		if item.ID == itemID {
 			giftItem = item

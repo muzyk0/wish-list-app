@@ -40,7 +40,7 @@ import (
 	"wish-list/internal/pkg/encryption"
 	"wish-list/internal/pkg/validation"
 
-	_ "wish-list/internal/handlers/docs" // Import generated Swagger docs
+	_ "wish-list/internal/app/swagger/docs" // Import generated Swagger docs
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 )

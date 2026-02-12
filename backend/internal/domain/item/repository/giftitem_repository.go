@@ -15,7 +15,7 @@ import (
 
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
-	db "wish-list/internal/shared/db/models" // temporary: Reservation model not migrated yet
+	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 // Sentinel errors for gift item repository
@@ -75,7 +75,7 @@ type GiftItemRepositoryInterface interface {
 	Unreserve(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error)
 	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error)
 	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*models.GiftItem, error)
-	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error)
+	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
 }
 
 // GiftItemRepository implements GiftItemRepositoryInterface
@@ -589,7 +589,7 @@ func (r *GiftItemRepository) ReserveIfNotReserved(ctx context.Context, giftItemI
 }
 
 // DeleteWithReservationNotification deletes a gift item and returns any active reservations for notification purposes
-func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
+func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
@@ -608,7 +608,7 @@ func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Conte
 		WHERE gift_item_id = $1 AND status = 'active'
 	`
 
-	var activeReservations []*db.Reservation
+	var activeReservations []*reservationmodels.Reservation
 	err = tx.SelectContext(ctx, &activeReservations, getReservationsQuery, giftItemID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get active reservations: %w", err)

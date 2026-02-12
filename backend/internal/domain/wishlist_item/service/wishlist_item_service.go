@@ -1,3 +1,5 @@
+//go:generate go run github.com/matryer/moq@latest -out mock_crossdomain_test.go -pkg service . WishListRepositoryInterface GiftItemRepositoryInterface
+
 package service
 
 import (
@@ -6,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
+	itemmodels "wish-list/internal/domain/item/models"
+	wishlistmodels "wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist_item/repository"
-
-	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -29,13 +31,13 @@ var (
 
 // WishListRepositoryInterface defines what the wishlist_item service needs from wishlist repository (cross-domain)
 type WishListRepositoryInterface interface {
-	GetByID(ctx context.Context, id pgtype.UUID) (*db.WishList, error)
+	GetByID(ctx context.Context, id pgtype.UUID) (*wishlistmodels.WishList, error)
 }
 
 // GiftItemRepositoryInterface defines what the wishlist_item service needs from item repository (cross-domain)
 type GiftItemRepositoryInterface interface {
-	GetByID(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error)
-	CreateWithOwner(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
+	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
+	CreateWithOwner(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 }
 
 // Input/Output types
@@ -257,7 +259,7 @@ func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlist
 	}
 
 	// Create item model
-	item := db.GiftItem{
+	item := itemmodels.GiftItem{
 		OwnerID:     ownerID,
 		Name:        input.Title,
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
@@ -337,8 +339,8 @@ func (s *WishlistItemService) DetachItem(ctx context.Context, wishlistID string,
 	return nil
 }
 
-// Helper to convert db.GiftItem to ItemOutput
-func (s *WishlistItemService) convertItemToOutput(item *db.GiftItem) *ItemOutput {
+// Helper to convert itemmodels.GiftItem to ItemOutput
+func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *ItemOutput {
 	output := &ItemOutput{
 		ID:          item.ID.String(),
 		OwnerID:     item.OwnerID.String(),

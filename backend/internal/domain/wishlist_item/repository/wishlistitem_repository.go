@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"wish-list/internal/app/database"
-	db "wish-list/internal/shared/db/models"
+	itemmodels "wish-list/internal/domain/item/models"
 )
 
 // Sentinel errors for wishlist-item repository
@@ -23,7 +23,7 @@ var (
 type WishlistItemRepositoryInterface interface {
 	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
 	Detach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
-	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*db.GiftItem, error)
+	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error)
 	GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	IsAttached(ctx context.Context, wishlistID, itemID pgtype.UUID) (bool, error)
 	GetWishlistsForItem(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
@@ -83,7 +83,7 @@ func (r *WishlistItemRepository) Detach(ctx context.Context, wishlistID, itemID 
 }
 
 // GetByWishlist retrieves all items in a wishlist with pagination
-func (r *WishlistItemRepository) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*db.GiftItem, error) {
+func (r *WishlistItemRepository) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -110,7 +110,7 @@ func (r *WishlistItemRepository) GetByWishlist(ctx context.Context, wishlistID p
 		LIMIT $2 OFFSET $3
 	`
 
-	var items []*db.GiftItem
+	var items []*itemmodels.GiftItem
 	if err := r.db.SelectContext(ctx, &items, query, wishlistID, limit, offset); err != nil {
 		return nil, fmt.Errorf("failed to get wishlist items: %w", err)
 	}

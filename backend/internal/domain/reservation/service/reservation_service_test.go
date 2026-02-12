@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	itemmodels "wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/reservation/repository"
-	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -20,8 +20,8 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{{ID: giftItemID}}, nil
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{{ID: giftItemID}}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -52,8 +52,8 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{{ID: giftItemID}}, nil
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{{ID: giftItemID}}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -105,8 +105,8 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{{ID: giftItemID}}, nil
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{{ID: giftItemID}}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -143,8 +143,8 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{{ID: giftItemID}}, nil
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{{ID: giftItemID}}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -177,8 +177,8 @@ func TestReservationService_ExpirationLogic(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{{ID: giftItemID}}, nil
+			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{{ID: giftItemID}}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -205,7 +205,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
 		existingReservation := &models.Reservation{
 			ID:         pgtype.UUID{Valid: true},
 			GiftItemID: giftItemID,
@@ -213,8 +213,8 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -246,8 +246,8 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		userID := pgtype.UUID{Bytes: [16]byte{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
-		reservedItem := &db.GiftItem{
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
+		reservedItem := &itemmodels.GiftItem{
 			ID:               giftItemID,
 			ReservedByUserID: userID,
 		}
@@ -259,10 +259,10 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
-			ReserveIfNotReservedFunc: func(ctx context.Context, giID, uID pgtype.UUID) (*db.GiftItem, error) {
+			ReserveIfNotReservedFunc: func(ctx context.Context, giID, uID pgtype.UUID) (*itemmodels.GiftItem, error) {
 				return reservedItem, nil
 			},
 		}
@@ -300,7 +300,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
 		createdReservation := &models.Reservation{
 			ID:         pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			GiftItemID: giftItemID,
@@ -308,8 +308,8 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -344,11 +344,11 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -399,7 +399,7 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
 		canceledReservation := &models.Reservation{
 			ID:               pgtype.UUID{Bytes: [16]byte{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, Valid: true},
 			ReservationToken: token,
@@ -407,8 +407,8 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
@@ -438,11 +438,11 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 
-		giftItem := &db.GiftItem{ID: giftItemID}
+		giftItem := &itemmodels.GiftItem{ID: giftItemID}
 
 		mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
-			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*db.GiftItem, error) {
-				return []*db.GiftItem{giftItem}, nil
+			GetByWishListFunc: func(ctx context.Context, wlID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
+				return []*itemmodels.GiftItem{giftItem}, nil
 			},
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{}

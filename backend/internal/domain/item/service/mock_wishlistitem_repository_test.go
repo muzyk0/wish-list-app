@@ -5,23 +5,20 @@ package service
 
 import (
 	"context"
-	"sync"
-
-	"wish-list/internal/repositories"
-	db "wish-list/internal/shared/db/models"
-
 	"github.com/jackc/pgx/v5/pgtype"
+	"sync"
+	"wish-list/internal/domain/item/models"
 )
 
-// Ensure, that WishlistItemRepositoryInterfaceMock does implement repositories.WishlistItemRepositoryInterface.
+// Ensure, that WishlistItemRepositoryInterfaceMock does implement WishlistItemRepositoryInterface.
 // If this is not the case, regenerate this file with moq.
-var _ repositories.WishlistItemRepositoryInterface = &WishlistItemRepositoryInterfaceMock{}
+var _ WishlistItemRepositoryInterface = &WishlistItemRepositoryInterfaceMock{}
 
-// WishlistItemRepositoryInterfaceMock is a mock implementation of repositories.WishlistItemRepositoryInterface.
+// WishlistItemRepositoryInterfaceMock is a mock implementation of WishlistItemRepositoryInterface.
 //
 //	func TestSomethingThatUsesWishlistItemRepositoryInterface(t *testing.T) {
 //
-//		// make and configure a mocked repositories.WishlistItemRepositoryInterface
+//		// make and configure a mocked WishlistItemRepositoryInterface
 //		mockedWishlistItemRepositoryInterface := &WishlistItemRepositoryInterfaceMock{
 //			AttachFunc: func(ctx context.Context, wishlistID pgtype.UUID, itemID pgtype.UUID) error {
 //				panic("mock out the Attach method")
@@ -32,7 +29,7 @@ var _ repositories.WishlistItemRepositoryInterface = &WishlistItemRepositoryInte
 //			DetachAllFunc: func(ctx context.Context, itemID pgtype.UUID) error {
 //				panic("mock out the DetachAll method")
 //			},
-//			GetByWishlistFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error) {
+//			GetByWishlistFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
 //				panic("mock out the GetByWishlist method")
 //			},
 //			GetByWishlistCountFunc: func(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
@@ -46,7 +43,7 @@ var _ repositories.WishlistItemRepositoryInterface = &WishlistItemRepositoryInte
 //			},
 //		}
 //
-//		// use mockedWishlistItemRepositoryInterface in code that requires repositories.WishlistItemRepositoryInterface
+//		// use mockedWishlistItemRepositoryInterface in code that requires WishlistItemRepositoryInterface
 //		// and then make assertions.
 //
 //	}
@@ -61,7 +58,7 @@ type WishlistItemRepositoryInterfaceMock struct {
 	DetachAllFunc func(ctx context.Context, itemID pgtype.UUID) error
 
 	// GetByWishlistFunc mocks the GetByWishlist method.
-	GetByWishlistFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error)
+	GetByWishlistFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error)
 
 	// GetByWishlistCountFunc mocks the GetByWishlistCount method.
 	GetByWishlistCountFunc func(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
@@ -74,38 +71,64 @@ type WishlistItemRepositoryInterfaceMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// Attach holds details about calls to the Attach method.
 		Attach []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
-			ItemID     pgtype.UUID
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
 		}
+		// Detach holds details about calls to the Detach method.
 		Detach []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
-			ItemID     pgtype.UUID
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
 		}
+		// DetachAll holds details about calls to the DetachAll method.
 		DetachAll []struct {
-			Ctx    context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ItemID is the itemID argument value.
 			ItemID pgtype.UUID
 		}
+		// GetByWishlist holds details about calls to the GetByWishlist method.
 		GetByWishlist []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
-			Page       int
-			Limit      int
+			// Page is the page argument value.
+			Page int
+			// Limit is the limit argument value.
+			Limit int
 		}
+		// GetByWishlistCount holds details about calls to the GetByWishlistCount method.
 		GetByWishlistCount []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
 		}
+		// GetWishlistsForItem holds details about calls to the GetWishlistsForItem method.
 		GetWishlistsForItem []struct {
-			Ctx    context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ItemID is the itemID argument value.
 			ItemID pgtype.UUID
 		}
+		// IsAttached holds details about calls to the IsAttached method.
 		IsAttached []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
-			ItemID     pgtype.UUID
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
 		}
 	}
 	lockAttach              sync.RWMutex
@@ -126,7 +149,11 @@ func (mock *WishlistItemRepositoryInterfaceMock) Attach(ctx context.Context, wis
 		Ctx        context.Context
 		WishlistID pgtype.UUID
 		ItemID     pgtype.UUID
-	}{Ctx: ctx, WishlistID: wishlistID, ItemID: itemID}
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+		ItemID:     itemID,
+	}
 	mock.lockAttach.Lock()
 	mock.calls.Attach = append(mock.calls.Attach, callInfo)
 	mock.lockAttach.Unlock()
@@ -134,13 +161,21 @@ func (mock *WishlistItemRepositoryInterfaceMock) Attach(ctx context.Context, wis
 }
 
 // AttachCalls gets all the calls that were made to Attach.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.AttachCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) AttachCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
 	ItemID     pgtype.UUID
 } {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		ItemID     pgtype.UUID
+	}
 	mock.lockAttach.RLock()
-	calls := mock.calls.Attach
+	calls = mock.calls.Attach
 	mock.lockAttach.RUnlock()
 	return calls
 }
@@ -154,7 +189,11 @@ func (mock *WishlistItemRepositoryInterfaceMock) Detach(ctx context.Context, wis
 		Ctx        context.Context
 		WishlistID pgtype.UUID
 		ItemID     pgtype.UUID
-	}{Ctx: ctx, WishlistID: wishlistID, ItemID: itemID}
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+		ItemID:     itemID,
+	}
 	mock.lockDetach.Lock()
 	mock.calls.Detach = append(mock.calls.Detach, callInfo)
 	mock.lockDetach.Unlock()
@@ -162,13 +201,21 @@ func (mock *WishlistItemRepositoryInterfaceMock) Detach(ctx context.Context, wis
 }
 
 // DetachCalls gets all the calls that were made to Detach.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.DetachCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) DetachCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
 	ItemID     pgtype.UUID
 } {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		ItemID     pgtype.UUID
+	}
 	mock.lockDetach.RLock()
-	calls := mock.calls.Detach
+	calls = mock.calls.Detach
 	mock.lockDetach.RUnlock()
 	return calls
 }
@@ -181,7 +228,10 @@ func (mock *WishlistItemRepositoryInterfaceMock) DetachAll(ctx context.Context, 
 	callInfo := struct {
 		Ctx    context.Context
 		ItemID pgtype.UUID
-	}{Ctx: ctx, ItemID: itemID}
+	}{
+		Ctx:    ctx,
+		ItemID: itemID,
+	}
 	mock.lockDetachAll.Lock()
 	mock.calls.DetachAll = append(mock.calls.DetachAll, callInfo)
 	mock.lockDetachAll.Unlock()
@@ -189,18 +239,25 @@ func (mock *WishlistItemRepositoryInterfaceMock) DetachAll(ctx context.Context, 
 }
 
 // DetachAllCalls gets all the calls that were made to DetachAll.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.DetachAllCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) DetachAllCalls() []struct {
 	Ctx    context.Context
 	ItemID pgtype.UUID
 } {
+	var calls []struct {
+		Ctx    context.Context
+		ItemID pgtype.UUID
+	}
 	mock.lockDetachAll.RLock()
-	calls := mock.calls.DetachAll
+	calls = mock.calls.DetachAll
 	mock.lockDetachAll.RUnlock()
 	return calls
 }
 
 // GetByWishlist calls GetByWishlistFunc.
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error) {
+func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
 	if mock.GetByWishlistFunc == nil {
 		panic("WishlistItemRepositoryInterfaceMock.GetByWishlistFunc: method is nil but WishlistItemRepositoryInterface.GetByWishlist was just called")
 	}
@@ -209,7 +266,12 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Conte
 		WishlistID pgtype.UUID
 		Page       int
 		Limit      int
-	}{Ctx: ctx, WishlistID: wishlistID, Page: page, Limit: limit}
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+		Page:       page,
+		Limit:      limit,
+	}
 	mock.lockGetByWishlist.Lock()
 	mock.calls.GetByWishlist = append(mock.calls.GetByWishlist, callInfo)
 	mock.lockGetByWishlist.Unlock()
@@ -217,14 +279,23 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Conte
 }
 
 // GetByWishlistCalls gets all the calls that were made to GetByWishlist.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.GetByWishlistCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
 	Page       int
 	Limit      int
 } {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		Page       int
+		Limit      int
+	}
 	mock.lockGetByWishlist.RLock()
-	calls := mock.calls.GetByWishlist
+	calls = mock.calls.GetByWishlist
 	mock.lockGetByWishlist.RUnlock()
 	return calls
 }
@@ -237,7 +308,10 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCount(ctx context.
 	callInfo := struct {
 		Ctx        context.Context
 		WishlistID pgtype.UUID
-	}{Ctx: ctx, WishlistID: wishlistID}
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+	}
 	mock.lockGetByWishlistCount.Lock()
 	mock.calls.GetByWishlistCount = append(mock.calls.GetByWishlistCount, callInfo)
 	mock.lockGetByWishlistCount.Unlock()
@@ -245,12 +319,19 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCount(ctx context.
 }
 
 // GetByWishlistCountCalls gets all the calls that were made to GetByWishlistCount.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.GetByWishlistCountCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCountCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
 } {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+	}
 	mock.lockGetByWishlistCount.RLock()
-	calls := mock.calls.GetByWishlistCount
+	calls = mock.calls.GetByWishlistCount
 	mock.lockGetByWishlistCount.RUnlock()
 	return calls
 }
@@ -263,7 +344,10 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetWishlistsForItem(ctx context
 	callInfo := struct {
 		Ctx    context.Context
 		ItemID pgtype.UUID
-	}{Ctx: ctx, ItemID: itemID}
+	}{
+		Ctx:    ctx,
+		ItemID: itemID,
+	}
 	mock.lockGetWishlistsForItem.Lock()
 	mock.calls.GetWishlistsForItem = append(mock.calls.GetWishlistsForItem, callInfo)
 	mock.lockGetWishlistsForItem.Unlock()
@@ -271,12 +355,19 @@ func (mock *WishlistItemRepositoryInterfaceMock) GetWishlistsForItem(ctx context
 }
 
 // GetWishlistsForItemCalls gets all the calls that were made to GetWishlistsForItem.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.GetWishlistsForItemCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) GetWishlistsForItemCalls() []struct {
 	Ctx    context.Context
 	ItemID pgtype.UUID
 } {
+	var calls []struct {
+		Ctx    context.Context
+		ItemID pgtype.UUID
+	}
 	mock.lockGetWishlistsForItem.RLock()
-	calls := mock.calls.GetWishlistsForItem
+	calls = mock.calls.GetWishlistsForItem
 	mock.lockGetWishlistsForItem.RUnlock()
 	return calls
 }
@@ -290,7 +381,11 @@ func (mock *WishlistItemRepositoryInterfaceMock) IsAttached(ctx context.Context,
 		Ctx        context.Context
 		WishlistID pgtype.UUID
 		ItemID     pgtype.UUID
-	}{Ctx: ctx, WishlistID: wishlistID, ItemID: itemID}
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+		ItemID:     itemID,
+	}
 	mock.lockIsAttached.Lock()
 	mock.calls.IsAttached = append(mock.calls.IsAttached, callInfo)
 	mock.lockIsAttached.Unlock()
@@ -298,13 +393,21 @@ func (mock *WishlistItemRepositoryInterfaceMock) IsAttached(ctx context.Context,
 }
 
 // IsAttachedCalls gets all the calls that were made to IsAttached.
+// Check the length with:
+//
+//	len(mockedWishlistItemRepositoryInterface.IsAttachedCalls())
 func (mock *WishlistItemRepositoryInterfaceMock) IsAttachedCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
 	ItemID     pgtype.UUID
 } {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		ItemID     pgtype.UUID
+	}
 	mock.lockIsAttached.RLock()
-	calls := mock.calls.IsAttached
+	calls = mock.calls.IsAttached
 	mock.lockIsAttached.RUnlock()
 	return calls
 }

@@ -1,3 +1,5 @@
+//go:generate go run github.com/matryer/moq@latest -out mock_wishlistitem_repository_test.go -pkg service . WishlistItemRepositoryInterface
+
 package service
 
 import (
@@ -8,7 +10,6 @@ import (
 
 	"wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/item/repository"
-	"wish-list/internal/repositories"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -20,6 +21,17 @@ var (
 	ErrInvalidItemUser   = errors.New("invalid user id")
 	ErrItemTitleRequired = errors.New("title is required")
 )
+
+// WishlistItemRepositoryInterface defines what the item service needs from wishlist_item repository (cross-domain)
+type WishlistItemRepositoryInterface interface {
+	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
+	Detach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
+	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error)
+	GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
+	IsAttached(ctx context.Context, wishlistID, itemID pgtype.UUID) (bool, error)
+	GetWishlistsForItem(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
+	DetachAll(ctx context.Context, itemID pgtype.UUID) error
+}
 
 // ItemServiceInterface defines the interface for item-related operations
 type ItemServiceInterface interface {
@@ -34,13 +46,13 @@ type ItemServiceInterface interface {
 // ItemService implements ItemServiceInterface
 type ItemService struct {
 	itemRepo         repository.GiftItemRepositoryInterface
-	wishlistItemRepo repositories.WishlistItemRepositoryInterface
+	wishlistItemRepo WishlistItemRepositoryInterface
 }
 
 // NewItemService creates a new ItemService
 func NewItemService(
 	itemRepo repository.GiftItemRepositoryInterface,
-	wishlistItemRepo repositories.WishlistItemRepositoryInterface,
+	wishlistItemRepo WishlistItemRepositoryInterface,
 ) *ItemService {
 	return &ItemService{
 		itemRepo:         itemRepo,

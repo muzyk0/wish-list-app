@@ -10,7 +10,7 @@ import (
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/item/repository"
-	db "wish-list/internal/shared/db/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 // Ensure, that GiftItemRepositoryInterfaceMock does implement repository.GiftItemRepositoryInterface.
@@ -35,7 +35,7 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			DeleteWithExecutorFunc: func(ctx context.Context, executor database.Executor, id pgtype.UUID) error {
 //				panic("mock out the DeleteWithExecutor method")
 //			},
-//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
+//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
 //				panic("mock out the DeleteWithReservationNotification method")
 //			},
 //			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error) {
@@ -94,7 +94,7 @@ type GiftItemRepositoryInterfaceMock struct {
 	DeleteWithExecutorFunc func(ctx context.Context, executor database.Executor, id pgtype.UUID) error
 
 	// DeleteWithReservationNotificationFunc mocks the DeleteWithReservationNotification method.
-	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error)
+	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
 
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
@@ -434,7 +434,7 @@ func (mock *GiftItemRepositoryInterfaceMock) DeleteWithExecutorCalls() []struct 
 }
 
 // DeleteWithReservationNotification calls DeleteWithReservationNotificationFunc.
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error) {
+func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
 	if mock.DeleteWithReservationNotificationFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.DeleteWithReservationNotificationFunc: method is nil but GiftItemRepositoryInterface.DeleteWithReservationNotification was just called")
 	}

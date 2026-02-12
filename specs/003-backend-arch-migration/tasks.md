@@ -219,14 +219,14 @@
 
 **Purpose**: Remove old directories and files that have been fully migrated
 
-- [ ] T108 Delete `backend/internal/handlers/` directory (all handlers moved to domain/)
-- [ ] T109 [P] Delete `backend/internal/services/` directory (all services moved to domain/ or app/jobs/)
-- [ ] T110 [P] Delete `backend/internal/repositories/` directory (all repositories moved to domain/)
-- [ ] T111 [P] Delete `backend/internal/shared/` directory (split into app/ and pkg/)
-- [ ] T112 [P] Delete `backend/internal/auth/` directory (moved to pkg/auth/)
-- [ ] T113 [P] Delete `backend/internal/domains/` directory (moved to domain/)
-- [ ] T114 Remove entity structs from `backend/internal/shared/db/models/models.go` that were extracted to domain models (User, WishList, GiftItem, Reservation, WishlistItem) and Template — if file is now empty, delete it
-- [ ] T115 Run `go build ./...` and `go test ./...` after all deletions to confirm nothing was missed
+- [X] T108 Delete `backend/internal/handlers/` directory (all handlers moved to domain/)
+- [X] T109 [P] Delete `backend/internal/services/` directory (all services moved to domain/ or app/jobs/)
+- [X] T110 [P] Delete `backend/internal/repositories/` directory (all repositories moved to domain/)
+- [X] T111 [P] Delete `backend/internal/shared/` directory (split into app/ and pkg/)
+- [X] T112 [P] Delete `backend/internal/auth/` directory (moved to pkg/auth/)
+- [X] T113 [P] Delete `backend/internal/domains/` directory (moved to domain/)
+- [X] T114 Remove entity structs from `backend/internal/shared/db/models/models.go` that were extracted to domain models (User, WishList, GiftItem, Reservation, WishlistItem) and Template — if file is now empty, delete it
+- [X] T115 Run `go build ./...` and `go test ./...` after all deletions to confirm nothing was missed
 
 **Checkpoint**: Old directory structure fully removed. Only new structure remains.
 

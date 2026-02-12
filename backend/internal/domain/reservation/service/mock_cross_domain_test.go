@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
-	db "wish-list/internal/shared/db/models"
+	itemmodels "wish-list/internal/domain/item/models"
 )
 
 // Ensure, that GiftItemRepositoryInterfaceMock does implement GiftItemRepositoryInterface.
@@ -20,13 +20,13 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //
 //		// make and configure a mocked GiftItemRepositoryInterface
 //		mockedGiftItemRepositoryInterface := &GiftItemRepositoryInterfaceMock{
-//			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error) {
+//			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByWishList method")
 //			},
-//			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+//			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetPublicWishListGiftItems method")
 //			},
-//			ReserveIfNotReservedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error) {
+//			ReserveIfNotReservedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error) {
 //				panic("mock out the ReserveIfNotReserved method")
 //			},
 //		}
@@ -37,13 +37,13 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //	}
 type GiftItemRepositoryInterfaceMock struct {
 	// GetByWishListFunc mocks the GetByWishList method.
-	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
+	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
 
 	// GetPublicWishListGiftItemsFunc mocks the GetPublicWishListGiftItems method.
-	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error)
+	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error)
 
 	// ReserveIfNotReservedFunc mocks the ReserveIfNotReserved method.
-	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error)
+	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -77,7 +77,7 @@ type GiftItemRepositoryInterfaceMock struct {
 }
 
 // GetByWishList calls GetByWishListFunc.
-func (mock *GiftItemRepositoryInterfaceMock) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
 	if mock.GetByWishListFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.GetByWishListFunc: method is nil but GiftItemRepositoryInterface.GetByWishList was just called")
 	}
@@ -113,7 +113,7 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 }
 
 // GetPublicWishListGiftItems calls GetPublicWishListGiftItemsFunc.
-func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
 	if mock.GetPublicWishListGiftItemsFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItems was just called")
 	}
@@ -149,7 +149,7 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsCalls() [
 }
 
 // ReserveIfNotReserved calls ReserveIfNotReservedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReserved(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error) {
+func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReserved(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error) {
 	if mock.ReserveIfNotReservedFunc == nil {
 		panic("GiftItemRepositoryInterfaceMock.ReserveIfNotReservedFunc: method is nil but GiftItemRepositoryInterface.ReserveIfNotReserved was just called")
 	}

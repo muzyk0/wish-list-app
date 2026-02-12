@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	db "wish-list/internal/shared/db/models"
+	itemmodels "wish-list/internal/domain/item/models"
+	wishlistmodels "wish-list/internal/domain/wishlist/models"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -25,10 +26,10 @@ func uuidToPg(t *testing.T, u uuid.UUID) pgtype.UUID {
 	return pg
 }
 
-// makeWishlistWI builds a db.WishList owned by ownerID.
-func makeWishlistWI(t *testing.T, id, ownerID uuid.UUID, isPublic bool) *db.WishList {
+// makeWishlistWI builds a wishlistmodels.WishList owned by ownerID.
+func makeWishlistWI(t *testing.T, id, ownerID uuid.UUID, isPublic bool) *wishlistmodels.WishList {
 	t.Helper()
-	return &db.WishList{
+	return &wishlistmodels.WishList{
 		ID:        uuidToPg(t, id),
 		OwnerID:   uuidToPg(t, ownerID),
 		Title:     "Test Wishlist",
@@ -38,10 +39,10 @@ func makeWishlistWI(t *testing.T, id, ownerID uuid.UUID, isPublic bool) *db.Wish
 	}
 }
 
-// makeGiftItemWI builds a db.GiftItem with a specific item ID and owner.
-func makeGiftItemWI(t *testing.T, itemID, ownerID uuid.UUID) *db.GiftItem {
+// makeGiftItemWI builds a itemmodels.GiftItem with a specific item ID and owner.
+func makeGiftItemWI(t *testing.T, itemID, ownerID uuid.UUID) *itemmodels.GiftItem {
 	t.Helper()
-	return &db.GiftItem{
+	return &itemmodels.GiftItem{
 		ID:        uuidToPg(t, itemID),
 		OwnerID:   uuidToPg(t, ownerID),
 		Name:      "Test Item",
@@ -70,15 +71,15 @@ func TestGetWishlistItems_Success_Owner(t *testing.T) {
 	itemID := uuid.New()
 
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
-	items := []*db.GiftItem{makeGiftItemWI(t, itemID, ownerID)}
+	items := []*itemmodels.GiftItem{makeGiftItemWI(t, itemID, ownerID)}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*db.GiftItem, error) {
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
 			return items, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
@@ -108,13 +109,13 @@ func TestGetWishlistItems_Success_PublicWishlist_NonOwner(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, true) // public
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*db.GiftItem, error) {
-			return []*db.GiftItem{}, nil
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+			return []*itemmodels.GiftItem{}, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
@@ -139,15 +140,15 @@ func TestGetWishlistItems_DefaultPagination(t *testing.T) {
 
 	var capturedPage, capturedLimit int
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*db.GiftItem, error) {
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
 			capturedPage = page
 			capturedLimit = limit
-			return []*db.GiftItem{}, nil
+			return []*itemmodels.GiftItem{}, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
@@ -171,14 +172,14 @@ func TestGetWishlistItems_LimitCappedAt100(t *testing.T) {
 
 	var capturedLimit int
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, limit int) ([]*db.GiftItem, error) {
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, limit int) ([]*itemmodels.GiftItem, error) {
 			capturedLimit = limit
-			return []*db.GiftItem{}, nil
+			return []*itemmodels.GiftItem{}, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
@@ -223,7 +224,7 @@ func TestGetWishlistItems_InvalidUserID(t *testing.T) {
 
 func TestGetWishlistItems_WishlistNotFound(t *testing.T) {
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return nil, errors.New("not found")
 		},
 	}
@@ -245,7 +246,7 @@ func TestGetWishlistItems_Forbidden_PrivateWishlist_NonOwner(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false) // private
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -265,12 +266,12 @@ func TestGetWishlistItems_RepoGetByWishlistError(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*db.GiftItem, error) {
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
 			return nil, errors.New("db error")
 		},
 	}
@@ -290,13 +291,13 @@ func TestGetWishlistItems_RepoGetByWishlistCountError(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*db.GiftItem, error) {
-			return []*db.GiftItem{}, nil
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+			return []*itemmodels.GiftItem{}, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, errors.New("count error")
@@ -318,13 +319,13 @@ func TestGetWishlistItems_TotalPagesCalculation(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*db.GiftItem, error) {
-			return []*db.GiftItem{}, nil
+		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+			return []*itemmodels.GiftItem{}, nil
 		},
 		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 25, nil
@@ -354,12 +355,12 @@ func TestAttachItem_Success(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, ownerID)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return item, nil
 		},
 	}
@@ -421,7 +422,7 @@ func TestAttachItem_InvalidUserID(t *testing.T) {
 
 func TestAttachItem_WishlistNotFound(t *testing.T) {
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return nil, errors.New("not found")
 		},
 	}
@@ -442,7 +443,7 @@ func TestAttachItem_WishlistForbidden_NotOwner(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -462,12 +463,12 @@ func TestAttachItem_ItemNotFound(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return nil, errors.New("not found")
 		},
 	}
@@ -490,12 +491,12 @@ func TestAttachItem_ItemForbidden_NotOwner(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, itemOwnerID) // different owner
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return item, nil
 		},
 	}
@@ -517,12 +518,12 @@ func TestAttachItem_AlreadyAttached(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, ownerID)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return item, nil
 		},
 	}
@@ -549,12 +550,12 @@ func TestAttachItem_IsAttachedRepoError(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, ownerID)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return item, nil
 		},
 	}
@@ -581,12 +582,12 @@ func TestAttachItem_AttachRepoError(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, ownerID)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*itemmodels.GiftItem, error) {
 			return item, nil
 		},
 	}
@@ -618,7 +619,7 @@ func TestCreateItemInWishlist_Success(t *testing.T) {
 
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 	now := time.Now()
-	createdItem := &db.GiftItem{
+	createdItem := &itemmodels.GiftItem{
 		ID:        uuidToPg(t, createdItemID),
 		OwnerID:   uuidToPg(t, ownerID),
 		Name:      "New Item",
@@ -628,12 +629,12 @@ func TestCreateItemInWishlist_Success(t *testing.T) {
 	}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateWithOwnerFunc: func(_ context.Context, item db.GiftItem) (*db.GiftItem, error) {
+		CreateWithOwnerFunc: func(_ context.Context, item itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 			return createdItem, nil
 		},
 	}
@@ -666,7 +667,7 @@ func TestCreateItemInWishlist_Success_WithAllFields(t *testing.T) {
 
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 	now := time.Now()
-	createdItem := &db.GiftItem{
+	createdItem := &itemmodels.GiftItem{
 		ID:          uuidToPg(t, createdItemID),
 		OwnerID:     uuidToPg(t, ownerID),
 		Name:        "Full Item",
@@ -680,14 +681,14 @@ func TestCreateItemInWishlist_Success_WithAllFields(t *testing.T) {
 	}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 
-	var capturedItem db.GiftItem
+	var capturedItem itemmodels.GiftItem
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateWithOwnerFunc: func(_ context.Context, item db.GiftItem) (*db.GiftItem, error) {
+		CreateWithOwnerFunc: func(_ context.Context, item itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 			capturedItem = item
 			return createdItem, nil
 		},
@@ -772,7 +773,7 @@ func TestCreateItemInWishlist_InvalidUserID(t *testing.T) {
 
 func TestCreateItemInWishlist_WishlistNotFound(t *testing.T) {
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return nil, errors.New("not found")
 		},
 	}
@@ -795,7 +796,7 @@ func TestCreateItemInWishlist_WishlistForbidden(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -817,12 +818,12 @@ func TestCreateItemInWishlist_CreateItemRepoError(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateWithOwnerFunc: func(_ context.Context, _ db.GiftItem) (*db.GiftItem, error) {
+		CreateWithOwnerFunc: func(_ context.Context, _ itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 			return nil, errors.New("db error")
 		},
 	}
@@ -844,7 +845,7 @@ func TestCreateItemInWishlist_AttachRepoError(t *testing.T) {
 
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 	now := time.Now()
-	createdItem := &db.GiftItem{
+	createdItem := &itemmodels.GiftItem{
 		ID:        uuidToPg(t, createdItemID),
 		OwnerID:   uuidToPg(t, ownerID),
 		Name:      "Item",
@@ -853,12 +854,12 @@ func TestCreateItemInWishlist_AttachRepoError(t *testing.T) {
 	}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateWithOwnerFunc: func(_ context.Context, _ db.GiftItem) (*db.GiftItem, error) {
+		CreateWithOwnerFunc: func(_ context.Context, _ itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 			return createdItem, nil
 		},
 	}
@@ -890,7 +891,7 @@ func TestDetachItem_Success(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -952,7 +953,7 @@ func TestDetachItem_InvalidUserID(t *testing.T) {
 
 func TestDetachItem_WishlistNotFound(t *testing.T) {
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return nil, errors.New("not found")
 		},
 	}
@@ -973,7 +974,7 @@ func TestDetachItem_WishlistForbidden_NotOwner(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -994,7 +995,7 @@ func TestDetachItem_ItemNotInWishlist(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -1020,7 +1021,7 @@ func TestDetachItem_IsAttachedRepoError(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -1046,7 +1047,7 @@ func TestDetachItem_DetachRepoError(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -1077,7 +1078,7 @@ func TestGetWishlistItems_Forbidden_IsPublicInvalid(t *testing.T) {
 	otherUserID := uuid.New()
 	wlID := uuid.New()
 
-	wishlist := &db.WishList{
+	wishlist := &wishlistmodels.WishList{
 		ID:        uuidToPg(t, wlID),
 		OwnerID:   uuidToPg(t, ownerID),
 		Title:     "Wishlist",
@@ -1087,7 +1088,7 @@ func TestGetWishlistItems_Forbidden_IsPublicInvalid(t *testing.T) {
 	}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
@@ -1109,7 +1110,7 @@ func TestCreateItemInWishlist_NoPriceSet(t *testing.T) {
 
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 	now := time.Now()
-	createdItem := &db.GiftItem{
+	createdItem := &itemmodels.GiftItem{
 		ID:        uuidToPg(t, createdItemID),
 		OwnerID:   uuidToPg(t, ownerID),
 		Name:      "No Price Item",
@@ -1118,14 +1119,14 @@ func TestCreateItemInWishlist_NoPriceSet(t *testing.T) {
 	}
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}
 
-	var capturedItem db.GiftItem
+	var capturedItem itemmodels.GiftItem
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateWithOwnerFunc: func(_ context.Context, item db.GiftItem) (*db.GiftItem, error) {
+		CreateWithOwnerFunc: func(_ context.Context, item itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 			capturedItem = item
 			return createdItem, nil
 		},
@@ -1159,13 +1160,13 @@ func TestAttachItem_VerifiesCorrectIDsPassedToRepo(t *testing.T) {
 	item := makeGiftItemWI(t, itemID, ownerID)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*wishlistmodels.WishList, error) {
 			assert.Equal(t, uuidToPg(t, wlID), id)
 			return wishlist, nil
 		},
 	}
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*db.GiftItem, error) {
+		GetByIDFunc: func(_ context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 			assert.Equal(t, uuidToPg(t, itemID), id)
 			return item, nil
 		},
@@ -1200,7 +1201,7 @@ func TestDetachItem_VerifiesCorrectIDsPassedToRepo(t *testing.T) {
 	wishlist := makeWishlistWI(t, wlID, ownerID, false)
 
 	wlRepo := &WishListRepositoryInterfaceMock{
-		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*db.WishList, error) {
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
 			return wishlist, nil
 		},
 	}

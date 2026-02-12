@@ -7,8 +7,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
+	itemmodels "wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/wishlist_item/repository"
-	db "wish-list/internal/shared/db/models"
 )
 
 // Ensure, that WishlistItemRepositoryInterfaceMock does implement repository.WishlistItemRepositoryInterface.
@@ -30,7 +30,7 @@ var _ repository.WishlistItemRepositoryInterface = &WishlistItemRepositoryInterf
 //			DetachAllFunc: func(ctx context.Context, itemID pgtype.UUID) error {
 //				panic("mock out the DetachAll method")
 //			},
-//			GetByWishlistFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error) {
+//			GetByWishlistFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByWishlist method")
 //			},
 //			GetByWishlistCountFunc: func(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
@@ -59,7 +59,7 @@ type WishlistItemRepositoryInterfaceMock struct {
 	DetachAllFunc func(ctx context.Context, itemID pgtype.UUID) error
 
 	// GetByWishlistFunc mocks the GetByWishlist method.
-	GetByWishlistFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error)
+	GetByWishlistFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*itemmodels.GiftItem, error)
 
 	// GetByWishlistCountFunc mocks the GetByWishlistCount method.
 	GetByWishlistCountFunc func(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
@@ -258,7 +258,7 @@ func (mock *WishlistItemRepositoryInterfaceMock) DetachAllCalls() []struct {
 }
 
 // GetByWishlist calls GetByWishlistFunc.
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*db.GiftItem, error) {
+func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*itemmodels.GiftItem, error) {
 	if mock.GetByWishlistFunc == nil {
 		panic("WishlistItemRepositoryInterfaceMock.GetByWishlistFunc: method is nil but WishlistItemRepositoryInterface.GetByWishlist was just called")
 	}

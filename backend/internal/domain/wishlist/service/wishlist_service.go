@@ -13,9 +13,10 @@ import (
 	"time"
 
 	"wish-list/internal/app/database"
+	itemmodels "wish-list/internal/domain/item/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist/repository"
-	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -24,17 +25,17 @@ import (
 
 // GiftItemRepositoryInterface defines gift item repository methods used by wishlist service
 type GiftItemRepositoryInterface interface {
-	Create(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
-	GetByID(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error)
-	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
-	Update(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
-	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error)
-	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error)
+	Create(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
+	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
+	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
+	Update(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
+	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
+	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error)
 }
 
 // ReservationRepositoryInterface defines reservation repository methods used by wishlist service
 type ReservationRepositoryInterface interface {
-	GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error)
+	GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*reservationmodels.Reservation, error)
 }
 
 // EmailServiceInterface defines email service methods used by wishlist service
@@ -547,7 +548,7 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 	priceBig.SetInt64(int64(input.Price * 100)) // Convert to cents
 
 	// Create gift item
-	giftItem := db.GiftItem{
+	giftItem := itemmodels.GiftItem{
 		OwnerID:     listID,
 		Name:        input.Name,
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
