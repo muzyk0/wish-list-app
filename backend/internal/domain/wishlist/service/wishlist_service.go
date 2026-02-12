@@ -1,4 +1,6 @@
-package services
+//go:generate go run github.com/matryer/moq@latest -out mock_cross_domain_test.go -pkg service . GiftItemRepositoryInterface ReservationRepositoryInterface EmailServiceInterface CacheInterface
+
+package service
 
 import (
 	"context"
@@ -9,13 +11,44 @@ import (
 	"math/big"
 	"strings"
 	"time"
-	db "wish-list/internal/shared/db/models"
 
-	"wish-list/internal/pkg/cache"
-	"wish-list/internal/repositories"
+	"wish-list/internal/app/database"
+	"wish-list/internal/domain/wishlist/models"
+	"wish-list/internal/domain/wishlist/repository"
+	db "wish-list/internal/shared/db/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// Cross-domain interfaces - only methods actually used by WishListService
+
+// GiftItemRepositoryInterface defines gift item repository methods used by wishlist service
+type GiftItemRepositoryInterface interface {
+	Create(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
+	GetByID(ctx context.Context, id pgtype.UUID) (*db.GiftItem, error)
+	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
+	Update(ctx context.Context, giftItem db.GiftItem) (*db.GiftItem, error)
+	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*db.Reservation, error)
+	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*db.GiftItem, error)
+}
+
+// ReservationRepositoryInterface defines reservation repository methods used by wishlist service
+type ReservationRepositoryInterface interface {
+	GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*db.Reservation, error)
+}
+
+// EmailServiceInterface defines email service methods used by wishlist service
+type EmailServiceInterface interface {
+	SendReservationRemovedEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle string) error
+	SendGiftPurchasedConfirmationEmail(ctx context.Context, recipientEmail, giftItemName, wishlistTitle, guestName string) error
+}
+
+// CacheInterface defines cache methods used by wishlist service
+type CacheInterface interface {
+	Get(ctx context.Context, key string, dest any) error
+	Set(ctx context.Context, key string, value any) error
+	Delete(ctx context.Context, key string) error
+}
 
 // Sentinel errors
 var (
@@ -50,19 +83,19 @@ type WishListServiceInterface interface {
 }
 
 type WishListService struct {
-	wishListRepo    repositories.WishListRepositoryInterface
-	giftItemRepo    repositories.GiftItemRepositoryInterface
+	wishListRepo    repository.WishListRepositoryInterface
+	giftItemRepo    GiftItemRepositoryInterface
 	emailService    EmailServiceInterface
-	reservationRepo repositories.ReservationRepositoryInterface
-	cache           cache.CacheInterface
+	reservationRepo ReservationRepositoryInterface
+	cache           CacheInterface
 }
 
 func NewWishListService(
-	wishListRepo repositories.WishListRepositoryInterface,
-	giftItemRepo repositories.GiftItemRepositoryInterface,
+	wishListRepo repository.WishListRepositoryInterface,
+	giftItemRepo GiftItemRepositoryInterface,
 	emailService EmailServiceInterface,
-	reservationRepo repositories.ReservationRepositoryInterface,
-	cacheService cache.CacheInterface,
+	reservationRepo ReservationRepositoryInterface,
+	cacheService CacheInterface,
 ) *WishListService {
 	return &WishListService{
 		wishListRepo:    wishListRepo,
@@ -188,7 +221,7 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 	}
 
 	// Create wishlist
-	wishList := db.WishList{
+	wishList := models.WishList{
 		OwnerID:      ownerID,
 		Title:        input.Title,
 		Description:  pgtype.Text{String: input.Description, Valid: input.Description != ""},
@@ -521,9 +554,9 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
 		ImageUrl:    pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""},
 		Price:       pgtype.Numeric{Int: priceBig, Exp: -2, Valid: input.Price > 0},
-		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is saf
+		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is safe
 		Notes:       pgtype.Text{String: input.Notes, Valid: input.Notes != ""},
-		Position:    pgtype.Int4{Int32: int32(input.Position), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is saf
+		Position:    pgtype.Int4{Int32: int32(input.Position), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is safe
 	}
 
 	createdGiftItem, err := s.giftItemRepo.Create(ctx, giftItem)
@@ -797,7 +830,6 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 }
 
 // MarkGiftItemAsPurchased marks a gift item as purchased
-// MarkGiftItemAsPurchased marks a gift item as purchased
 func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemID, userID string, purchasedPrice float64) (*GiftItemOutput, error) {
 	// Validate input
 	if giftItemID == "" {
@@ -873,13 +905,13 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 		Description:       updatedGiftItem.Description.String,
 		Link:              updatedGiftItem.Link.String,
 		ImageURL:          updatedGiftItem.ImageUrl.String,
-		Price:             db.NumericToFloat64(updatedGiftItem.Price),
+		Price:             database.NumericToFloat64(updatedGiftItem.Price),
 		Priority:          int(updatedGiftItem.Priority.Int32),
 		ReservedByUserID:  updatedGiftItem.ReservedByUserID.String(),
 		ReservedAt:        updatedGiftItem.ReservedAt.Time.Format(time.RFC3339),
 		PurchasedByUserID: updatedGiftItem.PurchasedByUserID.String(),
 		PurchasedAt:       updatedGiftItem.PurchasedAt.Time.Format(time.RFC3339),
-		PurchasedPrice:    db.NumericToFloat64(updatedGiftItem.PurchasedPrice),
+		PurchasedPrice:    database.NumericToFloat64(updatedGiftItem.PurchasedPrice),
 		Notes:             updatedGiftItem.Notes.String,
 		Position:          int(updatedGiftItem.Position.Int32),
 		CreatedAt:         updatedGiftItem.CreatedAt.Time.Format(time.RFC3339),

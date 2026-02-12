@@ -179,7 +179,6 @@ func main() {
 	wishListRepo := repositories.NewWishListRepository(sqlxDB)
 	giftItemRepo := repositories.NewGiftItemRepository(sqlxDB)
 	wishlistItemRepo := repositories.NewWishlistItemRepository(sqlxDB)
-	templateRepo := repositories.NewTemplateRepository(sqlxDB)
 
 	var reservationRepo repositories.ReservationRepositoryInterface
 	if encryptionService != nil {
@@ -192,7 +191,7 @@ func main() {
 	analyticsService := analytics.NewAnalyticsService(cfg.AnalyticsEnabled)
 	emailService := services.NewEmailService()
 	userService := services.NewUserService(userRepo)
-	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, templateRepo, emailService, reservationRepo, redisCache)
+	wishListService := services.NewWishListService(wishListRepo, giftItemRepo, emailService, reservationRepo, redisCache)
 	itemService := services.NewItemService(giftItemRepo, wishlistItemRepo)
 	wishlistItemService := services.NewWishlistItemService(wishListRepo, giftItemRepo, wishlistItemRepo)
 	reservationService := services.NewReservationService(reservationRepo, giftItemRepo)

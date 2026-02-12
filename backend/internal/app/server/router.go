@@ -23,9 +23,11 @@ func SetupRoutes(e *echo.Echo, db *database.DB) {
 	// User domain (Phase 4C) - requires service dependencies, wired in Phase 5:
 	// userhttp.RegisterRoutes(e, userHandler, authMiddleware)
 
+	// Wishlist domain (Phase 4F) - requires service dependencies, wired in Phase 5:
+	// wishlisthttp.RegisterRoutes(e, wishlistHandler, authMiddleware)
+
 	// Remaining domain route registration (Phase 4D-4I, wired in Phase 5):
 	// authhttp.RegisterRoutes(...)
-	// wishlisthttp.RegisterRoutes(...)
 	// itemhttp.RegisterRoutes(...)
 	// wishlistitemhttp.RegisterRoutes(...)
 	// reservationhttp.RegisterRoutes(...)
