@@ -9,7 +9,8 @@ get:
         application/json:
           schema:
             items:
-              $ref: ../components/schemas/handlers.WishListResponse.yaml
+              $ref: >-
+                ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse.yaml
             type: array
     '401':
       description: Unauthorized
@@ -38,7 +39,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.CreateWishListRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest.yaml
     description: Wish list creation information
     required: true
   responses:
@@ -47,7 +49,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.WishListResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

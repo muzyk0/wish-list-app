@@ -14,7 +14,8 @@ get:
         application/json:
           schema:
             items:
-              $ref: ../components/schemas/handlers.ReservationDetailsResponse.yaml
+              $ref: >-
+                ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse.yaml
             type: array
     '400':
       description: Invalid request parameters

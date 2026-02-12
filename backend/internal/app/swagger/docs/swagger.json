@@ -41,7 +41,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ChangeEmailRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest"
                         }
                     }
                 ],
@@ -49,7 +49,7 @@
                     "200": {
                         "description": "Email changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                         }
                     },
                     "400": {
@@ -116,7 +116,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ChangePasswordRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ChangePasswordRequest"
                         }
                     }
                 ],
@@ -124,7 +124,7 @@
                     "200": {
                         "description": "Password changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                         }
                     },
                     "400": {
@@ -177,7 +177,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ExchangeRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest"
                         }
                     }
                 ],
@@ -185,7 +185,7 @@
                     "200": {
                         "description": "Code exchanged successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ExchangeResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse"
                         }
                     },
                     "400": {
@@ -247,7 +247,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.LoginRequest"
                         }
                     }
                 ],
@@ -255,7 +255,7 @@
                     "200": {
                         "description": "Login successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -310,7 +310,7 @@
                     "200": {
                         "description": "Logout successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.MessageResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                         }
                     }
                 }
@@ -338,7 +338,7 @@
                     "200": {
                         "description": "Handoff code generated",
                         "schema": {
-                            "$ref": "#/definitions/handlers.HandoffResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse"
                         }
                     },
                     "401": {
@@ -391,7 +391,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -399,7 +399,7 @@
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -443,7 +443,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.OAuthCodeRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"
                         }
                     }
                 ],
@@ -451,7 +451,7 @@
                     "200": {
                         "description": "Authentication successful",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -492,7 +492,7 @@
                     "200": {
                         "description": "Token refreshed successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.RefreshResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse"
                         }
                     },
                     "401": {
@@ -527,7 +527,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.RegisterRequest"
                         }
                     }
                 ],
@@ -535,7 +535,7 @@
                     "201": {
                         "description": "User created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.AuthResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -593,7 +593,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.ReservationDetailsResponse"
+                                "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"
                             }
                         }
                     },
@@ -774,7 +774,7 @@
                     "200": {
                         "description": "List of items retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.PaginatedItemsResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse"
                         }
                     },
                     "400": {
@@ -830,7 +830,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateItemRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest"
                         }
                     }
                 ],
@@ -838,7 +838,7 @@
                     "201": {
                         "description": "Item created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ItemResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                         }
                     },
                     "400": {
@@ -899,7 +899,7 @@
                     "200": {
                         "description": "Item retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ItemResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                         }
                     },
                     "401": {
@@ -962,7 +962,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateItemRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest"
                         }
                     }
                 ],
@@ -970,7 +970,7 @@
                     "200": {
                         "description": "Item updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ItemResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                         }
                     },
                     "400": {
@@ -1118,7 +1118,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.MarkPurchasedRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest"
                         }
                     }
                 ],
@@ -1126,7 +1126,7 @@
                     "200": {
                         "description": "Item marked as purchased",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ItemResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                         }
                     },
                     "400": {
@@ -1286,7 +1286,7 @@
                     "200": {
                         "description": "User profile",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
                         }
                     },
                     "401": {
@@ -1342,7 +1342,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateProfileRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -1350,7 +1350,7 @@
                     "200": {
                         "description": "Updated user profile",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
                         }
                     },
                     "400": {
@@ -1422,7 +1422,7 @@
                     "200": {
                         "description": "Reservation status retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ReservationStatusResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse"
                         }
                     },
                     "500": {
@@ -1460,7 +1460,7 @@
                     "200": {
                         "description": "Public wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                         }
                     },
                     "404": {
@@ -1510,7 +1510,7 @@
                     "200": {
                         "description": "Gift items retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.GetGiftItemsResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse"
                         }
                     },
                     "404": {
@@ -1567,7 +1567,7 @@
                     "200": {
                         "description": "List of user reservations retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.UserReservationsResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse"
                         }
                     },
                     "401": {
@@ -1629,7 +1629,7 @@
                         "name": "reservation_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"
                         }
                     }
                 ],
@@ -1637,7 +1637,7 @@
                     "200": {
                         "description": "Reservation created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -1706,7 +1706,7 @@
                         "name": "cancel_request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CancelReservationRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"
                         }
                     }
                 ],
@@ -1714,7 +1714,7 @@
                     "200": {
                         "description": "Reservation canceled successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateReservationResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
                         }
                     },
                     "400": {
@@ -1768,7 +1768,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.WishListResponse"
+                                "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                             }
                         }
                     },
@@ -1816,7 +1816,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateWishListRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest"
                         }
                     }
                 ],
@@ -1824,7 +1824,7 @@
                     "201": {
                         "description": "Wish list created successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                         }
                     },
                     "400": {
@@ -1885,7 +1885,7 @@
                     "200": {
                         "description": "Wish list retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                         }
                     },
                     "403": {
@@ -1939,7 +1939,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateWishListRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest"
                         }
                     }
                 ],
@@ -1947,7 +1947,7 @@
                     "200": {
                         "description": "Wish list updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WishListResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                         }
                     },
                     "400": {
@@ -2094,7 +2094,7 @@
                     "200": {
                         "description": "List of items in wishlist",
                         "schema": {
-                            "$ref": "#/definitions/handlers.PaginatedItemsResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse"
                         }
                     },
                     "401": {
@@ -2166,7 +2166,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.AttachItemRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest"
                         }
                     }
                 ],
@@ -2263,7 +2263,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateItemRequest"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest"
                         }
                     }
                 ],
@@ -2271,7 +2271,7 @@
                     "201": {
                         "description": "Item created and attached successfully",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ItemResponse"
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"
                         }
                     },
                     "400": {
@@ -2398,789 +2398,6 @@
         }
     },
     "definitions": {
-        "handlers.AttachItemRequest": {
-            "type": "object",
-            "required": [
-                "itemId"
-            ],
-            "properties": {
-                "itemId": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
-                }
-            }
-        },
-        "handlers.AuthResponse": {
-            "type": "object",
-            "required": [
-                "accessToken",
-                "refreshToken",
-                "user"
-            ],
-            "properties": {
-                "accessToken": {
-                    "description": "Access token (short-lived, 15 minutes)",
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "description": "Refresh token (long-lived, 7 days) - also set as httpOnly cookie",
-                    "type": "string"
-                },
-                "user": {
-                    "description": "User information",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/handlers.UserResponse"
-                        }
-                    ]
-                }
-            }
-        },
-        "handlers.CancelReservationRequest": {
-            "type": "object",
-            "properties": {
-                "reservation_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.ChangeEmailRequest": {
-            "type": "object",
-            "required": [
-                "current_password",
-                "new_email"
-            ],
-            "properties": {
-                "current_password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "new_email": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.ChangePasswordRequest": {
-            "type": "object",
-            "required": [
-                "current_password",
-                "new_password"
-            ],
-            "properties": {
-                "current_password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "new_password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "handlers.CreateItemRequest": {
-            "type": "object",
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 2000,
-                    "example": "256GB, Blue Titanium"
-                },
-                "imageUrl": {
-                    "type": "string",
-                    "example": "https://example.com/image.jpg"
-                },
-                "link": {
-                    "type": "string",
-                    "example": "https://apple.com/iphone-15-pro"
-                },
-                "notes": {
-                    "type": "string",
-                    "maxLength": 1000,
-                    "example": "Preferred color: Blue"
-                },
-                "price": {
-                    "type": "number",
-                    "minimum": 0,
-                    "example": 999.99
-                },
-                "priority": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 0,
-                    "example": 3
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "example": "iPhone 15 Pro"
-                }
-            }
-        },
-        "handlers.CreateReservationRequest": {
-            "type": "object",
-            "properties": {
-                "guest_email": {
-                    "type": "string"
-                },
-                "guest_name": {
-                    "type": "string",
-                    "maxLength": 200
-                }
-            }
-        },
-        "handlers.CreateReservationResponse": {
-            "type": "object",
-            "required": [
-                "gift_item_id",
-                "id",
-                "notification_sent",
-                "reservation_token",
-                "reserved_at",
-                "status"
-            ],
-            "properties": {
-                "cancel_reason": {
-                    "type": "string"
-                },
-                "canceled_at": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "gift_item_id": {
-                    "type": "string"
-                },
-                "guest_email": {
-                    "type": "string"
-                },
-                "guest_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "notification_sent": {
-                    "type": "boolean"
-                },
-                "reservation_token": {
-                    "type": "string"
-                },
-                "reserved_at": {
-                    "type": "string"
-                },
-                "reserved_by_user_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.CreateWishListRequest": {
-            "type": "object",
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "is_public": {
-                    "type": "boolean"
-                },
-                "occasion": {
-                    "type": "string"
-                },
-                "occasion_date": {
-                    "type": "string"
-                },
-                "template_id": {
-                    "type": "string",
-                    "default": "default"
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 200
-                }
-            }
-        },
-        "handlers.ExchangeRequest": {
-            "type": "object",
-            "required": [
-                "code"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.ExchangeResponse": {
-            "type": "object",
-            "required": [
-                "accessToken",
-                "refreshToken",
-                "user"
-            ],
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/handlers.UserResponse"
-                }
-            }
-        },
-        "handlers.GetGiftItemsResponse": {
-            "type": "object",
-            "required": [
-                "items",
-                "limit",
-                "page",
-                "pages",
-                "total"
-            ],
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.GiftItemResponse"
-                    }
-                },
-                "limit": {
-                    "type": "integer"
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "pages": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.GiftItemResponse": {
-            "type": "object",
-            "required": [
-                "created_at",
-                "id",
-                "name",
-                "updated_at",
-                "wishlist_id"
-            ],
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image_url": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "notes": {
-                    "type": "string"
-                },
-                "position": {
-                    "type": "integer"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "priority": {
-                    "type": "integer"
-                },
-                "purchased_at": {
-                    "type": "string"
-                },
-                "purchased_by_user_id": {
-                    "type": "string"
-                },
-                "purchased_price": {
-                    "type": "number"
-                },
-                "reserved_at": {
-                    "type": "string"
-                },
-                "reserved_by_user_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "wishlist_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.GiftItemSummary": {
-            "type": "object",
-            "required": [
-                "id",
-                "name"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "image_url": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.HandoffResponse": {
-            "type": "object",
-            "required": [
-                "code",
-                "expiresIn"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "a1b2c3d4e5f6..."
-                },
-                "expiresIn": {
-                    "type": "integer",
-                    "example": 60
-                }
-            }
-        },
-        "handlers.ItemResponse": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "256GB, Blue Titanium"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
-                },
-                "imageUrl": {
-                    "type": "string",
-                    "example": "https://example.com/image.jpg"
-                },
-                "isArchived": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "isPurchased": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "link": {
-                    "type": "string",
-                    "example": "https://apple.com/iphone-15-pro"
-                },
-                "notes": {
-                    "type": "string",
-                    "example": "Preferred color: Blue"
-                },
-                "ownerId": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440001"
-                },
-                "price": {
-                    "type": "number",
-                    "example": 999.99
-                },
-                "priority": {
-                    "type": "integer",
-                    "example": 3
-                },
-                "title": {
-                    "type": "string",
-                    "example": "iPhone 15 Pro"
-                },
-                "updatedAt": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                }
-            }
-        },
-        "handlers.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "handlers.MarkPurchasedRequest": {
-            "type": "object",
-            "required": [
-                "purchasedPrice"
-            ],
-            "properties": {
-                "purchasedPrice": {
-                    "type": "number",
-                    "minimum": 0,
-                    "example": 899.99
-                }
-            }
-        },
-        "handlers.MessageResponse": {
-            "type": "object",
-            "required": [
-                "message"
-            ],
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.OAuthCodeRequest": {
-            "type": "object",
-            "required": [
-                "code"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.PaginatedItemsResponse": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.ItemResponse"
-                    }
-                },
-                "limit": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "page": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "totalCount": {
-                    "type": "integer",
-                    "example": 42
-                },
-                "totalPages": {
-                    "type": "integer",
-                    "example": 5
-                }
-            }
-        },
-        "handlers.RefreshResponse": {
-            "type": "object",
-            "required": [
-                "accessToken",
-                "refreshToken"
-            ],
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "handlers.ReservationDetailsResponse": {
-            "type": "object",
-            "required": [
-                "gift_item",
-                "id",
-                "reserved_at",
-                "status",
-                "wishlist"
-            ],
-            "properties": {
-                "expires_at": {
-                    "type": "string"
-                },
-                "gift_item": {
-                    "$ref": "#/definitions/handlers.GiftItemSummary"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "reserved_at": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "wishlist": {
-                    "$ref": "#/definitions/handlers.WishListSummary"
-                }
-            }
-        },
-        "handlers.ReservationStatusResponse": {
-            "type": "object",
-            "required": [
-                "is_reserved",
-                "status"
-            ],
-            "properties": {
-                "is_reserved": {
-                    "type": "boolean"
-                },
-                "reserved_at": {
-                    "type": "string"
-                },
-                "reserved_by_name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.UpdateItemRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 2000
-                },
-                "imageUrl": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string"
-                },
-                "notes": {
-                    "type": "string",
-                    "maxLength": 1000
-                },
-                "price": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "priority": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 0
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "minLength": 1
-                }
-            }
-        },
-        "handlers.UpdateProfileRequest": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.UpdateWishListRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "is_public": {
-                    "type": "boolean"
-                },
-                "occasion": {
-                    "type": "string"
-                },
-                "occasion_date": {
-                    "type": "string"
-                },
-                "template_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 200
-                }
-            }
-        },
-        "handlers.UserReservationsResponse": {
-            "type": "object",
-            "required": [
-                "data",
-                "pagination"
-            ],
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.ReservationDetailsResponse"
-                    }
-                },
-                "pagination": {}
-            }
-        },
-        "handlers.UserResponse": {
-            "type": "object",
-            "required": [
-                "email",
-                "id"
-            ],
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.WishListResponse": {
-            "type": "object",
-            "required": [
-                "created_at",
-                "id",
-                "owner_id",
-                "title",
-                "updated_at",
-                "view_count"
-            ],
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_public": {
-                    "type": "boolean"
-                },
-                "item_count": {
-                    "type": "integer",
-                    "example": 5
-                },
-                "occasion": {
-                    "type": "string"
-                },
-                "occasion_date": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "public_slug": {
-                    "type": "string"
-                },
-                "template_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "view_count": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.WishListSummary": {
-            "type": "object",
-            "required": [
-                "id",
-                "title"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "owner_first_name": {
-                    "type": "string"
-                },
-                "owner_last_name": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "internal_domain_health_delivery_http.HealthResponse": {
             "type": "object",
             "required": [

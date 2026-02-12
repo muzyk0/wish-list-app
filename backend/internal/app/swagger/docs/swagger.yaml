@@ -1,546 +1,5 @@
 basePath: /api
 definitions:
-  handlers.AttachItemRequest:
-    properties:
-      itemId:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
-    required:
-    - itemId
-    type: object
-  handlers.AuthResponse:
-    properties:
-      accessToken:
-        description: Access token (short-lived, 15 minutes)
-        type: string
-      refreshToken:
-        description: Refresh token (long-lived, 7 days) - also set as httpOnly cookie
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/handlers.UserResponse'
-        description: User information
-    required:
-    - accessToken
-    - refreshToken
-    - user
-    type: object
-  handlers.CancelReservationRequest:
-    properties:
-      reservation_token:
-        type: string
-    type: object
-  handlers.ChangeEmailRequest:
-    properties:
-      current_password:
-        minLength: 6
-        type: string
-      new_email:
-        type: string
-    required:
-    - current_password
-    - new_email
-    type: object
-  handlers.ChangePasswordRequest:
-    properties:
-      current_password:
-        minLength: 6
-        type: string
-      new_password:
-        minLength: 6
-        type: string
-    required:
-    - current_password
-    - new_password
-    type: object
-  handlers.CreateItemRequest:
-    properties:
-      description:
-        example: 256GB, Blue Titanium
-        maxLength: 2000
-        type: string
-      imageUrl:
-        example: https://example.com/image.jpg
-        type: string
-      link:
-        example: https://apple.com/iphone-15-pro
-        type: string
-      notes:
-        example: 'Preferred color: Blue'
-        maxLength: 1000
-        type: string
-      price:
-        example: 999.99
-        minimum: 0
-        type: number
-      priority:
-        example: 3
-        maximum: 5
-        minimum: 0
-        type: integer
-      title:
-        example: iPhone 15 Pro
-        maxLength: 255
-        minLength: 1
-        type: string
-    required:
-    - title
-    type: object
-  handlers.CreateReservationRequest:
-    properties:
-      guest_email:
-        type: string
-      guest_name:
-        maxLength: 200
-        type: string
-    type: object
-  handlers.CreateReservationResponse:
-    properties:
-      cancel_reason:
-        type: string
-      canceled_at:
-        type: string
-      expires_at:
-        type: string
-      gift_item_id:
-        type: string
-      guest_email:
-        type: string
-      guest_name:
-        type: string
-      id:
-        type: string
-      notification_sent:
-        type: boolean
-      reservation_token:
-        type: string
-      reserved_at:
-        type: string
-      reserved_by_user_id:
-        type: string
-      status:
-        type: string
-    required:
-    - gift_item_id
-    - id
-    - notification_sent
-    - reservation_token
-    - reserved_at
-    - status
-    type: object
-  handlers.CreateWishListRequest:
-    properties:
-      description:
-        type: string
-      is_public:
-        type: boolean
-      occasion:
-        type: string
-      occasion_date:
-        type: string
-      template_id:
-        default: default
-        type: string
-      title:
-        maxLength: 200
-        type: string
-    required:
-    - title
-    type: object
-  handlers.ExchangeRequest:
-    properties:
-      code:
-        type: string
-    required:
-    - code
-    type: object
-  handlers.ExchangeResponse:
-    properties:
-      accessToken:
-        type: string
-      refreshToken:
-        type: string
-      user:
-        $ref: '#/definitions/handlers.UserResponse'
-    required:
-    - accessToken
-    - refreshToken
-    - user
-    type: object
-  handlers.GetGiftItemsResponse:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/handlers.GiftItemResponse'
-        type: array
-      limit:
-        type: integer
-      page:
-        type: integer
-      pages:
-        type: integer
-      total:
-        type: integer
-    required:
-    - items
-    - limit
-    - page
-    - pages
-    - total
-    type: object
-  handlers.GiftItemResponse:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      image_url:
-        type: string
-      link:
-        type: string
-      name:
-        type: string
-      notes:
-        type: string
-      position:
-        type: integer
-      price:
-        type: number
-      priority:
-        type: integer
-      purchased_at:
-        type: string
-      purchased_by_user_id:
-        type: string
-      purchased_price:
-        type: number
-      reserved_at:
-        type: string
-      reserved_by_user_id:
-        type: string
-      updated_at:
-        type: string
-      wishlist_id:
-        type: string
-    required:
-    - created_at
-    - id
-    - name
-    - updated_at
-    - wishlist_id
-    type: object
-  handlers.GiftItemSummary:
-    properties:
-      id:
-        type: string
-      image_url:
-        type: string
-      name:
-        type: string
-      price:
-        type: string
-    required:
-    - id
-    - name
-    type: object
-  handlers.HandoffResponse:
-    properties:
-      code:
-        example: a1b2c3d4e5f6...
-        type: string
-      expiresIn:
-        example: 60
-        type: integer
-    required:
-    - code
-    - expiresIn
-    type: object
-  handlers.ItemResponse:
-    properties:
-      createdAt:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-      description:
-        example: 256GB, Blue Titanium
-        type: string
-      id:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
-      imageUrl:
-        example: https://example.com/image.jpg
-        type: string
-      isArchived:
-        example: false
-        type: boolean
-      isPurchased:
-        example: false
-        type: boolean
-      link:
-        example: https://apple.com/iphone-15-pro
-        type: string
-      notes:
-        example: 'Preferred color: Blue'
-        type: string
-      ownerId:
-        example: 550e8400-e29b-41d4-a716-446655440001
-        type: string
-      price:
-        example: 999.99
-        type: number
-      priority:
-        example: 3
-        type: integer
-      title:
-        example: iPhone 15 Pro
-        type: string
-      updatedAt:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-    type: object
-  handlers.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  handlers.MarkPurchasedRequest:
-    properties:
-      purchasedPrice:
-        example: 899.99
-        minimum: 0
-        type: number
-    required:
-    - purchasedPrice
-    type: object
-  handlers.MessageResponse:
-    properties:
-      message:
-        type: string
-    required:
-    - message
-    type: object
-  handlers.OAuthCodeRequest:
-    properties:
-      code:
-        type: string
-    required:
-    - code
-    type: object
-  handlers.PaginatedItemsResponse:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/handlers.ItemResponse'
-        type: array
-      limit:
-        example: 10
-        type: integer
-      page:
-        example: 1
-        type: integer
-      totalCount:
-        example: 42
-        type: integer
-      totalPages:
-        example: 5
-        type: integer
-    type: object
-  handlers.RefreshResponse:
-    properties:
-      accessToken:
-        type: string
-      refreshToken:
-        type: string
-    required:
-    - accessToken
-    - refreshToken
-    type: object
-  handlers.RegisterRequest:
-    properties:
-      avatar_url:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      last_name:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  handlers.ReservationDetailsResponse:
-    properties:
-      expires_at:
-        type: string
-      gift_item:
-        $ref: '#/definitions/handlers.GiftItemSummary'
-      id:
-        type: string
-      reserved_at:
-        type: string
-      status:
-        type: string
-      wishlist:
-        $ref: '#/definitions/handlers.WishListSummary'
-    required:
-    - gift_item
-    - id
-    - reserved_at
-    - status
-    - wishlist
-    type: object
-  handlers.ReservationStatusResponse:
-    properties:
-      is_reserved:
-        type: boolean
-      reserved_at:
-        type: string
-      reserved_by_name:
-        type: string
-      status:
-        type: string
-    required:
-    - is_reserved
-    - status
-    type: object
-  handlers.UpdateItemRequest:
-    properties:
-      description:
-        maxLength: 2000
-        type: string
-      imageUrl:
-        type: string
-      link:
-        type: string
-      notes:
-        maxLength: 1000
-        type: string
-      price:
-        minimum: 0
-        type: number
-      priority:
-        maximum: 5
-        minimum: 0
-        type: integer
-      title:
-        maxLength: 255
-        minLength: 1
-        type: string
-    type: object
-  handlers.UpdateProfileRequest:
-    properties:
-      avatar_url:
-        type: string
-      first_name:
-        type: string
-      last_name:
-        type: string
-    type: object
-  handlers.UpdateWishListRequest:
-    properties:
-      description:
-        type: string
-      is_public:
-        type: boolean
-      occasion:
-        type: string
-      occasion_date:
-        type: string
-      template_id:
-        type: string
-      title:
-        maxLength: 200
-        type: string
-    type: object
-  handlers.UserReservationsResponse:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/handlers.ReservationDetailsResponse'
-        type: array
-      pagination: {}
-    required:
-    - data
-    - pagination
-    type: object
-  handlers.UserResponse:
-    properties:
-      avatar_url:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: string
-      last_name:
-        type: string
-    required:
-    - email
-    - id
-    type: object
-  handlers.WishListResponse:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      is_public:
-        type: boolean
-      item_count:
-        example: 5
-        type: integer
-      occasion:
-        type: string
-      occasion_date:
-        type: string
-      owner_id:
-        type: string
-      public_slug:
-        type: string
-      template_id:
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-      view_count:
-        type: string
-    required:
-    - created_at
-    - id
-    - owner_id
-    - title
-    - updated_at
-    - view_count
-    type: object
-  handlers.WishListSummary:
-    properties:
-      id:
-        type: string
-      owner_first_name:
-        type: string
-      owner_last_name:
-        type: string
-      title:
-        type: string
-    required:
-    - id
-    - title
-    type: object
   internal_domain_health_delivery_http.HealthResponse:
     properties:
       checks:
@@ -1248,14 +707,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.ChangeEmailRequest'
+          $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Email changed successfully
           schema:
-            $ref: '#/definitions/handlers.MessageResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1298,14 +757,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.ChangePasswordRequest'
+          $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ChangePasswordRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Password changed successfully
           schema:
-            $ref: '#/definitions/handlers.MessageResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1341,14 +800,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.ExchangeRequest'
+          $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Code exchanged successfully
           schema:
-            $ref: '#/definitions/handlers.ExchangeResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse'
         "400":
           description: Invalid request body
           schema:
@@ -1387,14 +846,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/handlers.LoginRequest'
+          $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Login successful
           schema:
-            $ref: '#/definitions/handlers.AuthResponse'
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.AuthResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1427,7 +886,7 @@ paths:
         "200":
           description: Logout successful
           schema:
-            $ref: '#/definitions/handlers.MessageResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse'
       security:
       - BearerAuth: []
       summary: Logout user
@@ -1445,7 +904,7 @@ paths:
         "200":
           description: Handoff code generated
           schema:
-            $ref: '#/definitions/handlers.HandoffResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse'
         "401":
           description: Not authenticated
           schema:
@@ -1480,14 +939,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.OAuthCodeRequest'
+          $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Authentication successful
           schema:
-            $ref: '#/definitions/handlers.AuthResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse'
         "400":
           description: Invalid request
           schema:
@@ -1514,14 +973,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.OAuthCodeRequest'
+          $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Authentication successful
           schema:
-            $ref: '#/definitions/handlers.AuthResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse'
         "400":
           description: Invalid request
           schema:
@@ -1550,7 +1009,7 @@ paths:
         "200":
           description: Token refreshed successfully
           schema:
-            $ref: '#/definitions/handlers.RefreshResponse'
+            $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse'
         "401":
           description: Invalid or expired refresh token
           schema:
@@ -1571,14 +1030,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handlers.RegisterRequest'
+          $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: User created successfully
           schema:
-            $ref: '#/definitions/handlers.AuthResponse'
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.AuthResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -1616,7 +1075,7 @@ paths:
           description: List of guest reservations retrieved successfully
           schema:
             items:
-              $ref: '#/definitions/handlers.ReservationDetailsResponse'
+              $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse'
             type: array
         "400":
           description: Invalid request parameters
@@ -1733,7 +1192,7 @@ paths:
         "200":
           description: List of items retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.PaginatedItemsResponse'
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse'
         "400":
           description: Invalid query parameters
           schema:
@@ -1767,14 +1226,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateItemRequest'
+          $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Item created successfully
           schema:
-            $ref: '#/definitions/handlers.ItemResponse'
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse'
         "400":
           description: Invalid request body
           schema:
@@ -1856,7 +1315,7 @@ paths:
         "200":
           description: Item retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.ItemResponse'
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse'
         "401":
           description: Not authenticated
           schema:
@@ -1895,14 +1354,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/handlers.UpdateItemRequest'
+          $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Item updated successfully
           schema:
-            $ref: '#/definitions/handlers.ItemResponse'
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse'
         "400":
           description: Invalid request body
           schema:
@@ -1955,14 +1414,14 @@ paths:
         name: purchase
         required: true
         schema:
-          $ref: '#/definitions/handlers.MarkPurchasedRequest'
+          $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Item marked as purchased
           schema:
-            $ref: '#/definitions/handlers.ItemResponse'
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ItemResponse'
         "400":
           description: Invalid request body
           schema:
@@ -2066,7 +1525,7 @@ paths:
         "200":
           description: User profile
           schema:
-            $ref: '#/definitions/handlers.UserResponse'
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.UserResponse'
         "401":
           description: Unauthorized
           schema:
@@ -2100,14 +1559,14 @@ paths:
         name: profile
         required: true
         schema:
-          $ref: '#/definitions/handlers.UpdateProfileRequest'
+          $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Updated user profile
           schema:
-            $ref: '#/definitions/handlers.UserResponse'
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.UserResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -2158,7 +1617,7 @@ paths:
         "200":
           description: Reservation status retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.ReservationStatusResponse'
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'
         "500":
           description: Internal server error
           schema:
@@ -2184,7 +1643,7 @@ paths:
         "200":
           description: Public wish list retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.WishListResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'
         "404":
           description: Wish list not found
           schema:
@@ -2218,7 +1677,7 @@ paths:
         "200":
           description: Gift items retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.GetGiftItemsResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse'
         "404":
           description: Wish list not found or not public
           schema:
@@ -2252,7 +1711,7 @@ paths:
         "200":
           description: List of user reservations retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.UserReservationsResponse'
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -2291,14 +1750,14 @@ paths:
         in: body
         name: cancel_request
         schema:
-          $ref: '#/definitions/handlers.CancelReservationRequest'
+          $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Reservation canceled successfully
           schema:
-            $ref: '#/definitions/handlers.CreateReservationResponse'
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -2342,14 +1801,14 @@ paths:
         in: body
         name: reservation_request
         schema:
-          $ref: '#/definitions/handlers.CreateReservationRequest'
+          $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Reservation created successfully
           schema:
-            $ref: '#/definitions/handlers.CreateReservationResponse'
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -2384,7 +1843,7 @@ paths:
           description: List of wish lists retrieved successfully (includes item_count)
           schema:
             items:
-              $ref: '#/definitions/handlers.WishListResponse'
+              $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'
             type: array
         "401":
           description: Unauthorized
@@ -2413,14 +1872,14 @@ paths:
         name: wish_list
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateWishListRequest'
+          $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Wish list created successfully
           schema:
-            $ref: '#/definitions/handlers.WishListResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -2497,7 +1956,7 @@ paths:
         "200":
           description: Wish list retrieved successfully
           schema:
-            $ref: '#/definitions/handlers.WishListResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'
         "403":
           description: Access denied
           schema:
@@ -2531,14 +1990,14 @@ paths:
         name: wish_list
         required: true
         schema:
-          $ref: '#/definitions/handlers.UpdateWishListRequest'
+          $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Wish list updated successfully
           schema:
-            $ref: '#/definitions/handlers.WishListResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'
         "400":
           description: Invalid request body or validation error
           schema:
@@ -2598,7 +2057,7 @@ paths:
         "200":
           description: List of items in wishlist
           schema:
-            $ref: '#/definitions/handlers.PaginatedItemsResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'
         "401":
           description: Not authenticated
           schema:
@@ -2644,7 +2103,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.AttachItemRequest'
+          $ref: '#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest'
       produces:
       - application/json
       responses:
@@ -2757,14 +2216,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateItemRequest'
+          $ref: '#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Item created and attached successfully
           schema:
-            $ref: '#/definitions/handlers.ItemResponse'
+            $ref: '#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse'
         "400":
           description: Invalid request body
           schema:

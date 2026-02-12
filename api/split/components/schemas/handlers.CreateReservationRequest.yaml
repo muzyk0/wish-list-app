@@ -1,7 +1,0 @@
-properties:
-  guest_email:
-    type: string
-  guest_name:
-    maxLength: 200
-    type: string
-type: object

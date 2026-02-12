@@ -27,7 +27,7 @@ export interface paths {
             /** @description Email change request */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.ChangeEmailRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest"];
                 };
             };
             responses: {
@@ -37,7 +37,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.MessageResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -115,7 +115,7 @@ export interface paths {
             /** @description Password change request */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.ChangePasswordRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.ChangePasswordRequest"];
                 };
             };
             responses: {
@@ -125,7 +125,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.MessageResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -192,7 +192,7 @@ export interface paths {
             /** @description Exchange request */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.ExchangeRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest"];
                 };
             };
             responses: {
@@ -202,7 +202,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ExchangeResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse"];
                     };
                 };
                 /** @description Invalid request body */
@@ -280,7 +280,7 @@ export interface paths {
             /** @description User login credentials */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.LoginRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.LoginRequest"];
                 };
             };
             responses: {
@@ -290,7 +290,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.AuthResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.AuthResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -362,7 +362,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.MessageResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"];
                     };
                 };
             };
@@ -401,7 +401,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.HandoffResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -468,7 +468,7 @@ export interface paths {
             /** @description Authorization code from Facebook */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.OAuthCodeRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"];
                 };
             };
             responses: {
@@ -478,7 +478,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.AuthResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"];
                     };
                 };
                 /** @description Invalid request */
@@ -534,7 +534,7 @@ export interface paths {
             /** @description Authorization code from Google */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.OAuthCodeRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"];
                 };
             };
             responses: {
@@ -544,7 +544,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.AuthResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"];
                     };
                 };
                 /** @description Invalid request */
@@ -605,7 +605,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.RefreshResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse"];
                     };
                 };
                 /** @description Invalid or expired refresh token */
@@ -650,7 +650,7 @@ export interface paths {
             /** @description User registration information */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.RegisterRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.RegisterRequest"];
                 };
             };
             responses: {
@@ -660,7 +660,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.AuthResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.AuthResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -733,7 +733,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ReservationDetailsResponse"][];
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"][];
                     };
                 };
                 /** @description Invalid request parameters */
@@ -941,7 +941,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.PaginatedItemsResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse"];
                     };
                 };
                 /** @description Invalid query parameters */
@@ -991,7 +991,12 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody: components["requestBodies"]["handlers.CreateItemRequest"];
+            /** @description Item data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest"];
+                };
+            };
             responses: {
                 /** @description Item created successfully */
                 201: {
@@ -999,7 +1004,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ItemResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ItemResponse"];
                     };
                 };
                 /** @description Invalid request body */
@@ -1072,7 +1077,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ItemResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ItemResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -1127,7 +1132,7 @@ export interface paths {
             /** @description Updated item data */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.UpdateItemRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest"];
                 };
             };
             responses: {
@@ -1137,7 +1142,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ItemResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ItemResponse"];
                     };
                 };
                 /** @description Invalid request body */
@@ -1298,7 +1303,7 @@ export interface paths {
             /** @description Purchase details */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.MarkPurchasedRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest"];
                 };
             };
             responses: {
@@ -1308,7 +1313,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ItemResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ItemResponse"];
                     };
                 };
                 /** @description Invalid request body */
@@ -1520,7 +1525,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.UserResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.UserResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1572,7 +1577,7 @@ export interface paths {
             /** @description Updated profile information */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.UpdateProfileRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest"];
                 };
             };
             responses: {
@@ -1582,7 +1587,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.UserResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.UserResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -1669,7 +1674,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ReservationStatusResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1722,7 +1727,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.WishListResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"];
                     };
                 };
                 /** @description Wish list not found */
@@ -1780,7 +1785,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.GetGiftItemsResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse"];
                     };
                 };
                 /** @description Wish list not found or not public */
@@ -1846,7 +1851,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.UserReservationsResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1909,7 +1914,7 @@ export interface paths {
             /** @description Reservation information (required for guests) */
             requestBody?: {
                 content: {
-                    "application/json": components["schemas"]["handlers.CreateReservationRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"];
                 };
             };
             responses: {
@@ -1919,7 +1924,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.CreateReservationResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -1976,7 +1981,7 @@ export interface paths {
             /** @description Cancellation information (required for guests) */
             requestBody?: {
                 content: {
-                    "application/json": components["schemas"]["handlers.CancelReservationRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"];
                 };
             };
             responses: {
@@ -1986,7 +1991,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.CreateReservationResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -2055,7 +2060,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.WishListResponse"][];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"][];
                     };
                 };
                 /** @description Unauthorized */
@@ -2097,7 +2102,7 @@ export interface paths {
             /** @description Wish list creation information */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.CreateWishListRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest"];
                 };
             };
             responses: {
@@ -2107,7 +2112,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.WishListResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -2180,7 +2185,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.WishListResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -2224,7 +2229,7 @@ export interface paths {
             /** @description Wish list update information */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.UpdateWishListRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest"];
                 };
             };
             responses: {
@@ -2234,7 +2239,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.WishListResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"];
                     };
                 };
                 /** @description Invalid request body or validation error */
@@ -2392,7 +2397,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.PaginatedItemsResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -2459,7 +2464,7 @@ export interface paths {
             /** @description Item to attach */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["handlers.AttachItemRequest"];
+                    "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest"];
                 };
             };
             responses: {
@@ -2653,7 +2658,12 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody: components["requestBodies"]["handlers.CreateItemRequest"];
+            /** @description Item data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest"];
+                };
+            };
             responses: {
                 /** @description Item created and attached successfully */
                 201: {
@@ -2661,7 +2671,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["handlers.ItemResponse"];
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"];
                     };
                 };
                 /** @description Invalid request body */
@@ -2731,251 +2741,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        "handlers.AttachItemRequest": {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            itemId: string;
-        };
-        "handlers.AuthResponse": {
-            /** @description Access token (short-lived, 15 minutes) */
-            accessToken: string;
-            /** @description Refresh token (long-lived, 7 days) - also set as httpOnly cookie */
-            refreshToken: string;
-            /** @description User information */
-            user: components["schemas"]["handlers.UserResponse"];
-        };
-        "handlers.CancelReservationRequest": {
-            reservation_token?: string;
-        };
-        "handlers.ChangeEmailRequest": {
-            current_password: string;
-            new_email: string;
-        };
-        "handlers.ChangePasswordRequest": {
-            current_password: string;
-            new_password: string;
-        };
-        "handlers.CreateItemRequest": {
-            /** @example 256GB, Blue Titanium */
-            description?: string;
-            /** @example https://example.com/image.jpg */
-            imageUrl?: string;
-            /** @example https://apple.com/iphone-15-pro */
-            link?: string;
-            /** @example Preferred color: Blue */
-            notes?: string;
-            /** @example 999.99 */
-            price?: number;
-            /** @example 3 */
-            priority?: number;
-            /** @example iPhone 15 Pro */
-            title: string;
-        };
-        "handlers.CreateReservationRequest": {
-            guest_email?: string;
-            guest_name?: string;
-        };
-        "handlers.CreateReservationResponse": {
-            cancel_reason?: string;
-            canceled_at?: string;
-            expires_at?: string;
-            gift_item_id: string;
-            guest_email?: string;
-            guest_name?: string;
-            id: string;
-            notification_sent: boolean;
-            reservation_token: string;
-            reserved_at: string;
-            reserved_by_user_id?: string;
-            status: string;
-        };
-        "handlers.CreateWishListRequest": {
-            description?: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            /** @default default */
-            template_id: string;
-            title: string;
-        };
-        "handlers.ExchangeRequest": {
-            code: string;
-        };
-        "handlers.ExchangeResponse": {
-            accessToken: string;
-            refreshToken: string;
-            user: components["schemas"]["handlers.UserResponse"];
-        };
-        "handlers.GetGiftItemsResponse": {
-            items: components["schemas"]["handlers.GiftItemResponse"][];
-            limit: number;
-            page: number;
-            pages: number;
-            total: number;
-        };
-        "handlers.GiftItemResponse": {
-            created_at: string;
-            description?: string;
-            id: string;
-            image_url?: string;
-            link?: string;
-            name: string;
-            notes?: string;
-            position?: number;
-            price?: number;
-            priority?: number;
-            purchased_at?: string;
-            purchased_by_user_id?: string;
-            purchased_price?: number;
-            reserved_at?: string;
-            reserved_by_user_id?: string;
-            updated_at: string;
-            wishlist_id: string;
-        };
-        "handlers.GiftItemSummary": {
-            id: string;
-            image_url?: string;
-            name: string;
-            price?: string;
-        };
-        "handlers.HandoffResponse": {
-            /** @example a1b2c3d4e5f6... */
-            code: string;
-            /** @example 60 */
-            expiresIn: number;
-        };
-        "handlers.ItemResponse": {
-            /** @example 2024-01-01T12:00:00Z */
-            createdAt?: string;
-            /** @example 256GB, Blue Titanium */
-            description?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id?: string;
-            /** @example https://example.com/image.jpg */
-            imageUrl?: string;
-            /** @example false */
-            isArchived?: boolean;
-            /** @example false */
-            isPurchased?: boolean;
-            /** @example https://apple.com/iphone-15-pro */
-            link?: string;
-            /** @example Preferred color: Blue */
-            notes?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440001 */
-            ownerId?: string;
-            /** @example 999.99 */
-            price?: number;
-            /** @example 3 */
-            priority?: number;
-            /** @example iPhone 15 Pro */
-            title?: string;
-            /** @example 2024-01-01T12:00:00Z */
-            updatedAt?: string;
-        };
-        "handlers.LoginRequest": {
-            email: string;
-            password: string;
-        };
-        "handlers.MarkPurchasedRequest": {
-            /** @example 899.99 */
-            purchasedPrice: number;
-        };
-        "handlers.MessageResponse": {
-            message: string;
-        };
-        "handlers.OAuthCodeRequest": {
-            code: string;
-        };
-        "handlers.PaginatedItemsResponse": {
-            items?: components["schemas"]["handlers.ItemResponse"][];
-            /** @example 10 */
-            limit?: number;
-            /** @example 1 */
-            page?: number;
-            /** @example 42 */
-            totalCount?: number;
-            /** @example 5 */
-            totalPages?: number;
-        };
-        "handlers.RefreshResponse": {
-            accessToken: string;
-            refreshToken: string;
-        };
-        "handlers.RegisterRequest": {
-            avatar_url?: string;
-            email: string;
-            first_name?: string;
-            last_name?: string;
-            password: string;
-        };
-        "handlers.ReservationDetailsResponse": {
-            expires_at?: string;
-            gift_item: components["schemas"]["handlers.GiftItemSummary"];
-            id: string;
-            reserved_at: string;
-            status: string;
-            wishlist: components["schemas"]["handlers.WishListSummary"];
-        };
-        "handlers.ReservationStatusResponse": {
-            is_reserved: boolean;
-            reserved_at?: string;
-            reserved_by_name?: string;
-            status: string;
-        };
-        "handlers.UpdateItemRequest": {
-            description?: string;
-            imageUrl?: string;
-            link?: string;
-            notes?: string;
-            price?: number;
-            priority?: number;
-            title?: string;
-        };
-        "handlers.UpdateProfileRequest": {
-            avatar_url?: string;
-            first_name?: string;
-            last_name?: string;
-        };
-        "handlers.UpdateWishListRequest": {
-            description?: string;
-            is_public?: boolean;
-            occasion?: string;
-            occasion_date?: string;
-            template_id?: string;
-            title?: string;
-        };
-        "handlers.UserReservationsResponse": {
-            data: components["schemas"]["handlers.ReservationDetailsResponse"][];
-            pagination: unknown;
-        };
-        "handlers.UserResponse": {
-            avatar_url?: string;
-            email: string;
-            first_name?: string;
-            id: string;
-            last_name?: string;
-        };
-        "handlers.WishListResponse": {
-            created_at: string;
-            description?: string;
-            id: string;
-            is_public?: boolean;
-            /** @example 5 */
-            item_count?: number;
-            occasion?: string;
-            occasion_date?: string;
-            owner_id: string;
-            public_slug?: string;
-            template_id?: string;
-            title: string;
-            updated_at: string;
-            view_count: string;
-        };
-        "handlers.WishListSummary": {
-            id: string;
-            owner_first_name?: string;
-            owner_last_name?: string;
-            title: string;
-        };
         "internal_domain_health_delivery_http.HealthResponse": {
             checks?: {
                 [key: string]: string;
@@ -3301,49 +3066,10 @@ export interface components {
     };
     responses: never;
     parameters: never;
-    requestBodies: {
-        /** @description Item data */
-        "handlers.CreateItemRequest": {
-            content: {
-                "application/json": components["schemas"]["handlers.CreateItemRequest"];
-            };
-        };
-    };
+    requestBodies: never;
     headers: never;
     pathItems: never;
 }
-export type SchemaHandlersAttachItemRequest = components['schemas']['handlers.AttachItemRequest'];
-export type SchemaHandlersAuthResponse = components['schemas']['handlers.AuthResponse'];
-export type SchemaHandlersCancelReservationRequest = components['schemas']['handlers.CancelReservationRequest'];
-export type SchemaHandlersChangeEmailRequest = components['schemas']['handlers.ChangeEmailRequest'];
-export type SchemaHandlersChangePasswordRequest = components['schemas']['handlers.ChangePasswordRequest'];
-export type SchemaHandlersCreateItemRequest = components['schemas']['handlers.CreateItemRequest'];
-export type SchemaHandlersCreateReservationRequest = components['schemas']['handlers.CreateReservationRequest'];
-export type SchemaHandlersCreateReservationResponse = components['schemas']['handlers.CreateReservationResponse'];
-export type SchemaHandlersCreateWishListRequest = components['schemas']['handlers.CreateWishListRequest'];
-export type SchemaHandlersExchangeRequest = components['schemas']['handlers.ExchangeRequest'];
-export type SchemaHandlersExchangeResponse = components['schemas']['handlers.ExchangeResponse'];
-export type SchemaHandlersGetGiftItemsResponse = components['schemas']['handlers.GetGiftItemsResponse'];
-export type SchemaHandlersGiftItemResponse = components['schemas']['handlers.GiftItemResponse'];
-export type SchemaHandlersGiftItemSummary = components['schemas']['handlers.GiftItemSummary'];
-export type SchemaHandlersHandoffResponse = components['schemas']['handlers.HandoffResponse'];
-export type SchemaHandlersItemResponse = components['schemas']['handlers.ItemResponse'];
-export type SchemaHandlersLoginRequest = components['schemas']['handlers.LoginRequest'];
-export type SchemaHandlersMarkPurchasedRequest = components['schemas']['handlers.MarkPurchasedRequest'];
-export type SchemaHandlersMessageResponse = components['schemas']['handlers.MessageResponse'];
-export type SchemaHandlersOAuthCodeRequest = components['schemas']['handlers.OAuthCodeRequest'];
-export type SchemaHandlersPaginatedItemsResponse = components['schemas']['handlers.PaginatedItemsResponse'];
-export type SchemaHandlersRefreshResponse = components['schemas']['handlers.RefreshResponse'];
-export type SchemaHandlersRegisterRequest = components['schemas']['handlers.RegisterRequest'];
-export type SchemaHandlersReservationDetailsResponse = components['schemas']['handlers.ReservationDetailsResponse'];
-export type SchemaHandlersReservationStatusResponse = components['schemas']['handlers.ReservationStatusResponse'];
-export type SchemaHandlersUpdateItemRequest = components['schemas']['handlers.UpdateItemRequest'];
-export type SchemaHandlersUpdateProfileRequest = components['schemas']['handlers.UpdateProfileRequest'];
-export type SchemaHandlersUpdateWishListRequest = components['schemas']['handlers.UpdateWishListRequest'];
-export type SchemaHandlersUserReservationsResponse = components['schemas']['handlers.UserReservationsResponse'];
-export type SchemaHandlersUserResponse = components['schemas']['handlers.UserResponse'];
-export type SchemaHandlersWishListResponse = components['schemas']['handlers.WishListResponse'];
-export type SchemaHandlersWishListSummary = components['schemas']['handlers.WishListSummary'];
 export type SchemaInternalDomainHealthDeliveryHttpHealthResponse = components['schemas']['internal_domain_health_delivery_http.HealthResponse'];
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoAuthResponse = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.AuthResponse'];
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoChangeEmailRequest = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest'];
@@ -3382,6 +3108,5 @@ export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoAttachItemReq
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoCreateItemRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'];
-export type RequestBodyHandlersCreateItemRequest = components['requestBodies']['handlers.CreateItemRequest'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

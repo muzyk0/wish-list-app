@@ -8,7 +8,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.HandoffResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse.yaml
     '401':
       description: Not authenticated
       content:

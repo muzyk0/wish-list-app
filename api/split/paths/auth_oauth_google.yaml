@@ -4,7 +4,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.OAuthCodeRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest.yaml
     description: Authorization code from Google
     required: true
   responses:
@@ -13,7 +14,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.AuthResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse.yaml
     '400':
       description: Invalid request
       content:

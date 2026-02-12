@@ -19,7 +19,8 @@ delete:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.CancelReservationRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest.yaml
     description: Cancellation information (required for guests)
   responses:
     '200':
@@ -27,7 +28,8 @@ delete:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.CreateReservationResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:
@@ -78,7 +80,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.CreateReservationRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest.yaml
     description: Reservation information (required for guests)
   responses:
     '200':
@@ -86,7 +89,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.CreateReservationResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

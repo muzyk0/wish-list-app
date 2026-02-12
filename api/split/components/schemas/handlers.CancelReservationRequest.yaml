@@ -1,4 +1,0 @@
-properties:
-  reservation_token:
-    type: string
-type: object

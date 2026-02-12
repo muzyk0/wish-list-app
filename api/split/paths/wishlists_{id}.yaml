@@ -56,7 +56,8 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.WishListResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse.yaml
     '403':
       description: Access denied
       content:
@@ -91,7 +92,8 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.UpdateWishListRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest.yaml
     description: Wish list update information
     required: true
   responses:
@@ -100,7 +102,8 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.WishListResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

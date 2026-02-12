@@ -6,7 +6,8 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.UserResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.UserResponse.yaml
     '401':
       description: Unauthorized
       content:
@@ -42,7 +43,8 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/handlers.UpdateProfileRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest.yaml
     description: Updated profile information
     required: true
   responses:
@@ -51,7 +53,8 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/handlers.UserResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.UserResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:
