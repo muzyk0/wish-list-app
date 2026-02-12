@@ -1,56 +1,28 @@
 package db
 
+// Type aliases pointing to canonical domain model types.
+// This ensures backward compatibility during migration (Phase 5).
+// All aliases are removed in Phase 6 when this file is deleted.
+
 import (
+	itemmodels "wish-list/internal/domain/item/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
+	usermodels "wish-list/internal/domain/user/models"
+	wishlistmodels "wish-list/internal/domain/wishlist/models"
+	wishlistitemmodels "wish-list/internal/domain/wishlist_item/models"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type GiftItem struct {
-	ID                pgtype.UUID        `db:"id" json:"id"`
-	OwnerID           pgtype.UUID        `db:"owner_id" json:"owner_id"` // Items belong to users, not wishlists
-	Name              string             `db:"name" json:"name"`
-	Description       pgtype.Text        `db:"description" json:"description"`
-	Link              pgtype.Text        `db:"link" json:"link"`
-	ImageUrl          pgtype.Text        `db:"image_url" json:"image_url"`
-	Price             pgtype.Numeric     `db:"price" json:"price"`
-	Priority          pgtype.Int4        `db:"priority" json:"priority"`
-	ReservedByUserID  pgtype.UUID        `db:"reserved_by_user_id" json:"reserved_by_user_id"`
-	ReservedAt        pgtype.Timestamptz `db:"reserved_at" json:"reserved_at"`
-	PurchasedByUserID pgtype.UUID        `db:"purchased_by_user_id" json:"purchased_by_user_id"`
-	PurchasedAt       pgtype.Timestamptz `db:"purchased_at" json:"purchased_at"`
-	PurchasedPrice    pgtype.Numeric     `db:"purchased_price" json:"purchased_price"`
-	Notes             pgtype.Text        `db:"notes" json:"notes"`
-	Position          pgtype.Int4        `db:"position" json:"position"`
-	ArchivedAt        pgtype.Timestamptz `db:"archived_at" json:"archived_at"` // Soft delete
-	CreatedAt         pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
+type GiftItem = itemmodels.GiftItem
+type WishList = wishlistmodels.WishList
+type WishListWithItemCount = wishlistmodels.WishListWithItemCount
+type User = usermodels.User
+type Reservation = reservationmodels.Reservation
+type WishlistItem = wishlistitemmodels.WishlistItem
 
-// WishlistItem represents the many-to-many relationship between wishlists and items
-type WishlistItem struct {
-	WishlistID pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"`
-	GiftItemID pgtype.UUID        `db:"gift_item_id" json:"gift_item_id"`
-	AddedAt    pgtype.Timestamptz `db:"added_at" json:"added_at"`
-}
-
-type Reservation struct {
-	ID                  pgtype.UUID        `db:"id" json:"id"`
-	WishlistID          pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"` // Reservation is for item in specific wishlist
-	GiftItemID          pgtype.UUID        `db:"gift_item_id" json:"gift_item_id"`
-	ReservedByUserID    pgtype.UUID        `db:"reserved_by_user_id" json:"reserved_by_user_id"`
-	GuestName           pgtype.Text        `db:"guest_name" json:"guest_name"`
-	EncryptedGuestName  pgtype.Text        `db:"encrypted_guest_name" json:"-"` // PII encrypted
-	GuestEmail          pgtype.Text        `db:"guest_email" json:"guest_email"`
-	EncryptedGuestEmail pgtype.Text        `db:"encrypted_guest_email" json:"-"` // PII encrypted
-	ReservationToken    pgtype.UUID        `db:"reservation_token" json:"reservation_token"`
-	Status              string             `db:"status" json:"status"`
-	ReservedAt          pgtype.Timestamptz `db:"reserved_at" json:"reserved_at"`
-	ExpiresAt           pgtype.Timestamptz `db:"expires_at" json:"expires_at"`
-	CanceledAt          pgtype.Timestamptz `db:"canceled_at" json:"canceled_at"`
-	CancelReason        pgtype.Text        `db:"cancel_reason" json:"canceled_reason"`
-	NotificationSent    pgtype.Bool        `db:"notification_sent" json:"notification_sent"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
+// Template has no domain model (feature removed per business decision).
+// Kept as regular struct until Phase 6 cleanup.
 type Template struct {
 	ID              string             `db:"id" json:"id"`
 	Name            string             `db:"name" json:"name"`
@@ -60,42 +32,4 @@ type Template struct {
 	IsDefault       pgtype.Bool        `db:"is_default" json:"is_default"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
-type User struct {
-	ID                 pgtype.UUID        `db:"id" json:"id"`
-	Email              string             `db:"email" json:"email"`
-	EncryptedEmail     pgtype.Text        `db:"encrypted_email" json:"-"` // PII encrypted
-	PasswordHash       pgtype.Text        `db:"password_hash" json:"-"`   // Never expose password hashes
-	FirstName          pgtype.Text        `db:"first_name" json:"first_name"`
-	EncryptedFirstName pgtype.Text        `db:"encrypted_first_name" json:"-"` // PII encrypted
-	LastName           pgtype.Text        `db:"last_name" json:"last_name"`
-	EncryptedLastName  pgtype.Text        `db:"encrypted_last_name" json:"-"` // PII encrypted
-	AvatarUrl          pgtype.Text        `db:"avatar_url" json:"avatar_url"`
-	IsVerified         pgtype.Bool        `db:"is_verified" json:"is_verified"`
-	CreatedAt          pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-	LastLoginAt        pgtype.Timestamptz `db:"last_login_at" json:"last_login_at"`
-	DeactivatedAt      pgtype.Timestamptz `db:"deactivated_at" json:"deactivated_at"`
-}
-
-type WishList struct {
-	ID           pgtype.UUID        `db:"id" json:"id"`
-	OwnerID      pgtype.UUID        `db:"owner_id" json:"owner_id"`
-	Title        string             `db:"title" json:"title"`
-	Description  pgtype.Text        `db:"description" json:"description"`
-	Occasion     pgtype.Text        `db:"occasion" json:"occasion"`
-	OccasionDate pgtype.Date        `db:"occasion_date" json:"occasion_date"`
-	TemplateID   string             `db:"template_id" json:"template_id"`
-	IsPublic     pgtype.Bool        `db:"is_public" json:"is_public"`
-	PublicSlug   pgtype.Text        `db:"public_slug" json:"public_slug"`
-	ViewCount    pgtype.Int4        `db:"view_count" json:"view_count"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
-// WishListWithItemCount extends WishList with item count (from JOIN query)
-type WishListWithItemCount struct {
-	WishList
-	ItemCount int64 `db:"item_count" json:"item_count"`
 }

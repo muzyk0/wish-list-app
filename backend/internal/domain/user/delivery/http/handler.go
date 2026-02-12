@@ -7,11 +7,11 @@ import (
 	nethttp "net/http"
 	"time"
 
+	"wish-list/internal/app/jobs"
 	"wish-list/internal/domain/user/delivery/http/dto"
 	userservice "wish-list/internal/domain/user/service"
 	"wish-list/internal/pkg/analytics"
 	"wish-list/internal/pkg/auth"
-	"wish-list/internal/services"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,11 +19,11 @@ import (
 type Handler struct {
 	service               userservice.UserServiceInterface
 	tokenManager          *auth.TokenManager
-	accountCleanupService *services.AccountCleanupService
+	accountCleanupService *jobs.AccountCleanupService
 	analyticsService      *analytics.AnalyticsService
 }
 
-func NewHandler(service userservice.UserServiceInterface, tokenManager *auth.TokenManager, accountCleanupService *services.AccountCleanupService, analyticsService *analytics.AnalyticsService) *Handler {
+func NewHandler(service userservice.UserServiceInterface, tokenManager *auth.TokenManager, accountCleanupService *jobs.AccountCleanupService, analyticsService *analytics.AnalyticsService) *Handler {
 	return &Handler{
 		service:               service,
 		tokenManager:          tokenManager,

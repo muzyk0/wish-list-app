@@ -203,13 +203,13 @@
 
 ### Implementation for US6
 
-- [ ] T101 [US6] Finalize `backend/internal/app/app.go` — complete dependency wiring: instantiate all repositories, services, and handlers per contracts/domain-interfaces.md pseudocode; inject cross-domain interfaces
-- [ ] T102 [US6] Finalize `backend/internal/app/server/router.go` — call all 8 domain `RegisterRoutes()` functions with correct Echo groups and auth middleware
-- [ ] T103 [US6] Update `backend/cmd/server/main.go` — minimize to: load config → `app.New()` → `app.Run()` with graceful shutdown
-- [ ] T104 [US6] Update `backend/cmd/migrate/main.go` (if exists) — update migration path to `internal/app/database/migrations/`
-- [ ] T105 [US6] Run `go build ./...` — verify full compilation with zero errors
-- [ ] T106 [US6] Run `go test ./...` — verify 100% test pass rate (SC-001)
-- [ ] T107 [US6] Run `go vet ./...` — verify no vet warnings
+- [X] T101 [US6] Finalize `backend/internal/app/app.go` — complete dependency wiring: instantiate all repositories, services, and handlers per contracts/domain-interfaces.md pseudocode; inject cross-domain interfaces
+- [X] T102 [US6] Finalize `backend/internal/app/server/router.go` — call all 8 domain `RegisterRoutes()` functions with correct Echo groups and auth middleware
+- [X] T103 [US6] Update `backend/cmd/server/main.go` — minimize to: load config → `app.New()` → `app.Run()` with graceful shutdown
+- [X] T104 [US6] Update `backend/cmd/migrate/main.go` (if exists) — update migration path to `internal/app/database/migrations/`
+- [X] T105 [US6] Run `go build ./...` — verify full compilation with zero errors
+- [X] T106 [US6] Run `go test ./...` — verify 100% test pass rate (SC-001)
+- [X] T107 [US6] Run `go vet ./...` — verify no vet warnings
 
 **Checkpoint**: Application builds, all tests pass, no vet warnings. Full functionality preserved.
 

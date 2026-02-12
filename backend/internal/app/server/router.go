@@ -1,35 +1,15 @@
 package server
 
-import (
-	healthhttp "wish-list/internal/domain/health/delivery/http"
-
-	"wish-list/internal/app/database"
-
-	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
-)
-
-// SetupRoutes registers all domain routes on the Echo instance.
-// This function is the central router that calls each domain's RegisterRoutes().
-// It will be completed in Phase 5 when all domains are migrated.
-func SetupRoutes(e *echo.Echo, db *database.DB) {
-	// Swagger documentation endpoint
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
-
-	// Health domain
-	healthHandler := healthhttp.NewHandler(db)
-	healthhttp.RegisterRoutes(e, healthHandler)
-
-	// User domain (Phase 4C) - requires service dependencies, wired in Phase 5:
-	// userhttp.RegisterRoutes(e, userHandler, authMiddleware)
-
-	// Wishlist domain (Phase 4F) - requires service dependencies, wired in Phase 5:
-	// wishlisthttp.RegisterRoutes(e, wishlistHandler, authMiddleware)
-
-	// Remaining domain route registration (Phase 4D-4I, wired in Phase 5):
-	// authhttp.RegisterRoutes(...)
-	// itemhttp.RegisterRoutes(...)
-	// wishlistitemhttp.RegisterRoutes(...)
-	// reservationhttp.RegisterRoutes(...)
-	// storagehttp.RegisterRoutes(...)
-}
+// Route registration is handled in app.go's initServer() method.
+// Each domain's RegisterRoutes() function is called with the appropriate
+// Echo instance and auth middleware.
+//
+// Domain route registration pattern:
+//   healthhttp.RegisterRoutes(e, healthHandler)
+//   userhttp.RegisterRoutes(e, userHandler, authMiddleware)
+//   authhttp.RegisterRoutes(e, authHandler, oauthHandler, authMiddleware)
+//   wishlisthttp.RegisterRoutes(e, wishlistHandler, authMiddleware)
+//   itemhttp.RegisterRoutes(e, itemHandler, authMiddleware)
+//   wishlistitemhttp.RegisterRoutes(e, wishlistItemHandler, authMiddleware)
+//   reservationhttp.RegisterRoutes(e, reservationHandler, authMiddleware)
+//   storagehttp.RegisterRoutes(e, storageHandler, tokenManager)

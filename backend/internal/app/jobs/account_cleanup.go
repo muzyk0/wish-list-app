@@ -7,34 +7,64 @@ import (
 	"fmt"
 	"log"
 	"time"
-	db "wish-list/internal/shared/db/models"
-	"wish-list/internal/repositories"
+
+	"wish-list/internal/app/database"
+	itemmodels "wish-list/internal/domain/item/models"
+	reservationmodels "wish-list/internal/domain/reservation/models"
+	usermodels "wish-list/internal/domain/user/models"
+	wishlistmodels "wish-list/internal/domain/wishlist/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// Cross-domain interfaces — only methods used by AccountCleanupService
+
+// UserRepoInterface defines user repo methods needed by cleanup service
+type UserRepoInterface interface {
+	GetByID(ctx context.Context, id pgtype.UUID) (*usermodels.User, error)
+	ListInactiveSince(ctx context.Context, since time.Time) ([]*usermodels.User, error)
+	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
+}
+
+// WishListRepoInterface defines wishlist repo methods needed by cleanup service
+type WishListRepoInterface interface {
+	GetByOwner(ctx context.Context, ownerID pgtype.UUID) ([]*wishlistmodels.WishList, error)
+	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
+}
+
+// GiftItemRepoInterface defines gift item repo methods needed by cleanup service
+type GiftItemRepoInterface interface {
+	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
+	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
+}
+
+// ReservationRepoInterface defines reservation repo methods needed by cleanup service
+type ReservationRepoInterface interface {
+	GetActiveReservationForGiftItem(ctx context.Context, giftItemID pgtype.UUID) (*reservationmodels.Reservation, error)
+}
+
 // AccountCleanupService handles account inactivity tracking and deletion
 type AccountCleanupService struct {
-	db              *db.DB
-	userRepo        repositories.UserRepositoryInterface
-	wishListRepo    repositories.WishListRepositoryInterface
-	giftItemRepo    repositories.GiftItemRepositoryInterface
-	reservationRepo repositories.ReservationRepositoryInterface
+	db              *database.DB
+	userRepo        UserRepoInterface
+	wishListRepo    WishListRepoInterface
+	giftItemRepo    GiftItemRepoInterface
+	reservationRepo ReservationRepoInterface
 	emailService    EmailServiceInterface
 	ticker          *time.Ticker
 }
 
 // NewAccountCleanupService creates a new account cleanup service
 func NewAccountCleanupService(
-	database *db.DB,
-	userRepo repositories.UserRepositoryInterface,
-	wishListRepo repositories.WishListRepositoryInterface,
-	giftItemRepo repositories.GiftItemRepositoryInterface,
-	reservationRepo repositories.ReservationRepositoryInterface,
+	db *database.DB,
+	userRepo UserRepoInterface,
+	wishListRepo WishListRepoInterface,
+	giftItemRepo GiftItemRepoInterface,
+	reservationRepo ReservationRepoInterface,
 	emailService EmailServiceInterface,
 ) *AccountCleanupService {
 	return &AccountCleanupService{
-		db:              database,
+		db:              db,
 		userRepo:        userRepo,
 		wishListRepo:    wishListRepo,
 		giftItemRepo:    giftItemRepo,
@@ -257,7 +287,7 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 				"description": item.Description.String,
 				"link":        item.Link.String,
 				"image_url":   item.ImageUrl.String,
-				"price":       db.NumericToFloat64(item.Price),
+				"price":       database.NumericToFloat64(item.Price),
 				"priority":    item.Priority.Int32,
 				"created_at":  item.CreatedAt.Time.Format(time.RFC3339),
 			})
@@ -301,7 +331,7 @@ func (s *AccountCleanupService) ExportUserData(ctx context.Context, userID strin
 }
 
 // findInactiveUsersSince finds users who haven't been active since the given date
-func (s *AccountCleanupService) findInactiveUsersSince(ctx context.Context, since time.Time) ([]*db.User, error) {
+func (s *AccountCleanupService) findInactiveUsersSince(ctx context.Context, since time.Time) ([]*usermodels.User, error) {
 	users, err := s.userRepo.ListInactiveSince(ctx, since)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find inactive users: %w", err)
