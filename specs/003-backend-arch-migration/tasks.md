@@ -168,17 +168,17 @@
 
 ### 4G: Reservation Domain (depends on item interface)
 
-- [ ] T083 [US1] Extract `Reservation` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/reservation/models/reservation.go`
-- [ ] T084 [US1] Move `backend/internal/repositories/reservation_repository.go` → `backend/internal/domain/reservation/repository/reservation_repository.go`, update package, model/DB imports
-- [ ] T085 [P] [US1] Move reservation repository test (if exists) → `backend/internal/domain/reservation/repository/reservation_repository_test.go`, update imports
-- [ ] T086 [US1] Move `backend/internal/services/reservation_service.go` → `backend/internal/domain/reservation/service/reservation_service.go`, update package and imports; define `GiftItemRepositoryInterface` in service package
-- [ ] T087 [P] [US1] Move `backend/internal/services/reservation_service_test.go` → `backend/internal/domain/reservation/service/reservation_service_test.go`, update imports
-- [ ] T087a [P] [US1] Regenerate `backend/internal/services/mock_reservation_repository_test.go` → `backend/internal/domain/reservation/service/mock_reservation_repository_test.go` with go:generate annotation in with go:generate annotation in backend/internal/repositories/reservation_repository.go
-- [ ] T088 [US1] Move `backend/internal/handlers/reservation_handler.go` → `backend/internal/domain/reservation/delivery/http/handler.go`, update package and imports
-- [ ] T089 [P] [US1] Move reservation handler test (if exists) → `backend/internal/domain/reservation/delivery/http/handler_test.go`, update imports
-- [ ] T090 [US4] Create `backend/internal/domain/reservation/delivery/http/dto/requests.go` and `responses.go` — extract reservation DTOs with conversion methods
-- [ ] T091 [US5] Create `backend/internal/domain/reservation/delivery/http/routes.go` — `RegisterRoutes()` for reservation endpoints
-- [ ] T092 [US1] Update router, verify build and `go test ./internal/domain/reservation/...` pass
+- [X] T083 [US1] Extract `Reservation` struct from `backend/internal/shared/db/models/models.go` → `backend/internal/domain/reservation/models/reservation.go`
+- [X] T084 [US1] Move `backend/internal/repositories/reservation_repository.go` → `backend/internal/domain/reservation/repository/reservation_repository.go`, update package, model/DB imports
+- [X] T085 [P] [US1] Move reservation repository test (if exists) → `backend/internal/domain/reservation/repository/reservation_repository_test.go`, update imports
+- [X] T086 [US1] Move `backend/internal/services/reservation_service.go` → `backend/internal/domain/reservation/service/reservation_service.go`, update package and imports; define `GiftItemRepositoryInterface` in service package
+- [X] T087 [P] [US1] Move `backend/internal/services/reservation_service_test.go` → `backend/internal/domain/reservation/service/reservation_service_test.go`, update imports
+- [X] T087a [P] [US1] Regenerate `backend/internal/services/mock_reservation_repository_test.go` → `backend/internal/domain/reservation/service/mock_reservation_repository_test.go` with go:generate annotation in with go:generate annotation in backend/internal/repositories/reservation_repository.go
+- [X] T088 [US1] Move `backend/internal/handlers/reservation_handler.go` → `backend/internal/domain/reservation/delivery/http/handler.go`, update package and imports
+- [X] T089 [P] [US1] Move reservation handler test (if exists) → `backend/internal/domain/reservation/delivery/http/handler_test.go`, update imports
+- [X] T090 [US4] Create `backend/internal/domain/reservation/delivery/http/dto/requests.go` and `responses.go` — extract reservation DTOs with conversion methods
+- [X] T091 [US5] Create `backend/internal/domain/reservation/delivery/http/routes.go` — `RegisterRoutes()` for reservation endpoints
+- [X] T092 [US1] Update router, verify build and `go test ./internal/domain/reservation/...` pass
 
 ### 4H: Auth Domain (depends on user service interface, token manager)
 
