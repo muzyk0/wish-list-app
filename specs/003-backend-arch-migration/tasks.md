@@ -182,14 +182,14 @@
 
 ### 4H: Auth Domain (depends on user service interface, token manager)
 
-- [ ] T093 [US1] Create `backend/internal/domain/auth/models/auth.go` — auth-specific models (token responses, session types) extracted from handler structs
-- [ ] T094 [US1] Move `backend/internal/handlers/auth_handler.go` → `backend/internal/domain/auth/delivery/http/handler.go`, update package, import `internal/pkg/auth` for token manager, define `UserServiceInterface` in handler or service package
-- [ ] T095 [P] [US1] Skip — no auth handler test file exists (no `auth_handler_test.go` in handlers/)
-- [ ] T096 [US1] Move `backend/internal/handlers/oauth_handler.go` → `backend/internal/domain/auth/delivery/http/oauth_handler.go`, update package and imports
-- [ ] T097 [P] [US1] Skip — no oauth handler test file exists (no `oauth_handler_test.go` in handlers/)
-- [ ] T098 [US4] Create `backend/internal/domain/auth/delivery/http/dto/requests.go` and `responses.go` — extract auth/oauth request and response DTOs with conversion methods
-- [ ] T099 [US5] Create `backend/internal/domain/auth/delivery/http/routes.go` — `RegisterRoutes()` for auth and oauth endpoints
-- [ ] T100 [US1] Update router, verify build and `go test ./internal/domain/auth/...` pass
+- [X] T093 [US1] Create `backend/internal/domain/auth/models/auth.go` — auth-specific models (token responses, session types) extracted from handler structs
+- [X] T094 [US1] Move `backend/internal/handlers/auth_handler.go` → `backend/internal/domain/auth/delivery/http/handler.go`, update package, import `internal/pkg/auth` for token manager, define `UserServiceInterface` in handler or service package
+- [X] T095 [P] [US1] Skip — no auth handler test file exists (no `auth_handler_test.go` in handlers/)
+- [X] T096 [US1] Move `backend/internal/handlers/oauth_handler.go` → `backend/internal/domain/auth/delivery/http/oauth_handler.go`, update package and imports
+- [X] T097 [P] [US1] Skip — no oauth handler test file exists (no `oauth_handler_test.go` in handlers/)
+- [X] T098 [US4] Create `backend/internal/domain/auth/delivery/http/dto/requests.go` and `responses.go` — extract auth/oauth request and response DTOs with conversion methods
+- [X] T099 [US5] Create `backend/internal/domain/auth/delivery/http/routes.go` — `RegisterRoutes()` for auth and oauth endpoints
+- [X] T100 [US1] Update router, verify build and `go test ./internal/domain/auth/...` pass
 
 **Checkpoint**: All 8 domains migrated. Each domain is self-contained with models, repository, service, handler, DTOs, and routes. Build passes.
 
