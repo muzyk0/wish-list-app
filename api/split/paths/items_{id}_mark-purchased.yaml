@@ -13,7 +13,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.MarkPurchasedRequest.yaml
+          $ref: ../components/schemas/handlers.MarkPurchasedRequest.yaml
     description: Purchase details
     required: true
   responses:
@@ -22,7 +22,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+            $ref: ../components/schemas/handlers.ItemResponse.yaml
     '400':
       description: Invalid request body
       content:

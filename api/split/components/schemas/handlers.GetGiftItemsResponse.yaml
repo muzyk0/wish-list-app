@@ -1,0 +1,20 @@
+properties:
+  items:
+    items:
+      $ref: ./handlers.GiftItemResponse.yaml
+    type: array
+  limit:
+    type: integer
+  page:
+    type: integer
+  pages:
+    type: integer
+  total:
+    type: integer
+required:
+  - items
+  - limit
+  - page
+  - pages
+  - total
+type: object

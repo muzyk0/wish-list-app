@@ -1,0 +1,18 @@
+properties:
+  items:
+    items:
+      $ref: ./wish-list_internal_domain_item_delivery_http_dto.ItemResponse.yaml
+    type: array
+  limit:
+    example: 10
+    type: integer
+  page:
+    example: 1
+    type: integer
+  totalCount:
+    example: 42
+    type: integer
+  totalPages:
+    example: 5
+    type: integer
+type: object

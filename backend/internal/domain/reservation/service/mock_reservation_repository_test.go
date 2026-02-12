@@ -5,10 +5,8 @@ package service
 
 import (
 	"context"
-	"sync"
-
 	"github.com/jackc/pgx/v5/pgtype"
-
+	"sync"
 	"wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/reservation/repository"
 )
@@ -18,6 +16,50 @@ import (
 var _ repository.ReservationRepositoryInterface = &ReservationRepositoryInterfaceMock{}
 
 // ReservationRepositoryInterfaceMock is a mock implementation of repository.ReservationRepositoryInterface.
+//
+//	func TestSomethingThatUsesReservationRepositoryInterface(t *testing.T) {
+//
+//		// make and configure a mocked repository.ReservationRepositoryInterface
+//		mockedReservationRepositoryInterface := &ReservationRepositoryInterfaceMock{
+//			CountUserReservationsFunc: func(ctx context.Context, userID pgtype.UUID) (int, error) {
+//				panic("mock out the CountUserReservations method")
+//			},
+//			CreateFunc: func(ctx context.Context, reservation models.Reservation) (*models.Reservation, error) {
+//				panic("mock out the Create method")
+//			},
+//			GetActiveReservationForGiftItemFunc: func(ctx context.Context, giftItemID pgtype.UUID) (*models.Reservation, error) {
+//				panic("mock out the GetActiveReservationForGiftItem method")
+//			},
+//			GetByGiftItemFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*models.Reservation, error) {
+//				panic("mock out the GetByGiftItem method")
+//			},
+//			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*models.Reservation, error) {
+//				panic("mock out the GetByID method")
+//			},
+//			GetByTokenFunc: func(ctx context.Context, token pgtype.UUID) (*models.Reservation, error) {
+//				panic("mock out the GetByToken method")
+//			},
+//			GetReservationsByUserFunc: func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]*models.Reservation, error) {
+//				panic("mock out the GetReservationsByUser method")
+//			},
+//			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error) {
+//				panic("mock out the ListGuestReservationsWithDetails method")
+//			},
+//			ListUserReservationsWithDetailsFunc: func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+//				panic("mock out the ListUserReservationsWithDetails method")
+//			},
+//			UpdateStatusFunc: func(ctx context.Context, reservationID pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error) {
+//				panic("mock out the UpdateStatus method")
+//			},
+//			UpdateStatusByTokenFunc: func(ctx context.Context, token pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error) {
+//				panic("mock out the UpdateStatusByToken method")
+//			},
+//		}
+//
+//		// use mockedReservationRepositoryInterface in code that requires repository.ReservationRepositoryInterface
+//		// and then make assertions.
+//
+//	}
 type ReservationRepositoryInterfaceMock struct {
 	// CountUserReservationsFunc mocks the CountUserReservations method.
 	CountUserReservationsFunc func(ctx context.Context, userID pgtype.UUID) (int, error)
@@ -56,67 +98,99 @@ type ReservationRepositoryInterfaceMock struct {
 	calls struct {
 		// CountUserReservations holds details about calls to the CountUserReservations method.
 		CountUserReservations []struct {
-			Ctx    context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserID is the userID argument value.
 			UserID pgtype.UUID
 		}
 		// Create holds details about calls to the Create method.
 		Create []struct {
-			Ctx         context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Reservation is the reservation argument value.
 			Reservation models.Reservation
 		}
 		// GetActiveReservationForGiftItem holds details about calls to the GetActiveReservationForGiftItem method.
 		GetActiveReservationForGiftItem []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// GiftItemID is the giftItemID argument value.
 			GiftItemID pgtype.UUID
 		}
 		// GetByGiftItem holds details about calls to the GetByGiftItem method.
 		GetByGiftItem []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// GiftItemID is the giftItemID argument value.
 			GiftItemID pgtype.UUID
 		}
 		// GetByID holds details about calls to the GetByID method.
 		GetByID []struct {
+			// Ctx is the ctx argument value.
 			Ctx context.Context
-			ID  pgtype.UUID
+			// ID is the id argument value.
+			ID pgtype.UUID
 		}
 		// GetByToken holds details about calls to the GetByToken method.
 		GetByToken []struct {
-			Ctx   context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Token is the token argument value.
 			Token pgtype.UUID
 		}
 		// GetReservationsByUser holds details about calls to the GetReservationsByUser method.
 		GetReservationsByUser []struct {
-			Ctx    context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserID is the userID argument value.
 			UserID pgtype.UUID
-			Limit  int
+			// Limit is the limit argument value.
+			Limit int
+			// Offset is the offset argument value.
 			Offset int
 		}
 		// ListGuestReservationsWithDetails holds details about calls to the ListGuestReservationsWithDetails method.
 		ListGuestReservationsWithDetails []struct {
-			Ctx   context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Token is the token argument value.
 			Token pgtype.UUID
 		}
 		// ListUserReservationsWithDetails holds details about calls to the ListUserReservationsWithDetails method.
 		ListUserReservationsWithDetails []struct {
-			Ctx    context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserID is the userID argument value.
 			UserID pgtype.UUID
-			Limit  int
+			// Limit is the limit argument value.
+			Limit int
+			// Offset is the offset argument value.
 			Offset int
 		}
 		// UpdateStatus holds details about calls to the UpdateStatus method.
 		UpdateStatus []struct {
-			Ctx           context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ReservationID is the reservationID argument value.
 			ReservationID pgtype.UUID
-			Status        string
-			CanceledAt    pgtype.Timestamptz
-			CancelReason  pgtype.Text
+			// Status is the status argument value.
+			Status string
+			// CanceledAt is the canceledAt argument value.
+			CanceledAt pgtype.Timestamptz
+			// CancelReason is the cancelReason argument value.
+			CancelReason pgtype.Text
 		}
 		// UpdateStatusByToken holds details about calls to the UpdateStatusByToken method.
 		UpdateStatusByToken []struct {
-			Ctx          context.Context
-			Token        pgtype.UUID
-			Status       string
-			CanceledAt   pgtype.Timestamptz
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Token is the token argument value.
+			Token pgtype.UUID
+			// Status is the status argument value.
+			Status string
+			// CanceledAt is the canceledAt argument value.
+			CanceledAt pgtype.Timestamptz
+			// CancelReason is the cancelReason argument value.
 			CancelReason pgtype.Text
 		}
 	}
@@ -152,6 +226,9 @@ func (mock *ReservationRepositoryInterfaceMock) CountUserReservations(ctx contex
 }
 
 // CountUserReservationsCalls gets all the calls that were made to CountUserReservations.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.CountUserReservationsCalls())
 func (mock *ReservationRepositoryInterfaceMock) CountUserReservationsCalls() []struct {
 	Ctx    context.Context
 	UserID pgtype.UUID
@@ -185,6 +262,9 @@ func (mock *ReservationRepositoryInterfaceMock) Create(ctx context.Context, rese
 }
 
 // CreateCalls gets all the calls that were made to Create.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.CreateCalls())
 func (mock *ReservationRepositoryInterfaceMock) CreateCalls() []struct {
 	Ctx         context.Context
 	Reservation models.Reservation
@@ -218,6 +298,9 @@ func (mock *ReservationRepositoryInterfaceMock) GetActiveReservationForGiftItem(
 }
 
 // GetActiveReservationForGiftItemCalls gets all the calls that were made to GetActiveReservationForGiftItem.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.GetActiveReservationForGiftItemCalls())
 func (mock *ReservationRepositoryInterfaceMock) GetActiveReservationForGiftItemCalls() []struct {
 	Ctx        context.Context
 	GiftItemID pgtype.UUID
@@ -251,6 +334,9 @@ func (mock *ReservationRepositoryInterfaceMock) GetByGiftItem(ctx context.Contex
 }
 
 // GetByGiftItemCalls gets all the calls that were made to GetByGiftItem.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.GetByGiftItemCalls())
 func (mock *ReservationRepositoryInterfaceMock) GetByGiftItemCalls() []struct {
 	Ctx        context.Context
 	GiftItemID pgtype.UUID
@@ -284,6 +370,9 @@ func (mock *ReservationRepositoryInterfaceMock) GetByID(ctx context.Context, id 
 }
 
 // GetByIDCalls gets all the calls that were made to GetByID.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.GetByIDCalls())
 func (mock *ReservationRepositoryInterfaceMock) GetByIDCalls() []struct {
 	Ctx context.Context
 	ID  pgtype.UUID
@@ -317,6 +406,9 @@ func (mock *ReservationRepositoryInterfaceMock) GetByToken(ctx context.Context, 
 }
 
 // GetByTokenCalls gets all the calls that were made to GetByToken.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.GetByTokenCalls())
 func (mock *ReservationRepositoryInterfaceMock) GetByTokenCalls() []struct {
 	Ctx   context.Context
 	Token pgtype.UUID
@@ -354,6 +446,9 @@ func (mock *ReservationRepositoryInterfaceMock) GetReservationsByUser(ctx contex
 }
 
 // GetReservationsByUserCalls gets all the calls that were made to GetReservationsByUser.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.GetReservationsByUserCalls())
 func (mock *ReservationRepositoryInterfaceMock) GetReservationsByUserCalls() []struct {
 	Ctx    context.Context
 	UserID pgtype.UUID
@@ -391,6 +486,9 @@ func (mock *ReservationRepositoryInterfaceMock) ListGuestReservationsWithDetails
 }
 
 // ListGuestReservationsWithDetailsCalls gets all the calls that were made to ListGuestReservationsWithDetails.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.ListGuestReservationsWithDetailsCalls())
 func (mock *ReservationRepositoryInterfaceMock) ListGuestReservationsWithDetailsCalls() []struct {
 	Ctx   context.Context
 	Token pgtype.UUID
@@ -428,6 +526,9 @@ func (mock *ReservationRepositoryInterfaceMock) ListUserReservationsWithDetails(
 }
 
 // ListUserReservationsWithDetailsCalls gets all the calls that were made to ListUserReservationsWithDetails.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.ListUserReservationsWithDetailsCalls())
 func (mock *ReservationRepositoryInterfaceMock) ListUserReservationsWithDetailsCalls() []struct {
 	Ctx    context.Context
 	UserID pgtype.UUID
@@ -471,6 +572,9 @@ func (mock *ReservationRepositoryInterfaceMock) UpdateStatus(ctx context.Context
 }
 
 // UpdateStatusCalls gets all the calls that were made to UpdateStatus.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.UpdateStatusCalls())
 func (mock *ReservationRepositoryInterfaceMock) UpdateStatusCalls() []struct {
 	Ctx           context.Context
 	ReservationID pgtype.UUID
@@ -516,6 +620,9 @@ func (mock *ReservationRepositoryInterfaceMock) UpdateStatusByToken(ctx context.
 }
 
 // UpdateStatusByTokenCalls gets all the calls that were made to UpdateStatusByToken.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.UpdateStatusByTokenCalls())
 func (mock *ReservationRepositoryInterfaceMock) UpdateStatusByTokenCalls() []struct {
 	Ctx          context.Context
 	Token        pgtype.UUID

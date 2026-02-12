@@ -3,10 +3,7 @@ properties:
     type: string
   refreshToken:
     type: string
-  user:
-    $ref: ./internal_handlers.UserResponse.yaml
 required:
   - accessToken
   - refreshToken
-  - user
 type: object

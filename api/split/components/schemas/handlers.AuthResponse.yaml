@@ -7,7 +7,7 @@ properties:
     type: string
   user:
     allOf:
-      - $ref: ./internal_handlers.UserResponse.yaml
+      - $ref: ./handlers.UserResponse.yaml
     description: User information
 required:
   - accessToken

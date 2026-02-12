@@ -64,7 +64,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+            $ref: ../components/schemas/handlers.ItemResponse.yaml
     '401':
       description: Not authenticated
       content:
@@ -107,7 +107,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.UpdateItemRequest.yaml
+          $ref: ../components/schemas/handlers.UpdateItemRequest.yaml
     description: Updated item data
     required: true
   responses:
@@ -116,7 +116,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+            $ref: ../components/schemas/handlers.ItemResponse.yaml
     '400':
       description: Invalid request body
       content:

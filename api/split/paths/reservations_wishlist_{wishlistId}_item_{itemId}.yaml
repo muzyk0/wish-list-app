@@ -19,8 +19,7 @@ delete:
     content:
       application/json:
         schema:
-          $ref: >-
-            ../components/schemas/internal_handlers.CancelReservationRequest.yaml
+          $ref: ../components/schemas/handlers.CancelReservationRequest.yaml
     description: Cancellation information (required for guests)
   responses:
     '200':
@@ -28,8 +27,7 @@ delete:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/internal_handlers.CreateReservationResponse.yaml
+            $ref: ../components/schemas/handlers.CreateReservationResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:
@@ -80,8 +78,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: >-
-            ../components/schemas/internal_handlers.CreateReservationRequest.yaml
+          $ref: ../components/schemas/handlers.CreateReservationRequest.yaml
     description: Reservation information (required for guests)
   responses:
     '200':
@@ -89,8 +86,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/internal_handlers.CreateReservationResponse.yaml
+            $ref: ../components/schemas/handlers.CreateReservationResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

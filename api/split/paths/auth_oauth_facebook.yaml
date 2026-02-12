@@ -4,7 +4,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.OAuthCodeRequest.yaml
+          $ref: ../components/schemas/handlers.OAuthCodeRequest.yaml
     description: Authorization code from Facebook
     required: true
   responses:
@@ -13,7 +13,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+            $ref: ../components/schemas/handlers.AuthResponse.yaml
     '400':
       description: Invalid request
       content:

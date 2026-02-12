@@ -1,7 +1,8 @@
 properties:
   items:
     items:
-      $ref: ./internal_handlers.ItemResponse.yaml
+      $ref: >-
+        ./wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse.yaml
     type: array
   limit:
     example: 10

@@ -9,7 +9,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.RefreshResponse.yaml
+            $ref: ../components/schemas/handlers.RefreshResponse.yaml
     '401':
       description: Invalid or expired refresh token
       content:

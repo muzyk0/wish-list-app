@@ -4,7 +4,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.LoginRequest.yaml
+          $ref: ../components/schemas/handlers.LoginRequest.yaml
     description: User login credentials
     required: true
   responses:
@@ -13,7 +13,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+            $ref: ../components/schemas/handlers.AuthResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

@@ -25,8 +25,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/internal_handlers.PaginatedItemsResponse.yaml
+            $ref: ../components/schemas/handlers.PaginatedItemsResponse.yaml
     '401':
       description: Not authenticated
       content:
@@ -79,7 +78,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.AttachItemRequest.yaml
+          $ref: ../components/schemas/handlers.AttachItemRequest.yaml
     description: Item to attach
     required: true
   responses:

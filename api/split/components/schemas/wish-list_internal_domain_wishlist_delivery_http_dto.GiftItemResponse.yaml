@@ -1,0 +1,42 @@
+properties:
+  created_at:
+    type: string
+  description:
+    type: string
+  id:
+    type: string
+  image_url:
+    type: string
+  link:
+    type: string
+  name:
+    type: string
+  notes:
+    type: string
+  position:
+    type: integer
+  price:
+    type: number
+  priority:
+    type: integer
+  purchased_at:
+    type: string
+  purchased_by_user_id:
+    type: string
+  purchased_price:
+    type: number
+  reserved_at:
+    type: string
+  reserved_by_user_id:
+    type: string
+  updated_at:
+    type: string
+  wishlist_id:
+    type: string
+required:
+  - created_at
+  - id
+  - name
+  - updated_at
+  - wishlist_id
+type: object

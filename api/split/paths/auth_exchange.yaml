@@ -6,7 +6,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.ExchangeRequest.yaml
+          $ref: ../components/schemas/handlers.ExchangeRequest.yaml
     description: Exchange request
     required: true
   responses:
@@ -15,7 +15,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ExchangeResponse.yaml
+            $ref: ../components/schemas/handlers.ExchangeResponse.yaml
     '400':
       description: Invalid request body
       content:

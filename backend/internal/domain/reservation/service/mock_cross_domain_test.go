@@ -5,10 +5,8 @@ package service
 
 import (
 	"context"
-	"sync"
-
 	"github.com/jackc/pgx/v5/pgtype"
-
+	"sync"
 	db "wish-list/internal/shared/db/models"
 )
 
@@ -17,38 +15,65 @@ import (
 var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 
 // GiftItemRepositoryInterfaceMock is a mock implementation of GiftItemRepositoryInterface.
+//
+//	func TestSomethingThatUsesGiftItemRepositoryInterface(t *testing.T) {
+//
+//		// make and configure a mocked GiftItemRepositoryInterface
+//		mockedGiftItemRepositoryInterface := &GiftItemRepositoryInterfaceMock{
+//			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error) {
+//				panic("mock out the GetByWishList method")
+//			},
+//			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+//				panic("mock out the GetPublicWishListGiftItems method")
+//			},
+//			ReserveIfNotReservedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error) {
+//				panic("mock out the ReserveIfNotReserved method")
+//			},
+//		}
+//
+//		// use mockedGiftItemRepositoryInterface in code that requires GiftItemRepositoryInterface
+//		// and then make assertions.
+//
+//	}
 type GiftItemRepositoryInterfaceMock struct {
 	// GetByWishListFunc mocks the GetByWishList method.
 	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*db.GiftItem, error)
 
-	// ReserveIfNotReservedFunc mocks the ReserveIfNotReserved method.
-	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error)
-
 	// GetPublicWishListGiftItemsFunc mocks the GetPublicWishListGiftItems method.
 	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*db.GiftItem, error)
+
+	// ReserveIfNotReservedFunc mocks the ReserveIfNotReserved method.
+	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*db.GiftItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// GetByWishList holds details about calls to the GetByWishList method.
 		GetByWishList []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
-		}
-		// ReserveIfNotReserved holds details about calls to the ReserveIfNotReserved method.
-		ReserveIfNotReserved []struct {
-			Ctx        context.Context
-			GiftItemID pgtype.UUID
-			UserID     pgtype.UUID
 		}
 		// GetPublicWishListGiftItems holds details about calls to the GetPublicWishListGiftItems method.
 		GetPublicWishListGiftItems []struct {
-			Ctx        context.Context
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// PublicSlug is the publicSlug argument value.
 			PublicSlug string
+		}
+		// ReserveIfNotReserved holds details about calls to the ReserveIfNotReserved method.
+		ReserveIfNotReserved []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// GiftItemID is the giftItemID argument value.
+			GiftItemID pgtype.UUID
+			// UserID is the userID argument value.
+			UserID pgtype.UUID
 		}
 	}
 	lockGetByWishList              sync.RWMutex
-	lockReserveIfNotReserved       sync.RWMutex
 	lockGetPublicWishListGiftItems sync.RWMutex
+	lockReserveIfNotReserved       sync.RWMutex
 }
 
 // GetByWishList calls GetByWishListFunc.
@@ -70,6 +95,9 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishList(ctx context.Context, 
 }
 
 // GetByWishListCalls gets all the calls that were made to GetByWishList.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetByWishListCalls())
 func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 	Ctx        context.Context
 	WishlistID pgtype.UUID
@@ -81,6 +109,42 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 	mock.lockGetByWishList.RLock()
 	calls = mock.calls.GetByWishList
 	mock.lockGetByWishList.RUnlock()
+	return calls
+}
+
+// GetPublicWishListGiftItems calls GetPublicWishListGiftItemsFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
+	if mock.GetPublicWishListGiftItemsFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItems was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		PublicSlug string
+	}{
+		Ctx:        ctx,
+		PublicSlug: publicSlug,
+	}
+	mock.lockGetPublicWishListGiftItems.Lock()
+	mock.calls.GetPublicWishListGiftItems = append(mock.calls.GetPublicWishListGiftItems, callInfo)
+	mock.lockGetPublicWishListGiftItems.Unlock()
+	return mock.GetPublicWishListGiftItemsFunc(ctx, publicSlug)
+}
+
+// GetPublicWishListGiftItemsCalls gets all the calls that were made to GetPublicWishListGiftItems.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetPublicWishListGiftItemsCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsCalls() []struct {
+	Ctx        context.Context
+	PublicSlug string
+} {
+	var calls []struct {
+		Ctx        context.Context
+		PublicSlug string
+	}
+	mock.lockGetPublicWishListGiftItems.RLock()
+	calls = mock.calls.GetPublicWishListGiftItems
+	mock.lockGetPublicWishListGiftItems.RUnlock()
 	return calls
 }
 
@@ -105,6 +169,9 @@ func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReserved(ctx context.Co
 }
 
 // ReserveIfNotReservedCalls gets all the calls that were made to ReserveIfNotReserved.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.ReserveIfNotReservedCalls())
 func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReservedCalls() []struct {
 	Ctx        context.Context
 	GiftItemID pgtype.UUID
@@ -118,38 +185,5 @@ func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReservedCalls() []struc
 	mock.lockReserveIfNotReserved.RLock()
 	calls = mock.calls.ReserveIfNotReserved
 	mock.lockReserveIfNotReserved.RUnlock()
-	return calls
-}
-
-// GetPublicWishListGiftItems calls GetPublicWishListGiftItemsFunc.
-func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*db.GiftItem, error) {
-	if mock.GetPublicWishListGiftItemsFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItems was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		PublicSlug string
-	}{
-		Ctx:        ctx,
-		PublicSlug: publicSlug,
-	}
-	mock.lockGetPublicWishListGiftItems.Lock()
-	mock.calls.GetPublicWishListGiftItems = append(mock.calls.GetPublicWishListGiftItems, callInfo)
-	mock.lockGetPublicWishListGiftItems.Unlock()
-	return mock.GetPublicWishListGiftItemsFunc(ctx, publicSlug)
-}
-
-// GetPublicWishListGiftItemsCalls gets all the calls that were made to GetPublicWishListGiftItems.
-func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsCalls() []struct {
-	Ctx        context.Context
-	PublicSlug string
-} {
-	var calls []struct {
-		Ctx        context.Context
-		PublicSlug string
-	}
-	mock.lockGetPublicWishListGiftItems.RLock()
-	calls = mock.calls.GetPublicWishListGiftItems
-	mock.lockGetPublicWishListGiftItems.RUnlock()
 	return calls
 }

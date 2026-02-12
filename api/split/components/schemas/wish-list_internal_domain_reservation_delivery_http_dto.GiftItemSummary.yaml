@@ -1,0 +1,13 @@
+properties:
+  id:
+    type: string
+  image_url:
+    type: string
+  name:
+    type: string
+  price:
+    type: string
+required:
+  - id
+  - name
+type: object

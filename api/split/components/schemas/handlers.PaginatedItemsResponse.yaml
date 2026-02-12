@@ -1,20 +1,18 @@
 properties:
   items:
     items:
-      $ref: ./internal_handlers.GiftItemResponse.yaml
+      $ref: ./handlers.ItemResponse.yaml
     type: array
   limit:
+    example: 10
     type: integer
   page:
+    example: 1
     type: integer
-  pages:
+  totalCount:
+    example: 42
     type: integer
-  total:
+  totalPages:
+    example: 5
     type: integer
-required:
-  - items
-  - limit
-  - page
-  - pages
-  - total
 type: object

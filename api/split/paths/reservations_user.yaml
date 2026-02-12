@@ -17,8 +17,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/internal_handlers.UserReservationsResponse.yaml
+            $ref: ../components/schemas/handlers.UserReservationsResponse.yaml
     '401':
       description: Unauthorized
       content:

@@ -6,7 +6,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.UserResponse.yaml
+            $ref: ../components/schemas/handlers.UserResponse.yaml
     '401':
       description: Unauthorized
       content:
@@ -42,7 +42,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.UpdateProfileRequest.yaml
+          $ref: ../components/schemas/handlers.UpdateProfileRequest.yaml
     description: Updated profile information
     required: true
   responses:
@@ -51,7 +51,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.UserResponse.yaml
+            $ref: ../components/schemas/handlers.UserResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

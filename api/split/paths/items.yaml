@@ -44,8 +44,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: >-
-              ../components/schemas/internal_handlers.PaginatedItemsResponse.yaml
+            $ref: ../components/schemas/handlers.PaginatedItemsResponse.yaml
     '400':
       description: Invalid query parameters
       content:
@@ -78,14 +77,14 @@ get:
 post:
   description: Create a new gift item without attaching it to a wishlist
   requestBody:
-    $ref: ../components/requestBodies/internal_handlers.CreateItemRequest.yaml
+    $ref: ../components/requestBodies/handlers.CreateItemRequest.yaml
   responses:
     '201':
       description: Item created successfully
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+            $ref: ../components/schemas/handlers.ItemResponse.yaml
     '400':
       description: Invalid request body
       content:

@@ -6,7 +6,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.ChangeEmailRequest.yaml
+          $ref: ../components/schemas/handlers.ChangeEmailRequest.yaml
     description: Email change request
     required: true
   responses:
@@ -15,7 +15,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.MessageResponse.yaml
+            $ref: ../components/schemas/handlers.MessageResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

@@ -1,7 +1,7 @@
 properties:
   data:
     items:
-      $ref: ./internal_handlers.ReservationDetailsResponse.yaml
+      $ref: ./handlers.ReservationDetailsResponse.yaml
     type: array
   pagination: {}
 required:
