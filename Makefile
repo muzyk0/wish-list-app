@@ -104,8 +104,8 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "Swagger 2.0 generated"
 	@echo ""
 	@echo "Step 2/4: Converting to OpenAPI 3.0..."
-	@pnpm exec swagger2openapi backend/internal/handlers/docs/swagger.json -o api/openapi3.json
-	@pnpm exec swagger2openapi backend/internal/handlers/docs/swagger.yaml -o api/openapi3.yaml
+	@pnpm exec swagger2openapi backend/internal/app/swagger/docs/swagger.json -o api/openapi3.json
+	@pnpm exec swagger2openapi backend/internal/app/swagger/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "OpenAPI 3.0 converted"
 	@echo ""
 	@echo "Step 3/4: Splitting into organized files..."
@@ -122,7 +122,7 @@ docs: ## Generate complete API documentation (Swagger 2.0 → OpenAPI 3.0 → Sp
 	@echo "================================================"
 	@echo ""
 	@echo "Generated files:"
-	@echo "  backend/docs/swagger.{json,yaml}  (Swagger 2.0)"
+	@echo "  backend/internal/app/swagger/docs/swagger.{json,yaml}  (Swagger 2.0)"
 	@echo "  api/openapi3.{json,yaml}          (OpenAPI 3.0)"
 	@echo "  api/split/                        (Split files)"
 	@echo "  frontend/src/lib/api/schema.ts    (Frontend types)"
@@ -182,7 +182,7 @@ lint-mobile: ## Run lint on mobile
 migrate-create: ## Create a new migration
 	@echo "Enter migration name:"
 	@read name; \
-	cd backend && migrate create -ext sql -dir internal/db/migrations $$name
+	cd backend && migrate create -ext sql -dir internal/app/database/migrations $$name
 
 .PHONY: migrate-down
 migrate-down: ## Rollback database migrations
@@ -241,8 +241,8 @@ setup: ## Set up the development environment
 .PHONY: swagger-convert-v3
 swagger-convert-v3: ## Convert OpenAPI 2.0 to 3.0
 	@echo "Converting OpenAPI 2.0 to 3.0..."
-	@pnpm exec swagger2openapi backend/docs/swagger.json -o api/openapi3.json
-	@pnpm exec swagger2openapi backend/docs/swagger.yaml -o api/openapi3.yaml
+	@pnpm exec swagger2openapi backend/internal/app/swagger/docs/swagger.json -o api/openapi3.json
+	@pnpm exec swagger2openapi backend/internal/app/swagger/docs/swagger.yaml -o api/openapi3.yaml
 	@echo "OpenAPI 3.0 files generated: api/openapi3.{json,yaml}"
 
 .PHONY: swagger-generate
@@ -252,7 +252,7 @@ swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 		echo "Installing swag..."; \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
-	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/docs --parseDependency --parseInternal
+	@$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -d backend -o backend/internal/app/swagger/docs --parseDependency --parseInternal
 	@echo "Converting to OpenAPI 3.0..."
 	@$(MAKE) swagger-convert-v3
 	@echo "OpenAPI 3.0 documentation generated at api/openapi3.{json,yaml}"
@@ -261,7 +261,7 @@ swagger-generate: ## Generate OpenAPI 3.0 documentation from Go code annotations
 .PHONY: swagger-split
 swagger-split: ## Split generated OpenAPI 3.0 spec into organized files
 	@echo "Splitting OpenAPI 3.0 specification..."
-	@if [ ! -f backend/docs/openapi3.yaml ]; then \
+	@if [ ! -f api/openapi3.yaml ]; then \
 		echo "OpenAPI 3.0 not found. Generating..."; \
 		$(MAKE) swagger-convert-v3; \
 	fi

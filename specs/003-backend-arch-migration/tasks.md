@@ -238,7 +238,7 @@
 
 - [ ] T116 [P] Update `backend/Dockerfile` — update migration file COPY path to `internal/app/database/migrations/`, verify Docker build passes
 - [ ] T117 [P] Update `backend/Makefile` — update test/build commands if any paths changed
-- [ ] T118 Update Swagger: run `swag init` with updated `--dir` and `--parseDependency` flags pointing to new handler locations, verify generated docs are identical
+- [ ] T118 Update Swagger: run `make docs` with updated `--dir` and `--parseDependency` flags pointing to new handler locations, verify generated docs are identical
 - [ ] T119 [P] Verify import direction rules (SC-006): run static analysis to confirm `pkg/` has zero imports from `domain/` or `app/`
 - [ ] T120 [P] Verify cross-domain isolation (SC-002): run static analysis to confirm no `domain/X` package imports `domain/Y` package
 - [ ] T121 Verify central router (SC-007): confirm `router.go` contains only `RegisterRoutes()` calls, no domain-specific route definitions

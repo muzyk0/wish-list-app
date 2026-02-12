@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=builder /app/bin/server .
 
 # Copy migrations (if needed at runtime)
-COPY --from=builder /app/internal/db/migrations ./internal/db/migrations
+COPY --from=builder /app/internal/app/database/migrations ./internal/app/database/migrations
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
