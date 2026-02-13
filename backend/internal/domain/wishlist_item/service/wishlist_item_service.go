@@ -65,6 +65,7 @@ type ItemOutput struct {
 	Priority    int
 	Notes       string
 	IsPurchased bool
+	IsReserved  bool
 	IsArchived  bool
 	CreatedAt   string
 	UpdatedAt   string
@@ -352,6 +353,7 @@ func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *It
 		Priority:    0,
 		Notes:       "",
 		IsPurchased: item.PurchasedByUserID.Valid,
+		IsReserved:  item.ReservedByUserID.Valid,
 		IsArchived:  item.ArchivedAt.Valid,
 		CreatedAt:   item.CreatedAt.Time.Format(time.RFC3339),
 		UpdatedAt:   item.UpdatedAt.Time.Format(time.RFC3339),

@@ -3,7 +3,7 @@ properties:
     example: 256GB, Blue Titanium
     maxLength: 2000
     type: string
-  imageUrl:
+  image_url:
     example: https://example.com/image.jpg
     type: string
   link:

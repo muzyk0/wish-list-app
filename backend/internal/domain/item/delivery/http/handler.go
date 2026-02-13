@@ -3,12 +3,12 @@ package http
 import (
 	"errors"
 	nethttp "net/http"
-	"strconv"
 
 	"wish-list/internal/domain/item/delivery/http/dto"
 	"wish-list/internal/domain/item/repository"
 	"wish-list/internal/domain/item/service"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -45,28 +45,8 @@ func NewHandler(svc service.ItemServiceInterface) *Handler {
 //	@Security		BearerAuth
 //	@Router			/items [get]
 func (h *Handler) GetMyItems(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
-
-	// Parse pagination parameters
-	page := 1
-	if pageStr := c.QueryParam("page"); pageStr != "" {
-		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
-			page = parsedPage
-		}
-	}
-
-	limit := 10
-	if limitStr := c.QueryParam("limit"); limitStr != "" {
-		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
-			limit = parsedLimit
-		}
-	}
+	userID := auth.MustGetUserID(c)
+	pagination := helpers.ParsePagination(c)
 
 	// Parse filter parameters
 	filters := repository.ItemFilters{
@@ -75,8 +55,8 @@ func (h *Handler) GetMyItems(c echo.Context) error {
 		Unattached:      c.QueryParam("unattached") == "true",
 		IncludeArchived: c.QueryParam("include_archived") == "true",
 		Search:          c.QueryParam("search"),
-		Page:            page,
-		Limit:           limit,
+		Page:            pagination.Page,
+		Limit:           pagination.Limit,
 	}
 
 	ctx := c.Request().Context()
@@ -107,27 +87,11 @@ func (h *Handler) GetMyItems(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/items [post]
 func (h *Handler) CreateItem(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
-	// Parse request body
 	var req dto.CreateItemRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -157,13 +121,7 @@ func (h *Handler) CreateItem(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/items/{id} [get]
 func (h *Handler) GetItem(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	itemID := c.Param("id")
 	ctx := c.Request().Context()
@@ -207,29 +165,13 @@ func (h *Handler) GetItem(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/items/{id} [put]
 func (h *Handler) UpdateItem(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	itemID := c.Param("id")
 
-	// Parse request body
 	var req dto.UpdateItemRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -270,19 +212,13 @@ func (h *Handler) UpdateItem(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/items/{id} [delete]
 func (h *Handler) DeleteItem(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	itemID := c.Param("id")
 	ctx := c.Request().Context()
 
 	// Soft delete item via service
-	err = h.service.SoftDeleteItem(ctx, itemID, userID)
+	err := h.service.SoftDeleteItem(ctx, itemID, userID)
 	if err != nil {
 		if errors.Is(err, service.ErrItemNotFound) {
 			return c.JSON(nethttp.StatusNotFound, map[string]string{
@@ -320,29 +256,13 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/items/{id}/mark-purchased [post]
 func (h *Handler) MarkItemAsPurchased(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	itemID := c.Param("id")
 
-	// Parse request body
 	var req dto.MarkPurchasedRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()

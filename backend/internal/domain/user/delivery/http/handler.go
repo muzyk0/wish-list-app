@@ -12,6 +12,7 @@ import (
 	userservice "wish-list/internal/domain/user/service"
 	"wish-list/internal/pkg/analytics"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -47,17 +48,8 @@ func NewHandler(service userservice.UserServiceInterface, tokenManager *auth.Tok
 //	@Router			/auth/register [post]
 func (h *Handler) Register(c echo.Context) error {
 	var req dto.RegisterRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -95,15 +87,7 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	// Set refresh token as httpOnly cookie
-	c.SetCookie(&nethttp.Cookie{
-		Name:     "refreshToken",
-		Value:    refreshToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: nethttp.SameSiteNoneMode,
-		MaxAge:   7 * 24 * 60 * 60, // 7 days
-	})
+	c.SetCookie(auth.NewRefreshTokenCookie(refreshToken))
 
 	// Track user registration analytics
 	_ = h.analyticsService.TrackUserRegistration(ctx, user.ID, user.Email)
@@ -132,17 +116,8 @@ func (h *Handler) Register(c echo.Context) error {
 //	@Router			/auth/login [post]
 func (h *Handler) Login(c echo.Context) error {
 	var req dto.LoginRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -176,15 +151,7 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 
 	// Set refresh token as httpOnly cookie
-	c.SetCookie(&nethttp.Cookie{
-		Name:     "refreshToken",
-		Value:    refreshToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: nethttp.SameSiteNoneMode,
-		MaxAge:   7 * 24 * 60 * 60, // 7 days
-	})
+	c.SetCookie(auth.NewRefreshTokenCookie(refreshToken))
 
 	// Track user login analytics
 	_ = h.analyticsService.TrackUserLogin(ctx, user.ID)
@@ -212,13 +179,7 @@ func (h *Handler) Login(c echo.Context) error {
 //	@Failure		500	{object}	map[string]string		"Internal server error"
 //	@Router			/protected/profile [get]
 func (h *Handler) GetProfile(c echo.Context) error {
-	// Get user from context (after JWT middleware)
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	ctx := c.Request().Context()
 	user, err := h.service.GetUser(ctx, userID)
@@ -255,26 +216,11 @@ func (h *Handler) GetProfile(c echo.Context) error {
 //	@Failure		500		{object}	map[string]string			"Internal server error"
 //	@Router			/protected/profile [put]
 func (h *Handler) UpdateProfile(c echo.Context) error {
-	// Get user from context (after JWT middleware)
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	var req dto.UpdateProfileRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -304,16 +250,10 @@ func (h *Handler) UpdateProfile(c echo.Context) error {
 // @Failure      500  {object}  map[string]string  "Internal server error"
 // @Router       /protected/account [delete]
 func (h *Handler) DeleteAccount(c echo.Context) error {
-	// Get user from context (after JWT middleware)
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	ctx := c.Request().Context()
-	err = h.accountCleanupService.DeleteUserAccount(ctx, userID, "user_requested_deletion")
+	err := h.accountCleanupService.DeleteUserAccount(ctx, userID, "user_requested_deletion")
 	if err != nil {
 		// Log detailed error server-side, return generic message to client
 		c.Logger().Errorf("Failed to delete user account: %v", err)
@@ -333,28 +273,24 @@ func (h *Handler) DeleteAccount(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  interface{}  "User data exported successfully"
-// @Failure      401  {object}  map[string]string  "Unauthorized"
-// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Success      200  {object}  dto.ExportUserDataResponse  "User data exported successfully"
+// @Failure      401  {object}  dto.ErrorResponse  "Unauthorized"
+// @Failure      500  {object}  dto.ErrorResponse  "Internal server error"
 // @Router       /protected/export-data [get]
 func (h *Handler) ExportUserData(c echo.Context) error {
-	// Get user from context (after JWT middleware)
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	ctx := c.Request().Context()
 	data, err := h.accountCleanupService.ExportUserData(ctx, userID)
 	if err != nil {
 		// Log detailed error server-side, return generic message to client
 		c.Logger().Errorf("Failed to export user data: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Unable to export user data",
+		return c.JSON(nethttp.StatusInternalServerError, dto.ErrorResponse{
+			Error: "Unable to export user data",
 		})
 	}
 
-	return c.JSON(nethttp.StatusOK, data)
+	// Convert map to typed response
+	response := dto.ExportUserDataResponseFromMap(data)
+	return c.JSON(nethttp.StatusOK, response)
 }

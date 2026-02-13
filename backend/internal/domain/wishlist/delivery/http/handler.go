@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	nethttp "net/http"
-	"strconv"
 
 	"wish-list/internal/domain/wishlist/delivery/http/dto"
 	"wish-list/internal/domain/wishlist/service"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -40,26 +40,11 @@ func NewHandler(svc service.WishListServiceInterface) *Handler {
 //	@Security		BearerAuth
 //	@Router			/wishlists [post]
 func (h *Handler) CreateWishList(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+
 	var req dto.CreateWishListRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
-	}
-
-	// Get user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -96,7 +81,7 @@ func (h *Handler) GetWishList(c echo.Context) error {
 		})
 	}
 
-	// Get user from context to check ownership
+	// Get user from context to check ownership (optional for public wishlists)
 	currentUserID, _, _, _ := auth.GetUserFromContext(c)
 
 	// If not the owner and not public, return forbidden
@@ -122,13 +107,7 @@ func (h *Handler) GetWishList(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists [get]
 func (h *Handler) GetWishListsByOwner(c echo.Context) error {
-	// Get user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	ctx := c.Request().Context()
 	wishLists, err := h.service.GetWishListsByOwner(ctx, userID)
@@ -159,28 +138,13 @@ func (h *Handler) GetWishListsByOwner(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id} [put]
 func (h *Handler) UpdateWishList(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+
 	wishListID := c.Param("id")
 
 	var req dto.UpdateWishListRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
-	}
-
-	// Get user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -220,18 +184,12 @@ func (h *Handler) UpdateWishList(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id} [delete]
 func (h *Handler) DeleteWishList(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+
 	wishListID := c.Param("id")
 
-	// Get user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
-
 	ctx := c.Request().Context()
-	err = h.service.DeleteWishList(ctx, wishListID, userID)
+	err := h.service.DeleteWishList(ctx, wishListID, userID)
 	if err != nil {
 		// Check if it's a forbidden error
 		if errors.Is(err, service.ErrWishListForbidden) {
@@ -286,23 +244,7 @@ func (h *Handler) GetWishListByPublicSlug(c echo.Context) error {
 //	@Router			/public/wishlists/{slug}/gift-items [get]
 func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 	publicSlug := c.Param("slug")
-
-	pageStr := c.QueryParam("page")
-	limitStr := c.QueryParam("limit")
-
-	page := 1
-	if pageStr != "" {
-		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
-			page = parsedPage
-		}
-	}
-
-	limit := 10
-	if limitStr != "" {
-		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
-			limit = parsedLimit
-		}
-	}
+	pagination := helpers.ParsePagination(c)
 
 	ctx := c.Request().Context()
 
@@ -328,8 +270,8 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 
 	// Apply pagination
 	total := len(giftItems)
-	start := (page - 1) * limit
-	end := min(start+limit, total)
+	start := (pagination.Page - 1) * pagination.Limit
+	end := min(start+pagination.Limit, total)
 
 	// Handle out of bounds
 	if start > total {
@@ -340,13 +282,13 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 	paginatedItems := giftItems[start:end]
 
 	// Calculate total pages
-	pages := (total + limit - 1) / limit
+	pages := (total + pagination.Limit - 1) / pagination.Limit
 
 	return c.JSON(nethttp.StatusOK, dto.GetGiftItemsResponse{
 		Items: dto.FromGiftItemOutputs(paginatedItems),
 		Total: total,
-		Page:  page,
-		Limit: limit,
+		Page:  pagination.Page,
+		Limit: pagination.Limit,
 		Pages: pages,
 	})
 }

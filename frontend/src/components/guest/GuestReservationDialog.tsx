@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { Heart } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +20,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiClient } from '@/lib/api/client';
+
+// Zod schema for guest reservation form validation
+const guestReservationSchema = z.object({
+  guestName: z
+    .string()
+    .min(1, 'Name is required')
+    .max(255, 'Name must be less than 255 characters'),
+  guestEmail: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Invalid email address'),
+});
+
+type GuestReservationFormData = z.infer<typeof guestReservationSchema>;
 
 interface GuestReservationDialogProps {
   wishlistSlug: string;
@@ -44,18 +61,31 @@ export function GuestReservationDialog({
   isPurchased,
 }: GuestReservationDialogProps) {
   const [open, setOpen] = useState(false);
-  const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
   const queryClient = useQueryClient();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    getValues,
+    formState: { errors },
+  } = useForm<GuestReservationFormData>({
+    resolver: zodResolver(guestReservationSchema),
+    defaultValues: {
+      guestName: '',
+      guestEmail: '',
+    },
+  });
+
   const reservationMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: GuestReservationFormData) => {
       return apiClient.createReservation(wishlistId, itemId, {
-        guest_name: guestName.trim(),
-        guest_email: guestEmail.trim(),
+        guest_name: data.guestName.trim(),
+        guest_email: data.guestEmail.trim(),
       }) as Promise<ReservationResponse>;
     },
     onSuccess: (data) => {
+      const { guestName, guestEmail } = getValues();
       toast.success('Reservation Successful!', {
         description: `You have reserved "${itemName}". A confirmation has been sent to ${guestEmail}`,
       });
@@ -81,8 +111,7 @@ export function GuestReservationDialog({
 
       // Close dialog and reset form
       setOpen(false);
-      setGuestName('');
-      setGuestEmail('');
+      reset();
     },
     onError: (error: Error) => {
       toast.error('Reservation Failed', {
@@ -91,25 +120,8 @@ export function GuestReservationDialog({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Basic validation
-    if (!guestName.trim()) {
-      toast.error('Validation Error', {
-        description: 'Please enter your name',
-      });
-      return;
-    }
-
-    if (!guestEmail.trim() || !guestEmail.includes('@')) {
-      toast.error('Validation Error', {
-        description: 'Please enter a valid email address',
-      });
-      return;
-    }
-
-    reservationMutation.mutate();
+  const onSubmit = (data: GuestReservationFormData) => {
+    reservationMutation.mutate(data);
   };
 
   return (
@@ -132,7 +144,7 @@ export function GuestReservationDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Reserve "{itemName}"</DialogTitle>
             <DialogDescription>
@@ -146,11 +158,15 @@ export function GuestReservationDialog({
               <Input
                 id="guest-name"
                 placeholder="John Doe"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                required
-                maxLength={200}
+                {...register('guestName')}
+                maxLength={255}
+                aria-invalid={!!errors.guestName}
               />
+              {errors.guestName && (
+                <p className="text-sm text-red-500">
+                  {errors.guestName.message}
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="guest-email">Your Email</Label>
@@ -158,10 +174,14 @@ export function GuestReservationDialog({
                 id="guest-email"
                 type="email"
                 placeholder="john@example.com"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                required
+                {...register('guestEmail')}
+                aria-invalid={!!errors.guestEmail}
               />
+              {errors.guestEmail && (
+                <p className="text-sm text-red-500">
+                  {errors.guestEmail.message}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 We'll send you a confirmation email with your reservation token
               </p>

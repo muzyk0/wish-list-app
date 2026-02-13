@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math"
 	nethttp "net/http"
-	"strconv"
 
 	"wish-list/internal/domain/reservation/delivery/http/dto"
 	"wish-list/internal/domain/reservation/service"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -48,34 +48,25 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 	giftItemID := c.Param("itemId")
 
 	var req dto.CreateReservationRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
-	}
+
 	ctx := c.Request().Context()
 
-	// Check if user is authenticated
+	// Check if user is authenticated (NOT an error - used to detect guest vs authenticated)
 	userIDStr, _, _, authErr := auth.GetUserFromContext(c)
 
 	var reservation *service.ReservationOutput
 	var err error
 
 	if authErr == nil {
-		// Parse the user ID string into a UUID
-		userID := pgtype.UUID{}
-		if err := userID.Scan(userIDStr); err != nil {
-			return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-				"error": "Invalid user ID format",
-			})
+		// Authenticated user reservation
+		userID, err := helpers.ParseUUID(c, userIDStr)
+		if err != nil {
+			return err
 		}
 
-		// Authenticated user reservation
 		reservation, err = h.service.CreateReservation(ctx, req.ToServiceInput(wishListID, giftItemID, userID))
 	} else {
 		// Guest reservation
@@ -133,36 +124,25 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 	giftItemID := c.Param("itemId")
 
 	var req dto.CancelReservationRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
 
-	// Check if user is authenticated
+	// Check if user is authenticated (NOT an error - used to detect guest vs authenticated)
 	userIDStr, _, _, authErr := auth.GetUserFromContext(c)
 
 	var reservation *service.ReservationOutput
 	var err error
 
 	if authErr == nil {
-		// Parse the user ID string into a UUID
-		userID := pgtype.UUID{}
-		if err := userID.Scan(userIDStr); err != nil {
-			return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-				"error": "Invalid user ID format",
-			})
+		// Authenticated user cancellation
+		userID, err := helpers.ParseUUID(c, userIDStr)
+		if err != nil {
+			return err
 		}
 
-		// Authenticated user cancellation
 		reservation, err = h.service.CancelReservation(ctx, service.CancelReservationInput{
 			WishListID:       wishListID,
 			GiftItemID:       giftItemID,
@@ -177,11 +157,9 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 			})
 		}
 
-		token := pgtype.UUID{}
-		if err := token.Scan(*req.ReservationToken); err != nil {
-			return c.JSON(nethttp.StatusBadRequest, map[string]string{
-				"error": "Invalid reservation token format",
-			})
+		token, err := helpers.ParseUUID(c, *req.ReservationToken)
+		if err != nil {
+			return err
 		}
 
 		reservation, err = h.service.CancelReservation(ctx, service.CancelReservationInput{
@@ -225,39 +203,12 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/reservations/user [get]
 func (h *Handler) GetUserReservations(c echo.Context) error {
-	pageStr := c.QueryParam("page")
-	limitStr := c.QueryParam("limit")
+	userIDStr := auth.MustGetUserID(c)
+	pagination := helpers.ParsePagination(c)
 
-	page := 1
-	if pageStr != "" {
-		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
-			page = parsedPage
-		}
-	}
-
-	limit := 10
-	if limitStr != "" {
-		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
-			limit = parsedLimit
-		}
-	}
-
-	offset := (page - 1) * limit
-
-	// Get user from context
-	userIDStr, _, _, err := auth.GetUserFromContext(c)
+	userID, err := helpers.ParseUUID(c, userIDStr)
 	if err != nil {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Unauthorized",
-		})
-	}
-
-	// Parse the user ID string into a UUID
-	userID := pgtype.UUID{}
-	if err := userID.Scan(userIDStr); err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Invalid user ID format",
-		})
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -270,7 +221,7 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 		})
 	}
 
-	reservations, err := h.service.GetUserReservations(ctx, userID, limit, offset)
+	reservations, err := h.service.GetUserReservations(ctx, userID, pagination.Limit, pagination.Offset)
 	if err != nil {
 		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to get user reservations: %w", err).Error(),
@@ -278,7 +229,7 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 	}
 
 	// Calculate total pages
-	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
 	if totalPages == 0 {
 		totalPages = 1
 	}
@@ -286,8 +237,8 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 	response := dto.UserReservationsResponse{
 		Data: dto.FromReservationDetails(reservations),
 		Pagination: map[string]any{
-			"page":       page,
-			"limit":      limit,
+			"page":       pagination.Page,
+			"limit":      pagination.Limit,
 			"total":      totalCount,
 			"totalPages": totalPages,
 		},
@@ -315,11 +266,9 @@ func (h *Handler) GetGuestReservations(c echo.Context) error {
 		})
 	}
 
-	token := pgtype.UUID{}
-	if err := token.Scan(tokenStr); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid reservation token format",
-		})
+	token, err := helpers.ParseUUID(c, tokenStr)
+	if err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()

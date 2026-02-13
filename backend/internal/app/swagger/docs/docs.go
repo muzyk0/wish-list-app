@@ -681,10 +681,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Image uploaded successfully, returns URL",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse"
                         }
                     },
                     "400": {
@@ -1247,24 +1244,20 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "User data exported successfully",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2602,7 +2595,7 @@ const docTemplate = `{
                     "maxLength": 2000,
                     "example": "256GB, Blue Titanium"
                 },
-                "imageUrl": {
+                "image_url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
                 },
@@ -2636,7 +2629,7 @@ const docTemplate = `{
         "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
                 },
@@ -2648,15 +2641,15 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "imageUrl": {
+                "image_url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
                 },
-                "isArchived": {
+                "is_archived": {
                     "type": "boolean",
                     "example": false
                 },
-                "isPurchased": {
+                "is_purchased": {
                     "type": "boolean",
                     "example": false
                 },
@@ -2668,7 +2661,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Preferred color: Blue"
                 },
-                "ownerId": {
+                "owner_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440001"
                 },
@@ -2684,7 +2677,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "iPhone 15 Pro"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
                 }
@@ -2693,10 +2686,10 @@ const docTemplate = `{
         "wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest": {
             "type": "object",
             "required": [
-                "purchasedPrice"
+                "purchased_price"
             ],
             "properties": {
-                "purchasedPrice": {
+                "purchased_price": {
                     "type": "number",
                     "minimum": 0,
                     "example": 899.99
@@ -2720,11 +2713,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "totalCount": {
+                "total_count": {
                     "type": "integer",
                     "example": 42
                 },
-                "totalPages": {
+                "total_pages": {
                     "type": "integer",
                     "example": 5
                 }
@@ -2737,7 +2730,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 2000
                 },
-                "imageUrl": {
+                "image_url": {
                     "type": "string"
                 },
                 "link": {
@@ -2941,6 +2934,18 @@ const docTemplate = `{
                 }
             }
         },
+        "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "example": "https://s3.amazonaws.com/bucket/images/uuid.jpg"
+                }
+            }
+        },
         "wish-list_internal_domain_user_delivery_http_dto.AuthResponse": {
             "type": "object",
             "required": [
@@ -2964,6 +2969,147 @@ const docTemplate = `{
                             "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
                         }
                     ]
+                }
+            }
+        },
+        "wish-list_internal_domain_user_delivery_http_dto.ErrorResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Error message"
+                }
+            }
+        },
+        "wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse": {
+            "type": "object",
+            "required": [
+                "export_format",
+                "exported_at",
+                "user",
+                "wishlists"
+            ],
+            "properties": {
+                "export_format": {
+                    "type": "string",
+                    "example": "json"
+                },
+                "exported_at": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "user": {
+                    "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse"
+                },
+                "wishlists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse"
+                    }
+                }
+            }
+        },
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "256GB, Blue Titanium"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "image_url": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://apple.com/iphone-15-pro"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "iPhone 15 Pro"
+                },
+                "price": {
+                    "type": "number",
+                    "example": 999.99
+                },
+                "priority": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440002"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        },
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "My birthday wishlist"
+                },
+                "gift_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "is_public": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "occasion": {
+                    "type": "string",
+                    "example": "Birthday"
+                },
+                "public_slug": {
+                    "type": "string",
+                    "example": "birthday-2024-abc123"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Birthday 2024"
                 }
             }
         },
@@ -3247,10 +3393,10 @@ const docTemplate = `{
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest": {
             "type": "object",
             "required": [
-                "itemId"
+                "item_id"
             ],
             "properties": {
-                "itemId": {
+                "item_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
@@ -3267,7 +3413,7 @@ const docTemplate = `{
                     "maxLength": 2000,
                     "example": "256GB, Blue Titanium"
                 },
-                "imageUrl": {
+                "image_url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
                 },
@@ -3302,7 +3448,7 @@ const docTemplate = `{
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
                 },
@@ -3314,15 +3460,19 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "imageUrl": {
+                "image_url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
                 },
-                "isArchived": {
+                "is_archived": {
                     "type": "boolean",
                     "example": false
                 },
-                "isPurchased": {
+                "is_purchased": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "is_reserved": {
                     "type": "boolean",
                     "example": false
                 },
@@ -3334,7 +3484,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Preferred color: Blue"
                 },
-                "ownerId": {
+                "owner_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440001"
                 },
@@ -3350,7 +3500,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "iPhone 15 Pro"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
                 }
@@ -3373,11 +3523,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "totalCount": {
+                "total_count": {
                     "type": "integer",
                     "example": 42
                 },
-                "totalPages": {
+                "total_pages": {
                     "type": "integer",
                     "example": 5
                 }

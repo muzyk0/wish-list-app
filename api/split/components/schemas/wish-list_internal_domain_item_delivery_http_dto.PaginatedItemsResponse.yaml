@@ -9,10 +9,10 @@ properties:
   page:
     example: 1
     type: integer
-  totalCount:
+  total_count:
     example: 42
     type: integer
-  totalPages:
+  total_pages:
     example: 5
     type: integer
 type: object

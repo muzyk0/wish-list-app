@@ -131,7 +131,7 @@ definitions:
         example: 256GB, Blue Titanium
         maxLength: 2000
         type: string
-      imageUrl:
+      image_url:
         example: https://example.com/image.jpg
         type: string
       link:
@@ -159,7 +159,7 @@ definitions:
     type: object
   wish-list_internal_domain_item_delivery_http_dto.ItemResponse:
     properties:
-      createdAt:
+      created_at:
         example: "2024-01-01T12:00:00Z"
         type: string
       description:
@@ -168,13 +168,13 @@ definitions:
       id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
-      imageUrl:
+      image_url:
         example: https://example.com/image.jpg
         type: string
-      isArchived:
+      is_archived:
         example: false
         type: boolean
-      isPurchased:
+      is_purchased:
         example: false
         type: boolean
       link:
@@ -183,7 +183,7 @@ definitions:
       notes:
         example: 'Preferred color: Blue'
         type: string
-      ownerId:
+      owner_id:
         example: 550e8400-e29b-41d4-a716-446655440001
         type: string
       price:
@@ -195,18 +195,18 @@ definitions:
       title:
         example: iPhone 15 Pro
         type: string
-      updatedAt:
+      updated_at:
         example: "2024-01-01T12:00:00Z"
         type: string
     type: object
   wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest:
     properties:
-      purchasedPrice:
+      purchased_price:
         example: 899.99
         minimum: 0
         type: number
     required:
-    - purchasedPrice
+    - purchased_price
     type: object
   wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse:
     properties:
@@ -220,10 +220,10 @@ definitions:
       page:
         example: 1
         type: integer
-      totalCount:
+      total_count:
         example: 42
         type: integer
-      totalPages:
+      total_pages:
         example: 5
         type: integer
     type: object
@@ -232,7 +232,7 @@ definitions:
       description:
         maxLength: 2000
         type: string
-      imageUrl:
+      image_url:
         type: string
       link:
         type: string
@@ -372,6 +372,14 @@ definitions:
     - id
     - title
     type: object
+  wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse:
+    properties:
+      url:
+        example: https://s3.amazonaws.com/bucket/images/uuid.jpg
+        type: string
+    required:
+    - url
+    type: object
   wish-list_internal_domain_user_delivery_http_dto.AuthResponse:
     properties:
       accessToken:
@@ -388,6 +396,107 @@ definitions:
     - accessToken
     - refreshToken
     - user
+    type: object
+  wish-list_internal_domain_user_delivery_http_dto.ErrorResponse:
+    properties:
+      error:
+        example: Error message
+        type: string
+    required:
+    - error
+    type: object
+  wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse:
+    properties:
+      export_format:
+        example: json
+        type: string
+      exported_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse'
+      wishlists:
+        items:
+          $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse'
+        type: array
+    required:
+    - export_format
+    - exported_at
+    - user
+    - wishlists
+    type: object
+  wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      description:
+        example: 256GB, Blue Titanium
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      image_url:
+        example: https://example.com/image.jpg
+        type: string
+      link:
+        example: https://apple.com/iphone-15-pro
+        type: string
+      name:
+        example: iPhone 15 Pro
+        type: string
+      price:
+        example: 999.99
+        type: number
+      priority:
+        example: 3
+        type: integer
+    type: object
+  wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+      name:
+        example: John Doe
+        type: string
+      updated_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+  wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      description:
+        example: My birthday wishlist
+        type: string
+      gift_items:
+        items:
+          $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse'
+        type: array
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      is_public:
+        example: true
+        type: boolean
+      occasion:
+        example: Birthday
+        type: string
+      public_slug:
+        example: birthday-2024-abc123
+        type: string
+      title:
+        example: Birthday 2024
+        type: string
     type: object
   wish-list_internal_domain_user_delivery_http_dto.LoginRequest:
     properties:
@@ -580,11 +689,11 @@ definitions:
     type: object
   wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest:
     properties:
-      itemId:
+      item_id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     required:
-    - itemId
+    - item_id
     type: object
   wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest:
     properties:
@@ -592,7 +701,7 @@ definitions:
         example: 256GB, Blue Titanium
         maxLength: 2000
         type: string
-      imageUrl:
+      image_url:
         example: https://example.com/image.jpg
         type: string
       link:
@@ -621,7 +730,7 @@ definitions:
     type: object
   wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse:
     properties:
-      createdAt:
+      created_at:
         example: "2024-01-01T12:00:00Z"
         type: string
       description:
@@ -630,13 +739,16 @@ definitions:
       id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
-      imageUrl:
+      image_url:
         example: https://example.com/image.jpg
         type: string
-      isArchived:
+      is_archived:
         example: false
         type: boolean
-      isPurchased:
+      is_purchased:
+        example: false
+        type: boolean
+      is_reserved:
         example: false
         type: boolean
       link:
@@ -645,7 +757,7 @@ definitions:
       notes:
         example: 'Preferred color: Blue'
         type: string
-      ownerId:
+      owner_id:
         example: 550e8400-e29b-41d4-a716-446655440001
         type: string
       price:
@@ -657,7 +769,7 @@ definitions:
       title:
         example: iPhone 15 Pro
         type: string
-      updatedAt:
+      updated_at:
         example: "2024-01-01T12:00:00Z"
         type: string
     type: object
@@ -673,10 +785,10 @@ definitions:
       page:
         example: 1
         type: integer
-      totalCount:
+      total_count:
         example: 42
         type: integer
-      totalPages:
+      total_pages:
         example: 5
         type: integer
     type: object
@@ -1126,9 +1238,7 @@ paths:
         "200":
           description: Image uploaded successfully, returns URL
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse'
         "400":
           description: Invalid file or file too large
           schema:
@@ -1495,19 +1605,16 @@ paths:
       responses:
         "200":
           description: User data exported successfully
-          schema: {}
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Export user data

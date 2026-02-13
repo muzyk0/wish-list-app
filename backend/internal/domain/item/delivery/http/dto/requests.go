@@ -9,7 +9,7 @@ type CreateItemRequest struct {
 	Title       string  `json:"title" validate:"required,min=1,max=255" example:"iPhone 15 Pro"`
 	Description string  `json:"description" validate:"max=2000" example:"256GB, Blue Titanium"`
 	Link        string  `json:"link" validate:"omitempty,url" example:"https://apple.com/iphone-15-pro"`
-	ImageURL    string  `json:"imageUrl" validate:"omitempty,url" example:"https://example.com/image.jpg"`
+	ImageURL    string  `json:"image_url" validate:"omitempty,url" example:"https://example.com/image.jpg"`
 	Price       float64 `json:"price" validate:"omitempty,gte=0" example:"999.99"`
 	Priority    int32   `json:"priority" validate:"omitempty,gte=0,lte=5" example:"3"`
 	Notes       string  `json:"notes" validate:"max:1000" example:"Preferred color: Blue"`
@@ -33,7 +33,7 @@ type UpdateItemRequest struct {
 	Title       *string  `json:"title" validate:"omitempty,min=1,max=255"`
 	Description *string  `json:"description" validate:"omitempty,max=2000"`
 	Link        *string  `json:"link" validate:"omitempty,url"`
-	ImageURL    *string  `json:"imageUrl" validate:"omitempty,url"`
+	ImageURL    *string  `json:"image_url" validate:"omitempty,url"`
 	Price       *float64 `json:"price" validate:"omitempty,gte=0"`
 	Priority    *int32   `json:"priority" validate:"omitempty,gte=0,lte=5"`
 	Notes       *string  `json:"notes" validate:"omitempty,max=1000"`
@@ -54,5 +54,5 @@ func (r *UpdateItemRequest) ToDomain() service.UpdateItemInput {
 
 // MarkPurchasedRequest represents the request to mark item as purchased
 type MarkPurchasedRequest struct {
-	PurchasedPrice float64 `json:"purchasedPrice" validate:"required,gte=0" example:"899.99"`
+	PurchasedPrice float64 `json:"purchased_price" validate:"required,gte=0" example:"899.99"`
 }

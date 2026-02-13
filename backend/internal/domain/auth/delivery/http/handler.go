@@ -5,11 +5,11 @@ import (
 	"errors"
 	"net/http"
 	"strings"
-	"time"
 
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	userservice "wish-list/internal/domain/user/service"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -107,15 +107,7 @@ func (h *Handler) Refresh(c echo.Context) error {
 	}
 
 	// Set new refresh token cookie for web clients
-	c.SetCookie(&http.Cookie{
-		Name:     "refreshToken",
-		Value:    newRefreshToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   7 * 24 * 60 * 60, // 7 days
-	})
+	c.SetCookie(auth.NewRefreshTokenCookie(newRefreshToken))
 
 	// Return both tokens in response for mobile clients
 	return c.JSON(http.StatusOK, dto.RefreshResponse{
@@ -138,13 +130,7 @@ func (h *Handler) Refresh(c echo.Context) error {
 //	@Failure		500	{object}	map[string]string	"Internal server error"
 //	@Router			/auth/mobile-handoff [post]
 func (h *Handler) MobileHandoff(c echo.Context) error {
-	// Get authenticated user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	// Parse user ID as UUID
 	userUUID, err := uuid.Parse(userID)
@@ -268,16 +254,7 @@ func (h *Handler) Exchange(c echo.Context) error {
 //	@Router			/auth/logout [post]
 func (h *Handler) Logout(c echo.Context) error {
 	// Clear refresh token cookie
-	c.SetCookie(&http.Cookie{
-		Name:     "refreshToken",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   -1, // Delete cookie
-		Expires:  time.Unix(0, 0),
-	})
+	c.SetCookie(auth.ClearRefreshTokenCookie())
 
 	return c.JSON(http.StatusOK, dto.MessageResponse{
 		Message: "Logged out successfully",
@@ -300,30 +277,15 @@ func (h *Handler) Logout(c echo.Context) error {
 //	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/auth/change-email [post]
 func (h *Handler) ChangeEmail(c echo.Context) error {
-	// Get authenticated user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	var req dto.ChangeEmailRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
-	err = h.userService.ChangeEmail(ctx, userID, req.CurrentPassword, req.NewEmail)
+	err := h.userService.ChangeEmail(ctx, userID, req.CurrentPassword, req.NewEmail)
 	if err != nil {
 		// Check for specific errors
 		if errors.Is(err, userservice.ErrInvalidPassword) {
@@ -363,30 +325,15 @@ func (h *Handler) ChangeEmail(c echo.Context) error {
 //	@Failure		500		{object}	map[string]string		"Internal server error"
 //	@Router			/auth/change-password [post]
 func (h *Handler) ChangePassword(c echo.Context) error {
-	// Get authenticated user from context
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	var req dto.ChangePasswordRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
-	err = h.userService.ChangePassword(ctx, userID, req.CurrentPassword, req.NewPassword)
+	err := h.userService.ChangePassword(ctx, userID, req.CurrentPassword, req.NewPassword)
 	if err != nil {
 		// Check for specific errors
 		if errors.Is(err, userservice.ErrInvalidPassword) {

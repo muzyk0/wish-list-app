@@ -854,9 +854,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse"];
                     };
                 };
                 /** @description Invalid file or file too large */
@@ -1464,7 +1462,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1473,9 +1471,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1484,9 +1480,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -2799,7 +2793,7 @@ export interface components {
             /** @example 256GB, Blue Titanium */
             description?: string;
             /** @example https://example.com/image.jpg */
-            imageUrl?: string;
+            image_url?: string;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
             /** @example Preferred color: Blue */
@@ -2813,23 +2807,23 @@ export interface components {
         };
         "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
             /** @example 2024-01-01T12:00:00Z */
-            createdAt?: string;
+            created_at?: string;
             /** @example 256GB, Blue Titanium */
             description?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id?: string;
             /** @example https://example.com/image.jpg */
-            imageUrl?: string;
+            image_url?: string;
             /** @example false */
-            isArchived?: boolean;
+            is_archived?: boolean;
             /** @example false */
-            isPurchased?: boolean;
+            is_purchased?: boolean;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
             /** @example Preferred color: Blue */
             notes?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440001 */
-            ownerId?: string;
+            owner_id?: string;
             /** @example 999.99 */
             price?: number;
             /** @example 3 */
@@ -2837,11 +2831,11 @@ export interface components {
             /** @example iPhone 15 Pro */
             title?: string;
             /** @example 2024-01-01T12:00:00Z */
-            updatedAt?: string;
+            updated_at?: string;
         };
         "wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest": {
             /** @example 899.99 */
-            purchasedPrice: number;
+            purchased_price: number;
         };
         "wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse": {
             items?: components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ItemResponse"][];
@@ -2850,13 +2844,13 @@ export interface components {
             /** @example 1 */
             page?: number;
             /** @example 42 */
-            totalCount?: number;
+            total_count?: number;
             /** @example 5 */
-            totalPages?: number;
+            total_pages?: number;
         };
         "wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest": {
             description?: string;
-            imageUrl?: string;
+            image_url?: string;
             link?: string;
             notes?: string;
             price?: number;
@@ -2914,6 +2908,10 @@ export interface components {
             owner_last_name?: string;
             title: string;
         };
+        "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
+            /** @example https://s3.amazonaws.com/bucket/images/uuid.jpg */
+            url: string;
+        };
         "wish-list_internal_domain_user_delivery_http_dto.AuthResponse": {
             /** @description Access token (short-lived, 15 minutes) */
             accessToken: string;
@@ -2921,6 +2919,65 @@ export interface components {
             refreshToken: string;
             /** @description User information */
             user: components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.UserResponse"];
+        };
+        "wish-list_internal_domain_user_delivery_http_dto.ErrorResponse": {
+            /** @example Error message */
+            error: string;
+        };
+        "wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse": {
+            /** @example json */
+            export_format: string;
+            /** @example 2024-01-01T12:00:00Z */
+            exported_at: string;
+            user: components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse"];
+            wishlists: components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse"][];
+        };
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse": {
+            /** @example 2024-01-01T12:00:00Z */
+            created_at?: string;
+            /** @example 256GB, Blue Titanium */
+            description?: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id?: string;
+            /** @example https://example.com/image.jpg */
+            image_url?: string;
+            /** @example https://apple.com/iphone-15-pro */
+            link?: string;
+            /** @example iPhone 15 Pro */
+            name?: string;
+            /** @example 999.99 */
+            price?: number;
+            /** @example 3 */
+            priority?: number;
+        };
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse": {
+            /** @example 2024-01-01T12:00:00Z */
+            created_at?: string;
+            /** @example user@example.com */
+            email?: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440002 */
+            id?: string;
+            /** @example John Doe */
+            name?: string;
+            /** @example 2024-01-01T12:00:00Z */
+            updated_at?: string;
+        };
+        "wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse": {
+            /** @example 2024-01-01T12:00:00Z */
+            created_at?: string;
+            /** @example My birthday wishlist */
+            description?: string;
+            gift_items?: components["schemas"]["wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse"][];
+            /** @example 550e8400-e29b-41d4-a716-446655440001 */
+            id?: string;
+            /** @example true */
+            is_public?: boolean;
+            /** @example Birthday */
+            occasion?: string;
+            /** @example birthday-2024-abc123 */
+            public_slug?: string;
+            /** @example Birthday 2024 */
+            title?: string;
         };
         "wish-list_internal_domain_user_delivery_http_dto.LoginRequest": {
             email: string;
@@ -3006,13 +3063,13 @@ export interface components {
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest": {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            itemId: string;
+            item_id: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest": {
             /** @example 256GB, Blue Titanium */
             description?: string;
             /** @example https://example.com/image.jpg */
-            imageUrl?: string;
+            image_url?: string;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
             /** @example Preferred color: Blue */
@@ -3026,23 +3083,25 @@ export interface components {
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
             /** @example 2024-01-01T12:00:00Z */
-            createdAt?: string;
+            created_at?: string;
             /** @example 256GB, Blue Titanium */
             description?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id?: string;
             /** @example https://example.com/image.jpg */
-            imageUrl?: string;
+            image_url?: string;
             /** @example false */
-            isArchived?: boolean;
+            is_archived?: boolean;
             /** @example false */
-            isPurchased?: boolean;
+            is_purchased?: boolean;
+            /** @example false */
+            is_reserved?: boolean;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
             /** @example Preferred color: Blue */
             notes?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440001 */
-            ownerId?: string;
+            owner_id?: string;
             /** @example 999.99 */
             price?: number;
             /** @example 3 */
@@ -3050,7 +3109,7 @@ export interface components {
             /** @example iPhone 15 Pro */
             title?: string;
             /** @example 2024-01-01T12:00:00Z */
-            updatedAt?: string;
+            updated_at?: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse": {
             items?: components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"][];
@@ -3059,9 +3118,9 @@ export interface components {
             /** @example 1 */
             page?: number;
             /** @example 42 */
-            totalCount?: number;
+            total_count?: number;
             /** @example 5 */
-            totalPages?: number;
+            total_pages?: number;
         };
     };
     responses: never;
@@ -3094,7 +3153,13 @@ export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationDet
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationStatusResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoUserReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishListSummary = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'];
+export type SchemaWishListInternalDomainStorageDeliveryHttpDtoUploadImageResponse = components['schemas']['wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoAuthResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.AuthResponse'];
+export type SchemaWishListInternalDomainUserDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'];
+export type SchemaWishListInternalDomainUserDeliveryHttpDtoExportUserDataResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse'];
+export type SchemaWishListInternalDomainUserDeliveryHttpDtoExportedGiftItemResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse'];
+export type SchemaWishListInternalDomainUserDeliveryHttpDtoExportedUserResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse'];
+export type SchemaWishListInternalDomainUserDeliveryHttpDtoExportedWishlistResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoLoginRequest = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.LoginRequest'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoRegisterRequest = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.RegisterRequest'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoUpdateProfileRequest = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest'];

@@ -3,11 +3,11 @@ package http
 import (
 	"errors"
 	nethttp "net/http"
-	"strconv"
 
 	"wish-list/internal/domain/wishlist_item/delivery/http/dto"
 	"wish-list/internal/domain/wishlist_item/service"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -45,26 +45,12 @@ func (h *Handler) GetWishlistItems(c echo.Context) error {
 	userID, _, _, _ := auth.GetUserFromContext(c)
 
 	wishlistID := c.Param("id")
-
-	// Parse pagination parameters
-	page := 1
-	if pageStr := c.QueryParam("page"); pageStr != "" {
-		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
-			page = parsedPage
-		}
-	}
-
-	limit := 10
-	if limitStr := c.QueryParam("limit"); limitStr != "" {
-		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
-			limit = parsedLimit
-		}
-	}
+	pagination := helpers.ParsePagination(c)
 
 	ctx := c.Request().Context()
 
 	// Get items
-	result, err := h.service.GetWishlistItems(ctx, wishlistID, userID, page, limit)
+	result, err := h.service.GetWishlistItems(ctx, wishlistID, userID, pagination.Page, pagination.Limit)
 	if err != nil {
 		if errors.Is(err, service.ErrWishListNotFound) {
 			return c.JSON(nethttp.StatusNotFound, map[string]string{
@@ -103,35 +89,19 @@ func (h *Handler) GetWishlistItems(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id}/items [post]
 func (h *Handler) AttachItemToWishlist(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	wishlistID := c.Param("id")
 
-	// Parse request body
 	var req dto.AttachItemRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
 
 	// Attach item
-	err = h.service.AttachItem(ctx, wishlistID, req.ItemID, userID)
+	err := h.service.AttachItem(ctx, wishlistID, req.ItemID, userID)
 	if err != nil {
 		if errors.Is(err, service.ErrWishListNotFound) || errors.Is(err, service.ErrItemNotFound) {
 			return c.JSON(nethttp.StatusNotFound, map[string]string{
@@ -174,29 +144,13 @@ func (h *Handler) AttachItemToWishlist(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id}/items/new [post]
 func (h *Handler) CreateItemInWishlist(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	wishlistID := c.Param("id")
 
-	// Parse request body
 	var req dto.CreateItemRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	ctx := c.Request().Context()
@@ -238,13 +192,7 @@ func (h *Handler) CreateItemInWishlist(c echo.Context) error {
 //	@Security		BearerAuth
 //	@Router			/wishlists/{id}/items/{itemId} [delete]
 func (h *Handler) DetachItemFromWishlist(c echo.Context) error {
-	// Get authenticated user ID
-	userID, _, _, err := auth.GetUserFromContext(c)
-	if err != nil || userID == "" {
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Not authenticated",
-		})
-	}
+	userID := auth.MustGetUserID(c)
 
 	wishlistID := c.Param("id")
 	itemID := c.Param("itemId")
@@ -252,7 +200,7 @@ func (h *Handler) DetachItemFromWishlist(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	// Detach item
-	err = h.service.DetachItem(ctx, wishlistID, itemID, userID)
+	err := h.service.DetachItem(ctx, wishlistID, itemID, userID)
 	if err != nil {
 		if errors.Is(err, service.ErrWishListNotFound) {
 			return c.JSON(nethttp.StatusNotFound, map[string]string{

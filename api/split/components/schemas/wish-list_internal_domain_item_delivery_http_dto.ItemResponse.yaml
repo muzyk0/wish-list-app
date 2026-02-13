@@ -1,5 +1,5 @@
 properties:
-  createdAt:
+  created_at:
     example: '2024-01-01T12:00:00Z'
     type: string
   description:
@@ -8,13 +8,13 @@ properties:
   id:
     example: 550e8400-e29b-41d4-a716-446655440000
     type: string
-  imageUrl:
+  image_url:
     example: https://example.com/image.jpg
     type: string
-  isArchived:
+  is_archived:
     example: false
     type: boolean
-  isPurchased:
+  is_purchased:
     example: false
     type: boolean
   link:
@@ -23,7 +23,7 @@ properties:
   notes:
     example: 'Preferred color: Blue'
     type: string
-  ownerId:
+  owner_id:
     example: 550e8400-e29b-41d4-a716-446655440001
     type: string
   price:
@@ -35,7 +35,7 @@ properties:
   title:
     example: iPhone 15 Pro
     type: string
-  updatedAt:
+  updated_at:
     example: '2024-01-01T12:00:00Z'
     type: string
 type: object

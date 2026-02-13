@@ -11,6 +11,7 @@ import (
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	usermodels "wish-list/internal/domain/user/models"
 	"wish-list/internal/pkg/auth"
+	"wish-list/internal/pkg/helpers"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -104,16 +105,8 @@ type FacebookUserInfo struct {
 // @Router       /auth/oauth/google [post]
 func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 	var req dto.OAuthCodeRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Code is required",
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	// Exchange authorization code for token
@@ -200,16 +193,8 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 // @Router       /auth/oauth/facebook [post]
 func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 	var req dto.OAuthCodeRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
-	if err := c.Validate(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Code is required",
-		})
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
 	}
 
 	// Exchange authorization code for token

@@ -1,7 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
+import { z } from 'zod';
 import {
   AuthDivider,
   AuthFooter,
@@ -13,12 +16,33 @@ import { OAuthButtonGroup } from '@/components/OAuthButton';
 import { useOAuthHandler } from '@/hooks/useOAuthHandler';
 import { loginUser } from '@/lib/api';
 
+// Zod schema for login form validation
+const loginSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(100, 'Password is too long'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { oauthLoading, handleOAuth } = useOAuthHandler();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
@@ -31,35 +55,47 @@ export default function LoginScreen() {
     },
   });
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields.');
-      return;
-    }
-    mutation.mutate({ email, password });
+  const onSubmit = (data: LoginFormData) => {
+    mutation.mutate(data);
   };
 
   return (
     <AuthLayout title="Wish List" subtitle="Welcome back!">
-      <AuthInput
-        testID="login-email-input"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        icon="email-outline"
-        keyboardType="email-address"
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AuthInput
+            testID="login-email-input"
+            placeholder="Email"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            icon="email-outline"
+            keyboardType="email-address"
+            error={errors.email?.message}
+          />
+        )}
       />
 
-      <AuthInput
-        testID="login-password-input"
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        icon="lock-outline"
-        secureTextEntry
-        showPasswordToggle
-        showPassword={showPassword}
-        onTogglePassword={() => setShowPassword(!showPassword)}
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AuthInput
+            testID="login-password-input"
+            placeholder="Password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            icon="lock-outline"
+            secureTextEntry
+            showPasswordToggle
+            showPassword={showPassword}
+            onTogglePassword={() => setShowPassword(!showPassword)}
+            error={errors.password?.message}
+          />
+        )}
       />
 
       <AuthGradientButton
@@ -67,7 +103,7 @@ export default function LoginScreen() {
         label="Sign In"
         loadingLabel="Signing in..."
         loading={mutation.isPending}
-        onPress={handleLogin}
+        onPress={handleSubmit(onSubmit)}
       />
 
       <AuthDivider />

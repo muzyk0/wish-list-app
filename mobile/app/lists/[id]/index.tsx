@@ -27,8 +27,8 @@ const GiftItemCard = ({
   onReserve: (item: WishlistItem) => void;
   onEdit: (item: WishlistItem) => void;
 }) => {
-  const isReserved = item.isPurchased || item.isArchived;
-  const isPurchased = item.isPurchased;
+  const isReserved = item.is_purchased || item.is_archived;
+  const isPurchased = item.is_purchased;
 
   return (
     <BlurView intensity={20} style={styles.giftItemCard}>
@@ -323,15 +323,15 @@ export default function WishListScreen() {
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValueSecondary}>
-                  {giftItems?.items?.filter((item) => item.isReserved).length ||
-                    0}
+                  {giftItems?.items?.filter((item) => item.is_reserved)
+                    .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Reserved</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {giftItems?.items?.filter((item) => item.isPurchased)
+                  {giftItems?.items?.filter((item) => item.is_purchased)
                     .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Purchased</Text>
