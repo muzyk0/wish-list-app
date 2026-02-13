@@ -236,17 +236,17 @@
 
 **Purpose**: Final quality checks, build infrastructure updates, and documentation
 
-- [ ] T116 [P] Update `backend/Dockerfile` — update migration file COPY path to `internal/app/database/migrations/`, verify Docker build passes
-- [ ] T117 [P] Update `backend/Makefile` — update test/build commands if any paths changed
-- [ ] T118 Update Swagger: run `make docs` with updated `--dir` and `--parseDependency` flags pointing to new handler locations, verify generated docs are identical
-- [ ] T119 [P] Verify import direction rules (SC-006): run static analysis to confirm `pkg/` has zero imports from `domain/` or `app/`
-- [ ] T120 [P] Verify cross-domain isolation (SC-002): run static analysis to confirm no `domain/X` package imports `domain/Y` package
-- [ ] T121 Verify central router (SC-007): confirm `router.go` contains only `RegisterRoutes()` calls, no domain-specific route definitions
-- [ ] T122 Start server and manually verify key endpoints return identical responses (SC-004): `GET /api/v1/health`, auth flow, wishlist CRUD, item CRUD, reservation flow
-- [ ] T123 Verify startup time (SC-005): compare server startup time before and after migration, confirm no measurable regression
-- [ ] T124 Update `CLAUDE.md` backend structure section to reflect new `internal/app/`, `internal/pkg/`, `internal/domain/` layout
-- [ ] T125 Run quickstart.md validation — confirm all example paths in quickstart.md are accurate
-- [ ] T126 [P] Update version identifiers per CR-005 — increment patch version in API docs (`@version` annotation) and any version constants to reflect structural refactor
+- [X] T116 [P] Update `backend/Dockerfile` — update migration file COPY path to `internal/app/database/migrations/`, verify Docker build passes
+- [X] T117 [P] Update `backend/Makefile` — update test/build commands if any paths changed
+- [X] T118 Update Swagger: run `make docs` with updated `--dir` and `--parseDependency` flags pointing to new handler locations, verify generated docs are identical
+- [X] T119 [P] Verify import direction rules (SC-006): run static analysis to confirm `pkg/` has zero imports from `domain/` or `app/`
+- [X] T120 [P] Verify cross-domain isolation (SC-002): run static analysis to confirm no `domain/X` package imports `domain/Y` package
+- [X] T121 Verify central router (SC-007): confirm `router.go` contains only `RegisterRoutes()` calls, no domain-specific route definitions
+- [X] T122 Start server and manually verify key endpoints return identical responses (SC-004): `GET /api/v1/health`, auth flow, wishlist CRUD, item CRUD, reservation flow
+- [X] T123 Verify startup time (SC-005): compare server startup time before and after migration, confirm no measurable regression
+- [X] T124 Update `CLAUDE.md` backend structure section to reflect new `internal/app/`, `internal/pkg/`, `internal/domain/` layout
+- [X] T125 Run quickstart.md validation — confirm all example paths in quickstart.md are accurate
+- [X] T126 [P] Update version identifiers per CR-005 — increment patch version in API docs (`@version` annotation) and any version constants to reflect structural refactor
 
 ---
 

@@ -10,7 +10,7 @@ import (
 )
 
 //	@title			Wish List API
-//	@version		1.0
+//	@version		1.1
 //	@description	A RESTful API for managing wish lists, gift items, and reservations.
 //	@description	Features include user authentication, wish list management, gift item tracking, and reservation system.
 

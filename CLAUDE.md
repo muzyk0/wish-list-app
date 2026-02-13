@@ -425,20 +425,30 @@ make clean                    # Clean build artifacts
 - Component stories in `frontend/src/stories`
 - API clients generated from OpenAPI specs
 
-### Backend Structure
+### Backend Structure (Domain-Driven)
 - Main entry point: `backend/cmd/server/main.go`
-- Database layer: `backend/internal/db/models` (using sqlx instead of sqlc)
-- Authentication: `backend/internal/auth`
-- Middleware: `backend/internal/middleware`
-- AWS integration: `backend/internal/aws`
-- Configuration: `backend/internal/config`
-- Handlers: `backend/internal/handlers`
-- Repositories: `backend/internal/repositories` (using sqlx)
-- Services: `backend/internal/services`
-- Old generated code directory removed (migrated from sqlc to manual sqlx operations)
+- Application wiring: `backend/internal/app/app.go`
+- Server & routing: `backend/internal/app/server/`
+- Configuration: `backend/internal/app/config/`
+- Database connection: `backend/internal/app/database/postgres.go`
+- Database migrations: `backend/internal/app/database/migrations/`
+- Middleware: `backend/internal/app/middleware/`
+- Background jobs: `backend/internal/app/jobs/`
+- Swagger docs: `backend/internal/app/swagger/`
+- Shared libraries: `backend/internal/pkg/` (auth, aws, cache, encryption, validation, analytics, helpers, response)
+- Domain modules: `backend/internal/domain/{name}/` — each domain contains:
+  - `delivery/http/handler.go` — HTTP request handling
+  - `delivery/http/dto/` — Request/response DTOs
+  - `delivery/http/routes.go` — Route registration
+  - `service/` — Business logic
+  - `repository/` — Database access (sqlx)
+  - `models/` — Domain entity structs
+- Domains: auth, user, wishlist, item, wishlist_item, reservation, health, storage
+
+**Import rules**: `pkg/` has no imports from `domain/` or `app/`. `app/` wires all domains together.
 
 **Architecture Guide**: For comprehensive backend architecture documentation, see `/docs/Go-Architecture-Guide.md`. This guide covers:
-- 3-layer architecture (Handler-Service-Repository)
+- Domain-driven 3-layer architecture (Handler-Service-Repository) per domain module
 - The ONE non-negotiable rule: JSON serialization ONLY in handlers
 - Complete code examples with good patterns and anti-patterns
 - Data flow, validation strategy, testing approach
@@ -452,8 +462,7 @@ make clean                    # Clean build artifacts
 
 ### Database Schema
 - Managed with Docker Compose in `/database/docker-compose.yml`
-- Migrations stored in `backend/internal/db/migrations`
-- SQL queries in `backend/internal/db/queries/`
+- Migrations stored in `backend/internal/app/database/migrations/`
 - Schema defined in `/specs/001-wish-list-app/data-model.md`
 
 ### API Contracts
