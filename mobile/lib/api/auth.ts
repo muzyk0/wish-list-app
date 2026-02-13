@@ -5,9 +5,9 @@
 // - Refresh token: 7 days
 // - Platform-native encryption (iOS Keychain, Android Keystore) or encrypted web storage
 
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { baseClient } from './client';
 
 const ACCESS_TOKEN_KEY = 'accessToken';

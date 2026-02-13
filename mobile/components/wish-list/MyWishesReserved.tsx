@@ -131,7 +131,9 @@ export function MyWishesReserved() {
               )}
             </View>
 
-            <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
+            <View
+              style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}
+            >
               <MaterialCommunityIcons
                 name={statusConfig.icon as any}
                 size={14}
@@ -158,7 +160,11 @@ export function MyWishesReserved() {
           {/* Reserved By */}
           <View style={styles.reservedByContainer}>
             <View style={styles.avatarCircle}>
-              <MaterialCommunityIcons name="account" size={16} color="#FFD700" />
+              <MaterialCommunityIcons
+                name="account"
+                size={16}
+                color="#FFD700"
+              />
             </View>
             <View style={styles.reservedByInfo}>
               <Text style={styles.reservedByLabel}>Reserved by</Text>
@@ -201,7 +207,11 @@ export function MyWishesReserved() {
     return (
       <View style={styles.centerContainer}>
         <BlurView intensity={20} style={styles.emptyCard}>
-          <MaterialCommunityIcons name="gift-outline" size={64} color="#FFD700" />
+          <MaterialCommunityIcons
+            name="gift-outline"
+            size={64}
+            color="#FFD700"
+          />
           <Text style={styles.emptyTitle}>No reservations yet</Text>
           <Text style={styles.emptyText}>
             When someone reserves your wishes, they'll appear here
@@ -220,7 +230,11 @@ export function MyWishesReserved() {
         </BlurView>
         <BlurView intensity={15} style={styles.statCard}>
           <Text style={styles.statValueGreen}>
-            {reservations.filter((r) => r.isPurchased || r.status === 'fulfilled').length}
+            {
+              reservations.filter(
+                (r) => r.isPurchased || r.status === 'fulfilled',
+              ).length
+            }
           </Text>
           <Text style={styles.statLabel}>Purchased</Text>
         </BlurView>
@@ -233,7 +247,11 @@ export function MyWishesReserved() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFD700" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#FFD700"
+          />
         }
       />
     </View>

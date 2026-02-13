@@ -1,19 +1,19 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
-  FlatList,
+  type FlatList,
   Pressable,
   StyleSheet,
   View,
   type ViewToken,
 } from 'react-native';
 import { Text } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 
 const { width, height } = Dimensions.get('window');
 const ONBOARDING_KEY = 'hasSeenOnboarding';
@@ -429,7 +429,7 @@ export default function OnboardingScreen() {
 
             return (
               <Animated.View
-                key={index}
+                key={slide.id}
                 style={[
                   styles.dot,
                   {
