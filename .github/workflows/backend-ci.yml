@@ -29,10 +29,10 @@ jobs:
         run: cd backend && go mod download
 
       - name: Install swag
-        run: cd backend && go install github.com/swaggo/swag/cmd/swag@v1.16.6
+        run: cd backend && go install github.com/swaggo/swag/cmd/swag@@latest
 
       - name: Generate Swagger docs
-        run: cd backend && swag init -g cmd/server/main.go -o docs
+        run: cd backend && swag init -g cmd/server/main.go -o internal/app/swagger/docs --parseDependency --parseInternal
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
