@@ -49,7 +49,7 @@ type CreateItemInput struct {
 	Link        string
 	ImageURL    string
 	Price       float64
-	Priority    int
+	Priority    int32
 	Notes       string
 }
 
@@ -108,7 +108,7 @@ func NewWishlistItemService(
 }
 
 // GetWishlistItems retrieves all items in a wishlist with pagination
-func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID string, userID string, page, limit int) (*PaginatedItemsOutput, error) {
+func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID, userID string, page, limit int) (*PaginatedItemsOutput, error) {
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
@@ -172,7 +172,7 @@ func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID s
 }
 
 // AttachItem attaches an existing item to a wishlist
-func (s *WishlistItemService) AttachItem(ctx context.Context, wishlistID string, itemID string, userID string) error {
+func (s *WishlistItemService) AttachItem(ctx context.Context, wishlistID, itemID, userID string) error {
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {
@@ -230,7 +230,7 @@ func (s *WishlistItemService) AttachItem(ctx context.Context, wishlistID string,
 }
 
 // CreateItemInWishlist creates a new item and immediately attaches it to a wishlist
-func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlistID string, userID string, input CreateItemInput) (*ItemOutput, error) {
+func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlistID, userID string, input CreateItemInput) (*ItemOutput, error) {
 	// Validate input
 	if input.Title == "" {
 		return nil, ErrWishlistItemTitleRequired
@@ -265,7 +265,7 @@ func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlist
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
 		ImageUrl:    pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""},
-		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true},
+		Priority:    pgtype.Int4{Int32: input.Priority, Valid: true},
 		Notes:       pgtype.Text{String: input.Notes, Valid: input.Notes != ""},
 	}
 
@@ -293,7 +293,7 @@ func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlist
 }
 
 // DetachItem removes an item from a wishlist (doesn't delete the item)
-func (s *WishlistItemService) DetachItem(ctx context.Context, wishlistID string, itemID string, userID string) error {
+func (s *WishlistItemService) DetachItem(ctx context.Context, wishlistID, itemID, userID string) error {
 	// Parse IDs
 	wlID := pgtype.UUID{}
 	if err := wlID.Scan(wishlistID); err != nil {

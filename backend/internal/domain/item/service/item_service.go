@@ -69,7 +69,7 @@ type CreateItemInput struct {
 	Link        string
 	ImageURL    string
 	Price       float64
-	Priority    int
+	Priority    int32
 	Notes       string
 }
 
@@ -80,7 +80,7 @@ type UpdateItemInput struct {
 	Link        *string
 	ImageURL    *string
 	Price       *float64
-	Priority    *int
+	Priority    *int32
 	Notes       *string
 }
 
@@ -178,7 +178,7 @@ func (s *ItemService) CreateItem(ctx context.Context, userID string, input Creat
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
 		ImageUrl:    pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""},
-		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true},
+		Priority:    pgtype.Int4{Int32: input.Priority, Valid: true},
 		Notes:       pgtype.Text{String: input.Notes, Valid: input.Notes != ""},
 	}
 
@@ -199,7 +199,7 @@ func (s *ItemService) CreateItem(ctx context.Context, userID string, input Creat
 }
 
 // GetItem retrieves a specific item by ID
-func (s *ItemService) GetItem(ctx context.Context, itemID string, userID string) (*ItemOutput, error) {
+func (s *ItemService) GetItem(ctx context.Context, itemID, userID string) (*ItemOutput, error) {
 	// Parse IDs
 	id := pgtype.UUID{}
 	if err := id.Scan(itemID); err != nil {
@@ -226,7 +226,7 @@ func (s *ItemService) GetItem(ctx context.Context, itemID string, userID string)
 }
 
 // UpdateItem updates an existing item
-func (s *ItemService) UpdateItem(ctx context.Context, itemID string, userID string, input UpdateItemInput) (*ItemOutput, error) {
+func (s *ItemService) UpdateItem(ctx context.Context, itemID, userID string, input UpdateItemInput) (*ItemOutput, error) {
 	// Parse IDs
 	id := pgtype.UUID{}
 	if err := id.Scan(itemID); err != nil {
@@ -268,7 +268,7 @@ func (s *ItemService) UpdateItem(ctx context.Context, itemID string, userID stri
 		}
 	}
 	if input.Priority != nil {
-		item.Priority = pgtype.Int4{Int32: int32(*input.Priority), Valid: true}
+		item.Priority = pgtype.Int4{Int32: *input.Priority, Valid: true}
 	}
 	if input.Notes != nil {
 		item.Notes = pgtype.Text{String: *input.Notes, Valid: *input.Notes != ""}
@@ -284,7 +284,7 @@ func (s *ItemService) UpdateItem(ctx context.Context, itemID string, userID stri
 }
 
 // SoftDeleteItem marks an item as archived
-func (s *ItemService) SoftDeleteItem(ctx context.Context, itemID string, userID string) error {
+func (s *ItemService) SoftDeleteItem(ctx context.Context, itemID, userID string) error {
 	// Parse IDs
 	id := pgtype.UUID{}
 	if err := id.Scan(itemID); err != nil {
@@ -316,7 +316,7 @@ func (s *ItemService) SoftDeleteItem(ctx context.Context, itemID string, userID 
 }
 
 // MarkPurchased marks an item as purchased with the actual price
-func (s *ItemService) MarkPurchased(ctx context.Context, itemID string, userID string, purchasedPrice float64) (*ItemOutput, error) {
+func (s *ItemService) MarkPurchased(ctx context.Context, itemID, userID string, purchasedPrice float64) (*ItemOutput, error) {
 	// Parse IDs
 	id := pgtype.UUID{}
 	if err := id.Scan(itemID); err != nil {
