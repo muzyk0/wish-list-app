@@ -239,18 +239,32 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 	}
 
 	output := &WishListOutput{
-		ID:           createdWishList.ID.String(),
-		OwnerID:      createdWishList.OwnerID.String(),
-		Title:        createdWishList.Title,
-		Description:  createdWishList.Description.String,
-		Occasion:     createdWishList.Occasion.String,
-		OccasionDate: createdWishList.OccasionDate.Time.Format(time.RFC3339),
-		TemplateID:   createdWishList.TemplateID,
-		IsPublic:     createdWishList.IsPublic.Bool,
-		PublicSlug:   createdWishList.PublicSlug.String,
-		ViewCount:    int64(createdWishList.ViewCount.Int32),
-		CreatedAt:    createdWishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:    createdWishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        createdWishList.ID.String(),
+		OwnerID:   createdWishList.OwnerID.String(),
+		Title:     createdWishList.Title,
+		TemplateID: createdWishList.TemplateID,
+		CreatedAt: createdWishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: createdWishList.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if createdWishList.Description.Valid {
+		output.Description = createdWishList.Description.String
+	}
+	if createdWishList.Occasion.Valid {
+		output.Occasion = createdWishList.Occasion.String
+	}
+	if createdWishList.OccasionDate.Valid {
+		output.OccasionDate = createdWishList.OccasionDate.Time.Format(time.RFC3339)
+	}
+	if createdWishList.IsPublic.Valid {
+		output.IsPublic = createdWishList.IsPublic.Bool
+	}
+	if createdWishList.PublicSlug.Valid {
+		output.PublicSlug = createdWishList.PublicSlug.String
+	}
+	if createdWishList.ViewCount.Valid {
+		output.ViewCount = int64(createdWishList.ViewCount.Int32)
 	}
 
 	return output, nil
@@ -268,18 +282,32 @@ func (s *WishListService) GetWishList(ctx context.Context, wishListID string) (*
 	}
 
 	output := &WishListOutput{
-		ID:           wishList.ID.String(),
-		OwnerID:      wishList.OwnerID.String(),
-		Title:        wishList.Title,
-		Description:  wishList.Description.String,
-		Occasion:     wishList.Occasion.String,
-		OccasionDate: wishList.OccasionDate.Time.Format(time.RFC3339),
-		TemplateID:   wishList.TemplateID,
-		IsPublic:     wishList.IsPublic.Bool,
-		PublicSlug:   wishList.PublicSlug.String,
-		ViewCount:    int64(wishList.ViewCount.Int32),
-		CreatedAt:    wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:    wishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        wishList.ID.String(),
+		OwnerID:   wishList.OwnerID.String(),
+		Title:     wishList.Title,
+		TemplateID: wishList.TemplateID,
+		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if wishList.Description.Valid {
+		output.Description = wishList.Description.String
+	}
+	if wishList.Occasion.Valid {
+		output.Occasion = wishList.Occasion.String
+	}
+	if wishList.OccasionDate.Valid {
+		output.OccasionDate = wishList.OccasionDate.Time.Format(time.RFC3339)
+	}
+	if wishList.IsPublic.Valid {
+		output.IsPublic = wishList.IsPublic.Bool
+	}
+	if wishList.PublicSlug.Valid {
+		output.PublicSlug = wishList.PublicSlug.String
+	}
+	if wishList.ViewCount.Valid {
+		output.ViewCount = int64(wishList.ViewCount.Int32)
 	}
 
 	return output, nil
@@ -301,18 +329,32 @@ func (s *WishListService) GetWishListByPublicSlug(ctx context.Context, publicSlu
 	}
 
 	output := &WishListOutput{
-		ID:           wishList.ID.String(),
-		OwnerID:      wishList.OwnerID.String(),
-		Title:        wishList.Title,
-		Description:  wishList.Description.String,
-		Occasion:     wishList.Occasion.String,
-		OccasionDate: wishList.OccasionDate.Time.Format(time.RFC3339),
-		TemplateID:   wishList.TemplateID,
-		IsPublic:     wishList.IsPublic.Bool,
-		PublicSlug:   wishList.PublicSlug.String,
-		ViewCount:    int64(wishList.ViewCount.Int32),
-		CreatedAt:    wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:    wishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        wishList.ID.String(),
+		OwnerID:   wishList.OwnerID.String(),
+		Title:     wishList.Title,
+		TemplateID: wishList.TemplateID,
+		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if wishList.Description.Valid {
+		output.Description = wishList.Description.String
+	}
+	if wishList.Occasion.Valid {
+		output.Occasion = wishList.Occasion.String
+	}
+	if wishList.OccasionDate.Valid {
+		output.OccasionDate = wishList.OccasionDate.Time.Format(time.RFC3339)
+	}
+	if wishList.IsPublic.Valid {
+		output.IsPublic = wishList.IsPublic.Bool
+	}
+	if wishList.PublicSlug.Valid {
+		output.PublicSlug = wishList.PublicSlug.String
+	}
+	if wishList.ViewCount.Valid {
+		output.ViewCount = int64(wishList.ViewCount.Int32)
 	}
 
 	// Store in cache if cache is available
@@ -339,20 +381,35 @@ func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string
 	var outputs []*WishListOutput
 	for _, wishListWithCount := range wishLists {
 		output := &WishListOutput{
-			ID:           wishListWithCount.ID.String(),
-			OwnerID:      wishListWithCount.OwnerID.String(),
-			Title:        wishListWithCount.Title,
-			Description:  wishListWithCount.Description.String,
-			Occasion:     wishListWithCount.Occasion.String,
-			OccasionDate: wishListWithCount.OccasionDate.Time.Format(time.RFC3339),
-			TemplateID:   wishListWithCount.TemplateID,
-			IsPublic:     wishListWithCount.IsPublic.Bool,
-			PublicSlug:   wishListWithCount.PublicSlug.String,
-			ViewCount:    int64(wishListWithCount.ViewCount.Int32),
-			ItemCount:    wishListWithCount.ItemCount,
-			CreatedAt:    wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt:    wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
+			ID:        wishListWithCount.ID.String(),
+			OwnerID:   wishListWithCount.OwnerID.String(),
+			Title:     wishListWithCount.Title,
+			TemplateID: wishListWithCount.TemplateID,
+			ItemCount: wishListWithCount.ItemCount,
+			CreatedAt: wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt: wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
 		}
+
+		// Handle nullable fields
+		if wishListWithCount.Description.Valid {
+			output.Description = wishListWithCount.Description.String
+		}
+		if wishListWithCount.Occasion.Valid {
+			output.Occasion = wishListWithCount.Occasion.String
+		}
+		if wishListWithCount.OccasionDate.Valid {
+			output.OccasionDate = wishListWithCount.OccasionDate.Time.Format(time.RFC3339)
+		}
+		if wishListWithCount.IsPublic.Valid {
+			output.IsPublic = wishListWithCount.IsPublic.Bool
+		}
+		if wishListWithCount.PublicSlug.Valid {
+			output.PublicSlug = wishListWithCount.PublicSlug.String
+		}
+		if wishListWithCount.ViewCount.Valid {
+			output.ViewCount = int64(wishListWithCount.ViewCount.Int32)
+		}
+
 		outputs = append(outputs, output)
 	}
 
@@ -456,18 +513,32 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	}
 
 	output := &WishListOutput{
-		ID:           updated.ID.String(),
-		OwnerID:      updated.OwnerID.String(),
-		Title:        updated.Title,
-		Description:  updated.Description.String,
-		Occasion:     updated.Occasion.String,
-		OccasionDate: updated.OccasionDate.Time.Format(time.RFC3339),
-		TemplateID:   updated.TemplateID,
-		IsPublic:     updated.IsPublic.Bool,
-		PublicSlug:   updated.PublicSlug.String,
-		ViewCount:    int64(updated.ViewCount.Int32),
-		CreatedAt:    updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:    updated.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        updated.ID.String(),
+		OwnerID:   updated.OwnerID.String(),
+		Title:     updated.Title,
+		TemplateID: updated.TemplateID,
+		CreatedAt: updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: updated.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if updated.Description.Valid {
+		output.Description = updated.Description.String
+	}
+	if updated.Occasion.Valid {
+		output.Occasion = updated.Occasion.String
+	}
+	if updated.OccasionDate.Valid {
+		output.OccasionDate = updated.OccasionDate.Time.Format(time.RFC3339)
+	}
+	if updated.IsPublic.Valid {
+		output.IsPublic = updated.IsPublic.Bool
+	}
+	if updated.PublicSlug.Valid {
+		output.PublicSlug = updated.PublicSlug.String
+	}
+	if updated.ViewCount.Valid {
+		output.ViewCount = int64(updated.ViewCount.Int32)
 	}
 
 	return output, nil
@@ -575,18 +646,32 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 	}
 
 	output := &GiftItemOutput{
-		ID:          createdGiftItem.ID.String(),
-		OwnerID:     createdGiftItem.OwnerID.String(),
-		Name:        createdGiftItem.Name,
-		Description: createdGiftItem.Description.String,
-		Link:        createdGiftItem.Link.String,
-		ImageURL:    createdGiftItem.ImageUrl.String,
-		Price:       price,
-		Priority:    int(createdGiftItem.Priority.Int32),
-		Notes:       createdGiftItem.Notes.String,
-		Position:    int(createdGiftItem.Position.Int32),
-		CreatedAt:   createdGiftItem.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   createdGiftItem.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        createdGiftItem.ID.String(),
+		OwnerID:   createdGiftItem.OwnerID.String(),
+		Name:      createdGiftItem.Name,
+		Price:     price,
+		CreatedAt: createdGiftItem.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: createdGiftItem.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if createdGiftItem.Description.Valid {
+		output.Description = createdGiftItem.Description.String
+	}
+	if createdGiftItem.Link.Valid {
+		output.Link = createdGiftItem.Link.String
+	}
+	if createdGiftItem.ImageUrl.Valid {
+		output.ImageURL = createdGiftItem.ImageUrl.String
+	}
+	if createdGiftItem.Priority.Valid {
+		output.Priority = int(createdGiftItem.Priority.Int32)
+	}
+	if createdGiftItem.Notes.Valid {
+		output.Notes = createdGiftItem.Notes.String
+	}
+	if createdGiftItem.Position.Valid {
+		output.Position = int(createdGiftItem.Position.Int32)
 	}
 
 	return output, nil
@@ -613,18 +698,32 @@ func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*
 	}
 
 	output := &GiftItemOutput{
-		ID:          giftItem.ID.String(),
-		OwnerID:     giftItem.OwnerID.String(),
-		Name:        giftItem.Name,
-		Description: giftItem.Description.String,
-		Link:        giftItem.Link.String,
-		ImageURL:    giftItem.ImageUrl.String,
-		Price:       price,
-		Priority:    int(giftItem.Priority.Int32),
-		Notes:       giftItem.Notes.String,
-		Position:    int(giftItem.Position.Int32),
-		CreatedAt:   giftItem.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   giftItem.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        giftItem.ID.String(),
+		OwnerID:   giftItem.OwnerID.String(),
+		Name:      giftItem.Name,
+		Price:     price,
+		CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if giftItem.Description.Valid {
+		output.Description = giftItem.Description.String
+	}
+	if giftItem.Link.Valid {
+		output.Link = giftItem.Link.String
+	}
+	if giftItem.ImageUrl.Valid {
+		output.ImageURL = giftItem.ImageUrl.String
+	}
+	if giftItem.Priority.Valid {
+		output.Priority = int(giftItem.Priority.Int32)
+	}
+	if giftItem.Notes.Valid {
+		output.Notes = giftItem.Notes.String
+	}
+	if giftItem.Position.Valid {
+		output.Position = int(giftItem.Position.Int32)
 	}
 
 	return output, nil
@@ -658,19 +757,34 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 		}
 
 		output := &GiftItemOutput{
-			ID:          giftItem.ID.String(),
-			OwnerID:     giftItem.OwnerID.String(),
-			Name:        giftItem.Name,
-			Description: giftItem.Description.String,
-			Link:        giftItem.Link.String,
-			ImageURL:    giftItem.ImageUrl.String,
-			Price:       price,
-			Priority:    int(giftItem.Priority.Int32),
-			Notes:       giftItem.Notes.String,
-			Position:    int(giftItem.Position.Int32),
-			CreatedAt:   giftItem.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt:   giftItem.UpdatedAt.Time.Format(time.RFC3339),
+			ID:        giftItem.ID.String(),
+			OwnerID:   giftItem.OwnerID.String(),
+			Name:      giftItem.Name,
+			Price:     price,
+			CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
 		}
+
+		// Handle nullable fields
+		if giftItem.Description.Valid {
+			output.Description = giftItem.Description.String
+		}
+		if giftItem.Link.Valid {
+			output.Link = giftItem.Link.String
+		}
+		if giftItem.ImageUrl.Valid {
+			output.ImageURL = giftItem.ImageUrl.String
+		}
+		if giftItem.Priority.Valid {
+			output.Priority = int(giftItem.Priority.Int32)
+		}
+		if giftItem.Notes.Valid {
+			output.Notes = giftItem.Notes.String
+		}
+		if giftItem.Position.Valid {
+			output.Position = int(giftItem.Position.Int32)
+		}
+
 		outputs = append(outputs, output)
 	}
 
@@ -753,18 +867,32 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 	}
 
 	output := &GiftItemOutput{
-		ID:          updated.ID.String(),
-		OwnerID:     updated.OwnerID.String(),
-		Name:        updated.Name,
-		Description: updated.Description.String,
-		Link:        updated.Link.String,
-		ImageURL:    updated.ImageUrl.String,
-		Price:       price,
-		Priority:    int(updated.Priority.Int32),
-		Notes:       updated.Notes.String,
-		Position:    int(updated.Position.Int32),
-		CreatedAt:   updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   updated.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        updated.ID.String(),
+		OwnerID:   updated.OwnerID.String(),
+		Name:      updated.Name,
+		Price:     price,
+		CreatedAt: updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: updated.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if updated.Description.Valid {
+		output.Description = updated.Description.String
+	}
+	if updated.Link.Valid {
+		output.Link = updated.Link.String
+	}
+	if updated.ImageUrl.Valid {
+		output.ImageURL = updated.ImageUrl.String
+	}
+	if updated.Priority.Valid {
+		output.Priority = int(updated.Priority.Int32)
+	}
+	if updated.Notes.Valid {
+		output.Notes = updated.Notes.String
+	}
+	if updated.Position.Valid {
+		output.Position = int(updated.Position.Int32)
 	}
 
 	return output, nil
@@ -900,23 +1028,45 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 
 	// Convert to output format
 	output := &GiftItemOutput{
-		ID:                updatedGiftItem.ID.String(),
-		OwnerID:           updatedGiftItem.OwnerID.String(),
-		Name:              updatedGiftItem.Name,
-		Description:       updatedGiftItem.Description.String,
-		Link:              updatedGiftItem.Link.String,
-		ImageURL:          updatedGiftItem.ImageUrl.String,
-		Price:             database.NumericToFloat64(updatedGiftItem.Price),
-		Priority:          int(updatedGiftItem.Priority.Int32),
-		ReservedByUserID:  updatedGiftItem.ReservedByUserID.String(),
-		ReservedAt:        updatedGiftItem.ReservedAt.Time.Format(time.RFC3339),
-		PurchasedByUserID: updatedGiftItem.PurchasedByUserID.String(),
-		PurchasedAt:       updatedGiftItem.PurchasedAt.Time.Format(time.RFC3339),
-		PurchasedPrice:    database.NumericToFloat64(updatedGiftItem.PurchasedPrice),
-		Notes:             updatedGiftItem.Notes.String,
-		Position:          int(updatedGiftItem.Position.Int32),
-		CreatedAt:         updatedGiftItem.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:         updatedGiftItem.UpdatedAt.Time.Format(time.RFC3339),
+		ID:             updatedGiftItem.ID.String(),
+		OwnerID:        updatedGiftItem.OwnerID.String(),
+		Name:           updatedGiftItem.Name,
+		Price:          database.NumericToFloat64(updatedGiftItem.Price),
+		PurchasedPrice: database.NumericToFloat64(updatedGiftItem.PurchasedPrice),
+		CreatedAt:      updatedGiftItem.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:      updatedGiftItem.UpdatedAt.Time.Format(time.RFC3339),
+	}
+
+	// Handle nullable fields
+	if updatedGiftItem.Description.Valid {
+		output.Description = updatedGiftItem.Description.String
+	}
+	if updatedGiftItem.Link.Valid {
+		output.Link = updatedGiftItem.Link.String
+	}
+	if updatedGiftItem.ImageUrl.Valid {
+		output.ImageURL = updatedGiftItem.ImageUrl.String
+	}
+	if updatedGiftItem.Priority.Valid {
+		output.Priority = int(updatedGiftItem.Priority.Int32)
+	}
+	if updatedGiftItem.Notes.Valid {
+		output.Notes = updatedGiftItem.Notes.String
+	}
+	if updatedGiftItem.Position.Valid {
+		output.Position = int(updatedGiftItem.Position.Int32)
+	}
+	if updatedGiftItem.ReservedByUserID.Valid {
+		output.ReservedByUserID = updatedGiftItem.ReservedByUserID.String()
+	}
+	if updatedGiftItem.ReservedAt.Valid {
+		output.ReservedAt = updatedGiftItem.ReservedAt.Time.Format(time.RFC3339)
+	}
+	if updatedGiftItem.PurchasedByUserID.Valid {
+		output.PurchasedByUserID = updatedGiftItem.PurchasedByUserID.String()
+	}
+	if updatedGiftItem.PurchasedAt.Valid {
+		output.PurchasedAt = updatedGiftItem.PurchasedAt.Time.Format(time.RFC3339)
 	}
 
 	return output, nil
