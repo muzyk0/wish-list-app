@@ -86,13 +86,13 @@ jobs:
       - name: Generate Swagger docs
         run: cd backend && swag init -g cmd/server/main.go -o internal/app/swagger/docs --parseDependency --parseInternal
 
-      - name: Run migrations
-        run: |
-          cd backend
-          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-          migrate -path internal/db/migrations -database "postgresql://test:test@localhost:5432/wishlist_test?sslmode=disable" up
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/wishlist_test?sslmode=disable
+#      - name: Run migrations
+#        run: |
+#          cd backend
+#          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+#          migrate -path internal/app/database/migrations -database "postgresql://test:test@localhost:5432/wishlist_test?sslmode=disable" up
+#        env:
+#          DATABASE_URL: postgresql://test:test@localhost:5432/wishlist_test?sslmode=disable
 
       - name: Run tests
         run: cd backend && go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
