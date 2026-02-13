@@ -1003,6 +1003,8 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 
 				if reservation.GuestEmail.Valid {
 					recipientEmail = reservation.GuestEmail.String
+				}
+				if reservation.GuestName.Valid {
 					guestName = reservation.GuestName.String
 				}
 
