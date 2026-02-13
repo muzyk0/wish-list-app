@@ -139,7 +139,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     await setTokens(data.accessToken, data.refreshToken);
 
     return data.accessToken;
-  } catch (error) {
+  } catch {
     // Even if there's a network error, clear tokens to prevent stuck state
     await clearTokens();
     return null;

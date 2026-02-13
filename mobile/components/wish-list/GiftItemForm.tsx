@@ -54,7 +54,7 @@ export default function GiftItemForm({
         data.price.trim() !== '' ? parseFloat(data.price) : NaN;
       const parsedPriority =
         data.priority.trim() !== '' ? parseInt(data.priority, 10) : NaN;
-      const parsedPosition =
+      const _parsedPosition =
         data.position.trim() !== '' ? parseInt(data.position, 10) : NaN;
 
       if (existingItem) {
@@ -64,8 +64,8 @@ export default function GiftItemForm({
           description: data.description,
           link: data.link,
           imageUrl: data.image_url,
-          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
-          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
+          price: !Number.isNaN(parsedPrice) ? parsedPrice : undefined,
+          priority: !Number.isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
         });
       } else {
@@ -75,8 +75,8 @@ export default function GiftItemForm({
           description: data.description,
           link: data.link,
           imageUrl: data.image_url,
-          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
-          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
+          price: !Number.isNaN(parsedPrice) ? parsedPrice : undefined,
+          priority: !Number.isNaN(parsedPriority) ? parsedPriority : undefined,
           notes: data.notes,
         });
       }
