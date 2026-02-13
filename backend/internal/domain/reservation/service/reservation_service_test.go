@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -26,7 +25,7 @@ func TestReservationService_GetReservationStatus(t *testing.T) {
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
 			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*models.Reservation, error) {
-				return nil, nil
+				return nil, repository.ErrNoActiveReservation
 			},
 		}
 
@@ -238,7 +237,7 @@ func TestReservationService_ConcurrencyControls(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.True(t, errors.Is(err, ErrGiftItemAlreadyReserved))
+		assert.ErrorIs(t, err, ErrGiftItemAlreadyReserved)
 	})
 
 	t.Run("authenticated user reservation uses atomic operation", func(t *testing.T) {
@@ -314,7 +313,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
 			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*models.Reservation, error) {
-				return nil, nil
+				return nil, repository.ErrNoActiveReservation
 			},
 			CreateFunc: func(ctx context.Context, reservation models.Reservation) (*models.Reservation, error) {
 				return createdReservation, nil
@@ -353,7 +352,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		}
 		mockRepo := &ReservationRepositoryInterfaceMock{
 			GetActiveReservationForGiftItemFunc: func(ctx context.Context, id pgtype.UUID) (*models.Reservation, error) {
-				return nil, nil
+				return nil, repository.ErrNoActiveReservation
 			},
 		}
 
@@ -370,7 +369,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.True(t, errors.Is(err, ErrGuestInfoRequired))
+		assert.ErrorIs(t, err, ErrGuestInfoRequired)
 	})
 
 	t.Run("invalid gift item id", func(t *testing.T) {
@@ -388,7 +387,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		_, err := service.CreateReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.True(t, errors.Is(err, ErrInvalidGiftItemID))
+		assert.ErrorIs(t, err, ErrInvalidGiftItemID)
 	})
 }
 
@@ -459,6 +458,6 @@ func TestReservationService_CancelReservation(t *testing.T) {
 		_, err := service.CancelReservation(context.Background(), input)
 
 		require.Error(t, err)
-		assert.True(t, errors.Is(err, ErrMissingUserOrToken))
+		assert.ErrorIs(t, err, ErrMissingUserOrToken)
 	})
 }

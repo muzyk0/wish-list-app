@@ -66,7 +66,7 @@ func newItemService(
 
 func stringPtr(s string) *string    { return &s }
 func float64Ptr(f float64) *float64 { return &f }
-func intPtr(i int) *int             { return &i }
+func int32Ptr(i int32) *int32       { return &i }
 
 // ---------------------------------------------------------------------------
 // GetMyItems
@@ -174,7 +174,7 @@ func TestItemService_GetMyItems_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	require.ErrorIs(t, err, ErrInvalidItemUser)
 	assert.Empty(t, itemRepo.GetByOwnerPaginatedCalls(), "repo should not be called for invalid UUID")
 }
 
@@ -265,7 +265,7 @@ func TestItemService_CreateItem_EmptyTitle(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemTitleRequired))
+	require.ErrorIs(t, err, ErrItemTitleRequired)
 	assert.Empty(t, itemRepo.CreateCalls(), "repo should not be called when title is empty")
 }
 
@@ -279,7 +279,7 @@ func TestItemService_CreateItem_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	require.ErrorIs(t, err, ErrInvalidItemUser)
 	assert.Empty(t, itemRepo.CreateCalls())
 }
 
@@ -381,7 +381,7 @@ func TestItemService_GetItem_InvalidItemID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	require.ErrorIs(t, err, ErrItemNotFound)
 	assert.Empty(t, itemRepo.GetByIDCalls())
 }
 
@@ -396,7 +396,7 @@ func TestItemService_GetItem_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	require.ErrorIs(t, err, ErrInvalidItemUser)
 	assert.Empty(t, itemRepo.GetByIDCalls())
 }
 
@@ -414,7 +414,7 @@ func TestItemService_GetItem_NotFound(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_GetItem_Forbidden(t *testing.T) {
@@ -434,7 +434,7 @@ func TestItemService_GetItem_Forbidden(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemForbidden))
+	assert.ErrorIs(t, err, ErrItemForbidden)
 }
 
 // ---------------------------------------------------------------------------
@@ -472,7 +472,7 @@ func TestItemService_UpdateItem_Success_AllFields(t *testing.T) {
 		Link:        stringPtr("https://new.link"),
 		ImageURL:    stringPtr("https://new.img.jpg"),
 		Price:       float64Ptr(99.99),
-		Priority:    intPtr(7),
+		Priority:    int32Ptr(7),
 		Notes:       stringPtr("New notes"),
 	})
 
@@ -544,7 +544,7 @@ func TestItemService_UpdateItem_InvalidItemID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_UpdateItem_InvalidUserID(t *testing.T) {
@@ -557,7 +557,7 @@ func TestItemService_UpdateItem_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	assert.ErrorIs(t, err, ErrInvalidItemUser)
 }
 
 func TestItemService_UpdateItem_NotFound(t *testing.T) {
@@ -576,7 +576,7 @@ func TestItemService_UpdateItem_NotFound(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_UpdateItem_Forbidden(t *testing.T) {
@@ -597,7 +597,7 @@ func TestItemService_UpdateItem_Forbidden(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemForbidden))
+	require.ErrorIs(t, err, ErrItemForbidden)
 	assert.Empty(t, itemRepo.UpdateWithNewSchemaCalls(), "update should not be called when forbidden")
 }
 
@@ -657,7 +657,7 @@ func TestItemService_SoftDeleteItem_InvalidItemID(t *testing.T) {
 	err := svc.SoftDeleteItem(context.Background(), "bad-id", uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	require.ErrorIs(t, err, ErrItemNotFound)
 	assert.Empty(t, itemRepo.GetByIDCalls())
 }
 
@@ -668,7 +668,7 @@ func TestItemService_SoftDeleteItem_InvalidUserID(t *testing.T) {
 	err := svc.SoftDeleteItem(context.Background(), uuid.New().String(), "bad-user")
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	assert.ErrorIs(t, err, ErrInvalidItemUser)
 }
 
 func TestItemService_SoftDeleteItem_NotFound(t *testing.T) {
@@ -684,7 +684,7 @@ func TestItemService_SoftDeleteItem_NotFound(t *testing.T) {
 	err := svc.SoftDeleteItem(context.Background(), uuid.New().String(), ownerStr)
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_SoftDeleteItem_Forbidden(t *testing.T) {
@@ -702,7 +702,7 @@ func TestItemService_SoftDeleteItem_Forbidden(t *testing.T) {
 	err := svc.SoftDeleteItem(context.Background(), existingItem.ID.String(), differentUserStr)
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemForbidden))
+	require.ErrorIs(t, err, ErrItemForbidden)
 	assert.Empty(t, itemRepo.SoftDeleteCalls(), "soft delete should not be called when forbidden")
 }
 
@@ -768,7 +768,7 @@ func TestItemService_MarkPurchased_InvalidItemID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_MarkPurchased_InvalidUserID(t *testing.T) {
@@ -779,7 +779,7 @@ func TestItemService_MarkPurchased_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidItemUser))
+	assert.ErrorIs(t, err, ErrInvalidItemUser)
 }
 
 func TestItemService_MarkPurchased_ItemNotFound(t *testing.T) {
@@ -796,7 +796,7 @@ func TestItemService_MarkPurchased_ItemNotFound(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestItemService_MarkPurchased_RepoUpdateError(t *testing.T) {
@@ -847,12 +847,12 @@ func TestItemService_ConvertToOutput_NullableFields(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, "Minimal", result.Name)
-	assert.Equal(t, "", result.Description)
-	assert.Equal(t, "", result.Link)
-	assert.Equal(t, "", result.ImageURL)
-	assert.Equal(t, float64(0), result.Price)
+	assert.Empty(t, result.Description)
+	assert.Empty(t, result.Link)
+	assert.Empty(t, result.ImageURL)
+	assert.InDelta(t, float64(0), result.Price, 0.0001)
 	assert.Equal(t, 0, result.Priority)
-	assert.Equal(t, "", result.Notes)
+	assert.Empty(t, result.Notes)
 	assert.False(t, result.IsPurchased)
 	assert.False(t, result.IsArchived)
 }

@@ -98,7 +98,7 @@ func TestUserService_Register(t *testing.T) {
 			Password: "secret123",
 		})
 
-		assert.ErrorIs(t, err, ErrUserAlreadyExists)
+		require.ErrorIs(t, err, ErrUserAlreadyExists)
 		assert.Len(t, mockRepo.GetByEmailCalls(), 1)
 		assert.Equal(t, "user@example.com", mockRepo.GetByEmailCalls()[0].Email)
 	})
@@ -117,9 +117,9 @@ func TestUserService_Register(t *testing.T) {
 			Password: "secret123",
 		})
 
-		assert.Error(t, err)
-		assert.NotErrorIs(t, err, ErrUserAlreadyExists)
-		assert.NotErrorIs(t, err, ErrCredentialsRequired)
+		require.Error(t, err)
+		require.NotErrorIs(t, err, ErrUserAlreadyExists)
+		require.NotErrorIs(t, err, ErrCredentialsRequired)
 	})
 
 	t.Run("successful registration hashes password and creates user", func(t *testing.T) {
@@ -134,7 +134,7 @@ func TestUserService_Register(t *testing.T) {
 				assert.NotEqual(t, "secret123", user.PasswordHash.String)
 				assert.True(t, user.PasswordHash.Valid)
 				err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte("secret123"))
-				assert.NoError(t, err, "password hash should validate against original password")
+				require.NoError(t, err, "password hash should validate against original password")
 
 				// Verify email and profile fields
 				assert.Equal(t, "user@example.com", user.Email)
@@ -183,7 +183,7 @@ func TestUserService_Register(t *testing.T) {
 			Password: "secret123",
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Len(t, mockRepo.CreateCalls(), 1)
 	})
 
@@ -212,8 +212,8 @@ func TestUserService_Register(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		assert.Equal(t, "", output.FirstName)
-		assert.Equal(t, "", output.LastName)
+		assert.Empty(t, output.FirstName)
+		assert.Empty(t, output.LastName)
 	})
 }
 
@@ -565,7 +565,7 @@ func TestUserService_UpdateProfile(t *testing.T) {
 
 		_, err := svc.UpdateProfile(context.Background(), userIDStr, UpdateProfileInput{})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "write failure")
 	})
 }
@@ -709,7 +709,7 @@ func TestUserService_ChangeEmail(t *testing.T) {
 
 		err := svc.ChangeEmail(context.Background(), userIDStr, currentPassword, "new@example.com")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, mockRepo.UpdateCalls(), 1)
 		assert.Equal(t, "new@example.com", mockRepo.UpdateCalls()[0].User.Email)
 	})
@@ -735,7 +735,7 @@ func TestUserService_ChangeEmail(t *testing.T) {
 
 		err := svc.ChangeEmail(context.Background(), userIDStr, currentPassword, "new@example.com")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "update failed")
 	})
 }
@@ -834,7 +834,7 @@ func TestUserService_ChangePassword(t *testing.T) {
 
 		err := svc.ChangePassword(context.Background(), userIDStr, currentPassword, newPassword)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, mockRepo.UpdateCalls(), 1)
 	})
 
@@ -893,7 +893,7 @@ func TestUserService_DeleteUser(t *testing.T) {
 
 		err := svc.DeleteUser(context.Background(), userIDStr)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, mockRepo.DeleteCalls(), 1)
 	})
 
@@ -908,7 +908,7 @@ func TestUserService_DeleteUser(t *testing.T) {
 
 		err := svc.DeleteUser(context.Background(), testUUID())
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.ErrorIs(t, err, repository.ErrUserNotFound)
 	})
 }

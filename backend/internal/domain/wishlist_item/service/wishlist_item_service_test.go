@@ -205,7 +205,7 @@ func TestGetWishlistItems_InvalidWishlistID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemWLID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemWLID)
 }
 
 func TestGetWishlistItems_InvalidUserID(t *testing.T) {
@@ -219,7 +219,7 @@ func TestGetWishlistItems_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemUser))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemUser)
 }
 
 func TestGetWishlistItems_WishlistNotFound(t *testing.T) {
@@ -235,7 +235,7 @@ func TestGetWishlistItems_WishlistNotFound(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishListNotFound))
+	assert.ErrorIs(t, err, ErrWishListNotFound)
 }
 
 func TestGetWishlistItems_Forbidden_PrivateWishlist_NonOwner(t *testing.T) {
@@ -257,7 +257,7 @@ func TestGetWishlistItems_Forbidden_PrivateWishlist_NonOwner(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishListForbidden))
+	assert.ErrorIs(t, err, ErrWishListForbidden)
 }
 
 func TestGetWishlistItems_RepoGetByWishlistError(t *testing.T) {
@@ -391,7 +391,7 @@ func TestAttachItem_InvalidWishlistID(t *testing.T) {
 	err := svc.AttachItem(context.Background(), "bad-wl-id", uuid.New().String(), uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemWLID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemWLID)
 }
 
 func TestAttachItem_InvalidItemID(t *testing.T) {
@@ -404,7 +404,7 @@ func TestAttachItem_InvalidItemID(t *testing.T) {
 	err := svc.AttachItem(context.Background(), uuid.New().String(), "bad-item-id", uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemID)
 }
 
 func TestAttachItem_InvalidUserID(t *testing.T) {
@@ -417,7 +417,7 @@ func TestAttachItem_InvalidUserID(t *testing.T) {
 	err := svc.AttachItem(context.Background(), uuid.New().String(), uuid.New().String(), "bad-user-id")
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemUser))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemUser)
 }
 
 func TestAttachItem_WishlistNotFound(t *testing.T) {
@@ -432,7 +432,7 @@ func TestAttachItem_WishlistNotFound(t *testing.T) {
 	err := svc.AttachItem(context.Background(), uuid.New().String(), uuid.New().String(), uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrWishListNotFound))
+	assert.ErrorIs(t, err, ErrWishListNotFound)
 }
 
 func TestAttachItem_WishlistForbidden_NotOwner(t *testing.T) {
@@ -453,7 +453,7 @@ func TestAttachItem_WishlistForbidden_NotOwner(t *testing.T) {
 	err := svc.AttachItem(context.Background(), wlID.String(), uuid.New().String(), otherUserID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrWishListForbidden))
+	assert.ErrorIs(t, err, ErrWishListForbidden)
 }
 
 func TestAttachItem_ItemNotFound(t *testing.T) {
@@ -478,7 +478,7 @@ func TestAttachItem_ItemNotFound(t *testing.T) {
 	err := svc.AttachItem(context.Background(), wlID.String(), uuid.New().String(), ownerID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemNotFound))
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }
 
 func TestAttachItem_ItemForbidden_NotOwner(t *testing.T) {
@@ -506,7 +506,7 @@ func TestAttachItem_ItemForbidden_NotOwner(t *testing.T) {
 	err := svc.AttachItem(context.Background(), wlID.String(), itemID.String(), ownerID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemForbidden))
+	assert.ErrorIs(t, err, ErrItemForbidden)
 }
 
 func TestAttachItem_AlreadyAttached(t *testing.T) {
@@ -538,7 +538,7 @@ func TestAttachItem_AlreadyAttached(t *testing.T) {
 	err := svc.AttachItem(context.Background(), wlID.String(), itemID.String(), ownerID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemAlreadyAttached))
+	assert.ErrorIs(t, err, ErrItemAlreadyAttached)
 }
 
 func TestAttachItem_IsAttachedRepoError(t *testing.T) {
@@ -738,7 +738,7 @@ func TestCreateItemInWishlist_EmptyTitle(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishlistItemTitleRequired))
+	assert.ErrorIs(t, err, ErrWishlistItemTitleRequired)
 }
 
 func TestCreateItemInWishlist_InvalidWishlistID(t *testing.T) {
@@ -753,7 +753,7 @@ func TestCreateItemInWishlist_InvalidWishlistID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemWLID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemWLID)
 }
 
 func TestCreateItemInWishlist_InvalidUserID(t *testing.T) {
@@ -768,7 +768,7 @@ func TestCreateItemInWishlist_InvalidUserID(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemUser))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemUser)
 }
 
 func TestCreateItemInWishlist_WishlistNotFound(t *testing.T) {
@@ -785,7 +785,7 @@ func TestCreateItemInWishlist_WishlistNotFound(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishListNotFound))
+	assert.ErrorIs(t, err, ErrWishListNotFound)
 }
 
 func TestCreateItemInWishlist_WishlistForbidden(t *testing.T) {
@@ -808,7 +808,7 @@ func TestCreateItemInWishlist_WishlistForbidden(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishListForbidden))
+	assert.ErrorIs(t, err, ErrWishListForbidden)
 }
 
 func TestCreateItemInWishlist_CreateItemRepoError(t *testing.T) {
@@ -922,7 +922,7 @@ func TestDetachItem_InvalidWishlistID(t *testing.T) {
 	err := svc.DetachItem(context.Background(), "bad-wl-id", uuid.New().String(), uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemWLID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemWLID)
 }
 
 func TestDetachItem_InvalidItemID(t *testing.T) {
@@ -935,7 +935,7 @@ func TestDetachItem_InvalidItemID(t *testing.T) {
 	err := svc.DetachItem(context.Background(), uuid.New().String(), "bad-item-id", uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemID))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemID)
 }
 
 func TestDetachItem_InvalidUserID(t *testing.T) {
@@ -948,7 +948,7 @@ func TestDetachItem_InvalidUserID(t *testing.T) {
 	err := svc.DetachItem(context.Background(), uuid.New().String(), uuid.New().String(), "bad-user-id")
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrInvalidWishlistItemUser))
+	assert.ErrorIs(t, err, ErrInvalidWishlistItemUser)
 }
 
 func TestDetachItem_WishlistNotFound(t *testing.T) {
@@ -963,7 +963,7 @@ func TestDetachItem_WishlistNotFound(t *testing.T) {
 	err := svc.DetachItem(context.Background(), uuid.New().String(), uuid.New().String(), uuid.New().String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrWishListNotFound))
+	assert.ErrorIs(t, err, ErrWishListNotFound)
 }
 
 func TestDetachItem_WishlistForbidden_NotOwner(t *testing.T) {
@@ -984,7 +984,7 @@ func TestDetachItem_WishlistForbidden_NotOwner(t *testing.T) {
 	err := svc.DetachItem(context.Background(), wlID.String(), uuid.New().String(), otherUserID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrWishListForbidden))
+	assert.ErrorIs(t, err, ErrWishListForbidden)
 }
 
 func TestDetachItem_ItemNotInWishlist(t *testing.T) {
@@ -1010,7 +1010,7 @@ func TestDetachItem_ItemNotInWishlist(t *testing.T) {
 	err := svc.DetachItem(context.Background(), wlID.String(), itemID.String(), ownerID.String())
 
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrItemNotInWishlist))
+	assert.ErrorIs(t, err, ErrItemNotInWishlist)
 }
 
 func TestDetachItem_IsAttachedRepoError(t *testing.T) {
@@ -1099,7 +1099,7 @@ func TestGetWishlistItems_Forbidden_IsPublicInvalid(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.True(t, errors.Is(err, ErrWishListForbidden))
+	assert.ErrorIs(t, err, ErrWishListForbidden)
 }
 
 func TestCreateItemInWishlist_NoPriceSet(t *testing.T) {
