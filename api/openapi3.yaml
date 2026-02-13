@@ -1988,7 +1988,6 @@ components:
           type: string
         notes:
           example: "Preferred color: Blue"
-          maxLength: 1000
           type: string
         price:
           example: 999.99

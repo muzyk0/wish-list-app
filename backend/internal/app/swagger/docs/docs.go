@@ -2612,7 +2612,6 @@ const docTemplate = `{
                 },
                 "notes": {
                     "type": "string",
-                    "maxLength": 1000,
                     "example": "Preferred color: Blue"
                 },
                 "price": {
