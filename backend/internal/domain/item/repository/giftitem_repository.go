@@ -84,9 +84,9 @@ type GiftItemRepository struct {
 }
 
 // NewGiftItemRepository creates a new GiftItemRepository
-func NewGiftItemRepository(database *database.DB) GiftItemRepositoryInterface {
+func NewGiftItemRepository(db *database.DB) GiftItemRepositoryInterface {
 	return &GiftItemRepository{
-		db: database,
+		db: db,
 	}
 }
 
@@ -95,6 +95,7 @@ func NewGiftItemRepository(database *database.DB) GiftItemRepositoryInterface {
 // ---------------------------------------------------------------------------
 
 // Create inserts a new gift item into the database.
+//
 // Deprecated: Use CreateWithOwner instead. Kept for backward compatibility.
 func (r *GiftItemRepository) Create(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
 	return r.CreateWithOwner(ctx, giftItem)
@@ -155,7 +156,7 @@ func (r *GiftItemRepository) GetByID(ctx context.Context, id pgtype.UUID) (*mode
 // GetByOwnerPaginated retrieves items owned by user with pagination and filters
 func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters ItemFilters) (*PaginatedResult, error) {
 	whereConditions := []string{"owner_id = $1"}
-	args := []interface{}{ownerID}
+	args := []any{ownerID}
 	argIndex := 2
 
 	if !filters.IncludeArchived {
@@ -192,7 +193,7 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 	}
 
 	order := "DESC"
-	if strings.ToUpper(filters.Order) == "ASC" {
+	if strings.EqualFold(filters.Order, "ASC") {
 		order = "ASC"
 	}
 
