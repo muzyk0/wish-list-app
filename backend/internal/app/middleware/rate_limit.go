@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"sync"
@@ -25,11 +26,13 @@ var AuthRateLimits = struct {
 	Exchange      RateLimitConfig
 	MobileHandoff RateLimitConfig
 	Refresh       RateLimitConfig
+	OAuth         RateLimitConfig
 }{
 	Login:         RateLimitConfig{Requests: 5, Window: time.Minute, BurstSize: 10},
 	Exchange:      RateLimitConfig{Requests: 10, Window: time.Minute, BurstSize: 15},
 	MobileHandoff: RateLimitConfig{Requests: 10, Window: time.Minute, BurstSize: 15},
 	Refresh:       RateLimitConfig{Requests: 20, Window: time.Minute, BurstSize: 30},
+	OAuth:         RateLimitConfig{Requests: 5, Window: time.Minute, BurstSize: 5},
 }
 
 // rateLimitEntry tracks request count for a single identifier
@@ -48,13 +51,18 @@ type AuthRateLimiter struct {
 
 // NewAuthRateLimiter creates a new rate limiter with the given configuration
 func NewAuthRateLimiter(config RateLimitConfig) *AuthRateLimiter {
+	return NewAuthRateLimiterWithContext(context.Background(), config)
+}
+
+// NewAuthRateLimiterWithContext creates a new rate limiter with context for graceful shutdown
+func NewAuthRateLimiterWithContext(ctx context.Context, config RateLimitConfig) *AuthRateLimiter {
 	limiter := &AuthRateLimiter{
 		entries: make(map[string]*rateLimitEntry),
 		config:  config,
 	}
 
-	// Start cleanup goroutine
-	go limiter.cleanupLoop()
+	// Start cleanup goroutine with context
+	go limiter.cleanupLoop(ctx)
 
 	return limiter
 }
@@ -112,13 +120,18 @@ func (rl *AuthRateLimiter) Reset(identifier string) {
 	delete(rl.entries, identifier)
 }
 
-// cleanupLoop periodically removes expired entries
-func (rl *AuthRateLimiter) cleanupLoop() {
+// cleanupLoop periodically removes expired entries with context support
+func (rl *AuthRateLimiter) cleanupLoop(ctx context.Context) {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		rl.cleanup()
+	for {
+		select {
+		case <-ticker.C:
+			rl.cleanup()
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 
@@ -193,4 +206,9 @@ func NewHandoffRateLimiter() *AuthRateLimiter {
 // NewRefreshRateLimiter creates a rate limiter configured for refresh endpoint
 func NewRefreshRateLimiter() *AuthRateLimiter {
 	return NewAuthRateLimiter(AuthRateLimits.Refresh)
+}
+
+// NewOAuthRateLimiter creates a rate limiter configured for OAuth endpoints (Google, Facebook)
+func NewOAuthRateLimiter() *AuthRateLimiter {
+	return NewAuthRateLimiter(AuthRateLimits.OAuth)
 }

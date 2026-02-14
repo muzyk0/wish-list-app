@@ -2,6 +2,8 @@ package http
 
 import (
 	"github.com/labstack/echo/v4"
+
+	"wish-list/internal/app/middleware"
 )
 
 // RegisterRoutes registers auth domain HTTP routes on the /api/auth group.
@@ -13,9 +15,12 @@ func RegisterRoutes(e *echo.Echo, h *Handler, oh *OAuthHandler, authMiddleware e
 	authGroup.POST("/refresh", h.Refresh)
 	authGroup.POST("/exchange", h.Exchange)
 
-	// OAuth endpoints
-	authGroup.POST("/oauth/google", oh.GoogleOAuth)
-	authGroup.POST("/oauth/facebook", oh.FacebookOAuth)
+	// OAuth endpoints with rate limiting (5 req/min)
+	oauthLimiter := middleware.NewOAuthRateLimiter()
+	oauthGroup := authGroup.Group("/oauth")
+	oauthGroup.Use(middleware.AuthRateLimitMiddleware(oauthLimiter, middleware.IPIdentifier))
+	oauthGroup.POST("/google", oh.GoogleOAuth)
+	oauthGroup.POST("/facebook", oh.FacebookOAuth)
 
 	// Protected auth endpoints (require authentication)
 	authGroup.POST("/mobile-handoff", h.MobileHandoff, authMiddleware)
