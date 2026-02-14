@@ -24,7 +24,23 @@ var (
 	ErrGiftItemAlreadyReserved   = errors.New("gift item is already reserved")
 	ErrGiftItemAlreadyArchived   = errors.New("item not found or already archived")
 	ErrGiftItemConcurrentReserve = errors.New("gift item was reserved by another transaction")
+	ErrInvalidSortField          = errors.New("invalid sort field")
+	ErrInvalidSortOrder          = errors.New("invalid sort order")
 )
+
+// validSortFields defines allowed sort fields for SQL queries
+var validSortFields = map[string]string{
+	"created_at": "created_at",
+	"updated_at": "updated_at",
+	"title":      "name",
+	"price":      "price",
+}
+
+// validSortOrders defines allowed sort orders for SQL queries
+var validSortOrders = map[string]bool{
+	"ASC":  true,
+	"DESC": true,
+}
 
 // giftItemColumns is the standard column list for gift_items queries
 const giftItemColumns = `id, owner_id, name, description, link, image_url, price, priority,
@@ -180,21 +196,19 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 
 	whereClause := strings.Join(whereConditions, " AND ")
 
-	validSortFields := map[string]string{
-		"created_at": "created_at",
-		"updated_at": "updated_at",
-		"title":      "name",
-		"price":      "price",
-	}
-
+	// Validate sort field against whitelist
 	sortField, ok := validSortFields[filters.Sort]
 	if !ok {
-		sortField = "created_at"
+		return nil, ErrInvalidSortField
 	}
 
-	order := "DESC"
-	if strings.EqualFold(filters.Order, "ASC") {
-		order = "ASC"
+	// Normalize and validate sort order
+	order := strings.ToUpper(filters.Order)
+	if order == "" {
+		order = "DESC"
+	}
+	if !validSortOrders[order] {
+		return nil, ErrInvalidSortOrder
 	}
 
 	orderClause := fmt.Sprintf("%s %s", sortField, order)

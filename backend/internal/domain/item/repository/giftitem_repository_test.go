@@ -488,6 +488,82 @@ func TestGiftItemRepository_ValidationRules(t *testing.T) {
 	})
 }
 
+func TestGiftItemRepository_SQLInjectionPrevention(t *testing.T) {
+	t.Run("malicious sort field is rejected", func(t *testing.T) {
+		maliciousSorts := []string{
+			"created_at; DROP TABLE users--",
+			"created_at; DELETE FROM users--",
+			"created_at' OR '1'='1",
+			"(SELECT * FROM users)",
+			"created_at; INSERT INTO users VALUES ('hack')--",
+			"; DROP TABLE gift_items;--",
+			"created_at UNION SELECT * FROM users--",
+		}
+
+		for _, sort := range maliciousSorts {
+			_, ok := validSortFields[sort]
+			if ok {
+				t.Errorf("malicious sort field %q should not be in whitelist", sort)
+			}
+		}
+	})
+
+	t.Run("malicious order direction is rejected", func(t *testing.T) {
+		maliciousOrders := []string{
+			"DESC; DROP TABLE users--",
+			"ASC; DELETE FROM users--",
+			"DESC' OR '1'='1",
+			"(SELECT * FROM users)",
+			"; INSERT INTO users VALUES ('hack')--",
+			"UNION SELECT * FROM users--",
+		}
+
+		for _, order := range maliciousOrders {
+			orderUpper := string(order)
+			if orderUpper == "" {
+				orderUpper = "DESC"
+			}
+			if validSortOrders[orderUpper] {
+				t.Errorf("malicious order direction %q should not be valid", order)
+			}
+		}
+	})
+
+	t.Run("valid sort fields are accepted", func(t *testing.T) {
+		validSorts := []string{"created_at", "updated_at", "title", "price"}
+
+		for _, sort := range validSorts {
+			_, ok := validSortFields[sort]
+			if !ok {
+				t.Errorf("valid sort field %q should be in whitelist", sort)
+			}
+		}
+	})
+
+	t.Run("valid order directions are accepted", func(t *testing.T) {
+		validOrders := []string{"ASC", "DESC"}
+
+		for _, order := range validOrders {
+			if !validSortOrders[order] {
+				t.Errorf("valid order direction %q should be accepted", order)
+			}
+		}
+	})
+
+	t.Run("sort field validation is case sensitive", func(t *testing.T) {
+		// Valid sort fields should be case-sensitive
+		_, ok := validSortFields["CREATED_AT"]
+		if ok {
+			t.Error("sort field validation should be case sensitive")
+		}
+
+		_, ok = validSortFields["Created_At"]
+		if ok {
+			t.Error("sort field validation should be case sensitive")
+		}
+	})
+}
+
 func TestGiftItemRepository_EdgeCases(t *testing.T) {
 	t.Run("handle special characters in name", func(t *testing.T) {
 		specialNames := []string{
