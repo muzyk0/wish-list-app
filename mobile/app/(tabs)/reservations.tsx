@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { TabsLayout } from '@/components/TabsLayout';
-import { MyWishesReserved } from '@/components/wish-list/MyWishesReserved';
 import { MyReservations } from '@/components/wish-list/MyReservations';
+import { MyWishesReserved } from '@/components/wish-list/MyWishesReserved';
 
 type TabType = 'wishes' | 'reservations';
 
@@ -20,15 +20,16 @@ export default function ReservationsScreen() {
           <View style={styles.tabs}>
             <Pressable
               onPress={() => setActiveTab('wishes')}
-              style={[
-                styles.tab,
-                activeTab === 'wishes' && styles.activeTab,
-              ]}
+              style={[styles.tab, activeTab === 'wishes' && styles.activeTab]}
             >
               <MaterialCommunityIcons
                 name="gift"
                 size={20}
-                color={activeTab === 'wishes' ? '#000000' : 'rgba(255, 255, 255, 0.6)'}
+                color={
+                  activeTab === 'wishes'
+                    ? '#000000'
+                    : 'rgba(255, 255, 255, 0.6)'
+                }
               />
               <Text
                 style={[

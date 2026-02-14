@@ -7,22 +7,22 @@ import type { components } from './schema';
 
 // Wish list type from API (without gift_items - fetched separately)
 export type WishList =
-  components['schemas']['internal_handlers.WishListResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'];
 
 // Gift item type
 export type GiftItem =
-  components['schemas']['internal_handlers.GiftItemResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.GiftItemResponse'];
 
 // Gift items response with pagination
 export type GetGiftItemsResponse =
-  components['schemas']['internal_handlers.GetGiftItemsResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse'];
 
 // Reservation types
 export type Reservation =
-  components['schemas']['internal_handlers.CreateReservationResponse'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'];
 export type CreateReservationRequest =
-  components['schemas']['internal_handlers.CreateReservationRequest'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest'];
 
 // Auth types (for mobile handoff)
 export type MobileHandoffResponse =
-  components['schemas']['internal_handlers.HandoffResponse'];
+  components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse'];

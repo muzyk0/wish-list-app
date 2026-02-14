@@ -1,0 +1,7 @@
+properties:
+  url:
+    example: https://s3.amazonaws.com/bucket/images/uuid.jpg
+    type: string
+required:
+  - url
+type: object

@@ -26,7 +26,7 @@ get:
         application/json:
           schema:
             $ref: >-
-              ../components/schemas/internal_handlers.PaginatedItemsResponse.yaml
+              ../components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse.yaml
     '401':
       description: Not authenticated
       content:
@@ -79,7 +79,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.AttachItemRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest.yaml
     description: Item to attach
     required: true
   responses:

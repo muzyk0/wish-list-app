@@ -485,7 +485,7 @@ class ApiClient {
       '/items/{id}/mark-purchased',
       {
         params: { path: { id: itemId } },
-        body: { purchasedPrice },
+        body: { purchased_price: purchasedPrice },
       },
     );
 

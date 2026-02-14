@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { BlurView } from 'expo-blur';
 import { ReservationItem } from './ReservationItem';
 
 interface Reservation {
@@ -89,7 +89,11 @@ export function MyReservations() {
     return (
       <View style={styles.centerContainer}>
         <BlurView intensity={20} style={styles.emptyCard}>
-          <MaterialCommunityIcons name="bookmark-outline" size={64} color="#FFD700" />
+          <MaterialCommunityIcons
+            name="bookmark-outline"
+            size={64}
+            color="#FFD700"
+          />
           <Text style={styles.emptyTitle}>No reservations yet</Text>
           <Text style={styles.emptyText}>
             When you reserve items, they'll appear here

@@ -1,7 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type React from 'react';
-import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from 'react-native';
+import { HelperText, TextInput } from 'react-native-paper';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -10,6 +16,7 @@ interface AuthInputProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
+  onBlur?: () => void;
   icon?: IconName;
   secureTextEntry?: boolean;
   showPasswordToggle?: boolean;
@@ -18,6 +25,7 @@ interface AuthInputProps {
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   style?: ViewStyle;
+  error?: string;
 }
 
 export const AuthInput: React.FC<AuthInputProps> = ({
@@ -25,6 +33,7 @@ export const AuthInput: React.FC<AuthInputProps> = ({
   placeholder,
   value,
   onChangeText,
+  onBlur,
   icon,
   secureTextEntry = false,
   showPasswordToggle = false,
@@ -33,40 +42,50 @@ export const AuthInput: React.FC<AuthInputProps> = ({
   keyboardType = 'default',
   autoCapitalize = 'none',
   style,
+  error,
 }) => {
   return (
-    <View style={[styles.container, style]}>
-      {icon && (
-        <MaterialCommunityIcons
-          name={icon}
-          size={22}
-          color="rgba(255, 255, 255, 0.5)"
-          style={styles.icon}
-        />
-      )}
-      <TextInput
-        testID={testID}
-        placeholder={placeholder}
-        placeholderTextColor="rgba(255, 255, 255, 0.4)"
-        value={value}
-        onChangeText={onChangeText}
-        secureTextEntry={secureTextEntry && !showPassword}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-        style={styles.input}
-        textColor="#ffffff"
-        underlineColor="transparent"
-        activeUnderlineColor="#FFD700"
-        contentStyle={styles.inputContent}
-      />
-      {showPasswordToggle && onTogglePassword && (
-        <Pressable onPress={onTogglePassword} style={styles.eyeIcon}>
+    <View style={style}>
+      <View style={[styles.container, error && styles.containerError]}>
+        {icon && (
           <MaterialCommunityIcons
-            name={showPassword ? 'eye-off' : 'eye'}
+            name={icon}
             size={22}
             color="rgba(255, 255, 255, 0.5)"
+            style={styles.icon}
           />
-        </Pressable>
+        )}
+        <TextInput
+          testID={testID}
+          placeholder={placeholder}
+          placeholderTextColor="rgba(255, 255, 255, 0.4)"
+          value={value}
+          onChangeText={onChangeText}
+          onBlur={onBlur}
+          secureTextEntry={secureTextEntry && !showPassword}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          style={styles.input}
+          textColor="#ffffff"
+          underlineColor="transparent"
+          activeUnderlineColor="#FFD700"
+          contentStyle={styles.inputContent}
+          error={!!error}
+        />
+        {showPasswordToggle && onTogglePassword && (
+          <Pressable onPress={onTogglePassword} style={styles.eyeIcon}>
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color="rgba(255, 255, 255, 0.5)"
+            />
+          </Pressable>
+        )}
+      </View>
+      {error && (
+        <HelperText type="error" visible={!!error} style={styles.errorText}>
+          {error}
+        </HelperText>
       )}
     </View>
   );
@@ -78,10 +97,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 4,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  containerError: {
+    borderColor: 'rgba(255, 82, 82, 0.5)',
   },
   icon: {
     marginRight: 12,
@@ -97,5 +119,10 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     padding: 8,
+  },
+  errorText: {
+    marginTop: -8,
+    marginBottom: 8,
+    color: '#ff5252',
   },
 });

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/api/types';
+import type { WishlistItem } from '@/lib/api/types';
 
 // Gift Item Card Component
 const GiftItemCard = ({
@@ -23,12 +23,12 @@ const GiftItemCard = ({
   onReserve,
   onEdit,
 }: {
-  item: GiftItem;
-  onReserve: (item: GiftItem) => void;
-  onEdit: (item: GiftItem) => void;
+  item: WishlistItem;
+  onReserve: (item: WishlistItem) => void;
+  onEdit: (item: WishlistItem) => void;
 }) => {
-  const isReserved = !!item.reserved_by_user_id || item.purchased_by_user_id;
-  const isPurchased = !!item.purchased_by_user_id;
+  const isReserved = item.is_purchased || item.is_archived;
+  const isPurchased = item.is_purchased;
 
   return (
     <BlurView intensity={20} style={styles.giftItemCard}>
@@ -36,7 +36,7 @@ const GiftItemCard = ({
         {/* Header */}
         <View style={styles.itemHeader}>
           <View style={styles.itemTitleContainer}>
-            <Text style={styles.itemTitle}>{item.name}</Text>
+            <Text style={styles.itemTitle}>{item.title}</Text>
             {item.price !== undefined && item.price !== null && (
               <View style={styles.priceContainer}>
                 <LinearGradient
@@ -172,10 +172,10 @@ export default function WishListScreen() {
     setRefreshing(false);
   };
 
-  const handleReserveGift = (item: GiftItem) => {
+  const handleReserveGift = (item: WishlistItem) => {
     Alert.alert(
       'Reserve Gift',
-      `You are reserving "${item.name}". In a real app, this would create a reservation.`,
+      `You are reserving "${item.title}". In a real app, this would create a reservation.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -191,7 +191,7 @@ export default function WishListScreen() {
     );
   };
 
-  const handleEditGift = (item: GiftItem) => {
+  const handleEditGift = (item: WishlistItem) => {
     router.push(`/lists/${id}/gifts/${item.id}/edit`);
   };
 
@@ -323,7 +323,7 @@ export default function WishListScreen() {
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValueSecondary}>
-                  {giftItems?.items?.filter((item) => item.reserved_by_user_id)
+                  {giftItems?.items?.filter((item) => item.is_reserved)
                     .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Reserved</Text>
@@ -331,7 +331,7 @@ export default function WishListScreen() {
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {giftItems?.items?.filter((item) => item.purchased_by_user_id)
+                  {giftItems?.items?.filter((item) => item.is_purchased)
                     .length || 0}
                 </Text>
                 <Text style={styles.statLabel}>Purchased</Text>

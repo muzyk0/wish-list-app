@@ -1,0 +1,44 @@
+properties:
+  created_at:
+    example: '2024-01-01T12:00:00Z'
+    type: string
+  description:
+    example: 256GB, Blue Titanium
+    type: string
+  id:
+    example: 550e8400-e29b-41d4-a716-446655440000
+    type: string
+  image_url:
+    example: https://example.com/image.jpg
+    type: string
+  is_archived:
+    example: false
+    type: boolean
+  is_purchased:
+    example: false
+    type: boolean
+  is_reserved:
+    example: false
+    type: boolean
+  link:
+    example: https://apple.com/iphone-15-pro
+    type: string
+  notes:
+    example: 'Preferred color: Blue'
+    type: string
+  owner_id:
+    example: 550e8400-e29b-41d4-a716-446655440001
+    type: string
+  price:
+    example: 999.99
+    type: number
+  priority:
+    example: 3
+    type: integer
+  title:
+    example: iPhone 15 Pro
+    type: string
+  updated_at:
+    example: '2024-01-01T12:00:00Z'
+    type: string
+type: object

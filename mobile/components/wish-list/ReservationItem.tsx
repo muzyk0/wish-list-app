@@ -58,7 +58,10 @@ export function ReservationItem({
                 onRefresh();
               } else {
                 const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to cancel reservation');
+                Alert.alert(
+                  'Error',
+                  data.error || 'Failed to cancel reservation',
+                );
               }
             } catch {
               Alert.alert(
@@ -108,7 +111,8 @@ export function ReservationItem({
   };
 
   const statusConfig = getStatusConfig();
-  const ownerName = `${reservation.wishlist.ownerFirstName || ''} ${reservation.wishlist.ownerLastName || ''}`.trim();
+  const ownerName =
+    `${reservation.wishlist.ownerFirstName || ''} ${reservation.wishlist.ownerLastName || ''}`.trim();
 
   return (
     <BlurView intensity={20} style={styles.card}>
@@ -204,9 +208,16 @@ export function ReservationItem({
 
         {/* Cancel Button */}
         {reservation.status === 'active' && (
-          <Pressable onPress={handleCancelReservation} style={styles.cancelButtonWrapper}>
+          <Pressable
+            onPress={handleCancelReservation}
+            style={styles.cancelButtonWrapper}
+          >
             <View style={styles.cancelButton}>
-              <MaterialCommunityIcons name="close" size={16} color="rgba(255, 255, 255, 0.7)" />
+              <MaterialCommunityIcons
+                name="close"
+                size={16}
+                color="rgba(255, 255, 255, 0.7)"
+              />
               <Text style={styles.cancelButtonText}>Cancel Reservation</Text>
             </View>
           </Pressable>

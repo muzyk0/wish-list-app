@@ -6,48 +6,56 @@
 import type { components, paths } from './schema';
 
 // User types
-export type User = components['schemas']['internal_handlers.UserResponse'];
+export type User =
+  components['schemas']['wish-list_internal_domain_user_delivery_http_dto.UserResponse'];
 export type UserRegistration =
-  components['schemas']['internal_handlers.RegisterRequest'];
-export type UserLogin = components['schemas']['internal_handlers.LoginRequest'];
+  components['schemas']['wish-list_internal_domain_user_delivery_http_dto.RegisterRequest'];
+export type UserLogin =
+  components['schemas']['wish-list_internal_domain_user_delivery_http_dto.LoginRequest'];
 export type UserUpdate =
-  components['schemas']['internal_handlers.UpdateProfileRequest'];
+  components['schemas']['wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest'];
 export type LoginResponse =
-  components['schemas']['internal_handlers.AuthResponse'];
+  components['schemas']['wish-list_internal_domain_user_delivery_http_dto.AuthResponse'];
 
 // Wish list types
 export type WishList =
-  components['schemas']['internal_handlers.WishListResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse'];
 export type CreateWishListRequest =
-  components['schemas']['internal_handlers.CreateWishListRequest'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest'];
 export type UpdateWishListRequest =
-  components['schemas']['internal_handlers.UpdateWishListRequest'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest'];
 
 // Gift item types
 export type GiftItem =
-  components['schemas']['internal_handlers.GiftItemResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.GiftItemResponse'];
 export type CreateGiftItemRequest =
-  components['schemas']['internal_handlers.CreateItemRequest'];
+  components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest'];
 export type UpdateGiftItemRequest =
-  components['schemas']['internal_handlers.UpdateItemRequest'];
+  components['schemas']['wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest'];
+
+// Wishlist item types (from /wishlists/{id}/items endpoint - camelCase)
+export type WishlistItem =
+  components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse'];
+export type PaginatedWishlistItems =
+  components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'];
 
 // Reservation types
 export type Reservation =
-  components['schemas']['internal_handlers.CreateReservationResponse'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'];
 export type CreateReservationRequest =
-  components['schemas']['internal_handlers.CreateReservationRequest'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest'];
 export type CancelReservationRequest =
-  components['schemas']['internal_handlers.CancelReservationRequest'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest'];
 export type ReservationDetails =
-  components['schemas']['internal_handlers.ReservationDetailsResponse'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse'];
 export type ReservationStatus =
-  components['schemas']['internal_handlers.ReservationStatusResponse'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'];
 
 // Response types
 export type GetGiftItemsResponse =
-  components['schemas']['internal_handlers.GetGiftItemsResponse'];
+  components['schemas']['wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse'];
 export type UserReservationsResponse =
-  components['schemas']['internal_handlers.UserReservationsResponse'];
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'];
 
 // Path operation types for type-safe API calls
 export type RegisterOperation = paths['/auth/register']['post'];

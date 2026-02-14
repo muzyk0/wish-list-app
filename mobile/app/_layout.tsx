@@ -1,7 +1,7 @@
+import * as Linking from 'expo-linking';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import * as Linking from 'expo-linking';
 import 'react-native-reanimated';
 
 import Providers from '@/app/providers';
@@ -47,8 +47,8 @@ export default function RootLayout() {
 
         // Handle parameterized routes with type-safe navigation
         if (path.startsWith('lists/') && path.includes('/edit')) {
-          const match = path.match(/^lists\/([^\/]+)\/edit/);
-          if (match && match[1]) {
+          const match = path.match(/^lists\/([^/]+)\/edit/);
+          if (match?.[1]) {
             router.navigate({
               pathname: '/lists/[id]/edit',
               params: { id: match[1] },
@@ -58,8 +58,8 @@ export default function RootLayout() {
         }
 
         if (path.startsWith('lists/')) {
-          const match = path.match(/^lists\/([^\/]+)/);
-          if (match && match[1]) {
+          const match = path.match(/^lists\/([^/]+)/);
+          if (match?.[1]) {
             router.navigate({
               pathname: '/lists/[id]',
               params: { id: match[1] },
@@ -69,8 +69,8 @@ export default function RootLayout() {
         }
 
         if (path.startsWith('public/')) {
-          const match = path.match(/^public\/([^\/]+)/);
-          if (match && match[1]) {
+          const match = path.match(/^public\/([^/]+)/);
+          if (match?.[1]) {
             router.navigate({
               pathname: '/public/[slug]' as any,
               params: { slug: match[1] },
@@ -80,8 +80,8 @@ export default function RootLayout() {
         }
 
         if (path.startsWith('gift-items/') && path.includes('/edit')) {
-          const match = path.match(/^gift-items\/([^\/]+)\/edit/);
-          if (match && match[1]) {
+          const match = path.match(/^gift-items\/([^/]+)\/edit/);
+          if (match?.[1]) {
             router.navigate({
               pathname: '/gift-items/[id]/edit',
               params: { id: match[1] },

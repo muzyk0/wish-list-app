@@ -167,7 +167,7 @@ class ApiClient {
     reservationData?: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data, error } = await this.client.POST(
-      '/wishlists/{wishlistId}/gift-items/{itemId}/reservation',
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: reservationData,

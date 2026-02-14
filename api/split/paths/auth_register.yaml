@@ -4,7 +4,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.RegisterRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.RegisterRequest.yaml
     description: User registration information
     required: true
   responses:
@@ -13,7 +14,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.AuthResponse.yaml
     '400':
       description: Invalid request body or validation error
       content:

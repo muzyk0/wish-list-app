@@ -6,7 +6,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.ExchangeRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest.yaml
     description: Exchange request
     required: true
   responses:
@@ -15,7 +16,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ExchangeResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse.yaml
     '400':
       description: Invalid request body
       content:

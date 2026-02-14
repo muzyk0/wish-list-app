@@ -1,0 +1,16 @@
+properties:
+  accessToken:
+    description: Access token (short-lived, 15 minutes)
+    type: string
+  refreshToken:
+    description: Refresh token (long-lived, 7 days)
+    type: string
+  user:
+    allOf:
+      - $ref: ./wish-list_internal_domain_auth_delivery_http_dto.UserResponse.yaml
+    description: User information
+required:
+  - accessToken
+  - refreshToken
+  - user
+type: object

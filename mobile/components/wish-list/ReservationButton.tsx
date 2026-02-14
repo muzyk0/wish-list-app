@@ -1,16 +1,34 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
+  HelperText,
   Paragraph,
   Portal,
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
+import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+
+// Zod schema for guest reservation form validation
+const guestReservationSchema = z.object({
+  guestName: z
+    .string()
+    .min(1, 'Name is required')
+    .max(255, 'Name must be less than 255 characters'),
+  guestEmail: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Invalid email address'),
+});
+
+type GuestReservationFormData = z.infer<typeof guestReservationSchema>;
 
 interface ReservationButtonProps {
   giftItemId: string;
@@ -29,20 +47,30 @@ export function ReservationButton({
 }: ReservationButtonProps) {
   const theme = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
-  const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<GuestReservationFormData>({
+    resolver: zodResolver(guestReservationSchema),
+    defaultValues: {
+      guestName: '',
+      guestEmail: '',
+    },
+  });
 
   const reservationMutation = useMutation({
-    mutationFn: (data: { guest_name: string; guest_email: string }) =>
+    mutationFn: (data: GuestReservationFormData) =>
       apiClient.createReservation(wishlistId, giftItemId, {
-        guest_name: data.guest_name,
-        guest_email: data.guest_email,
+        guest_name: data.guestName,
+        guest_email: data.guestEmail,
       }),
     onSuccess: () => {
       Alert.alert('Success', 'Gift item reserved successfully!');
       setModalVisible(false);
-      setGuestName('');
-      setGuestEmail('');
+      reset();
       onReservationSuccess?.();
     },
     onError: (error: Error) => {
@@ -50,16 +78,8 @@ export function ReservationButton({
     },
   });
 
-  const handleReservation = () => {
-    if (!guestName.trim() || !guestEmail.trim()) {
-      Alert.alert('Error', 'Please enter your name and email');
-      return;
-    }
-
-    reservationMutation.mutate({
-      guest_name: guestName.trim(),
-      guest_email: guestEmail.trim(),
-    });
+  const onSubmit = (data: GuestReservationFormData) => {
+    reservationMutation.mutate(data);
   };
 
   if (isReserved) {
@@ -99,21 +119,51 @@ export function ReservationButton({
               others from reserving the same gift.
             </Paragraph>
 
-            <TextInput
-              label="Your Name"
-              value={guestName}
-              onChangeText={setGuestName}
-              style={styles.input}
-              mode="outlined"
+            <Controller
+              control={control}
+              name="guestName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <TextInput
+                    label="Your Name"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    style={styles.input}
+                    mode="outlined"
+                    error={!!errors.guestName}
+                  />
+                  {errors.guestName && (
+                    <HelperText type="error" visible={!!errors.guestName}>
+                      {errors.guestName.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
             />
 
-            <TextInput
-              label="Your Email"
-              value={guestEmail}
-              onChangeText={setGuestEmail}
-              style={[styles.input, { marginTop: 16 }]}
-              mode="outlined"
-              keyboardType="email-address"
+            <Controller
+              control={control}
+              name="guestEmail"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <TextInput
+                    label="Your Email"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    style={[styles.input, { marginTop: 16 }]}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    error={!!errors.guestEmail}
+                  />
+                  {errors.guestEmail && (
+                    <HelperText type="error" visible={!!errors.guestEmail}>
+                      {errors.guestEmail.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
             />
           </Dialog.Content>
           <Dialog.Actions>
@@ -121,7 +171,7 @@ export function ReservationButton({
               <Text>Cancel</Text>
             </Button>
             <Button
-              onPress={handleReservation}
+              onPress={handleSubmit(onSubmit)}
               loading={reservationMutation.isPending}
               disabled={reservationMutation.isPending}
             >

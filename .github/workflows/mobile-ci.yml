@@ -7,7 +7,6 @@ on:
       - 'mobile/**'
       - '.github/workflows/mobile-ci.yml'
   pull_request:
-    branches: [main, develop]
     paths:
       - 'mobile/**'
       - '.github/workflows/mobile-ci.yml'

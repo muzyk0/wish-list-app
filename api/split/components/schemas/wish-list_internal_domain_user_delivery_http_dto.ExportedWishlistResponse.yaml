@@ -1,0 +1,28 @@
+properties:
+  created_at:
+    example: '2024-01-01T12:00:00Z'
+    type: string
+  description:
+    example: My birthday wishlist
+    type: string
+  gift_items:
+    items:
+      $ref: >-
+        ./wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse.yaml
+    type: array
+  id:
+    example: 550e8400-e29b-41d4-a716-446655440001
+    type: string
+  is_public:
+    example: true
+    type: boolean
+  occasion:
+    example: Birthday
+    type: string
+  public_slug:
+    example: birthday-2024-abc123
+    type: string
+  title:
+    example: Birthday 2024
+    type: string
+type: object

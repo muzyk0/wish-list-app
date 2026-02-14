@@ -1,0 +1,11 @@
+properties:
+  data:
+    items:
+      $ref: >-
+        ./wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse.yaml
+    type: array
+  pagination: {}
+required:
+  - data
+  - pagination
+type: object

@@ -1,0 +1,21 @@
+properties:
+  export_format:
+    example: json
+    type: string
+  exported_at:
+    example: '2024-01-01T12:00:00Z'
+    type: string
+  user:
+    $ref: >-
+      ./wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse.yaml
+  wishlists:
+    items:
+      $ref: >-
+        ./wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse.yaml
+    type: array
+required:
+  - export_format
+  - exported_at
+  - user
+  - wishlists
+type: object

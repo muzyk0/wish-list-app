@@ -1,9 +1,9 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useId, useRef } from 'react';
+import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 import { isAuthenticated } from '@/lib/api/auth';
 
 const { width, height } = Dimensions.get('window');
@@ -83,6 +83,7 @@ const FloatingParticle = ({
 };
 
 export default function SplashScreen() {
+  const id = useId();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.6)).current;
@@ -205,6 +206,7 @@ export default function SplashScreen() {
 
   // Generate particles
   const particles = Array.from({ length: 12 }, (_, i) => ({
+    key: `splash-screen|${id}|${i}`,
     delay: i * 300,
     startX: Math.random() * width,
     size: 8 + Math.random() * 16,
@@ -220,8 +222,8 @@ export default function SplashScreen() {
       />
 
       {/* Floating particles */}
-      {particles.map((particle, index) => (
-        <FloatingParticle key={index} {...particle} />
+      {particles.map(({ key, ...particle }) => (
+        <FloatingParticle key={key} {...particle} />
       ))}
 
       {/* Decorative circles */}

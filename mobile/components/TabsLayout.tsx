@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type React from 'react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   RefreshControl,
   ScrollView,

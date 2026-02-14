@@ -1,6 +1,0 @@
-content:
-  application/json:
-    schema:
-      $ref: ../schemas/internal_handlers.CreateItemRequest.yaml
-description: Item data
-required: true

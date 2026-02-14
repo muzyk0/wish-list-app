@@ -6,7 +6,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.MessageResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse.yaml
   security:
     - BearerAuth: []
   summary: Logout user
