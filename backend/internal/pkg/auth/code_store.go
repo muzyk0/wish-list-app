@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
@@ -109,26 +110,21 @@ func (cs *CodeStore) CleanupExpired() int {
 }
 
 // StartCleanupRoutine starts a background goroutine that cleans up
-// expired codes every 30 seconds. Returns a stop function.
-func (cs *CodeStore) StartCleanupRoutine() func() {
+// expired codes every 30 seconds. The goroutine stops when ctx is cancelled.
+func (cs *CodeStore) StartCleanupRoutine(ctx context.Context) {
 	ticker := time.NewTicker(30 * time.Second)
-	done := make(chan bool)
 
 	go func() {
+		defer ticker.Stop()
 		for {
 			select {
 			case <-ticker.C:
 				cs.CleanupExpired()
-			case <-done:
-				ticker.Stop()
+			case <-ctx.Done():
 				return
 			}
 		}
 	}()
-
-	return func() {
-		done <- true
-	}
 }
 
 // Len returns the current number of codes in the store (for testing)

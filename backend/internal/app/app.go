@@ -61,18 +61,17 @@ type App struct {
 
 	// Background jobs
 	accountCleanupService *jobs.AccountCleanupService
-	stopCodeStoreCleanup  func()
 
 	// Domain handlers
-	healthHandler      *healthhttp.Handler
-	storageHandler     *storagehttp.Handler
-	userHandler        *userhttp.Handler
-	authHandler        *authhttp.Handler
-	oauthHandler       *authhttp.OAuthHandler
-	wishlistHandler    *wishlisthttp.Handler
-	itemHandler        *itemhttp.Handler
+	healthHandler       *healthhttp.Handler
+	storageHandler      *storagehttp.Handler
+	userHandler         *userhttp.Handler
+	authHandler         *authhttp.Handler
+	oauthHandler        *authhttp.OAuthHandler
+	wishlistHandler     *wishlisthttp.Handler
+	itemHandler         *itemhttp.Handler
 	wishlistItemHandler *wishlistitemhttp.Handler
-	reservationHandler *reservationhttp.Handler
+	reservationHandler  *reservationhttp.Handler
 }
 
 // New creates a new App instance, initializing all infrastructure, domain
@@ -107,7 +106,6 @@ func (a *App) initInfrastructure() error {
 
 	// Code store for mobile handoff
 	a.codeStore = auth.NewCodeStore()
-	a.stopCodeStoreCleanup = a.codeStore.StartCleanupRoutine()
 
 	// S3 client (optional)
 	s3Client, err := aws.NewS3Client(a.cfg.AWSRegion, a.cfg.AWSAccessKeyID, a.cfg.AWSSecretAccessKey, a.cfg.AWSS3BucketName)
@@ -260,6 +258,9 @@ func (a *App) Run() error {
 	appCtx, appCancel := context.WithCancel(context.Background())
 	defer appCancel()
 
+	// Start code store cleanup goroutine
+	a.codeStore.StartCleanupRoutine(appCtx)
+
 	// Start background jobs
 	a.accountCleanupService.StartScheduledCleanup(appCtx)
 
@@ -292,11 +293,6 @@ func (a *App) Run() error {
 // Shutdown gracefully shuts down the application.
 func (a *App) Shutdown(ctx context.Context) error {
 	log.Println("Stopping background services...")
-
-	// Stop code store cleanup
-	if a.stopCodeStoreCleanup != nil {
-		a.stopCodeStoreCleanup()
-	}
 
 	// Shutdown HTTP server
 	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 10*time.Second)
