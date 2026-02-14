@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/mail"
+	"net/url"
+	"strings"
 	"time"
 
 	"wish-list/internal/domain/auth/delivery/http/dto"
@@ -336,6 +339,30 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL string) (*usermodels.User, error) {
 	ctx := context.Background()
 
+	// Validate email format
+	if _, err := mail.ParseAddress(email); err != nil {
+		return nil, fmt.Errorf("invalid email format: %w", err)
+	}
+
+	// Sanitize and validate names
+	firstName = strings.TrimSpace(firstName)
+	lastName = strings.TrimSpace(lastName)
+
+	const maxNameLength = 100
+	if len(firstName) > maxNameLength {
+		firstName = firstName[:maxNameLength]
+	}
+	if len(lastName) > maxNameLength {
+		lastName = lastName[:maxNameLength]
+	}
+
+	// Validate avatar URL if present
+	if avatarURL != "" {
+		if _, err := url.ParseRequestURI(avatarURL); err != nil {
+			avatarURL = ""
+		}
+	}
+
 	// Try to find existing user by email
 	user, err := h.userRepo.GetByEmail(ctx, email)
 	if err == nil {
@@ -344,10 +371,15 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 			user.AvatarUrl = pgtype.Text{String: avatarURL, Valid: true}
 			user, err = h.userRepo.Update(ctx, *user)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to update user avatar: %w", err)
 			}
 		}
 		return user, nil
+	}
+
+	// Handle repository errors other than "not found"
+	if err != nil {
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
 	// User doesn't exist, create new one
@@ -364,7 +396,7 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 
 	createdUser, err := h.userRepo.Create(ctx, newUser)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	return createdUser, nil
