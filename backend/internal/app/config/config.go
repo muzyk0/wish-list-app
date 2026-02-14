@@ -1,6 +1,9 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -41,12 +44,17 @@ func Load() *Config {
 
 	// Require JWT_SECRET in non-development environments
 	if serverEnv != "development" && jwtSecret == "" {
-		panic("JWT_SECRET must be set in production environments")
+		log.Fatal("JWT_SECRET must be set in production environments")
 	}
 
-	// Use a dev-only default for JWT_SECRET if not set in development
+	// Generate a random JWT secret for development if not provided
 	if jwtSecret == "" {
-		jwtSecret = "dev-only-secret-change-in-production" // #nosec G101 -- dev-only default, not production secret
+		b := make([]byte, 32)
+		if _, err := rand.Read(b); err != nil {
+			log.Fatal("Failed to generate random JWT secret:", err)
+		}
+		jwtSecret = base64.StdEncoding.EncodeToString(b)
+		log.Println("WARNING: Using generated temporary JWT secret for development. Set JWT_SECRET for persistence.")
 	}
 
 	return &Config{
