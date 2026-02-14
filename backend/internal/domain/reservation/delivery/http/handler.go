@@ -62,9 +62,9 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 
 	if authErr == nil {
 		// Authenticated user reservation
-		userID, err := helpers.ParseUUID(c, userIDStr)
-		if err != nil {
-			return err
+		userID, parseErr := helpers.ParseUUID(c, userIDStr)
+		if parseErr != nil {
+			return parseErr
 		}
 
 		reservation, err = h.service.CreateReservation(ctx, req.ToServiceInput(wishListID, giftItemID, userID))
@@ -138,9 +138,9 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 
 	if authErr == nil {
 		// Authenticated user cancellation
-		userID, err := helpers.ParseUUID(c, userIDStr)
-		if err != nil {
-			return err
+		userID, parseErr := helpers.ParseUUID(c, userIDStr)
+		if parseErr != nil {
+			return parseErr
 		}
 
 		reservation, err = h.service.CancelReservation(ctx, service.CancelReservationInput{
@@ -157,9 +157,9 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 			})
 		}
 
-		token, err := helpers.ParseUUID(c, *req.ReservationToken)
-		if err != nil {
-			return err
+		token, parseErr := helpers.ParseUUID(c, *req.ReservationToken)
+		if parseErr != nil {
+			return parseErr
 		}
 
 		reservation, err = h.service.CancelReservation(ctx, service.CancelReservationInput{

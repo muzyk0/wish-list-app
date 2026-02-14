@@ -115,33 +115,24 @@ c.SetCookie(auth.NewRefreshTokenCookie(refreshToken))
 
 ---
 
-## 📝 Что осталось сделать (опционально)
+## ✅ Завершено (2026-02-14) - Второй этап
 
-### 1. OAuth Handler (не рефакторили)
+### 1. ✅ OAuth Handler - рефакторинг завершён
 
 **Файл**: `backend/internal/domain/auth/delivery/http/oauth_handler.go`
 
-**Потенциальные улучшения**:
-- Применить `helpers.BindAndValidate` для OAuth request handling
-- Применить `auth.NewRefreshTokenCookie` для cookie management
-
-**Приоритет**: 🟡 Средний (OAuth handler отдельный, используется реже)
+**Применённые улучшения**:
+- ✅ Применён `helpers.BindAndValidate` для GoogleOAuth и FacebookOAuth (убрано дублирование Bind+Validate)
 
 ---
 
-### 2. Storage Handler (минимальные изменения)
+### 2. ✅ Storage Handler - cleanup завершён
 
 **Файл**: `backend/internal/domain/storage/delivery/http/handler.go`
 
-**Текущее состояние**:
-- Всего 1 метод `UploadImage`
-- Уже использует middleware для auth
-- Нет дублирующей логики
-
-**Потенциальное улучшение**:
-- Можно убрать явный auth check (строки 45-48), так как middleware уже применён
-
-**Приоритет**: 🟢 Низкий (файл очень маленький, 116 строк)
+**Применённые улучшения**:
+- ✅ Убран явный auth check (middleware уже обеспечивает auth)
+- ✅ Убран неиспользуемый import `auth`
 
 ---
 
@@ -155,27 +146,19 @@ c.SetCookie(auth.NewRefreshTokenCookie(refreshToken))
 
 ---
 
-### 4. Тестирование Helper Functions
+### 4. ✅ Тестирование Helper Functions - завершено
 
-**Создать unit-тесты для helpers**:
+**Созданные unit-тесты**:
 
-```bash
-# Создать тесты
-backend/internal/pkg/helpers/pagination_test.go
-backend/internal/pkg/helpers/request_test.go
-backend/internal/pkg/helpers/uuid_test.go
-backend/internal/pkg/auth/helpers_test.go
-backend/internal/pkg/auth/cookie_test.go
-```
+| Файл | Тесты | Покрытие |
+|------|-------|----------|
+| `helpers/pagination_test.go` | 20 тестов | defaults, boundaries, edge cases |
+| `helpers/request_test.go` | 12 тестов | valid/invalid JSON, validation, edge cases |
+| `helpers/uuid_test.go` | 14 тестов | valid/invalid UUID, ParseUUID/MustParseUUID consistency |
+| `auth/helpers_test.go` | 12 тестов | context keys, nil safety, consistency |
+| `auth/cookie_test.go` | 8 тестов | security settings, expiration, consistency |
 
-**Что тестировать**:
-- `ParsePagination`: граничные значения (0, negative, > 100)
-- `BindAndValidate`: невалидный JSON, ошибки валидации
-- `ParseUUID`: невалидные UUID форматы
-- `MustGetUserID`: поведение в protected/public routes
-- Cookie helpers: правильность настроек security
-
-**Приоритет**: 🟡 Средний (helpers простые, но тесты полезны)
+Все тесты проходят: `ok wish-list/internal/pkg/helpers`, `ok wish-list/internal/pkg/auth`
 
 ---
 
@@ -226,14 +209,15 @@ func SuccessResponse(c echo.Context, status int, data interface{}) error {
 
 ## 🎯 Рекомендации по Приоритетам
 
-### Сделать сейчас:
-1. ✅ Регенерировать Swagger docs (`swag init`). Готово. 
+### Всё завершено:
+1. ✅ Регенерировать Swagger docs (`swag init`). Готово.
 2. ✅ Прогнать тесты (`make test-backend`)
+3. ✅ Создать unit-тесты для helpers
+4. ✅ Рефакторить OAuth handler
+5. ✅ Cleanup Storage handler
 
-### Сделать позже (опционально):
-3. 🟡 Создать unit-тесты для helpers
-4. 🟡 Рефакторить OAuth handler (если используется)
-5. 🟢 Дополнительные helper functions (если видна польза)
+### Осталось (опционально):
+6. 🟢 Дополнительные helper functions (ErrorResponse/SuccessResponse - если видна польза)
 
 ---
 

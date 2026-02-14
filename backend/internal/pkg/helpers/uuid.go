@@ -8,7 +8,7 @@ import (
 )
 
 // ParseUUID parses a string into pgtype.UUID.
-// Returns error response if parsing fails.
+// Returns echo.HTTPError if parsing fails.
 //
 // Example usage in handler:
 //
@@ -23,9 +23,7 @@ import (
 func ParseUUID(c echo.Context, uuidStr string) (pgtype.UUID, error) {
 	var uuid pgtype.UUID
 	if err := uuid.Scan(uuidStr); err != nil {
-		return uuid, c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid UUID format",
-		})
+		return uuid, echo.NewHTTPError(http.StatusBadRequest, "Invalid UUID format")
 	}
 	return uuid, nil
 }

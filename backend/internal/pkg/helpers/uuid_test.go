@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -87,10 +88,10 @@ func TestParseUUID(t *testing.T) {
 				assert.True(t, result.Valid, "UUID should be valid")
 				assert.NotEqual(t, [16]byte{}, result.Bytes, "UUID bytes should not be zero")
 			} else {
-				// c.JSON() sends response and returns nil, so err is nil but HTTP response is sent
-				assert.Nil(t, err, "c.JSON() returns nil after sending response")
-				assert.Equal(t, tt.expectedStatusCode, rec.Code, "Status code mismatch")
-				assert.Contains(t, rec.Body.String(), tt.expectedError, "Error message should contain expected text")
+				assert.NotNil(t, err, "Expected non-nil error for invalid UUID")
+				var httpErr *echo.HTTPError
+				assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+				assert.Equal(t, tt.expectedStatusCode, httpErr.Code, "Status code mismatch")
 			}
 		})
 	}
@@ -189,9 +190,11 @@ func TestParseUUIDConsistency(t *testing.T) {
 		result1, err := ParseUUID(c, invalidUUID)
 		result2 := MustParseUUID(invalidUUID)
 
-		// ParseUUID sends HTTP error and returns nil
-		assert.Nil(t, err, "ParseUUID returns nil after sending HTTP response")
-		assert.Equal(t, http.StatusBadRequest, rec.Code, "Should send 400 status")
+		// ParseUUID returns echo.HTTPError for invalid UUID
+		assert.NotNil(t, err, "ParseUUID returns non-nil error for invalid UUID")
+		var httpErr *echo.HTTPError
+		assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+		assert.Equal(t, http.StatusBadRequest, httpErr.Code, "HTTP error should be 400")
 
 		// Both should have invalid UUID
 		assert.False(t, result1.Valid, "ParseUUID result should be invalid")

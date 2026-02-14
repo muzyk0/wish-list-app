@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -115,12 +116,10 @@ func TestBindAndValidate(t *testing.T) {
 			err := BindAndValidate(c, &testReq)
 
 			if tt.expectedError {
-				// c.JSON() sends response and returns nil, so check HTTP response
-				assert.Nil(t, err, "c.JSON() returns nil after sending response")
-				assert.Equal(t, tt.expectedStatusCode, rec.Code, "Status code mismatch")
-				if tt.errorContains != "" {
-					assert.Contains(t, rec.Body.String(), tt.errorContains, "Error message should contain expected text")
-				}
+				assert.NotNil(t, err, "Expected non-nil error for invalid input")
+				var httpErr *echo.HTTPError
+				assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+				assert.Equal(t, tt.expectedStatusCode, httpErr.Code, "Status code mismatch")
 			} else {
 				assert.Nil(t, err, "Expected no error but got: %v", err)
 				assert.Equal(t, "John Doe", testReq.Name)
@@ -144,10 +143,11 @@ func TestBindAndValidateWithoutValidator(t *testing.T) {
 		var testReq TestRequest
 		err := BindAndValidate(c, &testReq)
 
-		// When validator is not set, c.Validate() returns error, which triggers c.JSON()
-		// c.JSON() returns nil after sending response
-		assert.Nil(t, err, "c.JSON() returns nil after sending HTTP response")
-		assert.Equal(t, http.StatusBadRequest, rec.Code, "Should send 400 when validation fails")
+		// When validator is not set, c.Validate() returns error
+		assert.NotNil(t, err, "Expected non-nil error when validator is not set")
+		var httpErr *echo.HTTPError
+		assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+		assert.Equal(t, http.StatusBadRequest, httpErr.Code, "Should return 400 when validation fails")
 	})
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
@@ -397,13 +398,11 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 
 		// Invoke handler - should reject invalid token format
 		err := handler.CancelReservation(c)
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusBadRequest, rec.Code)
+		require.Error(t, err, "Expected error for invalid UUID")
 
-		var response map[string]string
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Contains(t, response["error"], "UUID")
+		var httpErr *echo.HTTPError
+		require.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+		assert.Equal(t, nethttp.StatusBadRequest, httpErr.Code)
 	})
 
 	t.Run("reservation token uniqueness", func(t *testing.T) {

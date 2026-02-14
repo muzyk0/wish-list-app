@@ -7,7 +7,7 @@ import (
 )
 
 // BindAndValidate binds request body to the provided struct and validates it.
-// Returns error response if binding or validation fails.
+// Returns echo.HTTPError if binding or validation fails.
 //
 // Example usage in handler:
 //
@@ -20,15 +20,11 @@ import (
 //	}
 func BindAndValidate(c echo.Context, req interface{}) error {
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return nil

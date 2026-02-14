@@ -334,6 +334,8 @@ func TestHandler_UpdateWishList(t *testing.T) {
 	})
 
 	t.Run("unauthorized update returns error", func(t *testing.T) {
+		// Note: In production, auth middleware protects this route.
+		// Without middleware, MustGetUserID returns "" and service returns Forbidden.
 		e := setupTestEcho()
 		mockService := new(MockWishListService)
 		handler := NewHandler(mockService)
@@ -345,16 +347,17 @@ func TestHandler_UpdateWishList(t *testing.T) {
 			Title: &title,
 		}
 
-		// No auth context
+		mockService.On("UpdateWishList", mock.Anything, wishListID, "", mock.AnythingOfType("service.UpdateWishListInput")).
+			Return((*service.WishListOutput)(nil), service.ErrWishListForbidden)
+
+		// No auth context - handler delegates auth to middleware
 		c, rec := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/"+wishListID, reqBody,
 			[]string{"id"}, []string{wishListID}, nil)
 
 		err := handler.UpdateWishList(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusUnauthorized, rec.Code)
-
-		mockService.AssertNotCalled(t, "UpdateWishList")
+		assert.Equal(t, nethttp.StatusForbidden, rec.Code)
 	})
 
 	t.Run("update with service error", func(t *testing.T) {
@@ -409,22 +412,25 @@ func TestHandler_DeleteWishList(t *testing.T) {
 	})
 
 	t.Run("unauthorized deletion returns error", func(t *testing.T) {
+		// Note: In production, auth middleware protects this route.
+		// Without middleware, MustGetUserID returns "" and service returns Forbidden.
 		e := echo.New()
 		mockService := new(MockWishListService)
 		handler := NewHandler(mockService)
 
 		wishListID := "123e4567-e89b-12d3-a456-426614174000"
 
-		// No auth context
+		mockService.On("DeleteWishList", mock.Anything, wishListID, "").
+			Return(service.ErrWishListForbidden)
+
+		// No auth context - handler delegates auth to middleware
 		c, rec := CreateTestContextWithParams(e, nethttp.MethodDelete, "/wishlists/"+wishListID, nil,
 			[]string{"id"}, []string{wishListID}, nil)
 
 		err := handler.DeleteWishList(c)
 
 		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusUnauthorized, rec.Code)
-
-		mockService.AssertNotCalled(t, "DeleteWishList")
+		assert.Equal(t, nethttp.StatusForbidden, rec.Code)
 	})
 
 	t.Run("delete with service error", func(t *testing.T) {
