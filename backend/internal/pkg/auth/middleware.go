@@ -27,7 +27,8 @@ func JWTMiddleware(tm *TokenManager) echo.MiddlewareFunc {
 
 			claims, err := tm.ValidateToken(tokenString)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token: "+err.Error())
+				c.Logger().Warn("Token validation failed: ", err)
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
 			}
 
 			// Add claims to context
