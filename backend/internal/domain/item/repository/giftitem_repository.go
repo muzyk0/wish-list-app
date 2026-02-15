@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
-	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 // Sentinel errors for gift item repository
@@ -70,9 +68,10 @@ type PaginatedResult struct {
 	TotalCount int64
 }
 
-// GiftItemRepositoryInterface defines the interface for gift item database operations
+// GiftItemRepositoryInterface defines the interface for gift item CRUD operations.
+// For reservation operations, use GiftItemReservationRepository.
+// For purchase operations, use GiftItemPurchaseRepository.
 type GiftItemRepositoryInterface interface {
-	// CRUD
 	CreateWithOwner(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	GetByID(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
 	GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters ItemFilters) (*PaginatedResult, error)
@@ -85,13 +84,6 @@ type GiftItemRepositoryInterface interface {
 	Delete(ctx context.Context, id pgtype.UUID) error
 	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
 	SoftDelete(ctx context.Context, id pgtype.UUID) error
-
-	// Reservation operations
-	Reserve(ctx context.Context, giftItemID, userID pgtype.UUID) (*models.GiftItem, error)
-	Unreserve(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error)
-	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error)
-	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*models.GiftItem, error)
-	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
 }
 
 // GiftItemRepository implements GiftItemRepositoryInterface
@@ -478,205 +470,4 @@ func (r *GiftItemRepository) SoftDelete(ctx context.Context, id pgtype.UUID) err
 	}
 
 	return nil
-}
-
-// ---------------------------------------------------------------------------
-// Reservation operations
-// ---------------------------------------------------------------------------
-
-// Reserve marks a gift item as reserved by a user
-func (r *GiftItemRepository) Reserve(ctx context.Context, giftItemID, userID pgtype.UUID) (*models.GiftItem, error) {
-	query := fmt.Sprintf(`
-		UPDATE gift_items SET
-			reserved_by_user_id = $2,
-			reserved_at = $3,
-			updated_at = NOW()
-		WHERE id = $1
-		RETURNING %s
-	`, giftItemColumns)
-
-	var updatedGiftItem models.GiftItem
-	now := pgtype.Timestamptz{Time: time.Now(), Valid: true}
-	err := r.db.QueryRowxContext(ctx, query,
-		giftItemID,
-		userID,
-		now,
-	).StructScan(&updatedGiftItem)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemNotFound
-		}
-		return nil, fmt.Errorf("failed to reserve gift item: %w", err)
-	}
-
-	return &updatedGiftItem, nil
-}
-
-// Unreserve removes reservation from a gift item
-func (r *GiftItemRepository) Unreserve(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error) {
-	query := fmt.Sprintf(`
-		UPDATE gift_items SET
-			reserved_by_user_id = NULL,
-			reserved_at = NULL,
-			updated_at = NOW()
-		WHERE id = $1
-		RETURNING %s
-	`, giftItemColumns)
-
-	var updatedGiftItem models.GiftItem
-	err := r.db.QueryRowxContext(ctx, query, giftItemID).StructScan(&updatedGiftItem)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemNotFound
-		}
-		return nil, fmt.Errorf("failed to unreserve gift item: %w", err)
-	}
-
-	return &updatedGiftItem, nil
-}
-
-// MarkAsPurchased marks a gift item as purchased
-func (r *GiftItemRepository) MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error) {
-	query := fmt.Sprintf(`
-		UPDATE gift_items SET
-			purchased_by_user_id = $2,
-			purchased_at = $3,
-			purchased_price = $4,
-			reserved_by_user_id = NULL,
-			reserved_at = NULL,
-			updated_at = NOW()
-		WHERE id = $1
-		RETURNING %s
-	`, giftItemColumns)
-
-	var updatedGiftItem models.GiftItem
-	now := pgtype.Timestamptz{Time: time.Now(), Valid: true}
-	err := r.db.QueryRowxContext(ctx, query,
-		giftItemID,
-		userID,
-		now,
-		purchasedPrice,
-	).StructScan(&updatedGiftItem)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemNotFound
-		}
-		return nil, fmt.Errorf("failed to mark gift item as purchased: %w", err)
-	}
-
-	return &updatedGiftItem, nil
-}
-
-// ReserveIfNotReserved atomically reserves a gift item if it's not already reserved
-func (r *GiftItemRepository) ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*models.GiftItem, error) {
-	tx, err := r.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer func() {
-		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
-			log.Printf("tx rollback error: %v", rbErr)
-		}
-	}()
-
-	lockQuery := `
-		SELECT id, reserved_by_user_id, reserved_at
-		FROM gift_items
-		WHERE id = $1
-		FOR UPDATE
-	`
-
-	var currentItem models.GiftItem
-	err = tx.GetContext(ctx, &currentItem, lockQuery, giftItemID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemNotFound
-		}
-		return nil, fmt.Errorf("failed to lock gift item: %w", err)
-	}
-
-	if currentItem.ReservedByUserID.Valid {
-		return nil, ErrGiftItemAlreadyReserved
-	}
-
-	now := pgtype.Timestamptz{Time: time.Now(), Valid: true}
-	updateQuery := fmt.Sprintf(`
-		UPDATE gift_items SET
-			reserved_by_user_id = $2,
-			reserved_at = $3,
-			updated_at = NOW()
-		WHERE id = $1 AND reserved_by_user_id IS NULL
-		RETURNING %s
-	`, giftItemColumns)
-
-	var updatedGiftItem models.GiftItem
-	err = tx.QueryRowxContext(ctx, updateQuery,
-		giftItemID,
-		userID,
-		now,
-	).StructScan(&updatedGiftItem)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemConcurrentReserve
-		}
-		return nil, fmt.Errorf("failed to reserve gift item: %w", err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("failed to commit reservation: %w", err)
-	}
-
-	return &updatedGiftItem, nil
-}
-
-// DeleteWithReservationNotification deletes a gift item and returns any active reservations for notification purposes
-func (r *GiftItemRepository) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
-	tx, err := r.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer func() {
-		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
-			log.Printf("tx rollback error: %v", rbErr)
-		}
-	}()
-
-	getReservationsQuery := `
-		SELECT id, wishlist_id, gift_item_id, reserved_by_user_id, guest_name, guest_email,
-			reservation_token, status, reserved_at, expires_at, canceled_at,
-			cancel_reason, notification_sent, updated_at
-		FROM reservations
-		WHERE gift_item_id = $1 AND status = 'active'
-	`
-
-	var activeReservations []*reservationmodels.Reservation
-	err = tx.SelectContext(ctx, &activeReservations, getReservationsQuery, giftItemID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get active reservations: %w", err)
-	}
-
-	deleteQuery := `DELETE FROM gift_items WHERE id = $1`
-	result, err := tx.ExecContext(ctx, deleteQuery, giftItemID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to delete gift item: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return nil, ErrGiftItemNotFound
-	}
-
-	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("failed to commit transaction: %w", err)
-	}
-
-	return activeReservations, nil
 }
