@@ -83,6 +83,26 @@ func TestCodeStore_ExchangeCode(t *testing.T) {
 		assert.False(t, ok)
 	})
 
+	t.Run("invalid code does not affect valid code exchange", func(t *testing.T) {
+		userID := uuid.New()
+
+		// Store a valid code
+		validCode, err := store.GenerateCode(userID)
+		require.NoError(t, err)
+
+		// Attempt exchange with completely wrong code
+		wrongCode := "invalid-code-12345"
+		gotID, valid := store.ExchangeCode(wrongCode)
+
+		assert.False(t, valid, "Invalid code should not be accepted")
+		assert.Equal(t, uuid.Nil, gotID, "Invalid code should return nil UUID")
+
+		// Verify valid code still works
+		gotID, valid = store.ExchangeCode(validCode)
+		assert.True(t, valid, "Valid code should be accepted")
+		assert.Equal(t, userID, gotID, "Valid code should return correct user ID")
+	})
+
 	t.Run("returns false for expired code", func(t *testing.T) {
 		userID := uuid.New()
 		code, err := store.GenerateCode(userID)
@@ -96,8 +116,15 @@ func TestCodeStore_ExchangeCode(t *testing.T) {
 		store.codes[code] = entry
 		store.mu.Unlock()
 
-		_, ok := store.ExchangeCode(code)
-		assert.False(t, ok)
+		gotID, valid := store.ExchangeCode(code)
+		assert.False(t, valid, "Expired code should not be accepted")
+		assert.Equal(t, uuid.Nil, gotID, "Expired code should return nil UUID")
+
+		// Verify code was deleted from store
+		store.mu.Lock()
+		_, exists := store.codes[code]
+		store.mu.Unlock()
+		assert.False(t, exists, "Expired code should be deleted")
 	})
 }
 

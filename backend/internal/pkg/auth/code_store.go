@@ -60,7 +60,8 @@ func (cs *CodeStore) ExchangeCode(code string) (uuid.UUID, bool) {
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 
-	// O(1) map lookup instead of O(n) iteration
+	// O(1) map lookup - existence check validates the code
+	// Map lookup already confirms the code exists and is the correct key
 	entry, exists := cs.codes[code]
 
 	// Perform constant-time comparison even if code not found
@@ -68,12 +69,6 @@ func (cs *CodeStore) ExchangeCode(code string) (uuid.UUID, bool) {
 	if !exists {
 		// Compare against a dummy value to maintain constant time
 		_ = constantTimeCompare("", code)
-		return uuid.Nil, false
-	}
-
-	// Verify the code matches using constant-time comparison
-	// This prevents timing attacks based on partial code matching
-	if !constantTimeCompare(code, code) {
 		return uuid.Nil, false
 	}
 
