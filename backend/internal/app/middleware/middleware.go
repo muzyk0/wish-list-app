@@ -8,50 +8,50 @@ import (
 	"strings"
 	"time"
 
+	apperrors "wish-list/internal/pkg/errors"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// CustomHTTPErrorHandler handles HTTP errors with custom formatting
+// CustomHTTPErrorHandler handles HTTP errors with custom formatting.
+// It integrates with the centralized errors package for consistent error responses.
 func CustomHTTPErrorHandler(err error, c echo.Context) {
-	code, message := extractErrorInfo(err)
-
-	// Log the error with context
-	c.Logger().Errorf("HTTP Error: %d - %s - %s", code, c.Request().URL.Path, message)
-
-	// Send error response if not already committed
 	if c.Response().Committed {
 		return
 	}
 
-	sendErrorResponse(c, code, message)
-}
-
-// extractErrorInfo extracts the HTTP status code and message from an error
-func extractErrorInfo(err error) (int, string) {
-	code := http.StatusInternalServerError
-	message := "Internal Server Error"
-
-	var he *echo.HTTPError
-	if errors.As(err, &he) {
-		code = he.Code
-		if msg, ok := he.Message.(string); ok {
-			message = msg
-		} else {
-			message = fmt.Sprintf("%v", he.Message)
+	var appErr *apperrors.HTTPError
+	if errors.As(err, &appErr) {
+		if appErr.Err != nil {
+			c.Logger().Errorf("Application error: %v", appErr.Err)
 		}
-	} else if err != nil {
-		// For non-HTTP errors, preserve the original error for logging
-		message = err.Error()
+
+		sendErrorResponse(c, appErr.StatusCode, appErr.Message)
+		return
 	}
 
-	return code, message
+	var echoErr *echo.HTTPError
+	if errors.As(err, &echoErr) {
+		code := echoErr.Code
+		message := http.StatusText(code)
+		if msg, ok := echoErr.Message.(string); ok {
+			message = msg
+		} else {
+			message = fmt.Sprintf("%v", echoErr.Message)
+		}
+
+		c.Logger().Errorf("HTTP Error: %d - %s - %s", code, c.Request().URL.Path, message)
+		sendErrorResponse(c, code, message)
+		return
+	}
+
+	c.Logger().Errorf("Unhandled error: %v", err)
+	sendErrorResponse(c, http.StatusInternalServerError, "Internal server error")
 }
 
 // sendErrorResponse sends an error response based on the client's Accept header
 func sendErrorResponse(c echo.Context, code int, message string) {
-	c.Logger().Errorf("HTTP %d: %s", code, message)
-
 	accept := c.Request().Header.Get("Accept")
 
 	// Simple check for JSON acceptance
