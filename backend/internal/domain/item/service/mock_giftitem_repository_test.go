@@ -10,7 +10,6 @@ import (
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/item/repository"
-	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
 // Ensure, that GiftItemRepositoryInterfaceMock does implement repository.GiftItemRepositoryInterface.
@@ -32,9 +31,6 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			DeleteWithExecutorFunc: func(ctx context.Context, executor database.Executor, id pgtype.UUID) error {
 //				panic("mock out the DeleteWithExecutor method")
 //			},
-//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
-//				panic("mock out the DeleteWithReservationNotification method")
-//			},
 //			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error) {
 //				panic("mock out the GetByID method")
 //			},
@@ -53,20 +49,8 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			GetUnattachedFunc: func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error) {
 //				panic("mock out the GetUnattached method")
 //			},
-//			MarkAsPurchasedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error) {
-//				panic("mock out the MarkAsPurchased method")
-//			},
-//			ReserveFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error) {
-//				panic("mock out the Reserve method")
-//			},
-//			ReserveIfNotReservedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error) {
-//				panic("mock out the ReserveIfNotReserved method")
-//			},
 //			SoftDeleteFunc: func(ctx context.Context, id pgtype.UUID) error {
 //				panic("mock out the SoftDelete method")
-//			},
-//			UnreserveFunc: func(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error) {
-//				panic("mock out the Unreserve method")
 //			},
 //			UpdateFunc: func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
 //				panic("mock out the Update method")
@@ -90,9 +74,6 @@ type GiftItemRepositoryInterfaceMock struct {
 	// DeleteWithExecutorFunc mocks the DeleteWithExecutor method.
 	DeleteWithExecutorFunc func(ctx context.Context, executor database.Executor, id pgtype.UUID) error
 
-	// DeleteWithReservationNotificationFunc mocks the DeleteWithReservationNotification method.
-	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
-
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
 
@@ -111,20 +92,8 @@ type GiftItemRepositoryInterfaceMock struct {
 	// GetUnattachedFunc mocks the GetUnattached method.
 	GetUnattachedFunc func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
 
-	// MarkAsPurchasedFunc mocks the MarkAsPurchased method.
-	MarkAsPurchasedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error)
-
-	// ReserveFunc mocks the Reserve method.
-	ReserveFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error)
-
-	// ReserveIfNotReservedFunc mocks the ReserveIfNotReserved method.
-	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error)
-
 	// SoftDeleteFunc mocks the SoftDelete method.
 	SoftDeleteFunc func(ctx context.Context, id pgtype.UUID) error
-
-	// UnreserveFunc mocks the Unreserve method.
-	UnreserveFunc func(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
@@ -156,13 +125,6 @@ type GiftItemRepositoryInterfaceMock struct {
 			Executor database.Executor
 			// ID is the id argument value.
 			ID pgtype.UUID
-		}
-		// DeleteWithReservationNotification holds details about calls to the DeleteWithReservationNotification method.
-		DeleteWithReservationNotification []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
 		}
 		// GetByID holds details about calls to the GetByID method.
 		GetByID []struct {
@@ -212,48 +174,12 @@ type GiftItemRepositoryInterfaceMock struct {
 			// OwnerID is the ownerID argument value.
 			OwnerID pgtype.UUID
 		}
-		// MarkAsPurchased holds details about calls to the MarkAsPurchased method.
-		MarkAsPurchased []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
-			// UserID is the userID argument value.
-			UserID pgtype.UUID
-			// PurchasedPrice is the purchasedPrice argument value.
-			PurchasedPrice pgtype.Numeric
-		}
-		// Reserve holds details about calls to the Reserve method.
-		Reserve []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
-			// UserID is the userID argument value.
-			UserID pgtype.UUID
-		}
-		// ReserveIfNotReserved holds details about calls to the ReserveIfNotReserved method.
-		ReserveIfNotReserved []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
-			// UserID is the userID argument value.
-			UserID pgtype.UUID
-		}
 		// SoftDelete holds details about calls to the SoftDelete method.
 		SoftDelete []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID pgtype.UUID
-		}
-		// Unreserve holds details about calls to the Unreserve method.
-		Unreserve []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -273,18 +199,13 @@ type GiftItemRepositoryInterfaceMock struct {
 	lockCreateWithOwner                     sync.RWMutex
 	lockDelete                              sync.RWMutex
 	lockDeleteWithExecutor                  sync.RWMutex
-	lockDeleteWithReservationNotification   sync.RWMutex
 	lockGetByID                             sync.RWMutex
 	lockGetByOwnerPaginated                 sync.RWMutex
 	lockGetByWishList                       sync.RWMutex
 	lockGetPublicWishListGiftItems          sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
 	lockGetUnattached                       sync.RWMutex
-	lockMarkAsPurchased                     sync.RWMutex
-	lockReserve                             sync.RWMutex
-	lockReserveIfNotReserved                sync.RWMutex
 	lockSoftDelete                          sync.RWMutex
-	lockUnreserve                           sync.RWMutex
 	lockUpdate                              sync.RWMutex
 	lockUpdateWithNewSchema                 sync.RWMutex
 }
@@ -398,42 +319,6 @@ func (mock *GiftItemRepositoryInterfaceMock) DeleteWithExecutorCalls() []struct 
 	mock.lockDeleteWithExecutor.RLock()
 	calls = mock.calls.DeleteWithExecutor
 	mock.lockDeleteWithExecutor.RUnlock()
-	return calls
-}
-
-// DeleteWithReservationNotification calls DeleteWithReservationNotificationFunc.
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
-	if mock.DeleteWithReservationNotificationFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.DeleteWithReservationNotificationFunc: method is nil but GiftItemRepositoryInterface.DeleteWithReservationNotification was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-	}
-	mock.lockDeleteWithReservationNotification.Lock()
-	mock.calls.DeleteWithReservationNotification = append(mock.calls.DeleteWithReservationNotification, callInfo)
-	mock.lockDeleteWithReservationNotification.Unlock()
-	return mock.DeleteWithReservationNotificationFunc(ctx, giftItemID)
-}
-
-// DeleteWithReservationNotificationCalls gets all the calls that were made to DeleteWithReservationNotification.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.DeleteWithReservationNotificationCalls())
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotificationCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}
-	mock.lockDeleteWithReservationNotification.RLock()
-	calls = mock.calls.DeleteWithReservationNotification
-	mock.lockDeleteWithReservationNotification.RUnlock()
 	return calls
 }
 
@@ -665,130 +550,6 @@ func (mock *GiftItemRepositoryInterfaceMock) GetUnattachedCalls() []struct {
 	return calls
 }
 
-// MarkAsPurchased calls MarkAsPurchasedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchased(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*models.GiftItem, error) {
-	if mock.MarkAsPurchasedFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.MarkAsPurchasedFunc: method is nil but GiftItemRepositoryInterface.MarkAsPurchased was just called")
-	}
-	callInfo := struct {
-		Ctx            context.Context
-		GiftItemID     pgtype.UUID
-		UserID         pgtype.UUID
-		PurchasedPrice pgtype.Numeric
-	}{
-		Ctx:            ctx,
-		GiftItemID:     giftItemID,
-		UserID:         userID,
-		PurchasedPrice: purchasedPrice,
-	}
-	mock.lockMarkAsPurchased.Lock()
-	mock.calls.MarkAsPurchased = append(mock.calls.MarkAsPurchased, callInfo)
-	mock.lockMarkAsPurchased.Unlock()
-	return mock.MarkAsPurchasedFunc(ctx, giftItemID, userID, purchasedPrice)
-}
-
-// MarkAsPurchasedCalls gets all the calls that were made to MarkAsPurchased.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.MarkAsPurchasedCalls())
-func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchasedCalls() []struct {
-	Ctx            context.Context
-	GiftItemID     pgtype.UUID
-	UserID         pgtype.UUID
-	PurchasedPrice pgtype.Numeric
-} {
-	var calls []struct {
-		Ctx            context.Context
-		GiftItemID     pgtype.UUID
-		UserID         pgtype.UUID
-		PurchasedPrice pgtype.Numeric
-	}
-	mock.lockMarkAsPurchased.RLock()
-	calls = mock.calls.MarkAsPurchased
-	mock.lockMarkAsPurchased.RUnlock()
-	return calls
-}
-
-// Reserve calls ReserveFunc.
-func (mock *GiftItemRepositoryInterfaceMock) Reserve(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error) {
-	if mock.ReserveFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.ReserveFunc: method is nil but GiftItemRepositoryInterface.Reserve was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-		UserID:     userID,
-	}
-	mock.lockReserve.Lock()
-	mock.calls.Reserve = append(mock.calls.Reserve, callInfo)
-	mock.lockReserve.Unlock()
-	return mock.ReserveFunc(ctx, giftItemID, userID)
-}
-
-// ReserveCalls gets all the calls that were made to Reserve.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.ReserveCalls())
-func (mock *GiftItemRepositoryInterfaceMock) ReserveCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-	UserID     pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}
-	mock.lockReserve.RLock()
-	calls = mock.calls.Reserve
-	mock.lockReserve.RUnlock()
-	return calls
-}
-
-// ReserveIfNotReserved calls ReserveIfNotReservedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReserved(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*models.GiftItem, error) {
-	if mock.ReserveIfNotReservedFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.ReserveIfNotReservedFunc: method is nil but GiftItemRepositoryInterface.ReserveIfNotReserved was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-		UserID:     userID,
-	}
-	mock.lockReserveIfNotReserved.Lock()
-	mock.calls.ReserveIfNotReserved = append(mock.calls.ReserveIfNotReserved, callInfo)
-	mock.lockReserveIfNotReserved.Unlock()
-	return mock.ReserveIfNotReservedFunc(ctx, giftItemID, userID)
-}
-
-// ReserveIfNotReservedCalls gets all the calls that were made to ReserveIfNotReserved.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.ReserveIfNotReservedCalls())
-func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReservedCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-	UserID     pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}
-	mock.lockReserveIfNotReserved.RLock()
-	calls = mock.calls.ReserveIfNotReserved
-	mock.lockReserveIfNotReserved.RUnlock()
-	return calls
-}
-
 // SoftDelete calls SoftDeleteFunc.
 func (mock *GiftItemRepositoryInterfaceMock) SoftDelete(ctx context.Context, id pgtype.UUID) error {
 	if mock.SoftDeleteFunc == nil {
@@ -822,42 +583,6 @@ func (mock *GiftItemRepositoryInterfaceMock) SoftDeleteCalls() []struct {
 	mock.lockSoftDelete.RLock()
 	calls = mock.calls.SoftDelete
 	mock.lockSoftDelete.RUnlock()
-	return calls
-}
-
-// Unreserve calls UnreserveFunc.
-func (mock *GiftItemRepositoryInterfaceMock) Unreserve(ctx context.Context, giftItemID pgtype.UUID) (*models.GiftItem, error) {
-	if mock.UnreserveFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.UnreserveFunc: method is nil but GiftItemRepositoryInterface.Unreserve was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-	}
-	mock.lockUnreserve.Lock()
-	mock.calls.Unreserve = append(mock.calls.Unreserve, callInfo)
-	mock.lockUnreserve.Unlock()
-	return mock.UnreserveFunc(ctx, giftItemID)
-}
-
-// UnreserveCalls gets all the calls that were made to Unreserve.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.UnreserveCalls())
-func (mock *GiftItemRepositoryInterfaceMock) UnreserveCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}
-	mock.lockUnreserve.RLock()
-	calls = mock.calls.Unreserve
-	mock.lockUnreserve.RUnlock()
 	return calls
 }
 

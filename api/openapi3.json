@@ -455,7 +455,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -469,6 +469,19 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -513,7 +526,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -527,6 +540,19 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "content": {
                             "application/json": {
                                 "schema": {

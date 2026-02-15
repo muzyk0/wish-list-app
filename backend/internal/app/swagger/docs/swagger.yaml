@@ -1059,13 +1059,19 @@ paths:
           schema:
             $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse'
         "400":
-          description: Invalid request
+          description: Invalid or expired authorization code
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
           description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "502":
+          description: Failed to communicate with provider
           schema:
             additionalProperties:
               type: string
@@ -1093,13 +1099,19 @@ paths:
           schema:
             $ref: '#/definitions/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse'
         "400":
-          description: Invalid request
+          description: Invalid or expired authorization code
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
           description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "502":
+          description: Failed to communicate with provider
           schema:
             additionalProperties:
               type: string

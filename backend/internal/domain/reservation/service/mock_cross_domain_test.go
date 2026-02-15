@@ -26,9 +26,6 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetPublicWishListGiftItems method")
 //			},
-//			ReserveIfNotReservedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error) {
-//				panic("mock out the ReserveIfNotReserved method")
-//			},
 //		}
 //
 //		// use mockedGiftItemRepositoryInterface in code that requires GiftItemRepositoryInterface
@@ -41,9 +38,6 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetPublicWishListGiftItemsFunc mocks the GetPublicWishListGiftItems method.
 	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error)
-
-	// ReserveIfNotReservedFunc mocks the ReserveIfNotReserved method.
-	ReserveIfNotReservedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -61,19 +55,9 @@ type GiftItemRepositoryInterfaceMock struct {
 			// PublicSlug is the publicSlug argument value.
 			PublicSlug string
 		}
-		// ReserveIfNotReserved holds details about calls to the ReserveIfNotReserved method.
-		ReserveIfNotReserved []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
-			// UserID is the userID argument value.
-			UserID pgtype.UUID
-		}
 	}
 	lockGetByWishList              sync.RWMutex
 	lockGetPublicWishListGiftItems sync.RWMutex
-	lockReserveIfNotReserved       sync.RWMutex
 }
 
 // GetByWishList calls GetByWishListFunc.
@@ -145,45 +129,5 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsCalls() [
 	mock.lockGetPublicWishListGiftItems.RLock()
 	calls = mock.calls.GetPublicWishListGiftItems
 	mock.lockGetPublicWishListGiftItems.RUnlock()
-	return calls
-}
-
-// ReserveIfNotReserved calls ReserveIfNotReservedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReserved(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID) (*itemmodels.GiftItem, error) {
-	if mock.ReserveIfNotReservedFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.ReserveIfNotReservedFunc: method is nil but GiftItemRepositoryInterface.ReserveIfNotReserved was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-		UserID:     userID,
-	}
-	mock.lockReserveIfNotReserved.Lock()
-	mock.calls.ReserveIfNotReserved = append(mock.calls.ReserveIfNotReserved, callInfo)
-	mock.lockReserveIfNotReserved.Unlock()
-	return mock.ReserveIfNotReservedFunc(ctx, giftItemID, userID)
-}
-
-// ReserveIfNotReservedCalls gets all the calls that were made to ReserveIfNotReserved.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.ReserveIfNotReservedCalls())
-func (mock *GiftItemRepositoryInterfaceMock) ReserveIfNotReservedCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-	UserID     pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-		UserID     pgtype.UUID
-	}
-	mock.lockReserveIfNotReserved.RLock()
-	calls = mock.calls.ReserveIfNotReserved
-	mock.lockReserveIfNotReserved.RUnlock()
 	return calls
 }

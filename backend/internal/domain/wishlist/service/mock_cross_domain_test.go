@@ -24,9 +24,6 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //			CreateWithOwnerFunc: func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 //				panic("mock out the CreateWithOwner method")
 //			},
-//			DeleteWithReservationNotificationFunc: func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
-//				panic("mock out the DeleteWithReservationNotification method")
-//			},
 //			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByID method")
 //			},
@@ -35,9 +32,6 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //			},
 //			GetPublicWishListGiftItemsPaginatedFunc: func(ctx context.Context, publicSlug string, limit int, offset int) ([]*itemmodels.GiftItem, int, error) {
 //				panic("mock out the GetPublicWishListGiftItemsPaginated method")
-//			},
-//			MarkAsPurchasedFunc: func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error) {
-//				panic("mock out the MarkAsPurchased method")
 //			},
 //			UpdateFunc: func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 //				panic("mock out the Update method")
@@ -52,9 +46,6 @@ type GiftItemRepositoryInterfaceMock struct {
 	// CreateWithOwnerFunc mocks the CreateWithOwner method.
 	CreateWithOwnerFunc func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 
-	// DeleteWithReservationNotificationFunc mocks the DeleteWithReservationNotification method.
-	DeleteWithReservationNotificationFunc func(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
-
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 
@@ -63,9 +54,6 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetPublicWishListGiftItemsPaginatedFunc mocks the GetPublicWishListGiftItemsPaginated method.
 	GetPublicWishListGiftItemsPaginatedFunc func(ctx context.Context, publicSlug string, limit int, offset int) ([]*itemmodels.GiftItem, int, error)
-
-	// MarkAsPurchasedFunc mocks the MarkAsPurchased method.
-	MarkAsPurchasedFunc func(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
@@ -78,13 +66,6 @@ type GiftItemRepositoryInterfaceMock struct {
 			Ctx context.Context
 			// GiftItem is the giftItem argument value.
 			GiftItem itemmodels.GiftItem
-		}
-		// DeleteWithReservationNotification holds details about calls to the DeleteWithReservationNotification method.
-		DeleteWithReservationNotification []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
 		}
 		// GetByID holds details about calls to the GetByID method.
 		GetByID []struct {
@@ -111,17 +92,6 @@ type GiftItemRepositoryInterfaceMock struct {
 			// Offset is the offset argument value.
 			Offset int
 		}
-		// MarkAsPurchased holds details about calls to the MarkAsPurchased method.
-		MarkAsPurchased []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItemID is the giftItemID argument value.
-			GiftItemID pgtype.UUID
-			// UserID is the userID argument value.
-			UserID pgtype.UUID
-			// PurchasedPrice is the purchasedPrice argument value.
-			PurchasedPrice pgtype.Numeric
-		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
 			// Ctx is the ctx argument value.
@@ -131,11 +101,9 @@ type GiftItemRepositoryInterfaceMock struct {
 		}
 	}
 	lockCreateWithOwner                     sync.RWMutex
-	lockDeleteWithReservationNotification   sync.RWMutex
 	lockGetByID                             sync.RWMutex
 	lockGetByWishList                       sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
-	lockMarkAsPurchased                     sync.RWMutex
 	lockUpdate                              sync.RWMutex
 }
 
@@ -172,42 +140,6 @@ func (mock *GiftItemRepositoryInterfaceMock) CreateWithOwnerCalls() []struct {
 	mock.lockCreateWithOwner.RLock()
 	calls = mock.calls.CreateWithOwner
 	mock.lockCreateWithOwner.RUnlock()
-	return calls
-}
-
-// DeleteWithReservationNotification calls DeleteWithReservationNotificationFunc.
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error) {
-	if mock.DeleteWithReservationNotificationFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.DeleteWithReservationNotificationFunc: method is nil but GiftItemRepositoryInterface.DeleteWithReservationNotification was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}{
-		Ctx:        ctx,
-		GiftItemID: giftItemID,
-	}
-	mock.lockDeleteWithReservationNotification.Lock()
-	mock.calls.DeleteWithReservationNotification = append(mock.calls.DeleteWithReservationNotification, callInfo)
-	mock.lockDeleteWithReservationNotification.Unlock()
-	return mock.DeleteWithReservationNotificationFunc(ctx, giftItemID)
-}
-
-// DeleteWithReservationNotificationCalls gets all the calls that were made to DeleteWithReservationNotification.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.DeleteWithReservationNotificationCalls())
-func (mock *GiftItemRepositoryInterfaceMock) DeleteWithReservationNotificationCalls() []struct {
-	Ctx        context.Context
-	GiftItemID pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		GiftItemID pgtype.UUID
-	}
-	mock.lockDeleteWithReservationNotification.RLock()
-	calls = mock.calls.DeleteWithReservationNotification
-	mock.lockDeleteWithReservationNotification.RUnlock()
 	return calls
 }
 
@@ -324,50 +256,6 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsPaginated
 	mock.lockGetPublicWishListGiftItemsPaginated.RLock()
 	calls = mock.calls.GetPublicWishListGiftItemsPaginated
 	mock.lockGetPublicWishListGiftItemsPaginated.RUnlock()
-	return calls
-}
-
-// MarkAsPurchased calls MarkAsPurchasedFunc.
-func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchased(ctx context.Context, giftItemID pgtype.UUID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error) {
-	if mock.MarkAsPurchasedFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.MarkAsPurchasedFunc: method is nil but GiftItemRepositoryInterface.MarkAsPurchased was just called")
-	}
-	callInfo := struct {
-		Ctx            context.Context
-		GiftItemID     pgtype.UUID
-		UserID         pgtype.UUID
-		PurchasedPrice pgtype.Numeric
-	}{
-		Ctx:            ctx,
-		GiftItemID:     giftItemID,
-		UserID:         userID,
-		PurchasedPrice: purchasedPrice,
-	}
-	mock.lockMarkAsPurchased.Lock()
-	mock.calls.MarkAsPurchased = append(mock.calls.MarkAsPurchased, callInfo)
-	mock.lockMarkAsPurchased.Unlock()
-	return mock.MarkAsPurchasedFunc(ctx, giftItemID, userID, purchasedPrice)
-}
-
-// MarkAsPurchasedCalls gets all the calls that were made to MarkAsPurchased.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.MarkAsPurchasedCalls())
-func (mock *GiftItemRepositoryInterfaceMock) MarkAsPurchasedCalls() []struct {
-	Ctx            context.Context
-	GiftItemID     pgtype.UUID
-	UserID         pgtype.UUID
-	PurchasedPrice pgtype.Numeric
-} {
-	var calls []struct {
-		Ctx            context.Context
-		GiftItemID     pgtype.UUID
-		UserID         pgtype.UUID
-		PurchasedPrice pgtype.Numeric
-	}
-	mock.lockMarkAsPurchased.RLock()
-	calls = mock.calls.MarkAsPurchased
-	mock.lockMarkAsPurchased.RUnlock()
 	return calls
 }
 

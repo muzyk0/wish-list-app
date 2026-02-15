@@ -298,7 +298,7 @@ paths:
                 $ref: "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.Au\
                   thResponse"
         "400":
-          description: Invalid request
+          description: Invalid or expired authorization code
           content:
             application/json:
               schema:
@@ -307,6 +307,14 @@ paths:
                 type: object
         "500":
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "502":
+          description: Failed to communicate with provider
           content:
             application/json:
               schema:
@@ -336,7 +344,7 @@ paths:
                 $ref: "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.Au\
                   thResponse"
         "400":
-          description: Invalid request
+          description: Invalid or expired authorization code
           content:
             application/json:
               schema:
@@ -345,6 +353,14 @@ paths:
                 type: object
         "500":
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "502":
+          description: Failed to communicate with provider
           content:
             application/json:
               schema:

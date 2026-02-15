@@ -409,7 +409,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -419,6 +419,15 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -461,7 +470,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -471,6 +480,15 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

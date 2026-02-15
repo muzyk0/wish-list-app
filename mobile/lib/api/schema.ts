@@ -481,7 +481,7 @@ export interface paths {
                         "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"];
                     };
                 };
-                /** @description Invalid request */
+                /** @description Invalid or expired authorization code */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -494,6 +494,17 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Failed to communicate with provider */
+                502: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -547,7 +558,7 @@ export interface paths {
                         "application/json": components["schemas"]["wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"];
                     };
                 };
-                /** @description Invalid request */
+                /** @description Invalid or expired authorization code */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -560,6 +571,17 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Failed to communicate with provider */
+                502: {
                     headers: {
                         [name: string]: unknown;
                     };
