@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
@@ -89,7 +90,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 		// If error is "user not found", continue with registration
 		if !errors.Is(err, repository.ErrUserNotFound) {
 			// Surface other database errors
-			return nil, err
+			return nil, fmt.Errorf("failed to check existing user: %w", err)
 		}
 	}
 	if existingUser != nil {
@@ -99,7 +100,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("failed to hash password")
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	// Create user
@@ -125,7 +126,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 
 	createdUser, err := s.repo.Create(ctx, user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	output := &UserOutput{
@@ -183,7 +184,7 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return nil, ErrUserNotFound
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	output := &UserOutput{
@@ -203,7 +204,10 @@ func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
 		return ErrInvalidUserID
 	}
 
-	return s.repo.Delete(ctx, id)
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	return nil
 }
 
 // UpdateProfile updates only non-sensitive profile information (firstName, lastName, avatarUrl)
@@ -215,7 +219,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID string, input Up
 
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	// Update only profile fields (no email or password)
@@ -240,7 +244,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID string, input Up
 
 	updatedUser, err := s.repo.Update(ctx, *user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
 	output := &UserOutput{
@@ -264,7 +268,7 @@ func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, 
 	// Get current user
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	// Verify current password
@@ -286,7 +290,7 @@ func (s *UserService) ChangeEmail(ctx context.Context, userID, currentPassword, 
 
 	_, err = s.repo.Update(ctx, *user)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user email: %w", err)
 	}
 
 	return nil
@@ -302,7 +306,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, currentPasswor
 	// Get current user
 	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	// Verify current password
@@ -316,7 +320,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, currentPasswor
 	// Hash new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New("failed to hash password")
+		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	// Update password
@@ -327,7 +331,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, currentPasswor
 
 	_, err = s.repo.Update(ctx, *user)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update user password: %w", err)
 	}
 
 	return nil
