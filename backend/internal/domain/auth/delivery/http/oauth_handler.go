@@ -114,7 +114,8 @@ type FacebookUserInfo struct {
 // @Produce      json
 // @Param			request	body	dto.OAuthCodeRequest	true	"Authorization code from Google"
 // @Success      200 {object} dto.AuthResponse "Authentication successful"
-// @Failure      400 {object} map[string]string "Invalid request"
+// @Failure      400 {object} map[string]string "Invalid or expired authorization code"
+// @Failure      502 {object} map[string]string "Failed to communicate with provider"
 // @Failure      500 {object} map[string]string "Internal server error"
 // @Router       /auth/oauth/google [post]
 func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
@@ -127,9 +128,7 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 	ctx := context.Background()
 	token, err := h.googleConfig.Exchange(ctx, req.Code)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Failed to exchange authorization code",
-		})
+		return h.handleOAuthExchangeError(c, "Google", err)
 	}
 
 	// Get user info from Google
@@ -202,7 +201,8 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 // @Produce      json
 // @Param			request	body	dto.OAuthCodeRequest	true	"Authorization code from Facebook"
 // @Success      200 {object} dto.AuthResponse "Authentication successful"
-// @Failure      400 {object} map[string]string "Invalid request"
+// @Failure      400 {object} map[string]string "Invalid or expired authorization code"
+// @Failure      502 {object} map[string]string "Failed to communicate with provider"
 // @Failure      500 {object} map[string]string "Internal server error"
 // @Router       /auth/oauth/facebook [post]
 func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
@@ -215,9 +215,7 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 	ctx := context.Background()
 	token, err := h.fbConfig.Exchange(ctx, req.Code)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Failed to exchange authorization code",
-		})
+		return h.handleOAuthExchangeError(c, "Facebook", err)
 	}
 
 	// Get user info from Facebook
@@ -417,6 +415,33 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 	}
 
 	return createdUser, nil
+}
+
+// handleOAuthExchangeError returns appropriate HTTP status code based on error type.
+// Client errors (invalid/expired code) return 400 Bad Request.
+// Provider/network errors return 502 Bad Gateway for retry indication.
+func (h *OAuthHandler) handleOAuthExchangeError(c echo.Context, provider string, err error) error {
+	// Log full error for debugging (server-side only)
+	c.Logger().Errorf("%s OAuth code exchange failed: %v", provider, err)
+
+	// Check if error indicates client mistake (invalid/expired/revoked code)
+	errMsg := strings.ToLower(err.Error())
+	clientErrorKeywords := []string{"invalid", "expired", "revoked", "unauthorized", "denied", "malformed"}
+
+	for _, keyword := range clientErrorKeywords {
+		if strings.Contains(errMsg, keyword) {
+			// Client error - bad request (user needs to re-authenticate)
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Invalid or expired authorization code. Please try logging in again.",
+			})
+		}
+	}
+
+	// Provider/network error - bad gateway (retryable)
+	// Examples: timeout, connection refused, DNS failure, provider downtime
+	return c.JSON(http.StatusBadGateway, map[string]string{
+		"error": "Failed to communicate with authentication provider. Please try again in a moment.",
+	})
 }
 
 // parseName splits full name into first and last name
