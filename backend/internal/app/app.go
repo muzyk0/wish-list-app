@@ -183,6 +183,8 @@ func (a *App) initDomains() {
 
 	wishlistRepo := wishlistrepo.NewWishListRepository(a.db)
 	giftItemRepo := itemrepo.NewGiftItemRepository(a.db)
+	giftItemReservationRepo := itemrepo.NewGiftItemReservationRepository(a.db)
+	giftItemPurchaseRepo := itemrepo.NewGiftItemPurchaseRepository(a.db)
 	wishlistItemRepo := wishlistitemrepo.NewWishlistItemRepository(a.db)
 
 	var reservationRepo reservationrepo.ReservationRepositoryInterface
@@ -196,10 +198,10 @@ func (a *App) initDomains() {
 
 	emailService := jobs.NewEmailService()
 	userSvc := userservice.NewUserService(userRepo)
-	wishlistSvc := wishlistservice.NewWishListService(wishlistRepo, giftItemRepo, emailService, reservationRepo, a.redisCache)
+	wishlistSvc := wishlistservice.NewWishListService(wishlistRepo, giftItemRepo, giftItemReservationRepo, giftItemPurchaseRepo, emailService, reservationRepo, a.redisCache)
 	itemSvc := itemservice.NewItemService(giftItemRepo, wishlistItemRepo)
 	wishlistItemSvc := wishlistitemservice.NewWishlistItemService(wishlistRepo, giftItemRepo, wishlistItemRepo)
-	reservationSvc := reservationservice.NewReservationService(reservationRepo, giftItemRepo)
+	reservationSvc := reservationservice.NewReservationService(reservationRepo, giftItemRepo, giftItemReservationRepo)
 	a.accountCleanupService = jobs.NewAccountCleanupService(a.db, userRepo, wishlistRepo, giftItemRepo, reservationRepo, emailService)
 
 	// --- Handlers ---

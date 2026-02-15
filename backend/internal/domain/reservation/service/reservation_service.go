@@ -20,8 +20,12 @@ import (
 // GiftItemRepositoryInterface defines gift item repository methods used by reservation service
 type GiftItemRepositoryInterface interface {
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
-	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
 	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*itemmodels.GiftItem, error)
+}
+
+// GiftItemReservationRepositoryInterface defines gift item reservation repository methods used by reservation service
+type GiftItemReservationRepositoryInterface interface {
+	ReserveIfNotReserved(ctx context.Context, giftItemID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
 }
 
 var (
@@ -46,17 +50,20 @@ type ReservationServiceInterface interface {
 }
 
 type ReservationService struct {
-	repo         repository.ReservationRepositoryInterface
-	giftItemRepo GiftItemRepositoryInterface
+	repo                    repository.ReservationRepositoryInterface
+	giftItemRepo            GiftItemRepositoryInterface
+	giftItemReservationRepo GiftItemReservationRepositoryInterface
 }
 
 func NewReservationService(
 	reservationRepo repository.ReservationRepositoryInterface,
 	giftItemRepo GiftItemRepositoryInterface,
+	giftItemReservationRepo GiftItemReservationRepositoryInterface,
 ) *ReservationService {
 	return &ReservationService{
-		repo:         reservationRepo,
-		giftItemRepo: giftItemRepo,
+		repo:                    reservationRepo,
+		giftItemRepo:            giftItemRepo,
+		giftItemReservationRepo: giftItemReservationRepo,
 	}
 }
 
@@ -131,7 +138,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	// Handle reservation based on user type (authenticated vs guest)
 	if input.UserID.Valid {
 		// For authenticated users, use atomic reservation that locks the gift item
-		_, err := s.giftItemRepo.ReserveIfNotReserved(ctx, giftItem.ID, input.UserID)
+		_, err := s.giftItemReservationRepo.ReserveIfNotReserved(ctx, giftItem.ID, input.UserID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to reserve gift item: %w", err)
 		}

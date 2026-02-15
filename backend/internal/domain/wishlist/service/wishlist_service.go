@@ -30,7 +30,15 @@ type GiftItemRepositoryInterface interface {
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
 	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*itemmodels.GiftItem, int, error)
 	Update(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
+}
+
+// GiftItemReservationRepositoryInterface defines gift item reservation repository methods used by wishlist service
+type GiftItemReservationRepositoryInterface interface {
 	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
+}
+
+// GiftItemPurchaseRepositoryInterface defines gift item purchase repository methods used by wishlist service
+type GiftItemPurchaseRepositoryInterface interface {
 	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error)
 }
 
@@ -86,26 +94,32 @@ type WishListServiceInterface interface {
 }
 
 type WishListService struct {
-	wishListRepo    repository.WishListRepositoryInterface
-	giftItemRepo    GiftItemRepositoryInterface
-	emailService    EmailServiceInterface
-	reservationRepo ReservationRepositoryInterface
-	cache           CacheInterface
+	wishListRepo            repository.WishListRepositoryInterface
+	giftItemRepo            GiftItemRepositoryInterface
+	giftItemReservationRepo GiftItemReservationRepositoryInterface
+	giftItemPurchaseRepo    GiftItemPurchaseRepositoryInterface
+	emailService            EmailServiceInterface
+	reservationRepo         ReservationRepositoryInterface
+	cache                   CacheInterface
 }
 
 func NewWishListService(
 	wishListRepo repository.WishListRepositoryInterface,
 	giftItemRepo GiftItemRepositoryInterface,
+	giftItemReservationRepo GiftItemReservationRepositoryInterface,
+	giftItemPurchaseRepo GiftItemPurchaseRepositoryInterface,
 	emailService EmailServiceInterface,
 	reservationRepo ReservationRepositoryInterface,
 	cacheService CacheInterface,
 ) *WishListService {
 	return &WishListService{
-		wishListRepo:    wishListRepo,
-		giftItemRepo:    giftItemRepo,
-		emailService:    emailService,
-		reservationRepo: reservationRepo,
-		cache:           cacheService,
+		wishListRepo:            wishListRepo,
+		giftItemRepo:            giftItemRepo,
+		giftItemReservationRepo: giftItemReservationRepo,
+		giftItemPurchaseRepo:    giftItemPurchaseRepo,
+		emailService:            emailService,
+		reservationRepo:         reservationRepo,
+		cache:                   cacheService,
 	}
 }
 
@@ -970,7 +984,7 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 	}
 
 	// Delete the gift item and get any active reservations for notification purposes
-	activeReservations, err := s.giftItemRepo.DeleteWithReservationNotification(ctx, id)
+	activeReservations, err := s.giftItemReservationRepo.DeleteWithReservationNotification(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete gift item in repository: %w", err)
 	}
@@ -1045,7 +1059,7 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 	}
 
 	// Mark as purchased in repository
-	updatedGiftItem, err := s.giftItemRepo.MarkAsPurchased(ctx, itemID, userUUID, priceValue)
+	updatedGiftItem, err := s.giftItemPurchaseRepo.MarkAsPurchased(ctx, itemID, userUUID, priceValue)
 	if err != nil {
 		return nil, fmt.Errorf("failed to mark gift item as purchased in repository: %w", err)
 	}
