@@ -33,16 +33,19 @@ type UserServiceInterface interface {
 	DeleteUser(ctx context.Context, userID string) error
 }
 
+// UserService implements business logic for user operations.
 type UserService struct {
 	repo repository.UserRepositoryInterface
 }
 
+// NewUserService creates a new UserService instance.
 func NewUserService(repo repository.UserRepositoryInterface) *UserService {
 	return &UserService{
 		repo: repo,
 	}
 }
 
+// RegisterUserInput contains the data required to register a new user.
 type RegisterUserInput struct {
 	Email     string
 	Password  string
@@ -51,11 +54,13 @@ type RegisterUserInput struct {
 	AvatarUrl string
 }
 
+// LoginUserInput contains the data required for user login.
 type LoginUserInput struct {
 	Email    string
 	Password string
 }
 
+// UpdateUserInput contains fields for updating a user (all optional).
 type UpdateUserInput struct {
 	Email     *string
 	Password  *string
@@ -64,12 +69,14 @@ type UpdateUserInput struct {
 	AvatarUrl *string
 }
 
+// UpdateProfileInput contains fields for updating user profile information.
 type UpdateProfileInput struct {
 	FirstName *string
 	LastName  *string
 	AvatarUrl *string
 }
 
+// UserOutput represents the user data returned by service operations.
 type UserOutput struct {
 	ID        string
 	Email     string
@@ -78,6 +85,7 @@ type UserOutput struct {
 	AvatarUrl string
 }
 
+// Register creates a new user account with the provided registration data.
 func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*UserOutput, error) {
 	// Validate input
 	if input.Email == "" || input.Password == "" {
@@ -140,6 +148,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 	return output, nil
 }
 
+// Login authenticates a user with email and password.
 func (s *UserService) Login(ctx context.Context, input LoginUserInput) (*UserOutput, error) {
 	// Validate input
 	if input.Email == "" || input.Password == "" {
@@ -173,6 +182,7 @@ func (s *UserService) Login(ctx context.Context, input LoginUserInput) (*UserOut
 	return output, nil
 }
 
+// GetUser retrieves a user by their ID.
 func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, error) {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
@@ -198,6 +208,7 @@ func (s *UserService) GetUser(ctx context.Context, userID string) (*UserOutput, 
 	return output, nil
 }
 
+// DeleteUser permanently removes a user account.
 func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
 	id := pgtype.UUID{}
 	if err := id.Scan(userID); err != nil {
