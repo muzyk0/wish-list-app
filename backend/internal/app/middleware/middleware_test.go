@@ -30,12 +30,12 @@ func TestCustomHTTPErrorHandler(t *testing.T) {
 	// Reset recorder
 	rec = httptest.NewRecorder()
 
-	// Test with a generic error
+	// Test with a generic error - should return generic message (security)
 	genericErr := errors.New("generic error")
 	CustomHTTPErrorHandler(genericErr, e.NewContext(req, rec))
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.Contains(t, rec.Body.String(), "generic error")
+	assert.Contains(t, rec.Body.String(), "Internal server error")
 }
 
 func TestExtractErrorInfo(t *testing.T) {

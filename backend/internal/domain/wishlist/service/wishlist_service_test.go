@@ -87,7 +87,7 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				}
 			}
 
-			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil)
+			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil, nil)
 
 			result, err := service.CreateWishList(context.Background(), tt.userID, tt.input)
 
@@ -157,7 +157,7 @@ func TestWishListService_GetWishList(t *testing.T) {
 				}
 			}
 
-			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil)
+			service := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil, nil)
 
 			result, err := service.GetWishList(context.Background(), tt.wishListID)
 
