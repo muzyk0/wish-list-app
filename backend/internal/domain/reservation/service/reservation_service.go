@@ -25,13 +25,13 @@ type GiftItemRepositoryInterface interface {
 }
 
 var (
-	ErrInvalidGiftItemID          = errors.New("invalid gift item id")
+	ErrInvalidGiftItemID           = errors.New("invalid gift item id")
 	ErrInvalidReservationWishlist  = errors.New("invalid wishlist id")
-	ErrGiftItemNotInWishlist      = errors.New("gift item not found in the specified wishlist")
-	ErrGiftItemAlreadyReserved    = errors.New("gift item is already reserved")
-	ErrGuestInfoRequired          = errors.New("guest name and email are required for guest reservations")
-	ErrReservationNotFound        = errors.New("no reservation found for this user and gift item")
-	ErrMissingUserOrToken         = errors.New("either user ID or reservation token must be provided")
+	ErrGiftItemNotInWishlist       = errors.New("gift item not found in the specified wishlist")
+	ErrGiftItemAlreadyReserved     = errors.New("gift item is already reserved")
+	ErrGuestInfoRequired           = errors.New("guest name and email are required for guest reservations")
+	ErrReservationNotFound         = errors.New("no reservation found for this user and gift item")
+	ErrMissingUserOrToken          = errors.New("either user ID or reservation token must be provided")
 	ErrGiftItemNotInPublicWishlist = errors.New("gift item not found in the specified public wishlist")
 )
 
@@ -133,7 +133,7 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 		// For authenticated users, use atomic reservation that locks the gift item
 		_, err := s.giftItemRepo.ReserveIfNotReserved(ctx, giftItem.ID, input.UserID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to reserve gift item: %w", err)
 		}
 
 		// Now create the reservation record
