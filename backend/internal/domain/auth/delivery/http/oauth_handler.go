@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"wish-list/internal/app/config"
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	usermodels "wish-list/internal/domain/user/models"
+	"wish-list/internal/domain/user/repository"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
@@ -372,11 +374,13 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 		}
 	}
 
-	// Try to find existing user by email
+	// Attempt to find existing user by email
 	user, err := h.userRepo.GetByEmail(ctx, email)
+
 	if err == nil {
-		// User exists, update avatar if provided and not set
-		if avatarURL != "" && user.AvatarUrl.String == "" {
+		// User exists - update avatar if provided and not currently set
+		// Check both Valid (not NULL) and String (not empty)
+		if avatarURL != "" && (!user.AvatarUrl.Valid || user.AvatarUrl.String == "") {
 			user.AvatarUrl = pgtype.Text{String: avatarURL, Valid: true}
 			user, err = h.userRepo.Update(ctx, *user)
 			if err != nil {
@@ -386,12 +390,16 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 		return user, nil
 	}
 
-	// Handle repository errors other than "not found"
-	if err != nil {
+	// Distinguish between "user not found" (expected) and database errors (unexpected)
+	if errors.Is(err, repository.ErrUserNotFound) {
+		// User doesn't exist - this is the expected path for first-time OAuth users
+		// Fall through to user creation below
+	} else {
+		// Other database errors (connection failure, timeout, etc.) should be returned
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
-	// User doesn't exist, create new one
+	// Create new user from OAuth profile data
 	// Note: OAuth users don't have passwords
 	userID := uuid.New()
 	newUser := usermodels.User{
