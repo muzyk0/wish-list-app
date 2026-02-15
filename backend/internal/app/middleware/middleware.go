@@ -76,6 +76,28 @@ func sendErrorResponse(c echo.Context, code int, message string) {
 	}
 }
 
+// extractErrorInfo extracts the HTTP status code and message from an error.
+// Used internally and exposed for testing.
+func extractErrorInfo(err error) (int, string) {
+	code := http.StatusInternalServerError
+	message := "Internal Server Error"
+
+	var he *echo.HTTPError
+	if errors.As(err, &he) {
+		code = he.Code
+		if msg, ok := he.Message.(string); ok {
+			message = msg
+		} else {
+			message = fmt.Sprintf("%v", he.Message)
+		}
+	} else if err != nil {
+		// For non-HTTP errors, preserve the original error for logging
+		message = err.Error()
+	}
+
+	return code, message
+}
+
 // RequestIDMiddleware adds a unique request ID to each request
 func RequestIDMiddleware() echo.MiddlewareFunc {
 	return middleware.RequestID()
