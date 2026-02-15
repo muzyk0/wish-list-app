@@ -73,12 +73,12 @@ type PaginatedResult struct {
 // GiftItemRepositoryInterface defines the interface for gift item database operations
 type GiftItemRepositoryInterface interface {
 	// CRUD
-	Create(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	CreateWithOwner(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	GetByID(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
 	GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters ItemFilters) (*PaginatedResult, error)
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error)
 	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*models.GiftItem, error)
+	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*models.GiftItem, int, error)
 	GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
 	Update(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	UpdateWithNewSchema(ctx context.Context, giftItem *models.GiftItem) (*models.GiftItem, error)
@@ -109,13 +109,6 @@ func NewGiftItemRepository(db *database.DB) GiftItemRepositoryInterface {
 // ---------------------------------------------------------------------------
 // CRUD operations
 // ---------------------------------------------------------------------------
-
-// Create inserts a new gift item into the database.
-//
-// Deprecated: Use CreateWithOwner instead. Kept for backward compatibility.
-func (r *GiftItemRepository) Create(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
-	return r.CreateWithOwner(ctx, giftItem)
-}
 
 // CreateWithOwner creates a new item with owner_id
 func (r *GiftItemRepository) CreateWithOwner(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
@@ -283,6 +276,43 @@ func (r *GiftItemRepository) GetPublicWishListGiftItems(ctx context.Context, pub
 	}
 
 	return giftItems, nil
+}
+
+// GetPublicWishListGiftItemsPaginated retrieves paginated gift items for a public wishlist by slug
+// Returns the items, total count, and any error
+func (r *GiftItemRepository) GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*models.GiftItem, int, error) {
+	// Get total count
+	countQuery := `
+		SELECT COUNT(*)
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		WHERE w.public_slug = $1 AND w.is_public = true
+		  AND gi.archived_at IS NULL
+	`
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, countQuery, publicSlug); err != nil {
+		return nil, 0, fmt.Errorf("failed to count public wishlist gift items: %w", err)
+	}
+
+	// Get paginated items
+	query := fmt.Sprintf(`
+		SELECT %s
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		WHERE w.public_slug = $1 AND w.is_public = true
+		  AND gi.archived_at IS NULL
+		ORDER BY gi.position ASC
+		LIMIT $2 OFFSET $3
+	`, giftItemColumnsAliased)
+
+	var giftItems []*models.GiftItem
+	if err := r.db.SelectContext(ctx, &giftItems, query, publicSlug, limit, offset); err != nil {
+		return nil, 0, fmt.Errorf("failed to get public wishlist gift items: %w", err)
+	}
+
+	return giftItems, totalCount, nil
 }
 
 // GetUnattached retrieves items not attached to any wishlist

@@ -23,9 +23,6 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //
 //		// make and configure a mocked repository.GiftItemRepositoryInterface
 //		mockedGiftItemRepositoryInterface := &GiftItemRepositoryInterfaceMock{
-//			CreateFunc: func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
-//				panic("mock out the Create method")
-//			},
 //			CreateWithOwnerFunc: func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
 //				panic("mock out the CreateWithOwner method")
 //			},
@@ -49,6 +46,9 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			},
 //			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*models.GiftItem, error) {
 //				panic("mock out the GetPublicWishListGiftItems method")
+//			},
+//			GetPublicWishListGiftItemsPaginatedFunc: func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error) {
+//				panic("mock out the GetPublicWishListGiftItemsPaginated method")
 //			},
 //			GetUnattachedFunc: func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error) {
 //				panic("mock out the GetUnattached method")
@@ -81,9 +81,6 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //
 //	}
 type GiftItemRepositoryInterfaceMock struct {
-	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
-
 	// CreateWithOwnerFunc mocks the CreateWithOwner method.
 	CreateWithOwnerFunc func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 
@@ -107,6 +104,9 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetPublicWishListGiftItemsFunc mocks the GetPublicWishListGiftItems method.
 	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*models.GiftItem, error)
+
+	// GetPublicWishListGiftItemsPaginatedFunc mocks the GetPublicWishListGiftItemsPaginated method.
+	GetPublicWishListGiftItemsPaginatedFunc func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error)
 
 	// GetUnattachedFunc mocks the GetUnattached method.
 	GetUnattachedFunc func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
@@ -134,13 +134,6 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Create holds details about calls to the Create method.
-		Create []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// GiftItem is the giftItem argument value.
-			GiftItem models.GiftItem
-		}
 		// CreateWithOwner holds details about calls to the CreateWithOwner method.
 		CreateWithOwner []struct {
 			// Ctx is the ctx argument value.
@@ -200,6 +193,17 @@ type GiftItemRepositoryInterfaceMock struct {
 			Ctx context.Context
 			// PublicSlug is the publicSlug argument value.
 			PublicSlug string
+		}
+		// GetPublicWishListGiftItemsPaginated holds details about calls to the GetPublicWishListGiftItemsPaginated method.
+		GetPublicWishListGiftItemsPaginated []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// PublicSlug is the publicSlug argument value.
+			PublicSlug string
+			// Limit is the limit argument value.
+			Limit int
+			// Offset is the offset argument value.
+			Offset int
 		}
 		// GetUnattached holds details about calls to the GetUnattached method.
 		GetUnattached []struct {
@@ -266,59 +270,23 @@ type GiftItemRepositoryInterfaceMock struct {
 			GiftItem *models.GiftItem
 		}
 	}
-	lockCreate                            sync.RWMutex
-	lockCreateWithOwner                   sync.RWMutex
-	lockDelete                            sync.RWMutex
-	lockDeleteWithExecutor                sync.RWMutex
-	lockDeleteWithReservationNotification sync.RWMutex
-	lockGetByID                           sync.RWMutex
-	lockGetByOwnerPaginated               sync.RWMutex
-	lockGetByWishList                     sync.RWMutex
-	lockGetPublicWishListGiftItems        sync.RWMutex
-	lockGetUnattached                     sync.RWMutex
-	lockMarkAsPurchased                   sync.RWMutex
-	lockReserve                           sync.RWMutex
-	lockReserveIfNotReserved              sync.RWMutex
-	lockSoftDelete                        sync.RWMutex
-	lockUnreserve                         sync.RWMutex
-	lockUpdate                            sync.RWMutex
-	lockUpdateWithNewSchema               sync.RWMutex
-}
-
-// Create calls CreateFunc.
-func (mock *GiftItemRepositoryInterfaceMock) Create(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
-	if mock.CreateFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.CreateFunc: method is nil but GiftItemRepositoryInterface.Create was just called")
-	}
-	callInfo := struct {
-		Ctx      context.Context
-		GiftItem models.GiftItem
-	}{
-		Ctx:      ctx,
-		GiftItem: giftItem,
-	}
-	mock.lockCreate.Lock()
-	mock.calls.Create = append(mock.calls.Create, callInfo)
-	mock.lockCreate.Unlock()
-	return mock.CreateFunc(ctx, giftItem)
-}
-
-// CreateCalls gets all the calls that were made to Create.
-// Check the length with:
-//
-//	len(mockedGiftItemRepositoryInterface.CreateCalls())
-func (mock *GiftItemRepositoryInterfaceMock) CreateCalls() []struct {
-	Ctx      context.Context
-	GiftItem models.GiftItem
-} {
-	var calls []struct {
-		Ctx      context.Context
-		GiftItem models.GiftItem
-	}
-	mock.lockCreate.RLock()
-	calls = mock.calls.Create
-	mock.lockCreate.RUnlock()
-	return calls
+	lockCreateWithOwner                     sync.RWMutex
+	lockDelete                              sync.RWMutex
+	lockDeleteWithExecutor                  sync.RWMutex
+	lockDeleteWithReservationNotification   sync.RWMutex
+	lockGetByID                             sync.RWMutex
+	lockGetByOwnerPaginated                 sync.RWMutex
+	lockGetByWishList                       sync.RWMutex
+	lockGetPublicWishListGiftItems          sync.RWMutex
+	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
+	lockGetUnattached                       sync.RWMutex
+	lockMarkAsPurchased                     sync.RWMutex
+	lockReserve                             sync.RWMutex
+	lockReserveIfNotReserved                sync.RWMutex
+	lockSoftDelete                          sync.RWMutex
+	lockUnreserve                           sync.RWMutex
+	lockUpdate                              sync.RWMutex
+	lockUpdateWithNewSchema                 sync.RWMutex
 }
 
 // CreateWithOwner calls CreateWithOwnerFunc.
@@ -614,6 +582,50 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsCalls() [
 	mock.lockGetPublicWishListGiftItems.RLock()
 	calls = mock.calls.GetPublicWishListGiftItems
 	mock.lockGetPublicWishListGiftItems.RUnlock()
+	return calls
+}
+
+// GetPublicWishListGiftItemsPaginated calls GetPublicWishListGiftItemsPaginatedFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error) {
+	if mock.GetPublicWishListGiftItemsPaginatedFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsPaginatedFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItemsPaginated was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		PublicSlug string
+		Limit      int
+		Offset     int
+	}{
+		Ctx:        ctx,
+		PublicSlug: publicSlug,
+		Limit:      limit,
+		Offset:     offset,
+	}
+	mock.lockGetPublicWishListGiftItemsPaginated.Lock()
+	mock.calls.GetPublicWishListGiftItemsPaginated = append(mock.calls.GetPublicWishListGiftItemsPaginated, callInfo)
+	mock.lockGetPublicWishListGiftItemsPaginated.Unlock()
+	return mock.GetPublicWishListGiftItemsPaginatedFunc(ctx, publicSlug, limit, offset)
+}
+
+// GetPublicWishListGiftItemsPaginatedCalls gets all the calls that were made to GetPublicWishListGiftItemsPaginated.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetPublicWishListGiftItemsPaginatedCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsPaginatedCalls() []struct {
+	Ctx        context.Context
+	PublicSlug string
+	Limit      int
+	Offset     int
+} {
+	var calls []struct {
+		Ctx        context.Context
+		PublicSlug string
+		Limit      int
+		Offset     int
+	}
+	mock.lockGetPublicWishListGiftItemsPaginated.RLock()
+	calls = mock.calls.GetPublicWishListGiftItemsPaginated
+	mock.lockGetPublicWishListGiftItemsPaginated.RUnlock()
 	return calls
 }
 

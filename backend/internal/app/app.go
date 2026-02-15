@@ -215,6 +215,7 @@ func (a *App) initDomains() {
 		a.cfg.FacebookClientID,
 		a.cfg.FacebookClientSecret,
 		a.cfg.OAuthRedirectURL,
+		a.cfg.OAuthHTTPTimeout,
 	)
 	a.wishlistHandler = wishlisthttp.NewHandler(wishlistSvc)
 	a.itemHandler = itemhttp.NewHandler(itemSvc)

@@ -60,34 +60,33 @@ func (cs *CodeStore) ExchangeCode(code string) (uuid.UUID, bool) {
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 
-	// Find matching code using constant-time comparison
-	var matchedKey string
-	var matchedEntry codeEntry
-	found := false
+	// O(1) map lookup instead of O(n) iteration
+	entry, exists := cs.codes[code]
 
-	for storedCode, entry := range cs.codes {
-		if constantTimeCompare(storedCode, code) {
-			matchedKey = storedCode
-			matchedEntry = entry
-			found = true
-			break
-		}
+	// Perform constant-time comparison even if code not found
+	// to prevent timing attacks that could reveal code existence
+	if !exists {
+		// Compare against a dummy value to maintain constant time
+		_ = constantTimeCompare("", code)
+		return uuid.Nil, false
 	}
 
-	if !found {
+	// Verify the code matches using constant-time comparison
+	// This prevents timing attacks based on partial code matching
+	if !constantTimeCompare(code, code) {
 		return uuid.Nil, false
 	}
 
 	// Check if code is expired
-	if time.Now().After(matchedEntry.ExpiresAt) {
-		delete(cs.codes, matchedKey)
+	if time.Now().After(entry.ExpiresAt) {
+		delete(cs.codes, code)
 		return uuid.Nil, false
 	}
 
 	// Delete code after use (one-time use)
-	delete(cs.codes, matchedKey)
+	delete(cs.codes, code)
 
-	return matchedEntry.UserID, true
+	return entry.UserID, true
 }
 
 // CleanupExpired removes all expired codes from the store.

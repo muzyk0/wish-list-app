@@ -136,8 +136,8 @@ func (h *Handler) MobileHandoff(c echo.Context) error {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		c.Logger().Errorf("Invalid user ID format: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Internal server error",
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Invalid user ID format",
 		})
 	}
 

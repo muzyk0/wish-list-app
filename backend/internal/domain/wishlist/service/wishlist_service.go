@@ -25,9 +25,10 @@ import (
 
 // GiftItemRepositoryInterface defines gift item repository methods used by wishlist service
 type GiftItemRepositoryInterface interface {
-	Create(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
+	CreateWithOwner(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
+	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*itemmodels.GiftItem, int, error)
 	Update(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 	DeleteWithReservationNotification(ctx context.Context, giftItemID pgtype.UUID) ([]*reservationmodels.Reservation, error)
 	MarkAsPurchased(ctx context.Context, giftItemID, userID pgtype.UUID, purchasedPrice pgtype.Numeric) (*itemmodels.GiftItem, error)
@@ -53,18 +54,18 @@ type CacheInterface interface {
 
 // Sentinel errors
 var (
-	ErrWishListNotFound         = errors.New("wishlist not found")
-	ErrWishListForbidden        = errors.New("not authorized to access this wishlist")
-	ErrWishListTitleRequired    = errors.New("title is required")
-	ErrInvalidWishListUserID    = errors.New("invalid user id")
-	ErrInvalidWishListID        = errors.New("invalid wishlist id")
-	ErrInvalidWishListGiftItem  = errors.New("invalid gift item id")
-	ErrActiveReservationsExist  = errors.New("cannot delete wishlist with active reservations - please remove or cancel all reservations first")
-	ErrNameRequired             = errors.New("name is required")
-	ErrPriorityOutOfRange       = errors.New("priority value out of int32 range")
-	ErrPositionOutOfRange       = errors.New("position value out of int32 range")
-	ErrGiftItemIDRequired       = errors.New("gift item ID is required")
-	ErrUserIDRequired           = errors.New("user ID is required")
+	ErrWishListNotFound        = errors.New("wishlist not found")
+	ErrWishListForbidden       = errors.New("not authorized to access this wishlist")
+	ErrWishListTitleRequired   = errors.New("title is required")
+	ErrInvalidWishListUserID   = errors.New("invalid user id")
+	ErrInvalidWishListID       = errors.New("invalid wishlist id")
+	ErrInvalidWishListGiftItem = errors.New("invalid gift item id")
+	ErrActiveReservationsExist = errors.New("cannot delete wishlist with active reservations - please remove or cancel all reservations first")
+	ErrNameRequired            = errors.New("name is required")
+	ErrPriorityOutOfRange      = errors.New("priority value out of int32 range")
+	ErrPositionOutOfRange      = errors.New("position value out of int32 range")
+	ErrGiftItemIDRequired      = errors.New("gift item ID is required")
+	ErrUserIDRequired          = errors.New("user ID is required")
 )
 
 // WishListServiceInterface defines the interface for wishlist-related operations
@@ -78,6 +79,7 @@ type WishListServiceInterface interface {
 	CreateGiftItem(ctx context.Context, wishListID string, input CreateGiftItemInput) (*GiftItemOutput, error)
 	GetGiftItem(ctx context.Context, giftItemID string) (*GiftItemOutput, error)
 	GetGiftItemsByWishList(ctx context.Context, wishListID string) ([]*GiftItemOutput, error)
+	GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*GiftItemOutput, int, error)
 	UpdateGiftItem(ctx context.Context, giftItemID string, input UpdateGiftItemInput) (*GiftItemOutput, error)
 	DeleteGiftItem(ctx context.Context, giftItemID string) error
 	MarkGiftItemAsPurchased(ctx context.Context, giftItemID, userID string, purchasedPrice float64) (*GiftItemOutput, error)
@@ -239,12 +241,12 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 	}
 
 	output := &WishListOutput{
-		ID:        createdWishList.ID.String(),
-		OwnerID:   createdWishList.OwnerID.String(),
-		Title:     createdWishList.Title,
+		ID:         createdWishList.ID.String(),
+		OwnerID:    createdWishList.OwnerID.String(),
+		Title:      createdWishList.Title,
 		TemplateID: createdWishList.TemplateID,
-		CreatedAt: createdWishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: createdWishList.UpdatedAt.Time.Format(time.RFC3339),
+		CreatedAt:  createdWishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  createdWishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -282,12 +284,12 @@ func (s *WishListService) GetWishList(ctx context.Context, wishListID string) (*
 	}
 
 	output := &WishListOutput{
-		ID:        wishList.ID.String(),
-		OwnerID:   wishList.OwnerID.String(),
-		Title:     wishList.Title,
+		ID:         wishList.ID.String(),
+		OwnerID:    wishList.OwnerID.String(),
+		Title:      wishList.Title,
 		TemplateID: wishList.TemplateID,
-		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
+		CreatedAt:  wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  wishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -329,12 +331,12 @@ func (s *WishListService) GetWishListByPublicSlug(ctx context.Context, publicSlu
 	}
 
 	output := &WishListOutput{
-		ID:        wishList.ID.String(),
-		OwnerID:   wishList.OwnerID.String(),
-		Title:     wishList.Title,
+		ID:         wishList.ID.String(),
+		OwnerID:    wishList.OwnerID.String(),
+		Title:      wishList.Title,
 		TemplateID: wishList.TemplateID,
-		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
+		CreatedAt:  wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  wishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -381,13 +383,13 @@ func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string
 	var outputs []*WishListOutput
 	for _, wishListWithCount := range wishLists {
 		output := &WishListOutput{
-			ID:        wishListWithCount.ID.String(),
-			OwnerID:   wishListWithCount.OwnerID.String(),
-			Title:     wishListWithCount.Title,
+			ID:         wishListWithCount.ID.String(),
+			OwnerID:    wishListWithCount.OwnerID.String(),
+			Title:      wishListWithCount.Title,
 			TemplateID: wishListWithCount.TemplateID,
-			ItemCount: wishListWithCount.ItemCount,
-			CreatedAt: wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt: wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
+			ItemCount:  wishListWithCount.ItemCount,
+			CreatedAt:  wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt:  wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
 		}
 
 		// Handle nullable fields
@@ -513,12 +515,12 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	}
 
 	output := &WishListOutput{
-		ID:        updated.ID.String(),
-		OwnerID:   updated.OwnerID.String(),
-		Title:     updated.Title,
+		ID:         updated.ID.String(),
+		OwnerID:    updated.OwnerID.String(),
+		Title:      updated.Title,
 		TemplateID: updated.TemplateID,
-		CreatedAt: updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: updated.UpdatedAt.Time.Format(time.RFC3339),
+		CreatedAt:  updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  updated.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -631,7 +633,7 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 		Position:    pgtype.Int4{Int32: int32(input.Position), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is safe
 	}
 
-	createdGiftItem, err := s.giftItemRepo.Create(ctx, giftItem)
+	createdGiftItem, err := s.giftItemRepo.CreateWithOwner(ctx, giftItem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gift item in repository: %w", err)
 	}
@@ -789,6 +791,63 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 	}
 
 	return outputs, nil
+}
+
+func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*GiftItemOutput, int, error) {
+	giftItems, totalCount, err := s.giftItemRepo.GetPublicWishListGiftItemsPaginated(ctx, publicSlug, limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get gift items from repository: %w", err)
+	}
+
+	var outputs []*GiftItemOutput
+
+	for _, giftItem := range giftItems {
+		if giftItem == nil {
+			continue // Skip nil items to avoid panic
+		}
+
+		// Convert price to float64
+		var price float64
+		if giftItem.Price.Valid {
+			priceValue, err := giftItem.Price.Float64Value()
+			if err == nil && priceValue.Valid {
+				price = priceValue.Float64
+			}
+		}
+
+		output := &GiftItemOutput{
+			ID:        giftItem.ID.String(),
+			OwnerID:   giftItem.OwnerID.String(),
+			Name:      giftItem.Name,
+			Price:     price,
+			CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
+		}
+
+		// Handle nullable fields
+		if giftItem.Description.Valid {
+			output.Description = giftItem.Description.String
+		}
+		if giftItem.Link.Valid {
+			output.Link = giftItem.Link.String
+		}
+		if giftItem.ImageUrl.Valid {
+			output.ImageURL = giftItem.ImageUrl.String
+		}
+		if giftItem.Priority.Valid {
+			output.Priority = int(giftItem.Priority.Int32)
+		}
+		if giftItem.Notes.Valid {
+			output.Notes = giftItem.Notes.String
+		}
+		if giftItem.Position.Valid {
+			output.Position = int(giftItem.Position.Int32)
+		}
+
+		outputs = append(outputs, output)
+	}
+
+	return outputs, totalCount, nil
 }
 
 func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string, input UpdateGiftItemInput) (*GiftItemOutput, error) {

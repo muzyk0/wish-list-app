@@ -225,7 +225,7 @@ func TestItemService_CreateItem_Success(t *testing.T) {
 	returnedItem := makeGiftItem(ownerID)
 
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
+		CreateWithOwnerFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
 			assert.Equal(t, ownerID, gi.OwnerID)
 			assert.Equal(t, "Birthday Gift", gi.Name)
 			assert.Equal(t, "A nice present", gi.Description.String)
@@ -252,7 +252,7 @@ func TestItemService_CreateItem_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	assert.Equal(t, returnedItem.Name, result.Name)
-	assert.Len(t, itemRepo.CreateCalls(), 1)
+	assert.Len(t, itemRepo.CreateWithOwnerCalls(), 1)
 }
 
 func TestItemService_CreateItem_EmptyTitle(t *testing.T) {
@@ -266,7 +266,7 @@ func TestItemService_CreateItem_EmptyTitle(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, result)
 	require.ErrorIs(t, err, ErrItemTitleRequired)
-	assert.Empty(t, itemRepo.CreateCalls(), "repo should not be called when title is empty")
+	assert.Empty(t, itemRepo.CreateWithOwnerCalls(), "repo should not be called when title is empty")
 }
 
 func TestItemService_CreateItem_InvalidUserID(t *testing.T) {
@@ -280,7 +280,7 @@ func TestItemService_CreateItem_InvalidUserID(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, result)
 	require.ErrorIs(t, err, ErrInvalidItemUser)
-	assert.Empty(t, itemRepo.CreateCalls())
+	assert.Empty(t, itemRepo.CreateWithOwnerCalls())
 }
 
 func TestItemService_CreateItem_ZeroPrice(t *testing.T) {
@@ -288,7 +288,7 @@ func TestItemService_CreateItem_ZeroPrice(t *testing.T) {
 	returnedItem := makeGiftItem(ownerID)
 
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
+		CreateWithOwnerFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
 			// Price should not be set when zero
 			assert.False(t, gi.Price.Valid, "price should not be set when input is 0")
 			return returnedItem, nil
@@ -310,7 +310,7 @@ func TestItemService_CreateItem_OptionalFieldsEmpty(t *testing.T) {
 	returnedItem := makeGiftItem(ownerID)
 
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
+		CreateWithOwnerFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
 			assert.False(t, gi.Description.Valid)
 			assert.False(t, gi.Link.Valid)
 			assert.False(t, gi.ImageUrl.Valid)
@@ -332,7 +332,7 @@ func TestItemService_CreateItem_RepoError(t *testing.T) {
 	repoErr := errors.New("insert failed")
 
 	itemRepo := &GiftItemRepositoryInterfaceMock{
-		CreateFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
+		CreateWithOwnerFunc: func(ctx context.Context, gi models.GiftItem) (*models.GiftItem, error) {
 			return nil, repoErr
 		},
 	}

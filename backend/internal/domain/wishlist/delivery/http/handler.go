@@ -248,16 +248,17 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	// Get the wishlist by public slug to verify it's public
-	wishList, err := h.service.GetWishListByPublicSlug(ctx, publicSlug)
+	// Verify the wishlist exists and is public
+	_, err := h.service.GetWishListByPublicSlug(ctx, publicSlug)
 	if err != nil {
 		return c.JSON(nethttp.StatusNotFound, map[string]string{
 			"error": "Wish list not found or not public",
 		})
 	}
 
-	// Get all gift items for this wishlist
-	giftItems, err := h.service.GetGiftItemsByWishList(ctx, wishList.ID)
+	// Use database-level pagination for better performance
+	offset := (pagination.Page - 1) * pagination.Limit
+	giftItems, totalCount, err := h.service.GetGiftItemsByPublicSlugPaginated(ctx, publicSlug, pagination.Limit, offset)
 	if err != nil {
 		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
 			"error": fmt.Errorf("failed to get gift items: %w", err).Error(),
@@ -268,25 +269,12 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 		giftItems = []*service.GiftItemOutput{}
 	}
 
-	// Apply pagination
-	total := len(giftItems)
-	start := (pagination.Page - 1) * pagination.Limit
-	end := min(start+pagination.Limit, total)
-
-	// Handle out of bounds
-	if start > total {
-		start = total
-		end = total
-	}
-
-	paginatedItems := giftItems[start:end]
-
 	// Calculate total pages
-	pages := (total + pagination.Limit - 1) / pagination.Limit
+	pages := (totalCount + pagination.Limit - 1) / pagination.Limit
 
 	return c.JSON(nethttp.StatusOK, dto.GetGiftItemsResponse{
-		Items: dto.FromGiftItemOutputs(paginatedItems),
-		Total: total,
+		Items: dto.FromGiftItemOutputs(giftItems),
+		Total: totalCount,
 		Page:  pagination.Page,
 		Limit: pagination.Limit,
 		Pages: pages,

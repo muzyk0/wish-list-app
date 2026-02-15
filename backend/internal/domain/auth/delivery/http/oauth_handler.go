@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"wish-list/internal/app/config"
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	usermodels "wish-list/internal/domain/user/models"
 	"wish-list/internal/pkg/auth"
@@ -37,6 +38,7 @@ type OAuthHandler struct {
 	tokenManager *auth.TokenManager
 	googleConfig *oauth2.Config
 	fbConfig     *oauth2.Config
+	httpTimeout  time.Duration
 }
 
 // NewOAuthHandler creates a new OAuth handler
@@ -48,7 +50,13 @@ func NewOAuthHandler(
 	fbClientID string,
 	fbClientSecret string,
 	redirectURL string,
+	httpTimeout int,
 ) *OAuthHandler {
+	timeout := time.Duration(httpTimeout) * time.Second
+	if httpTimeout <= 0 {
+		timeout = config.DefaultOAuthHTTPTimeout
+	}
+
 	return &OAuthHandler{
 		userRepo:     userRepo,
 		tokenManager: tokenManager,
@@ -69,6 +77,7 @@ func NewOAuthHandler(
 			Scopes:       []string{"email", "public_profile"},
 			Endpoint:     facebook.Endpoint,
 		},
+		httpTimeout: timeout,
 	}
 }
 
@@ -269,7 +278,7 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 
 // getGoogleUserInfo fetches user information from Google
 func (h *OAuthHandler) getGoogleUserInfo(ctx context.Context, accessToken string) (*GoogleUserInfo, error) {
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: h.httpTimeout}
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
@@ -303,7 +312,7 @@ func (h *OAuthHandler) getGoogleUserInfo(ctx context.Context, accessToken string
 
 // getFacebookUserInfo fetches user information from Facebook
 func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken string) (*FacebookUserInfo, error) {
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: h.httpTimeout}
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,

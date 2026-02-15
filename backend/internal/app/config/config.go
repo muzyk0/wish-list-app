@@ -35,6 +35,7 @@ type Config struct {
 	FacebookClientID     string
 	FacebookClientSecret string
 	OAuthRedirectURL     string
+	OAuthHTTPTimeout     int // Timeout in seconds for OAuth HTTP requests
 }
 
 // Load loads the configuration from environment variables
@@ -82,6 +83,7 @@ func Load() *Config {
 		FacebookClientID:     getEnvOrDefault("FACEBOOK_CLIENT_ID", ""),
 		FacebookClientSecret: getEnvOrDefault("FACEBOOK_CLIENT_SECRET", ""),
 		OAuthRedirectURL:     getEnvOrDefault("OAUTH_REDIRECT_URL", "wishlistapp://oauth"),
+		OAuthHTTPTimeout:     getIntEnvOrDefault("OAUTH_HTTP_TIMEOUT", 10),
 	}
 }
 

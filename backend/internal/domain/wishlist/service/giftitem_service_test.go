@@ -82,7 +82,7 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
-				mockGiftItemRepo.CreateFunc = func(ctx context.Context, gi itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
+				mockGiftItemRepo.CreateWithOwnerFunc = func(ctx context.Context, gi itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 					return tt.mockReturn, tt.mockError
 				}
 			}

@@ -151,6 +151,14 @@ func (m *MockWishListService) GetGiftItemsByWishList(ctx context.Context, wishLi
 	return args.Get(0).([]*service.GiftItemOutput), args.Error(1)
 }
 
+func (m *MockWishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*service.GiftItemOutput, int, error) {
+	args := m.Called(ctx, publicSlug, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Int(1), args.Error(2)
+	}
+	return args.Get(0).([]*service.GiftItemOutput), args.Int(1), args.Error(2)
+}
+
 func (m *MockWishListService) UpdateGiftItem(ctx context.Context, giftItemID string, input service.UpdateGiftItemInput) (*service.GiftItemOutput, error) {
 	args := m.Called(ctx, giftItemID, input)
 	if args.Get(0) == nil {

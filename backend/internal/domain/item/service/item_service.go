@@ -190,7 +190,7 @@ func (s *ItemService) CreateItem(ctx context.Context, userID string, input Creat
 	}
 
 	// Create in repository
-	createdItem, err := s.itemRepo.Create(ctx, item)
+	createdItem, err := s.itemRepo.CreateWithOwner(ctx, item)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create item: %w", err)
 	}
