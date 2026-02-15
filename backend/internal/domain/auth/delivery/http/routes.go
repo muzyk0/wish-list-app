@@ -11,9 +11,17 @@ import (
 func RegisterRoutes(e *echo.Echo, h *Handler, oh *OAuthHandler, authMiddleware echo.MiddlewareFunc) {
 	authGroup := e.Group("/api/auth")
 
-	// Public auth endpoints
-	authGroup.POST("/refresh", h.Refresh)
-	authGroup.POST("/exchange", h.Exchange)
+	// Refresh endpoint - rate limited to prevent token brute force
+	// Limit: 20 requests/minute per IP, burst of 30
+	refreshLimiter := middleware.NewRefreshRateLimiter()
+	authGroup.POST("/refresh", h.Refresh,
+		middleware.AuthRateLimitMiddleware(refreshLimiter, middleware.IPIdentifier))
+
+	// Exchange endpoint - rate limited to prevent handoff code enumeration
+	// Limit: 10 requests/minute per IP, burst of 15
+	exchangeLimiter := middleware.NewExchangeRateLimiter()
+	authGroup.POST("/exchange", h.Exchange,
+		middleware.AuthRateLimitMiddleware(exchangeLimiter, middleware.IPIdentifier))
 
 	// OAuth endpoints with rate limiting (5 req/min)
 	oauthLimiter := middleware.NewOAuthRateLimiter()
