@@ -11,7 +11,7 @@
             "name": "MIT",
             "url": "https://opensource.org/licenses/MIT"
         },
-        "version": "1.0"
+        "version": "1.1"
     },
     "paths": {
         "/auth/change-email": {
@@ -30,7 +30,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.ChangeEmailRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest"
                             }
                         }
                     },
@@ -43,7 +43,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                                 }
                             }
                         }
@@ -119,7 +119,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.ChangePasswordRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ChangePasswordRequest"
                             }
                         }
                     },
@@ -132,7 +132,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                                 }
                             }
                         }
@@ -190,7 +190,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.ExchangeRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest"
                             }
                         }
                     },
@@ -203,7 +203,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ExchangeResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse"
                                 }
                             }
                         }
@@ -274,7 +274,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.LoginRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.LoginRequest"
                             }
                         }
                     },
@@ -287,7 +287,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.AuthResponse"
                                 }
                             }
                         }
@@ -352,7 +352,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.MessageResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.MessageResponse"
                                 }
                             }
                         }
@@ -378,7 +378,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.HandoffResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse"
                                 }
                             }
                         }
@@ -436,7 +436,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.OAuthCodeRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"
                             }
                         }
                     },
@@ -449,13 +449,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -469,6 +469,19 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -494,7 +507,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.OAuthCodeRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest"
                             }
                         }
                     },
@@ -507,13 +520,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse"
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid or expired authorization code",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -527,6 +540,19 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to communicate with provider",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -554,7 +580,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.RefreshResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse"
                                 }
                             }
                         }
@@ -586,7 +612,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.RegisterRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.RegisterRequest"
                             }
                         }
                     },
@@ -599,7 +625,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.AuthResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.AuthResponse"
                                 }
                             }
                         }
@@ -672,7 +698,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/internal_handlers.ReservationDetailsResponse"
+                                        "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"
                                     }
                                 }
                             }
@@ -720,7 +746,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                    "$ref": "#/components/schemas/internal_domain_health_delivery_http.HealthResponse"
                                 }
                             }
                         }
@@ -730,7 +756,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                    "$ref": "#/components/schemas/internal_domain_health_delivery_http.HealthResponse"
                                 }
                             }
                         }
@@ -776,10 +802,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse"
                                 }
                             }
                         }
@@ -902,7 +925,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.PaginatedItemsResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse"
                                 }
                             }
                         }
@@ -960,7 +983,15 @@
                 ],
                 "summary": "Create gift item",
                 "requestBody": {
-                    "$ref": "#/components/requestBodies/internal_handlers.CreateItemRequest"
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest"
+                            }
+                        }
+                    },
+                    "description": "Item data",
+                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -968,7 +999,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ItemResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                                 }
                             }
                         }
@@ -1044,7 +1075,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ItemResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                                 }
                             }
                         }
@@ -1116,7 +1147,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.UpdateItemRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest"
                             }
                         }
                     },
@@ -1129,7 +1160,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ItemResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                                 }
                             }
                         }
@@ -1309,7 +1340,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.MarkPurchasedRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest"
                             }
                         }
                     },
@@ -1322,7 +1353,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ItemResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
                                 }
                             }
                         }
@@ -1457,7 +1488,9 @@
                         "description": "User data exported successfully",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse"
+                                }
                             }
                         }
                     },
@@ -1466,10 +1499,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1479,10 +1509,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1508,7 +1535,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
                                 }
                             }
                         }
@@ -1569,7 +1596,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.UpdateProfileRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest"
                             }
                         }
                     },
@@ -1582,7 +1609,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.UserResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
                                 }
                             }
                         }
@@ -1675,7 +1702,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ReservationStatusResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse"
                                 }
                             }
                         }
@@ -1720,7 +1747,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                                 }
                             }
                         }
@@ -1781,7 +1808,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.GetGiftItemsResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse"
                                 }
                             }
                         }
@@ -1851,7 +1878,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.UserReservationsResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse"
                                 }
                             }
                         }
@@ -1921,7 +1948,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.CreateReservationRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"
                             }
                         }
                     },
@@ -1933,7 +1960,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.CreateReservationResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
                                 }
                             }
                         }
@@ -2014,7 +2041,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.CancelReservationRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"
                             }
                         }
                     },
@@ -2026,7 +2053,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.CreateReservationResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
                                 }
                             }
                         }
@@ -2093,7 +2120,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/internal_handlers.WishListResponse"
+                                        "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                                     }
                                 }
                             }
@@ -2142,7 +2169,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.CreateWishListRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest"
                             }
                         }
                     },
@@ -2155,7 +2182,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                                 }
                             }
                         }
@@ -2231,7 +2258,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                                 }
                             }
                         }
@@ -2290,7 +2317,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.UpdateWishListRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest"
                             }
                         }
                     },
@@ -2303,7 +2330,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.WishListResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse"
                                 }
                             }
                         }
@@ -2488,7 +2515,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.PaginatedItemsResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse"
                                 }
                             }
                         }
@@ -2573,7 +2600,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/internal_handlers.AttachItemRequest"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest"
                             }
                         }
                     },
@@ -2689,7 +2716,15 @@
                     }
                 ],
                 "requestBody": {
-                    "$ref": "#/components/requestBodies/internal_handlers.CreateItemRequest"
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest"
+                            }
+                        }
+                    },
+                    "description": "Item data",
+                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -2697,7 +2732,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/internal_handlers.ItemResponse"
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"
                                 }
                             }
                         }
@@ -2868,19 +2903,6 @@
         }
     ],
     "components": {
-        "requestBodies": {
-            "internal_handlers.CreateItemRequest": {
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/internal_handlers.CreateItemRequest"
-                        }
-                    }
-                },
-                "description": "Item data",
-                "required": true
-            }
-        },
         "securitySchemes": {
             "BearerAuth": {
                 "description": "Type \"Bearer\" followed by a space and JWT token.",
@@ -2890,19 +2912,27 @@
             }
         },
         "schemas": {
-            "internal_handlers.AttachItemRequest": {
+            "internal_domain_health_delivery_http.HealthResponse": {
                 "type": "object",
                 "required": [
-                    "itemId"
+                    "status"
                 ],
                 "properties": {
-                    "itemId": {
-                        "type": "string",
-                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "checks": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
                     }
                 }
             },
-            "internal_handlers.AuthResponse": {
+            "wish-list_internal_domain_auth_delivery_http_dto.AuthResponse": {
                 "type": "object",
                 "required": [
                     "accessToken",
@@ -2915,28 +2945,20 @@
                         "type": "string"
                     },
                     "refreshToken": {
-                        "description": "Refresh token (long-lived, 7 days) - also set as httpOnly cookie",
+                        "description": "Refresh token (long-lived, 7 days)",
                         "type": "string"
                     },
                     "user": {
                         "description": "User information",
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/internal_handlers.UserResponse"
+                                "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.UserResponse"
                             }
                         ]
                     }
                 }
             },
-            "internal_handlers.CancelReservationRequest": {
-                "type": "object",
-                "properties": {
-                    "reservation_token": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.ChangeEmailRequest": {
+            "wish-list_internal_domain_auth_delivery_http_dto.ChangeEmailRequest": {
                 "type": "object",
                 "required": [
                     "current_password",
@@ -2952,7 +2974,7 @@
                     }
                 }
             },
-            "internal_handlers.ChangePasswordRequest": {
+            "wish-list_internal_domain_auth_delivery_http_dto.ChangePasswordRequest": {
                 "type": "object",
                 "required": [
                     "current_password",
@@ -2969,7 +2991,115 @@
                     }
                 }
             },
-            "internal_handlers.CreateItemRequest": {
+            "wish-list_internal_domain_auth_delivery_http_dto.ExchangeRequest": {
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.ExchangeResponse": {
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken",
+                    "user"
+                ],
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/wish-list_internal_domain_auth_delivery_http_dto.UserResponse"
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "expiresIn"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6..."
+                    },
+                    "expiresIn": {
+                        "type": "integer",
+                        "example": 60
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.MessageResponse": {
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest": {
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse": {
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken"
+                ],
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_auth_delivery_http_dto.UserResponse": {
+                "type": "object",
+                "required": [
+                    "email",
+                    "id"
+                ],
+                "properties": {
+                    "avatar_url": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest": {
                 "type": "object",
                 "required": [
                     "title"
@@ -2980,7 +3110,7 @@
                         "maxLength": 2000,
                         "example": "256GB, Blue Titanium"
                     },
-                    "imageUrl": {
+                    "image_url": {
                         "type": "string",
                         "example": "https://example.com/image.jpg"
                     },
@@ -2990,7 +3120,6 @@
                     },
                     "notes": {
                         "type": "string",
-                        "maxLength": 1000,
                         "example": "Preferred color: Blue"
                     },
                     "price": {
@@ -3012,7 +3141,145 @@
                     }
                 }
             },
-            "internal_handlers.CreateReservationRequest": {
+            "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "256GB, Blue Titanium"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "https://example.com/image.jpg"
+                    },
+                    "is_archived": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_purchased": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "link": {
+                        "type": "string",
+                        "example": "https://apple.com/iphone-15-pro"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Preferred color: Blue"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "price": {
+                        "type": "number",
+                        "example": 999.99
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "iPhone 15 Pro"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    }
+                }
+            },
+            "wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest": {
+                "type": "object",
+                "required": [
+                    "purchased_price"
+                ],
+                "properties": {
+                    "purchased_price": {
+                        "type": "number",
+                        "minimum": 0,
+                        "example": 899.99
+                    }
+                }
+            },
+            "wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse"
+                        }
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "total_count": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                }
+            },
+            "wish-list_internal_domain_item_delivery_http_dto.UpdateItemRequest": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 2000
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 0
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 1
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest": {
+                "type": "object",
+                "properties": {
+                    "reservation_token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest": {
                 "type": "object",
                 "properties": {
                     "guest_email": {
@@ -3024,7 +3291,7 @@
                     }
                 }
             },
-            "internal_handlers.CreateReservationResponse": {
+            "wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse": {
                 "type": "object",
                 "required": [
                     "gift_item_id",
@@ -3073,7 +3340,374 @@
                     }
                 }
             },
-            "internal_handlers.CreateWishListRequest": {
+            "wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse": {
+                "type": "object",
+                "required": [
+                    "gift_item",
+                    "id",
+                    "reserved_at",
+                    "status",
+                    "wishlist"
+                ],
+                "properties": {
+                    "expires_at": {
+                        "type": "string"
+                    },
+                    "gift_item": {
+                        "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "reserved_at": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "wishlist": {
+                        "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse": {
+                "type": "object",
+                "required": [
+                    "is_reserved",
+                    "status"
+                ],
+                "properties": {
+                    "is_reserved": {
+                        "type": "boolean"
+                    },
+                    "reserved_at": {
+                        "type": "string"
+                    },
+                    "reserved_by_name": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse": {
+                "type": "object",
+                "required": [
+                    "data",
+                    "pagination"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"
+                        }
+                    },
+                    "pagination": {}
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "owner_first_name": {
+                        "type": "string"
+                    },
+                    "owner_last_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "example": "https://s3.amazonaws.com/bucket/images/uuid.jpg"
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.AuthResponse": {
+                "type": "object",
+                "required": [
+                    "accessToken",
+                    "refreshToken",
+                    "user"
+                ],
+                "properties": {
+                    "accessToken": {
+                        "description": "Access token (short-lived, 15 minutes)",
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "description": "Refresh token (long-lived, 7 days) - also set as httpOnly cookie",
+                        "type": "string"
+                    },
+                    "user": {
+                        "description": "User information",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.UserResponse"
+                            }
+                        ]
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.ErrorResponse": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Error message"
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse": {
+                "type": "object",
+                "required": [
+                    "export_format",
+                    "exported_at",
+                    "user",
+                    "wishlists"
+                ],
+                "properties": {
+                    "export_format": {
+                        "type": "string",
+                        "example": "json"
+                    },
+                    "exported_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse"
+                    },
+                    "wishlists": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse"
+                        }
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "256GB, Blue Titanium"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "https://example.com/image.jpg"
+                    },
+                    "link": {
+                        "type": "string",
+                        "example": "https://apple.com/iphone-15-pro"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "iPhone 15 Pro"
+                    },
+                    "price": {
+                        "type": "number",
+                        "example": 999.99
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "example": 3
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.ExportedUserResponse": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440002"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.ExportedWishlistResponse": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "My birthday wishlist"
+                    },
+                    "gift_items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_domain_user_delivery_http_dto.ExportedGiftItemResponse"
+                        }
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "is_public": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "occasion": {
+                        "type": "string",
+                        "example": "Birthday"
+                    },
+                    "public_slug": {
+                        "type": "string",
+                        "example": "birthday-2024-abc123"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Birthday 2024"
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.LoginRequest": {
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.RegisterRequest": {
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "avatar_url": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.UpdateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "avatar_url": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_user_delivery_http_dto.UserResponse": {
+                "type": "object",
+                "required": [
+                    "email",
+                    "id"
+                ],
+                "properties": {
+                    "avatar_url": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_wishlist_delivery_http_dto.CreateWishListRequest": {
                 "type": "object",
                 "required": [
                     "title"
@@ -3091,47 +3725,13 @@
                     "occasion_date": {
                         "type": "string"
                     },
-                    "template_id": {
-                        "type": "string",
-                        "default": "default"
-                    },
                     "title": {
                         "type": "string",
                         "maxLength": 200
                     }
                 }
             },
-            "internal_handlers.ExchangeRequest": {
-                "type": "object",
-                "required": [
-                    "code"
-                ],
-                "properties": {
-                    "code": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.ExchangeResponse": {
-                "type": "object",
-                "required": [
-                    "accessToken",
-                    "refreshToken",
-                    "user"
-                ],
-                "properties": {
-                    "accessToken": {
-                        "type": "string"
-                    },
-                    "refreshToken": {
-                        "type": "string"
-                    },
-                    "user": {
-                        "$ref": "#/components/schemas/internal_handlers.UserResponse"
-                    }
-                }
-            },
-            "internal_handlers.GetGiftItemsResponse": {
+            "wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse": {
                 "type": "object",
                 "required": [
                     "items",
@@ -3144,7 +3744,7 @@
                     "items": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/internal_handlers.GiftItemResponse"
+                            "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.GiftItemResponse"
                         }
                     },
                     "limit": {
@@ -3161,7 +3761,7 @@
                     }
                 }
             },
-            "internal_handlers.GiftItemResponse": {
+            "wish-list_internal_domain_wishlist_delivery_http_dto.GiftItemResponse": {
                 "type": "object",
                 "required": [
                     "created_at",
@@ -3224,338 +3824,7 @@
                     }
                 }
             },
-            "internal_handlers.GiftItemSummary": {
-                "type": "object",
-                "required": [
-                    "id",
-                    "name"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "image_url": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "price": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.HandoffResponse": {
-                "type": "object",
-                "required": [
-                    "code",
-                    "expiresIn"
-                ],
-                "properties": {
-                    "code": {
-                        "type": "string",
-                        "example": "a1b2c3d4e5f6..."
-                    },
-                    "expiresIn": {
-                        "type": "integer",
-                        "example": 60
-                    }
-                }
-            },
-            "internal_handlers.HealthResponse": {
-                "type": "object",
-                "required": [
-                    "status"
-                ],
-                "properties": {
-                    "checks": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "string"
-                        }
-                    },
-                    "error": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.ItemResponse": {
-                "type": "object",
-                "properties": {
-                    "createdAt": {
-                        "type": "string",
-                        "example": "2024-01-01T12:00:00Z"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "256GB, Blue Titanium"
-                    },
-                    "id": {
-                        "type": "string",
-                        "example": "550e8400-e29b-41d4-a716-446655440000"
-                    },
-                    "imageUrl": {
-                        "type": "string",
-                        "example": "https://example.com/image.jpg"
-                    },
-                    "isArchived": {
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "isPurchased": {
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "link": {
-                        "type": "string",
-                        "example": "https://apple.com/iphone-15-pro"
-                    },
-                    "notes": {
-                        "type": "string",
-                        "example": "Preferred color: Blue"
-                    },
-                    "ownerId": {
-                        "type": "string",
-                        "example": "550e8400-e29b-41d4-a716-446655440001"
-                    },
-                    "price": {
-                        "type": "number",
-                        "example": 999.99
-                    },
-                    "priority": {
-                        "type": "integer",
-                        "example": 3
-                    },
-                    "title": {
-                        "type": "string",
-                        "example": "iPhone 15 Pro"
-                    },
-                    "updatedAt": {
-                        "type": "string",
-                        "example": "2024-01-01T12:00:00Z"
-                    }
-                }
-            },
-            "internal_handlers.LoginRequest": {
-                "type": "object",
-                "required": [
-                    "email",
-                    "password"
-                ],
-                "properties": {
-                    "email": {
-                        "type": "string"
-                    },
-                    "password": {
-                        "type": "string",
-                        "minLength": 6
-                    }
-                }
-            },
-            "internal_handlers.MarkPurchasedRequest": {
-                "type": "object",
-                "required": [
-                    "purchasedPrice"
-                ],
-                "properties": {
-                    "purchasedPrice": {
-                        "type": "number",
-                        "minimum": 0,
-                        "example": 899.99
-                    }
-                }
-            },
-            "internal_handlers.MessageResponse": {
-                "type": "object",
-                "required": [
-                    "message"
-                ],
-                "properties": {
-                    "message": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.OAuthCodeRequest": {
-                "type": "object",
-                "required": [
-                    "code"
-                ],
-                "properties": {
-                    "code": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.PaginatedItemsResponse": {
-                "type": "object",
-                "properties": {
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/internal_handlers.ItemResponse"
-                        }
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "example": 10
-                    },
-                    "page": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "totalCount": {
-                        "type": "integer",
-                        "example": 42
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "example": 5
-                    }
-                }
-            },
-            "internal_handlers.RefreshResponse": {
-                "type": "object",
-                "required": [
-                    "accessToken",
-                    "refreshToken"
-                ],
-                "properties": {
-                    "accessToken": {
-                        "type": "string"
-                    },
-                    "refreshToken": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.RegisterRequest": {
-                "type": "object",
-                "required": [
-                    "email",
-                    "password"
-                ],
-                "properties": {
-                    "avatar_url": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "first_name": {
-                        "type": "string"
-                    },
-                    "last_name": {
-                        "type": "string"
-                    },
-                    "password": {
-                        "type": "string",
-                        "minLength": 6
-                    }
-                }
-            },
-            "internal_handlers.ReservationDetailsResponse": {
-                "type": "object",
-                "required": [
-                    "gift_item",
-                    "id",
-                    "reserved_at",
-                    "status",
-                    "wishlist"
-                ],
-                "properties": {
-                    "expires_at": {
-                        "type": "string"
-                    },
-                    "gift_item": {
-                        "$ref": "#/components/schemas/internal_handlers.GiftItemSummary"
-                    },
-                    "id": {
-                        "type": "string"
-                    },
-                    "reserved_at": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "wishlist": {
-                        "$ref": "#/components/schemas/internal_handlers.WishListSummary"
-                    }
-                }
-            },
-            "internal_handlers.ReservationStatusResponse": {
-                "type": "object",
-                "required": [
-                    "is_reserved",
-                    "status"
-                ],
-                "properties": {
-                    "is_reserved": {
-                        "type": "boolean"
-                    },
-                    "reserved_at": {
-                        "type": "string"
-                    },
-                    "reserved_by_name": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.UpdateItemRequest": {
-                "type": "object",
-                "properties": {
-                    "description": {
-                        "type": "string",
-                        "maxLength": 2000
-                    },
-                    "imageUrl": {
-                        "type": "string"
-                    },
-                    "link": {
-                        "type": "string"
-                    },
-                    "notes": {
-                        "type": "string",
-                        "maxLength": 1000
-                    },
-                    "price": {
-                        "type": "number",
-                        "minimum": 0
-                    },
-                    "priority": {
-                        "type": "integer",
-                        "maximum": 5,
-                        "minimum": 0
-                    },
-                    "title": {
-                        "type": "string",
-                        "maxLength": 255,
-                        "minLength": 1
-                    }
-                }
-            },
-            "internal_handlers.UpdateProfileRequest": {
-                "type": "object",
-                "properties": {
-                    "avatar_url": {
-                        "type": "string"
-                    },
-                    "first_name": {
-                        "type": "string"
-                    },
-                    "last_name": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.UpdateWishListRequest": {
+            "wish-list_internal_domain_wishlist_delivery_http_dto.UpdateWishListRequest": {
                 "type": "object",
                 "properties": {
                     "description": {
@@ -3570,56 +3839,13 @@
                     "occasion_date": {
                         "type": "string"
                     },
-                    "template_id": {
-                        "type": "string"
-                    },
                     "title": {
                         "type": "string",
                         "maxLength": 200
                     }
                 }
             },
-            "internal_handlers.UserReservationsResponse": {
-                "type": "object",
-                "required": [
-                    "data",
-                    "pagination"
-                ],
-                "properties": {
-                    "data": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/internal_handlers.ReservationDetailsResponse"
-                        }
-                    },
-                    "pagination": {}
-                }
-            },
-            "internal_handlers.UserResponse": {
-                "type": "object",
-                "required": [
-                    "email",
-                    "id"
-                ],
-                "properties": {
-                    "avatar_url": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "first_name": {
-                        "type": "string"
-                    },
-                    "id": {
-                        "type": "string"
-                    },
-                    "last_name": {
-                        "type": "string"
-                    }
-                }
-            },
-            "internal_handlers.WishListResponse": {
+            "wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse": {
                 "type": "object",
                 "required": [
                     "created_at",
@@ -3658,9 +3884,6 @@
                     "public_slug": {
                         "type": "string"
                     },
-                    "template_id": {
-                        "type": "string"
-                    },
                     "title": {
                         "type": "string"
                     },
@@ -3672,24 +3895,146 @@
                     }
                 }
             },
-            "internal_handlers.WishListSummary": {
+            "wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest": {
                 "type": "object",
                 "required": [
-                    "id",
+                    "item_id"
+                ],
+                "properties": {
+                    "item_id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    }
+                }
+            },
+            "wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest": {
+                "type": "object",
+                "required": [
                     "title"
                 ],
                 "properties": {
-                    "id": {
-                        "type": "string"
+                    "description": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "example": "256GB, Blue Titanium"
                     },
-                    "owner_first_name": {
-                        "type": "string"
+                    "image_url": {
+                        "type": "string",
+                        "example": "https://example.com/image.jpg"
                     },
-                    "owner_last_name": {
-                        "type": "string"
+                    "link": {
+                        "type": "string",
+                        "example": "https://apple.com/iphone-15-pro"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "example": "Preferred color: Blue"
+                    },
+                    "price": {
+                        "type": "number",
+                        "minimum": 0,
+                        "example": 999.99
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 0,
+                        "example": 3
                     },
                     "title": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "example": "iPhone 15 Pro"
+                    }
+                }
+            },
+            "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
+                "type": "object",
+                "properties": {
+                    "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "256GB, Blue Titanium"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "https://example.com/image.jpg"
+                    },
+                    "is_archived": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_purchased": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_reserved": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "link": {
+                        "type": "string",
+                        "example": "https://apple.com/iphone-15-pro"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Preferred color: Blue"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "price": {
+                        "type": "number",
+                        "example": 999.99
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "iPhone 15 Pro"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2024-01-01T12:00:00Z"
+                    }
+                }
+            },
+            "wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"
+                        }
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "total_count": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 5
                     }
                 }
             }

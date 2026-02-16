@@ -7,23 +7,23 @@ get:
       description: User data exported successfully
       content:
         application/json:
-          schema: {}
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.ExportUserDataResponse.yaml
     '401':
       description: Unauthorized
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_user_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Export user data

@@ -1,0 +1,21 @@
+properties:
+  items:
+    items:
+      $ref: >-
+        ./wish-list_internal_domain_wishlist_delivery_http_dto.GiftItemResponse.yaml
+    type: array
+  limit:
+    type: integer
+  page:
+    type: integer
+  pages:
+    type: integer
+  total:
+    type: integer
+required:
+  - items
+  - limit
+  - page
+  - pages
+  - total
+type: object

@@ -18,7 +18,7 @@ get:
         application/json:
           schema:
             $ref: >-
-              ../components/schemas/internal_handlers.UserReservationsResponse.yaml
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse.yaml
     '401':
       description: Unauthorized
       content:

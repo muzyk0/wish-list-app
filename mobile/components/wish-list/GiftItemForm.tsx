@@ -1,14 +1,47 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   Button as PaperButton,
+  HelperText,
   TextInput as PaperTextInput,
 } from 'react-native-paper';
+import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import type { GiftItem } from '@/lib/api/types';
 import ImageUpload from './ImageUpload';
+
+// Zod schema for form validation
+const giftItemSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(255, 'Name must be less than 255 characters'),
+  description: z.string().optional(),
+  link: z.string().url('Invalid URL').or(z.literal('')).optional(),
+  imageUrl: z.string().optional(),
+  price: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val === '' || !Number.isNaN(parseFloat(val)),
+      'Invalid price',
+    ),
+  priority: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val === '') return true;
+      const num = parseInt(val, 10);
+      return !Number.isNaN(num) && num >= 0 && num <= 10;
+    }, 'Priority must be between 0 and 10'),
+  notes: z.string().optional(),
+  position: z.string().optional(),
+});
+
+type GiftItemFormData = z.infer<typeof giftItemSchema>;
 
 interface GiftItemFormProps {
   wishlistId: string;
@@ -21,65 +54,60 @@ export default function GiftItemForm({
   existingItem,
   onComplete,
 }: GiftItemFormProps) {
-  const [name, setName] = useState(existingItem?.name || '');
-  const [description, setDescription] = useState(
-    existingItem?.description || '',
-  );
-  const [link, setLink] = useState(existingItem?.link || '');
-  const [imageUrl, setImageUrl] = useState(existingItem?.image_url || '');
-  const [price, setPrice] = useState(existingItem?.price?.toString() || '');
-  const [priority, setPriority] = useState(
-    existingItem?.priority?.toString() || '0',
-  );
-  const [notes, setNotes] = useState(existingItem?.notes || '');
-  const [position, setPosition] = useState(
-    existingItem?.position?.toString() || '0',
-  );
-
   const router = useRouter();
 
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<GiftItemFormData>({
+    resolver: zodResolver(giftItemSchema),
+    defaultValues: {
+      name: existingItem?.name || '',
+      description: existingItem?.description || '',
+      link: existingItem?.link || '',
+      imageUrl: existingItem?.image_url || '',
+      price: existingItem?.price?.toString() || '',
+      priority: existingItem?.priority?.toString() || '0',
+      notes: existingItem?.notes || '',
+      position: existingItem?.position?.toString() || '0',
+    },
+  });
+
+  const imageUrl = watch('imageUrl');
+
   const mutation = useMutation({
-    mutationFn: (data: {
-      name: string;
-      description: string;
-      link: string;
-      image_url: string;
-      price: string;
-      priority: string;
-      notes: string;
-      position: string;
-    }) => {
+    mutationFn: (data: GiftItemFormData) => {
       // Parse numeric fields, set to undefined if empty or invalid
-      const parsedPrice =
-        data.price.trim() !== '' ? parseFloat(data.price) : NaN;
-      const parsedPriority =
-        data.priority.trim() !== '' ? parseInt(data.priority, 10) : NaN;
-      const parsedPosition =
-        data.position.trim() !== '' ? parseInt(data.position, 10) : NaN;
+      const parsedPrice = data.price ? parseFloat(data.price) : undefined;
+      const parsedPriority = data.priority
+        ? parseInt(data.priority, 10)
+        : undefined;
 
       if (existingItem) {
         // Update existing item
         return apiClient.updateGiftItem(wishlistId, existingItem.id, {
           title: data.name,
-          description: data.description,
-          link: data.link,
-          imageUrl: data.image_url,
-          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
-          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
-          notes: data.notes,
-        });
-      } else {
-        // Create new item
-        return apiClient.createGiftItem(wishlistId, {
-          title: data.name,
-          description: data.description,
-          link: data.link,
-          imageUrl: data.image_url,
-          price: !isNaN(parsedPrice) ? parsedPrice : undefined,
-          priority: !isNaN(parsedPriority) ? parsedPriority : undefined,
-          notes: data.notes,
+          description: data.description || '',
+          link: data.link || '',
+          image_url: data.imageUrl || '',
+          price: parsedPrice,
+          priority: parsedPriority,
+          notes: data.notes || '',
         });
       }
+      // Create new item
+      return apiClient.createGiftItem(wishlistId, {
+        title: data.name,
+        description: data.description || '',
+        link: data.link || '',
+        image_url: data.imageUrl || '',
+        price: parsedPrice,
+        priority: parsedPriority,
+        notes: data.notes || '',
+      });
     },
     onSuccess: (_data) => {
       Alert.alert(
@@ -137,38 +165,8 @@ export default function GiftItemForm({
     },
   });
 
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a name for the gift item.');
-      return;
-    }
-
-    // Validate price if provided
-    if (price && Number.isNaN(parseFloat(price))) {
-      Alert.alert('Error', 'Please enter a valid price.');
-      return;
-    }
-
-    // Validate priority (0-10)
-    const priorityNum = parseInt(priority, 10);
-    if (
-      priority &&
-      (Number.isNaN(priorityNum) || priorityNum < 0 || priorityNum > 10)
-    ) {
-      Alert.alert('Error', 'Please enter a priority between 0 and 10.');
-      return;
-    }
-
-    mutation.mutate({
-      name: name.trim(),
-      description: description.trim(),
-      link: link.trim(),
-      image_url: imageUrl.trim(),
-      price,
-      priority,
-      notes: notes.trim(),
-      position: position.trim(),
-    });
+  const onSubmit = (data: GiftItemFormData) => {
+    mutation.mutate(data);
   };
 
   const handleDelete = () => {
@@ -194,87 +192,168 @@ export default function GiftItemForm({
         {existingItem ? 'Edit Gift Item' : 'Add New Gift Item'}
       </Text>
 
-      <PaperTextInput
-        label="Name *"
-        value={name}
-        onChangeText={setName}
-        mode="outlined"
-        maxLength={255}
-        style={styles.input}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="name"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View>
+            <PaperTextInput
+              label="Name *"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              mode="outlined"
+              maxLength={255}
+              style={styles.input}
+              disabled={mutation.isPending}
+              error={!!errors.name}
+            />
+            {errors.name && (
+              <HelperText type="error" visible={!!errors.name}>
+                {errors.name.message}
+              </HelperText>
+            )}
+          </View>
+        )}
       />
 
-      <PaperTextInput
-        label="Description"
-        value={description}
-        onChangeText={setDescription}
-        mode="outlined"
-        multiline
-        numberOfLines={3}
-        style={styles.multilineInput}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="description"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <PaperTextInput
+            label="Description"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            mode="outlined"
+            multiline
+            numberOfLines={3}
+            style={styles.multilineInput}
+            disabled={mutation.isPending}
+          />
+        )}
       />
 
-      <PaperTextInput
-        label="Link (URL)"
-        value={link}
-        onChangeText={setLink}
-        mode="outlined"
-        keyboardType="url"
-        style={styles.input}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="link"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View>
+            <PaperTextInput
+              label="Link (URL)"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              mode="outlined"
+              keyboardType="url"
+              style={styles.input}
+              disabled={mutation.isPending}
+              error={!!errors.link}
+            />
+            {errors.link && (
+              <HelperText type="error" visible={!!errors.link}>
+                {errors.link.message}
+              </HelperText>
+            )}
+          </View>
+        )}
       />
 
       <ImageUpload
-        onImageUpload={setImageUrl}
+        onImageUpload={(url) => setValue('imageUrl', url)}
         currentImageUrl={imageUrl}
         disabled={mutation.isPending}
       />
 
-      <PaperTextInput
-        label="Price"
-        value={price}
-        onChangeText={setPrice}
-        mode="outlined"
-        keyboardType="decimal-pad"
-        style={styles.input}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="price"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View>
+            <PaperTextInput
+              label="Price"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              mode="outlined"
+              keyboardType="decimal-pad"
+              style={styles.input}
+              disabled={mutation.isPending}
+              error={!!errors.price}
+            />
+            {errors.price && (
+              <HelperText type="error" visible={!!errors.price}>
+                {errors.price.message}
+              </HelperText>
+            )}
+          </View>
+        )}
       />
 
-      <PaperTextInput
-        label="Priority (0-10)"
-        value={priority}
-        onChangeText={setPriority}
-        mode="outlined"
-        keyboardType="numeric"
-        style={styles.input}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="priority"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View>
+            <PaperTextInput
+              label="Priority (0-10)"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              mode="outlined"
+              keyboardType="numeric"
+              style={styles.input}
+              disabled={mutation.isPending}
+              error={!!errors.priority}
+            />
+            {errors.priority && (
+              <HelperText type="error" visible={!!errors.priority}>
+                {errors.priority.message}
+              </HelperText>
+            )}
+          </View>
+        )}
       />
 
-      <PaperTextInput
-        label="Notes"
-        value={notes}
-        onChangeText={setNotes}
-        mode="outlined"
-        multiline
-        numberOfLines={3}
-        style={styles.multilineInput}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="notes"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <PaperTextInput
+            label="Notes"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            mode="outlined"
+            multiline
+            numberOfLines={3}
+            style={styles.multilineInput}
+            disabled={mutation.isPending}
+          />
+        )}
       />
 
-      <PaperTextInput
-        label="Position"
-        value={position}
-        onChangeText={setPosition}
-        mode="outlined"
-        keyboardType="numeric"
-        style={styles.input}
-        disabled={mutation.isPending}
+      <Controller
+        control={control}
+        name="position"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <PaperTextInput
+            label="Position"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.input}
+            disabled={mutation.isPending}
+          />
+        )}
       />
 
       <PaperButton
         mode="contained"
-        onPress={handleSubmit}
+        onPress={handleSubmit(onSubmit)}
         loading={mutation.isPending}
         disabled={mutation.isPending}
         style={styles.button}

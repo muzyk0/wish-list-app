@@ -1,0 +1,12 @@
+properties:
+  accessToken:
+    type: string
+  refreshToken:
+    type: string
+  user:
+    $ref: ./wish-list_internal_domain_auth_delivery_http_dto.UserResponse.yaml
+required:
+  - accessToken
+  - refreshToken
+  - user
+type: object

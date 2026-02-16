@@ -25,7 +25,8 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.GetGiftItemsResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse.yaml
     '404':
       description: Wish list not found or not public
       content:

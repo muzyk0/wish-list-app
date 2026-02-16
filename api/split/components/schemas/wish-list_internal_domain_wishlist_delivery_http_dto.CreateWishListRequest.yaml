@@ -1,0 +1,15 @@
+properties:
+  description:
+    type: string
+  is_public:
+    type: boolean
+  occasion:
+    type: string
+  occasion_date:
+    type: string
+  title:
+    maxLength: 200
+    type: string
+required:
+  - title
+type: object

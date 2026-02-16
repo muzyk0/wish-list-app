@@ -13,7 +13,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.MarkPurchasedRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest.yaml
     description: Purchase details
     required: true
   responses:
@@ -22,7 +23,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.ItemResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ItemResponse.yaml
     '400':
       description: Invalid request body
       content:

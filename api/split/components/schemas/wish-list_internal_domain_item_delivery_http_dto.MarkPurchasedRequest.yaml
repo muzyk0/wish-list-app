@@ -1,0 +1,8 @@
+properties:
+  purchased_price:
+    example: 899.99
+    minimum: 0
+    type: number
+required:
+  - purchased_price
+type: object

@@ -1,9 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Pressable,
@@ -12,28 +13,50 @@ import {
   Switch,
   View,
 } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { HelperText, Text, TextInput } from 'react-native-paper';
+import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 
+// Zod schema for wishlist creation form validation
+const createWishlistSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be less than 200 characters'),
+  description: z.string().optional(),
+  occasion: z
+    .string()
+    .max(100, 'Occasion must be less than 100 characters')
+    .optional(),
+  isPublic: z.boolean(),
+});
+
+type CreateWishlistFormData = z.infer<typeof createWishlistSchema>;
+
 export default function CreateWishListScreen() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
   const router = useRouter();
 
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateWishlistFormData>({
+    resolver: zodResolver(createWishlistSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      occasion: '',
+      isPublic: false,
+    },
+  });
+
   const mutation = useMutation({
-    mutationFn: (data: {
-      title: string;
-      description?: string;
-      occasion?: string;
-      is_public: boolean;
-    }) =>
+    mutationFn: (data: CreateWishlistFormData) =>
       apiClient.createWishList({
         title: data.title,
         description: data.description || '',
         occasion: data.occasion || '',
-        is_public: data.is_public,
+        is_public: data.isPublic,
         template_id: 'default',
       }),
     onSuccess: () => {
@@ -49,18 +72,8 @@ export default function CreateWishListScreen() {
     },
   });
 
-  const handleCreate = () => {
-    if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a title for your wishlist.');
-      return;
-    }
-
-    mutation.mutate({
-      title: title.trim(),
-      description: description.trim(),
-      occasion: occasion.trim(),
-      is_public: isPublic,
-    });
+  const onSubmit = (data: CreateWishlistFormData) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -100,98 +113,144 @@ export default function CreateWishListScreen() {
               </LinearGradient>
             </View>
 
-            <TextInput
-              label="Title *"
-              value={title}
-              onChangeText={setTitle}
-              maxLength={200}
-              style={styles.input}
-              textColor="#ffffff"
-              underlineColor="transparent"
-              activeUnderlineColor="#FFD700"
-              placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              theme={{
-                colors: {
-                  primary: '#FFD700',
-                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
-                },
-              }}
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <TextInput
+                    label="Title *"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    maxLength={200}
+                    style={styles.input}
+                    textColor="#ffffff"
+                    underlineColor="transparent"
+                    activeUnderlineColor="#FFD700"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    error={!!errors.title}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                      },
+                    }}
+                  />
+                  {errors.title && (
+                    <HelperText type="error" visible={!!errors.title}>
+                      {errors.title.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
             />
 
-            <View style={styles.textAreaWrapper}>
-              <TextInput
-                label="Description"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-                numberOfLines={3}
-                mode="flat"
-                style={styles.textArea}
-                textColor="#ffffff"
-                underlineColor="transparent"
-                activeUnderlineColor="#FFD700"
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-                contentStyle={{
-                  backgroundColor: 'transparent',
-                }}
-                theme={{
-                  colors: {
-                    primary: '#FFD700',
-                    onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
-                    background: 'transparent',
-                    surface: 'transparent',
-                    surfaceVariant: 'transparent',
-                    elevation: {
-                      level0: 'transparent',
-                      level1: 'transparent',
-                      level2: 'transparent',
-                      level3: 'transparent',
-                      level4: 'transparent',
-                      level5: 'transparent',
-                    },
-                  },
-                }}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={styles.textAreaWrapper}>
+                  <TextInput
+                    label="Description"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    multiline
+                    numberOfLines={3}
+                    mode="flat"
+                    style={styles.textArea}
+                    textColor="#ffffff"
+                    underlineColor="transparent"
+                    activeUnderlineColor="#FFD700"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    contentStyle={{
+                      backgroundColor: 'transparent',
+                    }}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                        background: 'transparent',
+                        surface: 'transparent',
+                        surfaceVariant: 'transparent',
+                        elevation: {
+                          level0: 'transparent',
+                          level1: 'transparent',
+                          level2: 'transparent',
+                          level3: 'transparent',
+                          level4: 'transparent',
+                          level5: 'transparent',
+                        },
+                      },
+                    }}
+                  />
+                </View>
+              )}
+            />
 
-            <TextInput
-              label="Occasion (e.g., Birthday, Wedding)"
-              value={occasion}
-              onChangeText={setOccasion}
-              maxLength={100}
-              style={styles.input}
-              textColor="#ffffff"
-              underlineColor="transparent"
-              activeUnderlineColor="#FFD700"
-              placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              theme={{
-                colors: {
-                  primary: '#FFD700',
-                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
-                },
-              }}
+            <Controller
+              control={control}
+              name="occasion"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <TextInput
+                    label="Occasion (e.g., Birthday, Wedding)"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    maxLength={100}
+                    style={styles.input}
+                    textColor="#ffffff"
+                    underlineColor="transparent"
+                    activeUnderlineColor="#FFD700"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    error={!!errors.occasion}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                      },
+                    }}
+                  />
+                  {errors.occasion && (
+                    <HelperText type="error" visible={!!errors.occasion}>
+                      {errors.occasion.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
             />
 
             {/* Public Toggle */}
-            <View style={styles.toggleContainer}>
-              <View style={styles.toggleLeft}>
-                <MaterialCommunityIcons
-                  name="earth"
-                  size={20}
-                  color="#FFD700"
-                />
-                <Text style={styles.toggleLabel}>Make Public</Text>
-              </View>
-              <Switch
-                value={isPublic}
-                onValueChange={setIsPublic}
-                trackColor={{ false: '#767577', true: '#FFD700' }}
-                thumbColor={isPublic ? '#FFA500' : '#f4f3f4'}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="isPublic"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.toggleContainer}>
+                  <View style={styles.toggleLeft}>
+                    <MaterialCommunityIcons
+                      name="earth"
+                      size={20}
+                      color="#FFD700"
+                    />
+                    <Text style={styles.toggleLabel}>Make Public</Text>
+                  </View>
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: '#767577', true: '#FFD700' }}
+                    thumbColor={value ? '#FFA500' : '#f4f3f4'}
+                  />
+                </View>
+              )}
+            />
 
             {/* Create Button */}
-            <Pressable onPress={handleCreate} disabled={mutation.isPending}>
+            <Pressable
+              onPress={handleSubmit(onSubmit)}
+              disabled={mutation.isPending}
+            >
               <LinearGradient
                 colors={['#FFD700', '#FFA500']}
                 style={styles.createButton}

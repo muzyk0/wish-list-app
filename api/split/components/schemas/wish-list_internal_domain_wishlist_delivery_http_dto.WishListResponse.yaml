@@ -1,0 +1,34 @@
+properties:
+  created_at:
+    type: string
+  description:
+    type: string
+  id:
+    type: string
+  is_public:
+    type: boolean
+  item_count:
+    example: 5
+    type: integer
+  occasion:
+    type: string
+  occasion_date:
+    type: string
+  owner_id:
+    type: string
+  public_slug:
+    type: string
+  title:
+    type: string
+  updated_at:
+    type: string
+  view_count:
+    type: string
+required:
+  - created_at
+  - id
+  - owner_id
+  - title
+  - updated_at
+  - view_count
+type: object

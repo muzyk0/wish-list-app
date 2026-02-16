@@ -1,0 +1,32 @@
+properties:
+  description:
+    example: 256GB, Blue Titanium
+    maxLength: 2000
+    type: string
+  image_url:
+    example: https://example.com/image.jpg
+    type: string
+  link:
+    example: https://apple.com/iphone-15-pro
+    type: string
+  notes:
+    example: 'Preferred color: Blue'
+    maxLength: 1000
+    type: string
+  price:
+    example: 999.99
+    minimum: 0
+    type: number
+  priority:
+    example: 3
+    maximum: 5
+    minimum: 0
+    type: integer
+  title:
+    example: iPhone 15 Pro
+    maxLength: 255
+    minLength: 1
+    type: string
+required:
+  - title
+type: object

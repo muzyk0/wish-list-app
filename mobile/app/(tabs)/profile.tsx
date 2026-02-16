@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { ActivityIndicator, Avatar, Text } from 'react-native-paper';
 import { TabsLayout } from '@/components/TabsLayout';
@@ -91,7 +90,7 @@ const MenuSectionComponent = ({ title, titleIcon, items }: MenuSection) => {
 };
 
 export default function ProfileScreen() {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const router = useRouter();
   const { isDark, toggleTheme } = useThemeContext();
 
@@ -269,7 +268,7 @@ export default function ProfileScreen() {
     ],
   };
 
-  const dangerSection: MenuSection = {
+  const _dangerSection: MenuSection = {
     title: 'Danger Zone',
     titleIcon: 'alert-circle',
     items: [

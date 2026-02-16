@@ -20,7 +20,7 @@ get:
         application/json:
           schema:
             $ref: >-
-              ../components/schemas/internal_handlers.ReservationStatusResponse.yaml
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse.yaml
     '500':
       description: Internal server error
       content:

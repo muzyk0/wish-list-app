@@ -4,7 +4,8 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/internal_handlers.OAuthCodeRequest.yaml
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.OAuthCodeRequest.yaml
     description: Authorization code from Google
     required: true
   responses:
@@ -13,9 +14,10 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/internal_handlers.AuthResponse.yaml
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_auth_delivery_http_dto.AuthResponse.yaml
     '400':
-      description: Invalid request
+      description: Invalid or expired authorization code
       content:
         application/json:
           schema:
@@ -24,6 +26,14 @@ post:
             type: object
     '500':
       description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '502':
+      description: Failed to communicate with provider
       content:
         application/json:
           schema:

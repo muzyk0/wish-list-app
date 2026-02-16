@@ -60,7 +60,7 @@ func main() {
 
 	// Create migrate instance
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://internal/db/migrations",
+		"file://internal/app/database/migrations",
 		"postgres", driver)
 	if err != nil {
 		log.Fatal("Failed to create migrate instance:", err)
