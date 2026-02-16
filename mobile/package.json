@@ -15,6 +15,7 @@
     "format": "biome format --write",
     "type-check": "tsgo --noEmit",
     "type-check:watch": "tsgo --noEmit --watch",
+    "test": "vitest run --passWithNoTests",
     "generate:api": "pnpm openapi-typescript ../api/openapi3.yaml -o ./lib/api/schema.ts --root-types --enum --enum-values --dedupe-enums"
   },
   "dependencies": {

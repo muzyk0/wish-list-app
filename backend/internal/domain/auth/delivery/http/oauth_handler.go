@@ -171,16 +171,24 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
+	userResp := &dto.UserResponse{
+		ID:    userIDStr,
+		Email: userEmail,
+	}
+	if user.FirstName.Valid {
+		userResp.FirstName = user.FirstName.String
+	}
+	if user.LastName.Valid {
+		userResp.LastName = user.LastName.String
+	}
+	if user.AvatarUrl.Valid {
+		userResp.AvatarUrl = user.AvatarUrl.String
+	}
+
 	return c.JSON(http.StatusOK, dto.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User: &dto.UserResponse{
-			ID:        userIDStr,
-			Email:     userEmail,
-			FirstName: user.FirstName.String,
-			LastName:  user.LastName.String,
-			AvatarUrl: user.AvatarUrl.String,
-		},
+		User:         userResp,
 	})
 }
 
@@ -246,16 +254,24 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
+	userResp := &dto.UserResponse{
+		ID:    userIDStr,
+		Email: userEmail,
+	}
+	if user.FirstName.Valid {
+		userResp.FirstName = user.FirstName.String
+	}
+	if user.LastName.Valid {
+		userResp.LastName = user.LastName.String
+	}
+	if user.AvatarUrl.Valid {
+		userResp.AvatarUrl = user.AvatarUrl.String
+	}
+
 	return c.JSON(http.StatusOK, dto.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User: &dto.UserResponse{
-			ID:        userIDStr,
-			Email:     userEmail,
-			FirstName: user.FirstName.String,
-			LastName:  user.LastName.String,
-			AvatarUrl: user.AvatarUrl.String,
-		},
+		User:         userResp,
 	})
 }
 
