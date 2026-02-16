@@ -11,7 +11,6 @@ type WishList struct {
 	Description  pgtype.Text        `db:"description" json:"description"`
 	Occasion     pgtype.Text        `db:"occasion" json:"occasion"`
 	OccasionDate pgtype.Date        `db:"occasion_date" json:"occasion_date"`
-	TemplateID   string             `db:"template_id" json:"template_id"`
 	IsPublic     pgtype.Bool        `db:"is_public" json:"is_public"`
 	PublicSlug   pgtype.Text        `db:"public_slug" json:"public_slug"`
 	ViewCount    pgtype.Int4        `db:"view_count" json:"view_count"`

@@ -561,9 +561,6 @@ definitions:
         type: string
       occasion_date:
         type: string
-      template_id:
-        default: default
-        type: string
       title:
         maxLength: 200
         type: string
@@ -644,8 +641,6 @@ definitions:
         type: string
       occasion_date:
         type: string
-      template_id:
-        type: string
       title:
         maxLength: 200
         type: string
@@ -670,8 +665,6 @@ definitions:
       owner_id:
         type: string
       public_slug:
-        type: string
-      template_id:
         type: string
       title:
         type: string

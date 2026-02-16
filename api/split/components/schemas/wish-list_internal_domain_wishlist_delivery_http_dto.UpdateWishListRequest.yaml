@@ -7,8 +7,6 @@ properties:
     type: string
   occasion_date:
     type: string
-  template_id:
-    type: string
   title:
     maxLength: 200
     type: string

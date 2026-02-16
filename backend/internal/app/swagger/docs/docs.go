@@ -3228,10 +3228,6 @@ const docTemplate = `{
                 "occasion_date": {
                     "type": "string"
                 },
-                "template_id": {
-                    "type": "string",
-                    "default": "default"
-                },
                 "title": {
                     "type": "string",
                     "maxLength": 200
@@ -3346,9 +3342,6 @@ const docTemplate = `{
                 "occasion_date": {
                     "type": "string"
                 },
-                "template_id": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string",
                     "maxLength": 200
@@ -3392,9 +3385,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "public_slug": {
-                    "type": "string"
-                },
-                "template_id": {
                     "type": "string"
                 },
                 "title": {

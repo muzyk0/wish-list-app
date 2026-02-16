@@ -18,8 +18,6 @@ properties:
     type: string
   public_slug:
     type: string
-  template_id:
-    type: string
   title:
     type: string
   updated_at:

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"slices"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -19,7 +18,6 @@ func TestWishListRepository_Create(t *testing.T) {
 			Title:       "Birthday Wish List",
 			Description: pgtype.Text{String: "My birthday wishes for 2024", Valid: true},
 			Occasion:    pgtype.Text{String: "Birthday", Valid: true},
-			TemplateID:  "default",
 			IsPublic:    pgtype.Bool{Bool: true, Valid: true},
 			PublicSlug:  pgtype.Text{String: "john-birthday-2024", Valid: true},
 		}
@@ -28,9 +26,6 @@ func TestWishListRepository_Create(t *testing.T) {
 		if wishList.Title == "" {
 			t.Error("title should not be empty")
 		}
-		if wishList.TemplateID == "" {
-			t.Error("template_id should not be empty")
-		}
 		if !wishList.OwnerID.Valid {
 			t.Error("owner_id should be valid")
 		}
@@ -38,9 +33,8 @@ func TestWishListRepository_Create(t *testing.T) {
 
 	t.Run("create wishlist with minimal fields", func(t *testing.T) {
 		wishList := models.WishList{
-			OwnerID:    pgtype.UUID{Valid: true},
-			Title:      "Minimal Wish List",
-			TemplateID: "default",
+			OwnerID: pgtype.UUID{Valid: true},
+			Title:   "Minimal Wish List",
 		}
 
 		// Verify optional fields can be omitted
@@ -59,7 +53,6 @@ func TestWishListRepository_Create(t *testing.T) {
 		wishList := models.WishList{
 			OwnerID:    pgtype.UUID{Valid: true},
 			Title:      "Public Wish List",
-			TemplateID: "default",
 			IsPublic:   pgtype.Bool{Bool: true, Valid: true},
 			PublicSlug: pgtype.Text{String: "test-slug", Valid: true},
 		}
@@ -79,7 +72,6 @@ func TestWishListRepository_GetByID(t *testing.T) {
 			OwnerID:     pgtype.UUID{Valid: true},
 			Title:       "Test Wish List",
 			Description: pgtype.Text{String: "Test description", Valid: true},
-			TemplateID:  "default",
 			IsPublic:    pgtype.Bool{Bool: false, Valid: true},
 			ViewCount:   pgtype.Int4{Int32: 0, Valid: true},
 		}
@@ -177,7 +169,6 @@ func TestWishListRepository_Update(t *testing.T) {
 			OwnerID:     pgtype.UUID{Valid: true},
 			Title:       "Updated Title",
 			Description: pgtype.Text{String: "Updated description", Valid: true},
-			TemplateID:  "modern",
 		}
 
 		// ID should remain unchanged during update
@@ -188,11 +179,10 @@ func TestWishListRepository_Update(t *testing.T) {
 
 	t.Run("update can change public status", func(t *testing.T) {
 		wishList := models.WishList{
-			ID:         pgtype.UUID{Valid: true},
-			OwnerID:    pgtype.UUID{Valid: true},
-			Title:      "Test List",
-			TemplateID: "default",
-			IsPublic:   pgtype.Bool{Bool: false, Valid: true},
+			ID:       pgtype.UUID{Valid: true},
+			OwnerID:  pgtype.UUID{Valid: true},
+			Title:    "Test List",
+			IsPublic: pgtype.Bool{Bool: false, Valid: true},
 		}
 
 		// Change to public
@@ -207,21 +197,6 @@ func TestWishListRepository_Update(t *testing.T) {
 		}
 	})
 
-	t.Run("update can change template", func(t *testing.T) {
-		wishList := models.WishList{
-			ID:         pgtype.UUID{Valid: true},
-			OwnerID:    pgtype.UUID{Valid: true},
-			Title:      "Test List",
-			TemplateID: "default",
-		}
-
-		// Change template
-		wishList.TemplateID = "modern"
-
-		if wishList.TemplateID != "modern" {
-			t.Errorf("expected template 'modern', got %q", wishList.TemplateID)
-		}
-	})
 }
 
 func TestWishListRepository_Delete(t *testing.T) {
@@ -361,21 +336,4 @@ func TestWishListRepository_EdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("template ID references valid template", func(t *testing.T) {
-		validTemplates := []string{"default", "modern", "classic"}
-
-		for _, templateID := range validTemplates {
-			wishList := models.WishList{
-				Title:      "Test List",
-				TemplateID: templateID,
-			}
-
-			// In real implementation, this would be enforced by foreign key
-			found := slices.Contains(validTemplates, wishList.TemplateID)
-
-			if !found {
-				t.Errorf("template_id %q should reference valid template", templateID)
-			}
-		}
-	})
 }

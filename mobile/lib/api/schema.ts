@@ -3029,8 +3029,6 @@ export interface components {
             is_public?: boolean;
             occasion?: string;
             occasion_date?: string;
-            /** @default default */
-            template_id: string;
             title: string;
         };
         "wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse": {
@@ -3064,7 +3062,6 @@ export interface components {
             is_public?: boolean;
             occasion?: string;
             occasion_date?: string;
-            template_id?: string;
             title?: string;
         };
         "wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse": {
@@ -3078,7 +3075,6 @@ export interface components {
             occasion_date?: string;
             owner_id: string;
             public_slug?: string;
-            template_id?: string;
             title: string;
             updated_at: string;
             view_count: string;

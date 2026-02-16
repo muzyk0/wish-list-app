@@ -14,7 +14,6 @@ type WishListResponse struct {
 	Description  string `json:"description"`
 	Occasion     string `json:"occasion"`
 	OccasionDate string `json:"occasion_date"`
-	TemplateID   string `json:"template_id"`
 	IsPublic     bool   `json:"is_public"`
 	PublicSlug   string `json:"public_slug"`
 	ViewCount    string `json:"view_count" validate:"required"`
@@ -34,7 +33,6 @@ func FromWishListOutput(wl *service.WishListOutput) *WishListResponse {
 		Description:  wl.Description,
 		Occasion:     wl.Occasion,
 		OccasionDate: wl.OccasionDate,
-		TemplateID:   wl.TemplateID,
 		IsPublic:     wl.IsPublic,
 		PublicSlug:   wl.PublicSlug,
 		ViewCount:    fmt.Sprintf("%d", wl.ViewCount),

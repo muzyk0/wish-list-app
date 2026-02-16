@@ -128,7 +128,6 @@ type CreateWishListInput struct {
 	Description  string
 	Occasion     string
 	OccasionDate string
-	TemplateID   string
 	IsPublic     bool
 }
 
@@ -137,7 +136,6 @@ type UpdateWishListInput struct {
 	Description  *string
 	Occasion     *string
 	OccasionDate *string
-	TemplateID   *string
 	IsPublic     *bool
 }
 
@@ -148,7 +146,6 @@ type WishListOutput struct {
 	Description  string
 	Occasion     string
 	OccasionDate string
-	TemplateID   string
 	IsPublic     bool
 	PublicSlug   string
 	ViewCount    int64
@@ -244,7 +241,6 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 		Description:  pgtype.Text{String: input.Description, Valid: input.Description != ""},
 		Occasion:     pgtype.Text{String: input.Occasion, Valid: input.Occasion != ""},
 		OccasionDate: occasionDate,
-		TemplateID:   input.TemplateID,
 		IsPublic:     pgtype.Bool{Bool: input.IsPublic, Valid: true},
 		PublicSlug:   publicSlug,
 	}
@@ -255,12 +251,11 @@ func (s *WishListService) CreateWishList(ctx context.Context, userID string, inp
 	}
 
 	output := &WishListOutput{
-		ID:         createdWishList.ID.String(),
-		OwnerID:    createdWishList.OwnerID.String(),
-		Title:      createdWishList.Title,
-		TemplateID: createdWishList.TemplateID,
-		CreatedAt:  createdWishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:  createdWishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        createdWishList.ID.String(),
+		OwnerID:   createdWishList.OwnerID.String(),
+		Title:     createdWishList.Title,
+		CreatedAt: createdWishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: createdWishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -298,12 +293,11 @@ func (s *WishListService) GetWishList(ctx context.Context, wishListID string) (*
 	}
 
 	output := &WishListOutput{
-		ID:         wishList.ID.String(),
-		OwnerID:    wishList.OwnerID.String(),
-		Title:      wishList.Title,
-		TemplateID: wishList.TemplateID,
-		CreatedAt:  wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:  wishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        wishList.ID.String(),
+		OwnerID:   wishList.OwnerID.String(),
+		Title:     wishList.Title,
+		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -345,12 +339,11 @@ func (s *WishListService) GetWishListByPublicSlug(ctx context.Context, publicSlu
 	}
 
 	output := &WishListOutput{
-		ID:         wishList.ID.String(),
-		OwnerID:    wishList.OwnerID.String(),
-		Title:      wishList.Title,
-		TemplateID: wishList.TemplateID,
-		CreatedAt:  wishList.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:  wishList.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        wishList.ID.String(),
+		OwnerID:   wishList.OwnerID.String(),
+		Title:     wishList.Title,
+		CreatedAt: wishList.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: wishList.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -397,13 +390,12 @@ func (s *WishListService) GetWishListsByOwner(ctx context.Context, userID string
 	var outputs []*WishListOutput
 	for _, wishListWithCount := range wishLists {
 		output := &WishListOutput{
-			ID:         wishListWithCount.ID.String(),
-			OwnerID:    wishListWithCount.OwnerID.String(),
-			Title:      wishListWithCount.Title,
-			TemplateID: wishListWithCount.TemplateID,
-			ItemCount:  wishListWithCount.ItemCount,
-			CreatedAt:  wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt:  wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
+			ID:        wishListWithCount.ID.String(),
+			OwnerID:   wishListWithCount.OwnerID.String(),
+			Title:     wishListWithCount.Title,
+			ItemCount: wishListWithCount.ItemCount,
+			CreatedAt: wishListWithCount.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt: wishListWithCount.UpdatedAt.Time.Format(time.RFC3339),
 		}
 
 		// Handle nullable fields
@@ -474,13 +466,6 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 		updatedWishList.Occasion = wishList.Occasion
 	}
 
-	if input.TemplateID != nil {
-		updatedWishList.TemplateID = *input.TemplateID
-	} else if input.TemplateID == nil {
-		// Keep the original template ID if not provided
-		updatedWishList.TemplateID = wishList.TemplateID
-	}
-
 	if input.IsPublic != nil {
 		updatedWishList.IsPublic = pgtype.Bool{Bool: *input.IsPublic, Valid: true}
 	} else if input.IsPublic == nil {
@@ -529,12 +514,11 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 	}
 
 	output := &WishListOutput{
-		ID:         updated.ID.String(),
-		OwnerID:    updated.OwnerID.String(),
-		Title:      updated.Title,
-		TemplateID: updated.TemplateID,
-		CreatedAt:  updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:  updated.UpdatedAt.Time.Format(time.RFC3339),
+		ID:        updated.ID.String(),
+		OwnerID:   updated.OwnerID.String(),
+		Title:     updated.Title,
+		CreatedAt: updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: updated.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields

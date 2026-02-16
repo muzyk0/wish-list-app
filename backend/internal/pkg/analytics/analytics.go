@@ -18,7 +18,6 @@ const (
 	EventGiftItemReserved    = "gift_item_reserved"
 	EventGiftItemPurchased   = "gift_item_purchased"
 	EventReservationCanceled = "reservation_canceled"
-	EventTemplateChanged     = "template_changed"
 	EventAccountDeleted      = "account_deleted"
 )
 
@@ -93,13 +92,12 @@ func (s *AnalyticsService) TrackUserLogin(ctx context.Context, userID string) er
 }
 
 // TrackWishListCreated tracks when a wishlist is created
-func (s *AnalyticsService) TrackWishListCreated(ctx context.Context, userID, wishListID, templateID string, isPublic bool) error {
+func (s *AnalyticsService) TrackWishListCreated(ctx context.Context, userID, wishListID string, isPublic bool) error {
 	return s.Track(ctx, Event{
 		EventType: EventWishListCreated,
 		UserID:    userID,
 		Properties: map[string]any{
 			"wishlist_id": wishListID,
-			"template_id": templateID,
 			"is_public":   isPublic,
 		},
 	})
@@ -181,19 +179,6 @@ func (s *AnalyticsService) TrackReservationCanceled(ctx context.Context, userID,
 		Properties: map[string]any{
 			"gift_item_id": giftItemID,
 			"reason":       reason,
-		},
-	})
-}
-
-// TrackTemplateChanged tracks when a wishlist template is changed
-func (s *AnalyticsService) TrackTemplateChanged(ctx context.Context, userID, wishListID, oldTemplateID, newTemplateID string) error {
-	return s.Track(ctx, Event{
-		EventType: EventTemplateChanged,
-		UserID:    userID,
-		Properties: map[string]any{
-			"wishlist_id":     wishListID,
-			"old_template_id": oldTemplateID,
-			"new_template_id": newTemplateID,
 		},
 	})
 }

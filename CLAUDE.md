@@ -134,7 +134,14 @@ Library documentation is organized in modular, AI-agent-friendly files:
 
 **Generate Swagger docs**:
 ```bash
-swag init                           # Generate docs
+make docs                           # Complete API documentation generation (recommended)
+                                    # - Generates Swagger 2.0 from Go annotations
+                                    # - Converts to OpenAPI 3.0
+                                    # - Splits into organized files
+                                    # - Regenerates frontend/mobile client schemas
+
+# Or manually:
+swag init                           # Generate docs only
 swag init --parseDependency         # Include external packages
 swag init --parseInternal           # Include internal packages
 swag fmt                            # Format annotations
@@ -167,6 +174,7 @@ swag fmt                            # Format annotations
 
 #### Important Notes
 
+- **Regenerate after changes**: Always run `make docs` after modifying handler DTOs to update OpenAPI specs and client schemas
 - **Handler DTOs Required**: Always use handler-specific response types (not service types) in `@Success` and `@Failure` annotations
 - **Validation Tags**: Use `validate:"required"` in response DTOs for OpenAPI schema generation
 - **Format Tags**: Use `format:"uuid"`, `format:"email"`, etc. for proper schema types
@@ -177,9 +185,10 @@ swag fmt                            # Format annotations
 
 1. **Document as you code**: Add Swagger annotations when creating handlers
 2. **Use handler DTOs**: Never expose service types directly in Swagger docs
-3. **Validate annotations**: Run `swag init` to catch annotation errors early
-4. **Keep examples**: Add `example` tags to struct fields for better API docs
-5. **Security first**: Always add `@Security` annotations to protected endpoints
+3. **Regenerate documentation**: Run `make docs` after any DTO changes to update all schemas
+4. **Validate annotations**: Run `make docs` to catch annotation errors early
+5. **Keep examples**: Add `example` tags to struct fields for better API docs
+6. **Security first**: Always add `@Security` annotations to protected endpoints
 
 ### Mobile Development
 - **Navigation**: Uses Expo Router with file-based routing in `/mobile/app/`

@@ -27,7 +27,6 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				Description:  "Test Description",
 				Occasion:     "Birthday",
 				OccasionDate: "2026-12-25",
-				TemplateID:   "default",
 				IsPublic:     true,
 			},
 			userID: "01020304-0506-0708-090a-0b0c0d0e0f10",
@@ -37,7 +36,6 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				Title:       "Test List",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Occasion:    pgtype.Text{String: "Birthday", Valid: true},
-				TemplateID:  "default",
 				IsPublic:    pgtype.Bool{Bool: true, Valid: true},
 				PublicSlug:  pgtype.Text{String: "test-list-1234", Valid: true},
 			},
@@ -51,7 +49,6 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				Description:  "Test Description",
 				Occasion:     "Birthday",
 				OccasionDate: "2026-12-25",
-				TemplateID:   "default",
 				IsPublic:     true,
 			},
 			userID:        "test-user-id",
@@ -66,7 +63,6 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				Description:  "Test Description",
 				Occasion:     "Birthday",
 				OccasionDate: "2026-12-25",
-				TemplateID:   "default",
 				IsPublic:     true,
 			},
 			userID:        "invalid-user-id",
@@ -98,7 +94,6 @@ func TestWishListService_CreateWishList(t *testing.T) {
 				assert.Equal(t, tt.mockReturn.Title, result.Title)
 				assert.Equal(t, tt.mockReturn.Description.String, result.Description)
 				assert.Equal(t, tt.mockReturn.Occasion.String, result.Occasion)
-				assert.Equal(t, tt.mockReturn.TemplateID, result.TemplateID)
 				assert.Equal(t, tt.mockReturn.IsPublic.Bool, result.IsPublic)
 			}
 		})
@@ -124,7 +119,6 @@ func TestWishListService_GetWishList(t *testing.T) {
 				Title:       "Test List",
 				Description: pgtype.Text{String: "Test Description", Valid: true},
 				Occasion:    pgtype.Text{String: "Birthday", Valid: true},
-				TemplateID:  "default",
 				IsPublic:    pgtype.Bool{Bool: true, Valid: true},
 			},
 			mockError:     nil,

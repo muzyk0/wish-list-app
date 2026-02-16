@@ -7,21 +7,15 @@ type CreateWishListRequest struct {
 	Description  string `json:"description"`
 	Occasion     string `json:"occasion"`
 	OccasionDate string `json:"occasion_date"`
-	TemplateID   string `json:"template_id" default:"default"`
 	IsPublic     bool   `json:"is_public"`
 }
 
 func (r *CreateWishListRequest) ToServiceInput() service.CreateWishListInput {
-	templateID := r.TemplateID
-	if templateID == "" {
-		templateID = "default"
-	}
 	return service.CreateWishListInput{
 		Title:        r.Title,
 		Description:  r.Description,
 		Occasion:     r.Occasion,
 		OccasionDate: r.OccasionDate,
-		TemplateID:   templateID,
 		IsPublic:     r.IsPublic,
 	}
 }
@@ -31,7 +25,6 @@ type UpdateWishListRequest struct {
 	Description  *string `json:"description"`
 	Occasion     *string `json:"occasion"`
 	OccasionDate *string `json:"occasion_date"`
-	TemplateID   *string `json:"template_id"`
 	IsPublic     *bool   `json:"is_public"`
 }
 
@@ -41,7 +34,6 @@ func (r *UpdateWishListRequest) ToServiceInput() service.UpdateWishListInput {
 		Description:  r.Description,
 		Occasion:     r.Occasion,
 		OccasionDate: r.OccasionDate,
-		TemplateID:   r.TemplateID,
 		IsPublic:     r.IsPublic,
 	}
 }
