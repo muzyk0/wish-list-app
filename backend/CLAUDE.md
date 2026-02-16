@@ -15,7 +15,7 @@ Backend-specific patterns, best practices, and conventions for the Go/Echo/Postg
 - Middleware: `backend/internal/app/middleware/`
 - Background jobs: `backend/internal/app/jobs/`
 - Swagger docs: `backend/internal/app/swagger/`
-- Shared libraries: `backend/internal/pkg/` (auth, aws, cache, encryption, validation, analytics, helpers, response)
+- Shared libraries: `backend/internal/pkg/` (analytics, apperrors, auth, aws, cache, encryption, helpers, logger, pii, validation)
 - Domain modules: `backend/internal/domain/{name}/` — each domain contains:
   - `delivery/http/handler.go` — HTTP request handling
   - `delivery/http/dto/` — Request/response DTOs
@@ -383,25 +383,66 @@ func setupTestEcho() *echo.Echo {
   5. Verify build and tests pass
 
 ### Logging Best Practices
+- **Structured Logging with slog**: Always use `internal/pkg/logger` package for structured JSON logging
+  ```go
+  import "wish-list/internal/pkg/logger"
+
+  // CORRECT - structured logging with context
+  logger.Info("user logged in", "user_id", userID, "session_id", sessionID)
+  logger.Error("failed to create item", "error", err, "item_id", itemID)
+  logger.Warn("retry attempt", "attempt", retryCount, "max_retries", maxRetries)
+
+  // WRONG - using fmt.Printf or log.Printf
+  fmt.Printf("User %s logged in\n", userID) // ❌ Never use in production code
+  log.Printf("Error: %v", err)               // ❌ Use logger.Error instead
+  ```
 - **Conditional success logging**: Only log success when operations actually succeed
   ```go
   // WRONG - logs success even on failure
   if err := sendEmail(); err != nil {
-      log.Printf("Failed: %v", err)
+      logger.Error("failed to send email", "error", err)
   }
-  log.Printf("Success!") // Always executes!
+  logger.Info("email sent successfully") // Always executes!
 
   // CORRECT - success only logged when err == nil
   if err := sendEmail(); err != nil {
-      log.Printf("Failed: %v", err)
+      logger.Error("failed to send email", "error", err)
   } else {
-      log.Printf("Success!")
+      logger.Info("email sent successfully", "recipient", recipientEmail)
   }
   ```
-- **Error context**: Include relevant IDs and context in error logs for debugging
+- **Error context**: Always include relevant IDs and context in error logs for debugging
+  ```go
+  logger.Error("database query failed", "error", err, "user_id", userID, "query", "GetByID")
+  ```
+- **Log levels**:
+  - `logger.Debug()` - Development debugging (disabled in production)
+  - `logger.Info()` - Important operational events (user actions, system state)
+  - `logger.Warn()` - Recoverable errors, degraded functionality
+  - `logger.Error()` - Errors requiring attention, failed operations
+- **Logger initialization**: Automatically initialized in `app.New()` based on `SERVER_ENV`
+  - `development` - Debug level, verbose output
+  - `production` - Info level, JSON formatting
+  - `test` - Warn level, minimal output
 - **No PII in logs**: Never log emails, names, or other PII in plaintext (Constitution Requirement CR-004)
+  ```go
+  // WRONG - exposes PII
+  logger.Info("user registered", "email", email, "name", name)
+
+  // CORRECT - use IDs or redact PII
+  logger.Info("user registered", "user_id", userID)
+  ```
 
 ### Production Code Quality
-- **Remove debug statements**: Never leave `fmt.Printf` debug statements in production code
-- **Use structured logging**: Use proper logging library instead of fmt.Printf
+- **Remove debug statements**: Never leave `fmt.Printf` or `log.Printf` debug statements in production code
+- **Use structured logging**: Always use `internal/pkg/logger` for all logging (see Logging Best Practices)
+  ```go
+  // ❌ WRONG - debug statements in production
+  fmt.Printf("Debug: user_id = %s\n", userID)
+  log.Printf("Processing request: %v", req)
+
+  // ✅ CORRECT - structured logging with logger package
+  logger.Debug("processing request", "user_id", userID, "request", req)
+  logger.Info("request completed", "duration_ms", duration.Milliseconds())
+  ```
 - **Clean code**: Remove commented-out code, TODOs, and temporary hacks before committing

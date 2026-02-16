@@ -17,6 +17,7 @@ import (
 	reservationmodels "wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -988,7 +989,7 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.OwnerID)
 		if err != nil {
 			// Log the error but continue with the notifications
-			fmt.Printf("Warning: failed to get wish list details for notification: %v\n", err)
+			logger.Warn("failed to get wish list details for notification", "error", err, "owner_id", giftItemForCache.OwnerID)
 		} else {
 			// Send notification emails to all reservation holders
 			for _, reservation := range activeReservations {
@@ -1005,7 +1006,7 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 					err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItemForCache.Name, wishList.Title)
 					if err != nil {
 						// Log the error but don't fail the deletion
-						fmt.Printf("Warning: failed to send reservation removal notification: %v\n", err)
+						logger.Warn("failed to send reservation removal notification", "error", err, "recipient_email", recipientEmail, "item_name", giftItemForCache.Name)
 					}
 				}
 			}
@@ -1069,7 +1070,7 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 					err := s.emailService.SendGiftPurchasedConfirmationEmail(ctx, recipientEmail, updatedGiftItem.Name, wishList.Title, guestName)
 					if err != nil {
 						// Log the error but don't fail the purchase marking
-						fmt.Printf("Warning: failed to send gift purchased notification: %v\n", err)
+						logger.Warn("failed to send gift purchased notification", "error", err, "recipient_email", recipientEmail, "item_name", updatedGiftItem.Name)
 					}
 				}
 			}

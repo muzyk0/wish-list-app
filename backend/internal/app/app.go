@@ -38,6 +38,7 @@ import (
 	"wish-list/internal/pkg/aws"
 	"wish-list/internal/pkg/cache"
 	"wish-list/internal/pkg/encryption"
+	"wish-list/internal/pkg/logger"
 	"wish-list/internal/pkg/validation"
 
 	_ "wish-list/internal/app/swagger/docs" // Import generated Swagger docs
@@ -77,6 +78,10 @@ type App struct {
 // New creates a new App instance, initializing all infrastructure, domain
 // repositories, services, and handlers.
 func New(cfg *config.Config) (*App, error) {
+	// Initialize structured logger first
+	logger.Initialize(cfg.ServerEnv)
+	logger.Info("initializing application", "env", cfg.ServerEnv)
+
 	a := &App{cfg: cfg}
 
 	if err := a.initInfrastructure(); err != nil {

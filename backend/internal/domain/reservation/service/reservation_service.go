@@ -11,6 +11,7 @@ import (
 	itemmodels "wish-list/internal/domain/item/models"
 	"wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/reservation/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -393,7 +394,7 @@ func (s *ReservationService) GetReservationStatus(ctx context.Context, publicSlu
 		_, err := s.repo.UpdateStatus(ctx, activeReservation.ID, "expired", expiredAt, pgtype.Text{String: "Reservation expired", Valid: true})
 		if err != nil {
 			// Log the error but continue with the old status
-			fmt.Printf("Error updating expired reservation: %v\n", err)
+			logger.Error("failed to update expired reservation", "error", err, "reservation_id", activeReservation.ID)
 		}
 
 		return &ReservationStatusOutput{

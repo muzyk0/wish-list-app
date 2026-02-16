@@ -2,7 +2,6 @@ package http
 
 import (
 	"io"
-	"log"
 	"mime/multipart"
 	nethttp "net/http"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	"wish-list/internal/domain/storage/delivery/http/dto"
 	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/aws"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/labstack/echo/v4"
 )
@@ -88,7 +88,7 @@ func (h *Handler) processGifFile(src multipart.File, filename string) error {
 
 	isAnimated, err := aws.IsAnimatedGif(src)
 	if err != nil {
-		log.Printf("Warning: Could not check if GIF is animated: %v", err)
+		logger.Warn("could not check if GIF is animated", "error", err, "filename", filename)
 		// Reset file pointer to beginning since we read it during animation check
 		if seeker, ok := src.(io.Seeker); ok {
 			_, seekErr := seeker.Seek(0, 0)
@@ -102,7 +102,7 @@ func (h *Handler) processGifFile(src multipart.File, filename string) error {
 
 	if isAnimated {
 		// Log that we have an animated GIF - this is allowed per FR-011
-		log.Printf("Animated GIF uploaded: %s", filename)
+		logger.Info("animated GIF uploaded", "filename", filename)
 	}
 
 	return nil

@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,6 +14,7 @@ import (
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
 	reservationmodels "wish-list/internal/domain/reservation/models"
+	"wish-list/internal/pkg/logger"
 )
 
 // GiftItemReservationRepositoryInterface defines operations for gift item reservations
@@ -107,7 +107,7 @@ func (r *GiftItemReservationRepository) ReserveIfNotReserved(ctx context.Context
 	}
 	defer func() {
 		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
-			log.Printf("tx rollback error: %v", rbErr)
+			logger.Warn("transaction rollback error", "error", rbErr)
 		}
 	}()
 
@@ -170,7 +170,7 @@ func (r *GiftItemReservationRepository) DeleteWithReservationNotification(ctx co
 	}
 	defer func() {
 		if rbErr := tx.Rollback(); rbErr != nil && !errors.Is(rbErr, sql.ErrTxDone) {
-			log.Printf("tx rollback error: %v", rbErr)
+			logger.Warn("transaction rollback error", "error", rbErr)
 		}
 	}()
 
