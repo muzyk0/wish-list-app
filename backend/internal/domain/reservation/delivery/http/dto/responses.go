@@ -86,8 +86,10 @@ type ReservationDetailsResponse struct {
 
 func FromReservationDetail(res repository.ReservationDetail) ReservationDetailsResponse {
 	itemSummary := GiftItemSummary{
-		ID:   res.GiftItemID.String(),
-		Name: res.GiftItemName.String,
+		ID: res.GiftItemID.String(),
+	}
+	if res.GiftItemName.Valid {
+		itemSummary.Name = res.GiftItemName.String
 	}
 	if res.GiftItemImageURL.Valid {
 		itemSummary.ImageURL = &res.GiftItemImageURL.String
@@ -101,8 +103,10 @@ func FromReservationDetail(res repository.ReservationDetail) ReservationDetailsR
 	}
 
 	listSummary := WishListSummary{
-		ID:    res.WishlistID.String(),
-		Title: res.WishlistTitle.String,
+		ID: res.WishlistID.String(),
+	}
+	if res.WishlistTitle.Valid {
+		listSummary.Title = res.WishlistTitle.String
 	}
 	if res.OwnerFirstName.Valid {
 		listSummary.OwnerFirstName = &res.OwnerFirstName.String
