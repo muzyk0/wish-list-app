@@ -2,7 +2,6 @@ package http
 
 import (
 	"crypto/sha256"
-	"errors"
 	"fmt"
 	nethttp "net/http"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"wish-list/internal/domain/user/delivery/http/dto"
 	userservice "wish-list/internal/domain/user/service"
 	"wish-list/internal/pkg/analytics"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
@@ -54,36 +54,21 @@ func (h *Handler) Register(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	user, err := h.service.Register(ctx, req.ToDomain())
-
 	if err != nil {
-		// Detect duplicate user error specifically
-		if errors.Is(err, userservice.ErrUserAlreadyExists) {
-			return c.JSON(nethttp.StatusConflict, map[string]string{
-				"error": "User with this email already exists",
-			})
-		}
-		// Log detailed error server-side, return generic message to client
-		c.Logger().Errorf("Registration failed: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to create user account",
-		})
+		return mapUserServiceError(err)
 	}
 
 	// Generate access token (15 minutes)
 	accessToken, err := h.tokenManager.GenerateAccessToken(user.ID, user.Email, "user")
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Could not generate access token",
-		})
+		return apperrors.Internal("Could not generate access token").Wrap(err)
 	}
 
 	// Generate refresh token (7 days)
 	tokenID := fmt.Sprintf("%s-%d", user.ID, time.Now().Unix())
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(user.ID, user.Email, "user", tokenID)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Could not generate refresh token",
-		})
+		return apperrors.Internal("Could not generate refresh token").Wrap(err)
 	}
 
 	// Set refresh token as httpOnly cookie
@@ -122,32 +107,25 @@ func (h *Handler) Login(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	user, err := h.service.Login(ctx, req.ToDomain())
-
 	if err != nil {
 		// Log the error server-side for debugging with redacted email (avoid PII in logs)
 		emailHash := fmt.Sprintf("%x", sha256.Sum256([]byte(req.Email)))[:16]
 		c.Logger().Errorf("Login failed for email_hash %s: %v", emailHash, err)
 		// Return generic message to avoid leaking information about user existence
-		return c.JSON(nethttp.StatusUnauthorized, map[string]string{
-			"error": "Invalid credentials",
-		})
+		return apperrors.Unauthorized("Invalid credentials")
 	}
 
 	// Generate access token (15 minutes)
 	accessToken, err := h.tokenManager.GenerateAccessToken(user.ID, user.Email, "user")
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Could not generate access token",
-		})
+		return apperrors.Internal("Could not generate access token").Wrap(err)
 	}
 
 	// Generate refresh token (7 days)
 	tokenID := fmt.Sprintf("%s-%d", user.ID, time.Now().Unix())
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(user.ID, user.Email, "user", tokenID)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Could not generate refresh token",
-		})
+		return apperrors.Internal("Could not generate refresh token").Wrap(err)
 	}
 
 	// Set refresh token as httpOnly cookie
@@ -184,17 +162,7 @@ func (h *Handler) GetProfile(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, err := h.service.GetUser(ctx, userID)
 	if err != nil {
-		// Check for user not found error specifically
-		if errors.Is(err, userservice.ErrUserNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "User not found",
-			})
-		}
-		// Other errors are internal server errors
-		c.Logger().Errorf("Failed to get user profile: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Internal server error",
-		})
+		return mapUserServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.UserResponseFromDomain(user))
@@ -225,13 +193,8 @@ func (h *Handler) UpdateProfile(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	user, err := h.service.UpdateProfile(ctx, userID, req.ToDomain())
-
 	if err != nil {
-		// Log detailed error server-side, return generic message to client
-		c.Logger().Errorf("Failed to update user profile: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Internal server error",
-		})
+		return mapUserServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.UserResponseFromDomain(user))
@@ -255,11 +218,7 @@ func (h *Handler) DeleteAccount(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := h.accountCleanupService.DeleteUserAccount(ctx, userID, "user_requested_deletion")
 	if err != nil {
-		// Log detailed error server-side, return generic message to client
-		c.Logger().Errorf("Failed to delete user account: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to delete account",
-		})
+		return apperrors.Internal("Failed to delete account").Wrap(err)
 	}
 
 	return c.NoContent(nethttp.StatusNoContent)
@@ -283,11 +242,7 @@ func (h *Handler) ExportUserData(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, err := h.accountCleanupService.ExportUserData(ctx, userID)
 	if err != nil {
-		// Log detailed error server-side, return generic message to client
-		c.Logger().Errorf("Failed to export user data: %v", err)
-		return c.JSON(nethttp.StatusInternalServerError, dto.ErrorResponse{
-			Error: "Unable to export user data",
-		})
+		return apperrors.Internal("Unable to export user data").Wrap(err)
 	}
 
 	// Convert map to typed response

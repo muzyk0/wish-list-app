@@ -2,17 +2,17 @@ package http
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"strings"
 
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	userservice "wish-list/internal/domain/user/service"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 // UserServiceInterface defines what the auth handler needs from the user domain.
@@ -74,36 +74,26 @@ func (h *Handler) Refresh(c echo.Context) error {
 	}
 
 	if refreshToken == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "No refresh token provided",
-		})
+		return apperrors.Unauthorized("No refresh token provided")
 	}
 
 	// Validate refresh token
 	claims, err := h.tokenManager.ValidateToken(refreshToken)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Invalid or expired refresh token",
-		})
+		return apperrors.Unauthorized("Invalid or expired refresh token")
 	}
 
 	// Generate new access token
 	newAccessToken, err := h.tokenManager.GenerateAccessToken(claims.UserID, claims.Email, claims.UserType)
 	if err != nil {
-		c.Logger().Errorf("Failed to generate access token: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate access token",
-		})
+		return apperrors.Internal("Failed to generate access token").Wrap(err)
 	}
 
 	// Generate new refresh token (rotation)
 	newTokenID := uuid.New().String()
 	newRefreshToken, err := h.tokenManager.GenerateRefreshToken(claims.UserID, claims.Email, claims.UserType, newTokenID)
 	if err != nil {
-		c.Logger().Errorf("Failed to generate refresh token: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate refresh token",
-		})
+		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
 	// Set new refresh token cookie for web clients
@@ -135,19 +125,13 @@ func (h *Handler) MobileHandoff(c echo.Context) error {
 	// Parse user ID as UUID
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
-		c.Logger().Errorf("Invalid user ID format: %v", err)
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid user ID format",
-		})
+		return apperrors.BadRequest("Invalid user ID format")
 	}
 
 	// Generate handoff code
 	code, err := h.codeStore.GenerateCode(userUUID)
 	if err != nil {
-		c.Logger().Errorf("Failed to generate handoff code: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate handoff code",
-		})
+		return apperrors.Internal("Failed to generate handoff code").Wrap(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.HandoffResponse{
@@ -173,57 +157,37 @@ func (h *Handler) MobileHandoff(c echo.Context) error {
 func (h *Handler) Exchange(c echo.Context) error {
 	var req dto.ExchangeRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
+		return apperrors.BadRequest("Invalid request body")
 	}
 
 	if req.Code == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Code is required",
-		})
+		return apperrors.BadRequest("Code is required")
 	}
 
 	// Exchange code for user ID
 	userID, valid := h.codeStore.ExchangeCode(req.Code)
 	if !valid {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "Invalid or expired code",
-		})
+		return apperrors.Unauthorized("Invalid or expired code")
 	}
 
 	// Get user information
 	ctx := c.Request().Context()
 	user, err := h.userService.GetUser(ctx, userID.String())
 	if err != nil {
-		if errors.Is(err, userservice.ErrUserNotFound) {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "User not found",
-			})
-		}
-		c.Logger().Errorf("Failed to get user: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Internal server error",
-		})
+		return mapAuthServiceError(err)
 	}
 
 	// Generate access token
 	accessToken, err := h.tokenManager.GenerateAccessToken(user.ID, user.Email, "user")
 	if err != nil {
-		c.Logger().Errorf("Failed to generate access token: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate access token",
-		})
+		return apperrors.Internal("Failed to generate access token").Wrap(err)
 	}
 
 	// Generate refresh token
 	tokenID := uuid.New().String()
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(user.ID, user.Email, "user", tokenID)
 	if err != nil {
-		c.Logger().Errorf("Failed to generate refresh token: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate refresh token",
-		})
+		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
 	// Create user response
@@ -287,22 +251,7 @@ func (h *Handler) ChangeEmail(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := h.userService.ChangeEmail(ctx, userID, req.CurrentPassword, req.NewEmail)
 	if err != nil {
-		// Check for specific errors
-		if errors.Is(err, userservice.ErrInvalidPassword) {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "Current password is incorrect",
-			})
-		}
-		if errors.Is(err, userservice.ErrUserAlreadyExists) {
-			return c.JSON(http.StatusConflict, map[string]string{
-				"error": "Email already in use",
-			})
-		}
-		// Log error and return generic message
-		c.Logger().Errorf("Failed to change email for user %s: %v", userID, err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to change email",
-		})
+		return mapAuthServiceError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.MessageResponse{
@@ -335,17 +284,7 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := h.userService.ChangePassword(ctx, userID, req.CurrentPassword, req.NewPassword)
 	if err != nil {
-		// Check for specific errors
-		if errors.Is(err, userservice.ErrInvalidPassword) {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "Current password is incorrect",
-			})
-		}
-		// Log error and return generic message
-		c.Logger().Errorf("Failed to change password for user %s: %v", userID, err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to change password",
-		})
+		return mapAuthServiceError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.MessageResponse{

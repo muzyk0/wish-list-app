@@ -9,9 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"wish-list/internal/app/middleware"
 	"wish-list/internal/domain/user/delivery/http/dto"
 	userservice "wish-list/internal/domain/user/service"
 	"wish-list/internal/pkg/analytics"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 	"wish-list/internal/pkg/validation"
@@ -26,6 +28,7 @@ import (
 func setupTestEcho() *echo.Echo {
 	e := echo.New()
 	e.Validator = validation.NewValidator()
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	return e
 }
 
@@ -242,9 +245,9 @@ func TestUserHandler_Register_BadRequest(t *testing.T) {
 
 	// Assertions
 	require.Error(t, err, "Expected validation error")
-	var httpErr *echo.HTTPError
-	require.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-	assert.Equal(t, nethttp.StatusBadRequest, httpErr.Code)
+	var appErr *apperrors.AppError
+	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 	// Service should NOT be called because validation fails first
 	mockService.AssertNotCalled(t, "Register")
@@ -270,9 +273,9 @@ func TestUserHandler_Login_BadRequest(t *testing.T) {
 
 	// Assertions
 	require.Error(t, err, "Expected validation error")
-	var httpErr *echo.HTTPError
-	require.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-	assert.Equal(t, nethttp.StatusBadRequest, httpErr.Code)
+	var appErr *apperrors.AppError
+	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 	// Service should NOT be called because validation fails first
 	mockService.AssertNotCalled(t, "Login")
@@ -314,8 +317,11 @@ func TestUserHandler_Register_Conflict(t *testing.T) {
 	err := handler.Register(c)
 
 	// Assertions
-	require.NoError(t, err)
-	assert.Equal(t, nethttp.StatusConflict, rec.Code)
+	require.Error(t, err)
+	var appErr *apperrors.AppError
+	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	assert.Equal(t, nethttp.StatusConflict, appErr.Code)
+	assert.Contains(t, appErr.Message, "User with this email already exists")
 
 	mockService.AssertExpectations(t)
 }
@@ -351,8 +357,11 @@ func TestUserHandler_Login_Unauthorized(t *testing.T) {
 	err := handler.Login(c)
 
 	// Assertions
-	require.NoError(t, err)
-	assert.Equal(t, nethttp.StatusUnauthorized, rec.Code)
+	require.Error(t, err)
+	var appErr *apperrors.AppError
+	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	assert.Equal(t, nethttp.StatusUnauthorized, appErr.Code)
+	assert.Contains(t, appErr.Message, "Invalid credentials")
 
 	mockService.AssertExpectations(t)
 }
@@ -404,12 +413,16 @@ func TestUserHandler_GetProfile(t *testing.T) {
 			Return((*userservice.UserOutput)(nil), userservice.ErrUserNotFound)
 
 		// No auth context - handler delegates auth to middleware
-		c, rec := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, nil)
+		c, _ := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, nil)
 
 		err := handler.GetProfile(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusNotFound, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
+		assert.Contains(t, appErr.Message, "User not found")
 	})
 
 	t.Run("user not found returns not found", func(t *testing.T) {
@@ -422,12 +435,16 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		authCtx := helpers.DefaultAuthContext()
 		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*userservice.UserOutput)(nil), userservice.ErrUserNotFound)
 
-		c, rec := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, &authCtx)
+		c, _ := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, &authCtx)
 
 		err := handler.GetProfile(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusNotFound, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
+		assert.Contains(t, appErr.Message, "User not found")
 
 		mockService.AssertExpectations(t)
 	})
@@ -442,12 +459,16 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		authCtx := helpers.DefaultAuthContext()
 		mockService.On("GetUser", mock.Anything, authCtx.UserID).Return((*userservice.UserOutput)(nil), assert.AnError)
 
-		c, rec := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, &authCtx)
+		c, _ := helpers.CreateTestContext(e, nethttp.MethodGet, "/api/users/me", nil, &authCtx)
 
 		err := handler.GetProfile(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
+		assert.Contains(t, appErr.Message, "Failed to process request")
 
 		mockService.AssertExpectations(t)
 	})
@@ -515,12 +536,15 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 			Return((*userservice.UserOutput)(nil), assert.AnError)
 
 		// No auth context - handler delegates auth to middleware
-		c, rec := helpers.CreateTestContext(e, nethttp.MethodPut, "/api/users/me", reqBody, nil)
+		c, _ := helpers.CreateTestContext(e, nethttp.MethodPut, "/api/users/me", reqBody, nil)
 
 		err := handler.UpdateProfile(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 	})
 
 	t.Run("update profile with invalid body", func(t *testing.T) {
@@ -542,9 +566,9 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		err := handler.UpdateProfile(c)
 
 		require.Error(t, err, "Expected binding error")
-		var httpErr *echo.HTTPError
-		require.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-		assert.Equal(t, nethttp.StatusBadRequest, httpErr.Code)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 		mockService.AssertNotCalled(t, "UpdateProfile")
 	})
@@ -567,12 +591,15 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		mockService.On("UpdateProfile", mock.Anything, authCtx.UserID, mock.AnythingOfType("service.UpdateProfileInput")).
 			Return((*userservice.UserOutput)(nil), assert.AnError)
 
-		c, rec := helpers.CreateTestContext(e, nethttp.MethodPut, "/api/users/me", reqBody, &authCtx)
+		c, _ := helpers.CreateTestContext(e, nethttp.MethodPut, "/api/users/me", reqBody, &authCtx)
 
 		err := handler.UpdateProfile(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 
 		mockService.AssertExpectations(t)
 	})

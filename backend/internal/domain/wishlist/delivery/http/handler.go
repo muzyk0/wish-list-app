@@ -1,12 +1,11 @@
 package http
 
 import (
-	"errors"
-	"fmt"
 	nethttp "net/http"
 
 	"wish-list/internal/domain/wishlist/delivery/http/dto"
 	"wish-list/internal/domain/wishlist/service"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
@@ -50,9 +49,7 @@ func (h *Handler) CreateWishList(c echo.Context) error {
 	ctx := c.Request().Context()
 	wishList, err := h.service.CreateWishList(ctx, userID, req.ToServiceInput())
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to create wish list: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusCreated, dto.FromWishListOutput(wishList))
@@ -76,9 +73,7 @@ func (h *Handler) GetWishList(c echo.Context) error {
 	ctx := c.Request().Context()
 	wishList, err := h.service.GetWishList(ctx, wishListID)
 	if err != nil {
-		return c.JSON(nethttp.StatusNotFound, map[string]string{
-			"error": fmt.Errorf("wish list not found: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	// Get user from context to check ownership (optional for public wishlists)
@@ -87,9 +82,7 @@ func (h *Handler) GetWishList(c echo.Context) error {
 	// If not the owner and not public, return forbidden
 	isOwner := currentUserID == wishList.OwnerID
 	if !isOwner && !wishList.IsPublic {
-		return c.JSON(nethttp.StatusForbidden, map[string]string{
-			"error": "Access denied",
-		})
+		return apperrors.Forbidden("Access denied")
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromWishListOutput(wishList))
@@ -112,9 +105,7 @@ func (h *Handler) GetWishListsByOwner(c echo.Context) error {
 	ctx := c.Request().Context()
 	wishLists, err := h.service.GetWishListsByOwner(ctx, userID)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to get wish lists: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromWishListOutputs(wishLists))
@@ -150,21 +141,7 @@ func (h *Handler) UpdateWishList(c echo.Context) error {
 	ctx := c.Request().Context()
 	wishList, err := h.service.UpdateWishList(ctx, wishListID, userID, req.ToServiceInput())
 	if err != nil {
-		// Check if it's a "not found" error
-		if errors.Is(err, service.ErrWishListNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "wish list not found",
-			})
-		}
-		// Check if it's a forbidden error
-		if errors.Is(err, service.ErrWishListForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "forbidden",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to update wish list: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromWishListOutput(wishList))
@@ -191,15 +168,7 @@ func (h *Handler) DeleteWishList(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := h.service.DeleteWishList(ctx, wishListID, userID)
 	if err != nil {
-		// Check if it's a forbidden error
-		if errors.Is(err, service.ErrWishListForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "forbidden",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to delete wish list: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	return c.NoContent(nethttp.StatusNoContent)
@@ -221,9 +190,7 @@ func (h *Handler) GetWishListByPublicSlug(c echo.Context) error {
 	ctx := c.Request().Context()
 	wishList, err := h.service.GetWishListByPublicSlug(ctx, publicSlug)
 	if err != nil {
-		return c.JSON(nethttp.StatusNotFound, map[string]string{
-			"error": fmt.Errorf("wish list not found: %w", err).Error(),
-		})
+		return mapWishlistServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromWishListOutput(wishList))
@@ -251,18 +218,14 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 	// Verify the wishlist exists and is public
 	_, err := h.service.GetWishListByPublicSlug(ctx, publicSlug)
 	if err != nil {
-		return c.JSON(nethttp.StatusNotFound, map[string]string{
-			"error": "Wish list not found or not public",
-		})
+		return apperrors.NotFound("Wish list not found or not public")
 	}
 
 	// Use database-level pagination for better performance
 	offset := (pagination.Page - 1) * pagination.Limit
 	giftItems, totalCount, err := h.service.GetGiftItemsByPublicSlugPaginated(ctx, publicSlug, pagination.Limit, offset)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to get gift items: %w", err).Error(),
-		})
+		return apperrors.Internal("Failed to get gift items").Wrap(err)
 	}
 
 	if giftItems == nil {

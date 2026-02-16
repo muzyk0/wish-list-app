@@ -16,6 +16,7 @@ import (
 	"wish-list/internal/domain/auth/delivery/http/dto"
 	usermodels "wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
@@ -134,16 +135,12 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 	// Get user info from Google
 	userInfo, err := h.getGoogleUserInfo(ctx, token.AccessToken)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get user information",
-		})
+		return apperrors.Internal("Failed to get user information").Wrap(err)
 	}
 
 	// Verify email
 	if !userInfo.VerifiedEmail {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Email not verified with Google",
-		})
+		return apperrors.BadRequest("Email not verified with Google")
 	}
 
 	// Create or find user in database
@@ -154,9 +151,7 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 		userInfo.Picture,
 	)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to process user",
-		})
+		return apperrors.Internal("Failed to process user").Wrap(err)
 	}
 
 	// Generate our own tokens
@@ -167,17 +162,13 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 	}
 	accessToken, err := h.tokenManager.GenerateAccessToken(userIDStr, userEmail, "user")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate access token",
-		})
+		return apperrors.Internal("Failed to generate access token").Wrap(err)
 	}
 
 	tokenID := uuid.New().String()
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(userIDStr, userEmail, "user", tokenID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate refresh token",
-		})
+		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.AuthResponse{
@@ -221,9 +212,7 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 	// Get user info from Facebook
 	userInfo, err := h.getFacebookUserInfo(ctx, token.AccessToken)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get user information",
-		})
+		return apperrors.Internal("Failed to get user information").Wrap(err)
 	}
 
 	// Parse name (Facebook returns full name)
@@ -237,9 +226,7 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 		userInfo.Picture.Data.URL,
 	)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to process user",
-		})
+		return apperrors.Internal("Failed to process user").Wrap(err)
 	}
 
 	// Generate our own tokens
@@ -250,17 +237,13 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 	}
 	accessToken, err := h.tokenManager.GenerateAccessToken(userIDStr, userEmail, "user")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate access token",
-		})
+		return apperrors.Internal("Failed to generate access token").Wrap(err)
 	}
 
 	tokenID := uuid.New().String()
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(userIDStr, userEmail, "user", tokenID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to generate refresh token",
-		})
+		return apperrors.Internal("Failed to generate refresh token").Wrap(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.AuthResponse{
@@ -431,17 +414,13 @@ func (h *OAuthHandler) handleOAuthExchangeError(c echo.Context, provider string,
 	for _, keyword := range clientErrorKeywords {
 		if strings.Contains(errMsg, keyword) {
 			// Client error - bad request (user needs to re-authenticate)
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid or expired authorization code. Please try logging in again.",
-			})
+			return apperrors.BadRequest("Invalid or expired authorization code. Please try logging in again.")
 		}
 	}
 
 	// Provider/network error - bad gateway (retryable)
 	// Examples: timeout, connection refused, DNS failure, provider downtime
-	return c.JSON(http.StatusBadGateway, map[string]string{
-		"error": "Failed to communicate with authentication provider. Please try again in a moment.",
-	})
+	return apperrors.BadGateway("Failed to communicate with authentication provider. Please try again in a moment.")
 }
 
 // parseName splits full name into first and last name

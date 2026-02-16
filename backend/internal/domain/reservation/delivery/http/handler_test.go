@@ -10,9 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"wish-list/internal/app/middleware"
 	"wish-list/internal/domain/reservation/delivery/http/dto"
 	"wish-list/internal/domain/reservation/repository"
 	"wish-list/internal/domain/reservation/service"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/validation"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -26,6 +28,7 @@ import (
 func setupTestEcho() *echo.Echo {
 	e := echo.New()
 	e.Validator = validation.NewValidator()
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	return e
 }
 
@@ -236,13 +239,12 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 
 		err := handler.CancelReservation(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusBadRequest, rec.Code)
-
-		var response map[string]string
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Contains(t, response["error"], "token is required")
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
+		assert.Contains(t, appErr.Message, "Reservation token is required")
 	})
 
 	t.Run("cancel non-existent reservation", func(t *testing.T) {
@@ -268,8 +270,12 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 
 		err := handler.CancelReservation(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
+		assert.Contains(t, appErr.Message, "Failed to process request")
 
 		mockService.AssertExpectations(t)
 	})
@@ -368,13 +374,12 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 
 		err := handler.CreateReservation(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusBadRequest, rec.Code)
-
-		var response map[string]string
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Contains(t, response["error"], "Guest name and email are required")
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
+		assert.Contains(t, appErr.Message, "Guest name and email are required")
 	})
 
 	t.Run("invalid reservation token format", func(t *testing.T) {
@@ -400,9 +405,9 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		err := handler.CancelReservation(c)
 		require.Error(t, err, "Expected error for invalid UUID")
 
-		var httpErr *echo.HTTPError
-		require.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-		assert.Equal(t, nethttp.StatusBadRequest, httpErr.Code)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 	})
 
 	t.Run("reservation token uniqueness", func(t *testing.T) {

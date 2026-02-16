@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
 
+	"wish-list/internal/app/middleware"
 	"wish-list/internal/domain/wishlist/delivery/http/dto"
 	"wish-list/internal/domain/wishlist/service"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/validation"
 
 	"github.com/labstack/echo/v4"
@@ -22,6 +25,7 @@ import (
 func setupTestEcho() *echo.Echo {
 	e := echo.New()
 	e.Validator = validation.NewValidator()
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	return e
 }
 
@@ -226,7 +230,7 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 		handler := NewHandler(mockService)
 
 		mockService.On("GetWishListByPublicSlug", mock.Anything, "non-existent-slug").
-			Return((*service.WishListOutput)(nil), assert.AnError)
+			Return((*service.WishListOutput)(nil), service.ErrWishListNotFound)
 
 		req := httptest.NewRequest(nethttp.MethodGet, "/public/wishlists/non-existent-slug", nethttp.NoBody)
 		rec := httptest.NewRecorder()
@@ -236,13 +240,12 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 
 		err := handler.GetWishListByPublicSlug(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusNotFound, rec.Code)
-
-		var response map[string]string
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Contains(t, response["error"], "wish list not found")
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
+		assert.Contains(t, appErr.Message, "Wish list not found")
 
 		mockService.AssertExpectations(t)
 	})
@@ -253,7 +256,7 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 		handler := NewHandler(mockService)
 
 		mockService.On("GetWishListByPublicSlug", mock.Anything, "deleted-list").
-			Return((*service.WishListOutput)(nil), assert.AnError)
+			Return((*service.WishListOutput)(nil), service.ErrWishListNotFound)
 
 		req := httptest.NewRequest(nethttp.MethodGet, "/public/wishlists/deleted-list", nethttp.NoBody)
 		rec := httptest.NewRecorder()
@@ -263,8 +266,12 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 
 		err := handler.GetWishListByPublicSlug(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusNotFound, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
+		assert.Contains(t, appErr.Message, "Wish list not found")
 
 		mockService.AssertExpectations(t)
 	})
@@ -359,13 +366,17 @@ func TestHandler_UpdateWishList(t *testing.T) {
 			Return((*service.WishListOutput)(nil), service.ErrWishListForbidden)
 
 		// No auth context - handler delegates auth to middleware
-		c, rec := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/"+wishListID, reqBody,
+		c, _ := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/"+wishListID, reqBody,
 			[]string{"id"}, []string{wishListID}, nil)
 
 		err := handler.UpdateWishList(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusForbidden, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusForbidden, appErr.Code)
+		assert.Contains(t, appErr.Message, "Access denied")
 	})
 
 	t.Run("update with service error", func(t *testing.T) {
@@ -384,13 +395,17 @@ func TestHandler_UpdateWishList(t *testing.T) {
 		mockService.On("UpdateWishList", mock.Anything, wishListID, authCtx.UserID, mock.AnythingOfType("service.UpdateWishListInput")).
 			Return((*service.WishListOutput)(nil), assert.AnError)
 
-		c, rec := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/"+wishListID, reqBody,
+		c, _ := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/"+wishListID, reqBody,
 			[]string{"id"}, []string{wishListID}, &authCtx)
 
 		err := handler.UpdateWishList(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
+		assert.Contains(t, appErr.Message, "Failed to process request")
 
 		mockService.AssertExpectations(t)
 	})
@@ -432,13 +447,17 @@ func TestHandler_DeleteWishList(t *testing.T) {
 			Return(service.ErrWishListForbidden)
 
 		// No auth context - handler delegates auth to middleware
-		c, rec := CreateTestContextWithParams(e, nethttp.MethodDelete, "/wishlists/"+wishListID, nil,
+		c, _ := CreateTestContextWithParams(e, nethttp.MethodDelete, "/wishlists/"+wishListID, nil,
 			[]string{"id"}, []string{wishListID}, nil)
 
 		err := handler.DeleteWishList(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusForbidden, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusForbidden, appErr.Code)
+		assert.Contains(t, appErr.Message, "Access denied")
 	})
 
 	t.Run("delete with service error", func(t *testing.T) {
@@ -452,13 +471,17 @@ func TestHandler_DeleteWishList(t *testing.T) {
 		mockService.On("DeleteWishList", mock.Anything, wishListID, authCtx.UserID).
 			Return(assert.AnError)
 
-		c, rec := CreateTestContextWithParams(e, nethttp.MethodDelete, "/wishlists/"+wishListID, nil,
+		c, _ := CreateTestContextWithParams(e, nethttp.MethodDelete, "/wishlists/"+wishListID, nil,
 			[]string{"id"}, []string{wishListID}, &authCtx)
 
 		err := handler.DeleteWishList(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusInternalServerError, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
+		assert.Contains(t, appErr.Message, "Failed to process request")
 
 		mockService.AssertExpectations(t)
 	})
@@ -481,13 +504,17 @@ func TestHandler_UpdateWishList_AuthorizationChecks(t *testing.T) {
 		mockService.On("UpdateWishList", mock.Anything, "non-existent-id", mock.Anything, mock.AnythingOfType("service.UpdateWishListInput")).
 			Return((*service.WishListOutput)(nil), service.ErrWishListNotFound)
 
-		c, rec := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/non-existent-id", reqBody,
+		c, _ := CreateTestContextWithParams(e, nethttp.MethodPut, "/wishlists/non-existent-id", reqBody,
 			[]string{"id"}, []string{"non-existent-id"}, &authCtx)
 
 		err := handler.UpdateWishList(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusNotFound, rec.Code)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
+		assert.Contains(t, appErr.Message, "Wish list not found")
 
 		mockService.AssertExpectations(t)
 	})

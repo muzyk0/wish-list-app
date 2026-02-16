@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"wish-list/internal/app/database"
+	"wish-list/internal/pkg/apperrors"
 
 	"github.com/labstack/echo/v4"
 )
@@ -46,10 +47,8 @@ func (h *Handler) Health(c echo.Context) error {
 
 	// Check database connection
 	if err := h.db.PingContext(ctx); err != nil {
-		return c.JSON(nethttp.StatusServiceUnavailable, HealthResponse{
-			Status: "unhealthy",
-			Error:  "database connection failed",
-		})
+		// Health check failures should return service unavailable with details
+		return apperrors.New(nethttp.StatusServiceUnavailable, "database connection failed").Wrap(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, HealthResponse{

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	nethttp "net/http"
 
 	"wish-list/internal/domain/wishlist_item/delivery/http/dto"
@@ -52,19 +51,7 @@ func (h *Handler) GetWishlistItems(c echo.Context) error {
 	// Get items
 	result, err := h.service.GetWishlistItems(ctx, wishlistID, userID, pagination.Page, pagination.Limit)
 	if err != nil {
-		if errors.Is(err, service.ErrWishListNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Wishlist not found",
-			})
-		}
-		if errors.Is(err, service.ErrWishListForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to get wishlist items",
-		})
+		return mapWishlistItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.PaginatedItemsResponseFromService(result))
@@ -103,24 +90,7 @@ func (h *Handler) AttachItemToWishlist(c echo.Context) error {
 	// Attach item
 	err := h.service.AttachItem(ctx, wishlistID, req.ItemID, userID)
 	if err != nil {
-		if errors.Is(err, service.ErrWishListNotFound) || errors.Is(err, service.ErrItemNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Wishlist or item not found",
-			})
-		}
-		if errors.Is(err, service.ErrWishListForbidden) || errors.Is(err, service.ErrItemForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		if errors.Is(err, service.ErrItemAlreadyAttached) {
-			return c.JSON(nethttp.StatusConflict, map[string]string{
-				"error": "Item already attached to this wishlist",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to attach item",
-		})
+		return mapWishlistItemServiceError(err)
 	}
 
 	return c.NoContent(nethttp.StatusNoContent)
@@ -158,19 +128,7 @@ func (h *Handler) CreateItemInWishlist(c echo.Context) error {
 	// Create and attach item
 	item, err := h.service.CreateItemInWishlist(ctx, wishlistID, userID, req.ToDomain())
 	if err != nil {
-		if errors.Is(err, service.ErrWishListNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Wishlist not found",
-			})
-		}
-		if errors.Is(err, service.ErrWishListForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to create item",
-		})
+		return mapWishlistItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusCreated, dto.ItemResponseFromService(item))
@@ -202,24 +160,7 @@ func (h *Handler) DetachItemFromWishlist(c echo.Context) error {
 	// Detach item
 	err := h.service.DetachItem(ctx, wishlistID, itemID, userID)
 	if err != nil {
-		if errors.Is(err, service.ErrWishListNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Wishlist not found",
-			})
-		}
-		if errors.Is(err, service.ErrWishListForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		if errors.Is(err, service.ErrItemNotInWishlist) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Item not found in this wishlist",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to detach item",
-		})
+		return mapWishlistItemServiceError(err)
 	}
 
 	return c.NoContent(nethttp.StatusNoContent)

@@ -156,9 +156,8 @@ func AuthRateLimitMiddleware(limiter *AuthRateLimiter, identifierFunc func(echo.
 			identifier := identifierFunc(c)
 
 			if !limiter.Allow(identifier) {
-				return c.JSON(http.StatusTooManyRequests, map[string]any{
-					"error":   "rate limit exceeded",
-					"message": "Too many requests. Please try again later.",
+				return c.JSON(http.StatusTooManyRequests, map[string]string{
+					"error": "Too many requests. Please try again later.",
 				})
 			}
 

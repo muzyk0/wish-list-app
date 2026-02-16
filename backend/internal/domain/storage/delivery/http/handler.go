@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"wish-list/internal/domain/storage/delivery/http/dto"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/aws"
 
 	"github.com/labstack/echo/v4"
@@ -43,23 +44,23 @@ func (h *Handler) UploadImage(c echo.Context) error {
 	// Get the file from the form data
 	file, err := c.FormFile("image")
 	if err != nil {
-		return echo.NewHTTPError(nethttp.StatusBadRequest, "Failed to get uploaded file")
+		return apperrors.BadRequest("Failed to get uploaded file")
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to open uploaded file")
+		return apperrors.Internal("Failed to open uploaded file").Wrap(err)
 	}
 	defer src.Close()
 
 	// Validate file type
 	if !aws.IsValidImageExtension(file.Filename) || !aws.IsValidImageContentType(file.Header.Get("Content-Type")) {
-		return echo.NewHTTPError(nethttp.StatusBadRequest, "Invalid file type. Only images are allowed.")
+		return apperrors.BadRequest("Invalid file type. Only images are allowed.")
 	}
 
 	// Validate file size (max 10MB)
 	if file.Size > 10*1024*1024 { // 10MB in bytes
-		return echo.NewHTTPError(nethttp.StatusBadRequest, "File too large. Maximum size is 10MB.")
+		return apperrors.BadRequest("File too large. Maximum size is 10MB.")
 	}
 
 	// Handle GIF file processing
@@ -70,7 +71,7 @@ func (h *Handler) UploadImage(c echo.Context) error {
 	// Upload to S3
 	url, err := h.s3Client.UploadFile(c.Request().Context(), src, file.Filename, file.Header.Get("Content-Type"))
 	if err != nil {
-		return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to upload image to S3")
+		return apperrors.Internal("Failed to upload image to S3").Wrap(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.UploadImageResponse{
@@ -92,7 +93,7 @@ func (h *Handler) processGifFile(src multipart.File, filename string) error {
 		if seeker, ok := src.(io.Seeker); ok {
 			_, seekErr := seeker.Seek(0, 0)
 			if seekErr != nil {
-				return echo.NewHTTPError(nethttp.StatusInternalServerError, "Failed to process image file")
+				return apperrors.Internal("Failed to process image file").Wrap(seekErr)
 			}
 		}
 		// Non-fatal error, continue with upload

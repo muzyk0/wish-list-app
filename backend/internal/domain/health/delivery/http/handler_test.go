@@ -3,11 +3,14 @@ package http
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
 
 	"wish-list/internal/app/database"
+	"wish-list/internal/app/middleware"
+	"wish-list/internal/pkg/apperrors"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
@@ -65,20 +68,19 @@ func TestHandler_Health(t *testing.T) {
 		mock.ExpectPing().WillReturnError(sql.ErrConnDone)
 
 		e := echo.New()
+		e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		err = handler.Health(c)
 
-		require.NoError(t, err)
-		assert.Equal(t, nethttp.StatusServiceUnavailable, rec.Code)
-
-		var response HealthResponse
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Equal(t, "unhealthy", response.Status)
-		assert.Equal(t, "database connection failed", response.Error)
+		// Assertions
+		require.Error(t, err)
+		var appErr *apperrors.AppError
+		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		assert.Equal(t, nethttp.StatusServiceUnavailable, appErr.Code)
+		assert.Contains(t, appErr.Message, "database connection failed")
 
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})

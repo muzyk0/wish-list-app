@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"wish-list/internal/pkg/apperrors"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,10 +58,10 @@ func TestJWTMiddlewareMissingHeader(t *testing.T) {
 
 	err := handler(c)
 	require.Error(t, err)
-	var httpErr *echo.HTTPError
-	ok := errors.As(err, &httpErr)
+	var appErr *apperrors.AppError
+	ok := errors.As(err, &appErr)
 	assert.True(t, ok)
-	assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(t, http.StatusUnauthorized, appErr.Code)
 }
 
 func TestJWTMiddlewareInvalidFormat(t *testing.T) {
@@ -78,10 +80,10 @@ func TestJWTMiddlewareInvalidFormat(t *testing.T) {
 
 	err := handler(c)
 	require.Error(t, err)
-	var httpErr *echo.HTTPError
-	ok := errors.As(err, &httpErr)
+	var appErr *apperrors.AppError
+	ok := errors.As(err, &appErr)
 	assert.True(t, ok)
-	assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(t, http.StatusUnauthorized, appErr.Code)
 }
 
 func TestJWTMiddlewareInvalidToken(t *testing.T) {
@@ -100,10 +102,10 @@ func TestJWTMiddlewareInvalidToken(t *testing.T) {
 
 	err := handler(c)
 	require.Error(t, err)
-	var httpErr *echo.HTTPError
-	ok := errors.As(err, &httpErr)
+	var appErr *apperrors.AppError
+	ok := errors.As(err, &appErr)
 	assert.True(t, ok)
-	assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(t, http.StatusUnauthorized, appErr.Code)
 }
 
 func TestOptionalJWTMiddleware(t *testing.T) {
@@ -163,10 +165,10 @@ func TestRequireAuth(t *testing.T) {
 
 	err := handler(c)
 	require.Error(t, err)
-	var httpErr *echo.HTTPError
-	ok := errors.As(err, &httpErr)
+	var appErr *apperrors.AppError
+	ok := errors.As(err, &appErr)
 	assert.True(t, ok)
-	assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(t, http.StatusUnauthorized, appErr.Code)
 
 	// Test with user context
 	req = httptest.NewRequest(http.MethodGet, "/", http.NoBody)
@@ -194,10 +196,11 @@ func TestRequireUserType(t *testing.T) {
 
 	err := handler(c)
 	require.Error(t, err)
-	var httpErr *echo.HTTPError
-	ok := errors.As(err, &httpErr)
-	assert.True(t, ok)
-	assert.Equal(t, http.StatusForbidden, httpErr.Code)
+	var appErr *apperrors.AppError
+	ok := errors.As(err, &appErr)
+	require.True(t, ok, "Error should be apperrors.AppError")
+	assert.Equal(t, http.StatusForbidden, appErr.Code)
+	assert.Contains(t, appErr.Message, "Insufficient permissions")
 
 	// Test with wrong user type
 	req = httptest.NewRequest(http.MethodGet, "/", http.NoBody)
@@ -207,10 +210,11 @@ func TestRequireUserType(t *testing.T) {
 
 	err = handler(c)
 	require.Error(t, err)
-	var httpErr2 *echo.HTTPError
-	ok = errors.As(err, &httpErr2)
-	assert.True(t, ok)
-	assert.Equal(t, http.StatusForbidden, httpErr2.Code)
+	var appErr2 *apperrors.AppError
+	ok = errors.As(err, &appErr2)
+	require.True(t, ok, "Error should be apperrors.AppError")
+	assert.Equal(t, http.StatusForbidden, appErr2.Code)
+	assert.Contains(t, appErr2.Message, "Insufficient permissions")
 
 	// Test with correct user type
 	req = httptest.NewRequest(http.MethodGet, "/", http.NoBody)

@@ -1,13 +1,12 @@
 package http
 
 import (
-	"errors"
-	"fmt"
 	"math"
 	nethttp "net/http"
 
 	"wish-list/internal/domain/reservation/delivery/http/dto"
 	"wish-list/internal/domain/reservation/service"
+	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
 
@@ -71,33 +70,14 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 	} else {
 		// Guest reservation
 		if req.GuestName == nil || req.GuestEmail == nil {
-			return c.JSON(nethttp.StatusBadRequest, map[string]string{
-				"error": "Guest name and email are required for unauthenticated reservations",
-			})
+			return apperrors.BadRequest("Guest name and email are required for unauthenticated reservations")
 		}
 
 		reservation, err = h.service.CreateReservation(ctx, req.ToServiceInput(wishListID, giftItemID, pgtype.UUID{Valid: false}))
 	}
 
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidGiftItemID) || errors.Is(err, service.ErrInvalidReservationWishlist) || errors.Is(err, service.ErrGuestInfoRequired) {
-			return c.JSON(nethttp.StatusBadRequest, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		if errors.Is(err, service.ErrGiftItemNotInWishlist) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		if errors.Is(err, service.ErrGiftItemAlreadyReserved) {
-			return c.JSON(nethttp.StatusConflict, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to create reservation: %w", err).Error(),
-		})
+		return mapReservationServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromReservationOutput(reservation))
@@ -152,9 +132,7 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 	} else {
 		// Guest cancellation with token
 		if req.ReservationToken == nil {
-			return c.JSON(nethttp.StatusBadRequest, map[string]string{
-				"error": "Reservation token is required for unauthenticated cancellations",
-			})
+			return apperrors.BadRequest("Reservation token is required for unauthenticated cancellations")
 		}
 
 		token, parseErr := helpers.ParseUUID(c, *req.ReservationToken)
@@ -171,19 +149,7 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 	}
 
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidGiftItemID) || errors.Is(err, service.ErrInvalidReservationWishlist) || errors.Is(err, service.ErrMissingUserOrToken) {
-			return c.JSON(nethttp.StatusBadRequest, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		if errors.Is(err, service.ErrGiftItemNotInWishlist) || errors.Is(err, service.ErrReservationNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to cancel reservation: %w", err).Error(),
-		})
+		return mapReservationServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromReservationOutput(reservation))
@@ -216,16 +182,12 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 	// Get total count for accurate pagination
 	totalCount, err := h.service.CountUserReservations(ctx, userID)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to count user reservations: %w", err).Error(),
-		})
+		return apperrors.Internal("Failed to count user reservations").Wrap(err)
 	}
 
 	reservations, err := h.service.GetUserReservations(ctx, userID, pagination.Limit, pagination.Offset)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to get user reservations: %w", err).Error(),
-		})
+		return apperrors.Internal("Failed to get user reservations").Wrap(err)
 	}
 
 	// Calculate total pages
@@ -261,9 +223,7 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 func (h *Handler) GetGuestReservations(c echo.Context) error {
 	tokenStr := c.QueryParam("token")
 	if tokenStr == "" {
-		return c.JSON(nethttp.StatusBadRequest, map[string]string{
-			"error": "Token parameter is required",
-		})
+		return apperrors.BadRequest("Token parameter is required")
 	}
 
 	token, err := helpers.ParseUUID(c, tokenStr)
@@ -274,9 +234,7 @@ func (h *Handler) GetGuestReservations(c echo.Context) error {
 	ctx := c.Request().Context()
 	reservations, err := h.service.GetGuestReservations(ctx, token)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to get guest reservations: %w", err).Error(),
-		})
+		return apperrors.Internal("Failed to get guest reservations").Wrap(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromReservationDetails(reservations))
@@ -300,9 +258,7 @@ func (h *Handler) GetReservationStatus(c echo.Context) error {
 	ctx := c.Request().Context()
 	status, err := h.service.GetReservationStatus(ctx, publicSlug, giftItemID)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": fmt.Errorf("failed to get reservation status: %w", err).Error(),
-		})
+		return apperrors.Internal("Failed to get reservation status").Wrap(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.FromReservationStatusOutput(status))

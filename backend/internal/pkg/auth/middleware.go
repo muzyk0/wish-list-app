@@ -2,8 +2,9 @@ package auth
 
 import (
 	"errors"
-	"net/http"
 	"strings"
+
+	"wish-list/internal/pkg/apperrors"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,13 +15,13 @@ func JWTMiddleware(tm *TokenManager) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
+				return apperrors.Unauthorized("Missing authorization header")
 			}
 
 			// Expect format: "Bearer <token>"
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization header format")
+				return apperrors.Unauthorized("Invalid authorization header format")
 			}
 
 			tokenString := parts[1]
@@ -28,7 +29,7 @@ func JWTMiddleware(tm *TokenManager) echo.MiddlewareFunc {
 			claims, err := tm.ValidateToken(tokenString)
 			if err != nil {
 				c.Logger().Warn("Token validation failed: ", err)
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+				return apperrors.Unauthorized("Invalid or expired token")
 			}
 
 			// Add claims to context
@@ -56,7 +57,7 @@ func OptionalJWTMiddleware(tm *TokenManager) echo.MiddlewareFunc {
 			// Expect format: "Bearer <token>"
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization header format")
+				return apperrors.Unauthorized("Invalid authorization header format")
 			}
 
 			tokenString := parts[1]
@@ -83,7 +84,7 @@ func RequireAuth() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			userID := c.Get("user_id")
 			if userID == nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Authentication required")
+				return apperrors.Unauthorized("Authentication required")
 			}
 			return next(c)
 		}
@@ -96,7 +97,7 @@ func RequireUserType(requiredType string) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			userType := c.Get("user_type")
 			if userType == nil || userType != requiredType {
-				return echo.NewHTTPError(http.StatusForbidden, "Insufficient permissions")
+				return apperrors.Forbidden("Insufficient permissions")
 			}
 			return next(c)
 		}

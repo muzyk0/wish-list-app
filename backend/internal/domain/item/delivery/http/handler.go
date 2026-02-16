@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	nethttp "net/http"
 
 	"wish-list/internal/domain/item/delivery/http/dto"
@@ -64,9 +63,7 @@ func (h *Handler) GetMyItems(c echo.Context) error {
 	// Get items from service
 	result, err := h.service.GetMyItems(ctx, userID, filters)
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to get items",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.PaginatedItemsResponseFromService(result))
@@ -99,9 +96,7 @@ func (h *Handler) CreateItem(c echo.Context) error {
 	// Create item via service
 	item, err := h.service.CreateItem(ctx, userID, req.ToDomain())
 	if err != nil {
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to create item",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusCreated, dto.ItemResponseFromService(item))
@@ -129,19 +124,7 @@ func (h *Handler) GetItem(c echo.Context) error {
 	// Get item via service
 	item, err := h.service.GetItem(ctx, itemID, userID)
 	if err != nil {
-		if errors.Is(err, service.ErrItemNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Item not found",
-			})
-		}
-		if errors.Is(err, service.ErrItemForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to get item",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.ItemResponseFromService(item))
@@ -179,19 +162,7 @@ func (h *Handler) UpdateItem(c echo.Context) error {
 	// Update item via service
 	item, err := h.service.UpdateItem(ctx, itemID, userID, req.ToDomain())
 	if err != nil {
-		if errors.Is(err, service.ErrItemNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Item not found",
-			})
-		}
-		if errors.Is(err, service.ErrItemForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to update item",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.ItemResponseFromService(item))
@@ -220,19 +191,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	// Soft delete item via service
 	err := h.service.SoftDeleteItem(ctx, itemID, userID)
 	if err != nil {
-		if errors.Is(err, service.ErrItemNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Item not found",
-			})
-		}
-		if errors.Is(err, service.ErrItemForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to delete item",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.NoContent(nethttp.StatusNoContent)
@@ -270,19 +229,7 @@ func (h *Handler) MarkItemAsPurchased(c echo.Context) error {
 	// Mark as purchased via service
 	item, err := h.service.MarkPurchased(ctx, itemID, userID, req.PurchasedPrice)
 	if err != nil {
-		if errors.Is(err, service.ErrItemNotFound) {
-			return c.JSON(nethttp.StatusNotFound, map[string]string{
-				"error": "Item not found",
-			})
-		}
-		if errors.Is(err, service.ErrItemForbidden) {
-			return c.JSON(nethttp.StatusForbidden, map[string]string{
-				"error": "Access denied",
-			})
-		}
-		return c.JSON(nethttp.StatusInternalServerError, map[string]string{
-			"error": "Failed to mark item as purchased",
-		})
+		return mapItemServiceError(err)
 	}
 
 	return c.JSON(nethttp.StatusOK, dto.ItemResponseFromService(item))

@@ -483,7 +483,49 @@ make clean                    # Clean build artifacts
 
 ## Backend Best Practices & Patterns
 
-### Error Handling
+### Error Handling (Updated Feb 2026)
+
+**Unified Error System**: All handlers use `internal/pkg/apperrors` package for consistent error responses.
+
+**Handler Error Pattern** (Required for all handlers):
+1. Create `errors.go` in each handler package with error mapping function:
+   ```go
+   func mapXxxServiceError(err error) error {
+       switch {
+       case errors.Is(err, service.ErrXxxNotFound):
+           return apperrors.NotFound("Xxx not found")
+       case errors.Is(err, service.ErrXxxForbidden):
+           return apperrors.Forbidden("Access denied")
+       default:
+           return apperrors.Internal("Failed to process request").Wrap(err)
+       }
+   }
+   ```
+2. In handlers, return mapped errors: `return mapXxxServiceError(err)`
+3. **Never use inline `c.JSON(status, map[string]string{...})`** - always use apperrors
+
+**Error Types**:
+- `apperrors.BadRequest(msg)` - 400
+- `apperrors.Unauthorized(msg)` - 401
+- `apperrors.Forbidden(msg)` - 403
+- `apperrors.NotFound(msg)` - 404
+- `apperrors.Conflict(msg)` - 409
+- `apperrors.Internal(msg).Wrap(err)` - 500 with wrapped cause
+- `apperrors.BadGateway(msg)` - 502
+
+**Middleware**: `middleware.CustomHTTPErrorHandler` converts all `*apperrors.AppError` to JSON `{"error": "msg", "details": {...}}`
+
+**Test Setup**: Always register error handler in test echo instances:
+```go
+func setupTestEcho() *echo.Echo {
+    e := echo.New()
+    e.Validator = validation.NewValidator()
+    e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler  // Required!
+    return e
+}
+```
+
+### Sentinel Errors (Original Pattern)
 - **Sentinel Errors**: Use sentinel errors for type-safe error handling instead of string matching
   ```go
   var (

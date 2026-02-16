@@ -3,7 +3,8 @@ package validation
 import (
 	"errors"
 	"fmt"
-	"strings"
+
+	"wish-list/internal/pkg/apperrors"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -21,47 +22,46 @@ func NewValidator() *CustomValidator {
 	}
 }
 
-// Validate validates a struct
+// Validate validates a struct and returns an apperrors.AppError with field details
 func (cv *CustomValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
-		// Convert validation errors to user-friendly messages
-		return fmt.Errorf("validation failed: %s", formatValidationErrors(err))
+		var validationErrors validator.ValidationErrors
+		if errors.As(err, &validationErrors) {
+			details := formatValidationErrors(validationErrors)
+			return apperrors.NewValidationError(details)
+		}
+		// Non-validation error (e.g., invalid struct)
+		return apperrors.BadRequest(fmt.Sprintf("validation failed: %s", err.Error()))
 	}
 	return nil
 }
 
-// formatValidationErrors formats validation errors into a readable string
-func formatValidationErrors(err error) string {
-	var validationErrors validator.ValidationErrors
-	if errors.As(err, &validationErrors) {
-		formattedErrors := make([]string, 0, len(validationErrors))
-		for _, e := range validationErrors {
-			formattedErrors = append(formattedErrors, formatFieldError(e))
-		}
-		return strings.Join(formattedErrors, "; ")
+// formatValidationErrors converts validator errors to a map of field -> message
+func formatValidationErrors(errs validator.ValidationErrors) map[string]string {
+	details := make(map[string]string, len(errs))
+	for _, e := range errs {
+		details[e.Field()] = formatFieldError(e)
 	}
-	return err.Error()
+	return details
 }
 
 // formatFieldError formats a single field error
 func formatFieldError(e validator.FieldError) string {
-	field := strings.ToLower(e.Field())
-
 	switch e.Tag() {
 	case "required":
-		return field + " is required"
+		return "this field is required"
 	case "email":
-		return field + " must be a valid email address"
+		return "must be a valid email address"
 	case "min":
-		return fmt.Sprintf("%s must be at least %s characters long", field, e.Param())
+		return fmt.Sprintf("must be at least %s characters long", e.Param())
 	case "max":
-		return fmt.Sprintf("%s must be at most %s characters long", field, e.Param())
+		return fmt.Sprintf("must be at most %s characters long", e.Param())
 	case "url":
-		return field + " must be a valid URL"
+		return "must be a valid URL"
 	case "uuid":
-		return field + " must be a valid UUID"
+		return "must be a valid UUID"
 	default:
-		return fmt.Sprintf("%s failed validation on %s", field, e.Tag())
+		return fmt.Sprintf("failed validation on %s", e.Tag())
 	}
 }
 

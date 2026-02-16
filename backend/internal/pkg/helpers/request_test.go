@@ -7,24 +7,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-playground/validator/v10"
+	"wish-list/internal/pkg/apperrors"
+	"wish-list/internal/pkg/validation"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type TestRequest struct {
 	Name  string `json:"name" validate:"required"`
 	Email string `json:"email" validate:"required,email"`
 	Age   int    `json:"age" validate:"gte=0,lte=120"`
-}
-
-// CustomValidator wraps go-playground validator
-type CustomValidator struct {
-	validator *validator.Validate
-}
-
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
 }
 
 func TestBindAndValidate(t *testing.T) {
@@ -103,7 +97,7 @@ func TestBindAndValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create Echo instance with validator
 			e := echo.New()
-			e.Validator = &CustomValidator{validator: validator.New()}
+			e.Validator = validation.NewValidator()
 
 			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tt.requestBody))
@@ -116,10 +110,10 @@ func TestBindAndValidate(t *testing.T) {
 			err := BindAndValidate(c, &testReq)
 
 			if tt.expectedError {
-				assert.NotNil(t, err, "Expected non-nil error for invalid input")
-				var httpErr *echo.HTTPError
-				assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-				assert.Equal(t, tt.expectedStatusCode, httpErr.Code, "Status code mismatch")
+				require.NotNil(t, err, "Expected non-nil error for invalid input")
+				var appErr *apperrors.AppError
+				require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+				assert.Equal(t, tt.expectedStatusCode, appErr.Code, "Status code mismatch")
 			} else {
 				assert.Nil(t, err, "Expected no error but got: %v", err)
 				assert.Equal(t, "John Doe", testReq.Name)
@@ -144,17 +138,15 @@ func TestBindAndValidateWithoutValidator(t *testing.T) {
 		err := BindAndValidate(c, &testReq)
 
 		// When validator is not set, c.Validate() returns error
-		assert.NotNil(t, err, "Expected non-nil error when validator is not set")
-		var httpErr *echo.HTTPError
-		assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
-		assert.Equal(t, http.StatusBadRequest, httpErr.Code, "Should return 400 when validation fails")
+		require.NotNil(t, err, "Expected non-nil error when validator is not set")
+		assert.Contains(t, err.Error(), "validator", "Error should mention validator not being registered")
 	})
 }
 
 func TestBindAndValidateEdgeCases(t *testing.T) {
 	t.Run("very large JSON", func(t *testing.T) {
 		e := echo.New()
-		e.Validator = &CustomValidator{validator: validator.New()}
+		e.Validator = validation.NewValidator()
 
 		largeJSON := `{"name":"` + strings.Repeat("a", 10000) + `","email":"test@example.com","age":25}`
 		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(largeJSON))
@@ -170,7 +162,7 @@ func TestBindAndValidateEdgeCases(t *testing.T) {
 
 	t.Run("special characters in JSON", func(t *testing.T) {
 		e := echo.New()
-		e.Validator = &CustomValidator{validator: validator.New()}
+		e.Validator = validation.NewValidator()
 
 		specialJSON := `{"name":"John \"The Rock\" Doe","email":"john@example.com","age":30}`
 		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(specialJSON))

@@ -177,7 +177,7 @@ func TestAuthRateLimitMiddleware(t *testing.T) {
 		err := handler(c)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusTooManyRequests, rec.Code)
-		assert.Contains(t, rec.Body.String(), "rate limit exceeded")
+		assert.Contains(t, rec.Body.String(), "Too many requests")
 	})
 }
 
