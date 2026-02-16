@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -278,7 +279,7 @@ func TestCodeStore_ConcurrentAccess(t *testing.T) {
 			go func(c string) {
 				_, ok := store.ExchangeCode(c)
 				if ok {
-					successCount++
+					atomic.AddInt64(&successCount, 1)
 				}
 				done <- true
 			}(code)

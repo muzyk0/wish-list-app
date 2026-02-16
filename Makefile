@@ -282,6 +282,11 @@ test-backend: ## Run backend tests
 	@echo "Running backend tests..."
 	@cd backend && go test ./...
 
+.PHONY: test-backend-advanced
+test-backend-advanced: ## Run backend tests with race detection and coverage
+	@echo "Running backend tests with race detection and coverage..."
+	@cd backend && go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
 .PHONY: test-frontend
 test-frontend: ## Run frontend tests
 	@echo "Running frontend tests..."
