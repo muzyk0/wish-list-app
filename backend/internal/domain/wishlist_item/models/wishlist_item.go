@@ -6,7 +6,7 @@ import (
 
 // WishlistItem represents the many-to-many relationship between wishlists and items
 type WishlistItem struct {
-	WishlistID pgtype.UUID        `db:"wishlist_id" json:"wishlist_id"`
-	GiftItemID pgtype.UUID        `db:"gift_item_id" json:"gift_item_id"`
-	AddedAt    pgtype.Timestamptz `db:"added_at" json:"added_at"`
+	WishlistID pgtype.UUID        `db:"wishlist_id"`
+	GiftItemID pgtype.UUID        `db:"gift_item_id"`
+	AddedAt    pgtype.Timestamptz `db:"added_at"`
 }
