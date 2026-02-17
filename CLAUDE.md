@@ -471,6 +471,8 @@ instead of "JWT ".
 - PostgreSQL (users, tokens metadata), In-memory (handoff codes) (002-cross-domain-implementation)
 - Go 1.25.5 + Echo v4.15.0, sqlx v1.4.0, pgx/v5 v5.8.0, golang-jwt/v5 v5.3.1, AWS SDK v2 (003-backend-arch-migration)
 - PostgreSQL (via pgx/sqlx), Redis (caching), AWS S3 (file uploads), AWS KMS (encryption) (003-backend-arch-migration)
+- Go 1.25.5 (migration runner), SQL (migration files) + golang-migrate/v4, lib/pq (migration driver) (004-db-init-migration)
+- PostgreSQL 14+ with pgcrypto extension (004-db-init-migration)
 
 ## Recent Changes
 - 002-cross-domain-implementation: Added PostgreSQL (users, tokens metadata), In-memory (handoff codes)
