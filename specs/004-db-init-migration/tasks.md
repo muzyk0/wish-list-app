@@ -25,8 +25,8 @@
 
 **Purpose**: Ensure migration infrastructure is ready
 
-- [ ] T001 Verify migrations directory exists and is empty at `backend/internal/app/database/migrations/`
-- [ ] T002 Verify migration runner works by running `cd backend && go run cmd/migrate/main.go -action version` (should report no version or error gracefully)
+- [X] T001 Verify migrations directory exists and is empty at `backend/internal/app/database/migrations/`
+- [X] T002 Verify migration runner works by running `cd backend && go run cmd/migrate/main.go -action version` (should report no version or error gracefully)
 
 **Checkpoint**: Migration infrastructure confirmed working
 
@@ -40,14 +40,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Create `backend/internal/app/database/migrations/000001_init_schema.up.sql` with pgcrypto extension enablement: `CREATE EXTENSION IF NOT EXISTS pgcrypto`
-- [ ] T004 [US1] Add `users` table DDL to `backend/internal/app/database/migrations/000001_init_schema.up.sql` with all 14 columns matching `backend/internal/domain/user/models/user.go` User struct (see data-model.md for exact types, constraints, defaults)
-- [ ] T005 [US1] Add `wishlists` table DDL to `backend/internal/app/database/migrations/000001_init_schema.up.sql` with all 11 columns matching `backend/internal/domain/wishlist/models/wishlist.go` WishList struct, FK to users(id) ON DELETE CASCADE
-- [ ] T006 [US1] Add `gift_items` table DDL to `backend/internal/app/database/migrations/000001_init_schema.up.sql` with all 17 columns matching `backend/internal/domain/item/models/item.go` GiftItem struct, FKs to users(id) with CASCADE/SET NULL per research.md
-- [ ] T007 [US1] Add `wishlist_items` junction table DDL to `backend/internal/app/database/migrations/000001_init_schema.up.sql` with composite PK (wishlist_id, gift_item_id), FKs to wishlists(id) and gift_items(id) ON DELETE CASCADE, matching `backend/internal/domain/wishlist_item/models/wishlist_item.go`
-- [ ] T008 [US1] Add `reservations` table DDL to `backend/internal/app/database/migrations/000001_init_schema.up.sql` with all 16 columns matching `backend/internal/domain/reservation/models/reservation.go` Reservation struct, FKs per research.md
-- [ ] T009 [US1] Add explicit indexes to `backend/internal/app/database/migrations/000001_init_schema.up.sql`: idx_wishlists_owner_id, idx_gift_items_owner_id, idx_reservations_gift_item_id, idx_reservations_wishlist_id, idx_reservations_reserved_by, idx_reservations_status (see data-model.md Indexes table for full list)
-- [ ] T010 [US1] Run `make migrate-up` against empty database and verify all 5 tables created with `\dt` in psql
+- [X] T003 [US1] Create `backend/internal/app/database/migrations/000006_init_schema.up.sql` with pgcrypto extension enablement: `CREATE EXTENSION IF NOT EXISTS pgcrypto`
+- [X] T004 [US1] Add `users` table DDL to `backend/internal/app/database/migrations/000006_init_schema.up.sql` with all 14 columns matching `backend/internal/domain/user/models/user.go` User struct (see data-model.md for exact types, constraints, defaults)
+- [X] T005 [US1] Add `wishlists` table DDL to `backend/internal/app/database/migrations/000006_init_schema.up.sql` with all 11 columns matching `backend/internal/domain/wishlist/models/wishlist.go` WishList struct, FK to users(id) ON DELETE CASCADE
+- [X] T006 [US1] Add `gift_items` table DDL to `backend/internal/app/database/migrations/000006_init_schema.up.sql` with all 17 columns matching `backend/internal/domain/item/models/item.go` GiftItem struct, FKs to users(id) with CASCADE/SET NULL per research.md
+- [X] T007 [US1] Add `wishlist_items` junction table DDL to `backend/internal/app/database/migrations/000006_init_schema.up.sql` with composite PK (wishlist_id, gift_item_id), FKs to wishlists(id) and gift_items(id) ON DELETE CASCADE, matching `backend/internal/domain/wishlist_item/models/wishlist_item.go`
+- [X] T008 [US1] Add `reservations` table DDL to `backend/internal/app/database/migrations/000006_init_schema.up.sql` with all 16 columns matching `backend/internal/domain/reservation/models/reservation.go` Reservation struct, FKs per research.md
+- [X] T009 [US1] Add explicit indexes to `backend/internal/app/database/migrations/000006_init_schema.up.sql`: idx_wishlists_owner_id, idx_gift_items_owner_id, idx_reservations_gift_item_id, idx_reservations_wishlist_id, idx_reservations_reserved_by, idx_reservations_status (see data-model.md Indexes table for full list)
+- [X] T010 [US1] Run `make migrate-up` against empty database and verify all 5 tables created with `\dt` in psql
 
 **Checkpoint**: Up migration complete. Fresh database deployment works.
 
@@ -61,9 +61,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Create `backend/internal/app/database/migrations/000001_init_schema.down.sql` with DROP TABLE statements in reverse dependency order: reservations, wishlist_items, gift_items, wishlists, users (all with IF EXISTS and CASCADE)
-- [ ] T012 [US2] Run `make migrate-down` after `make migrate-up` and verify all tables are removed
-- [ ] T013 [US2] Run `make migrate-up` again after rollback to verify re-apply works (idempotency via golang-migrate versioning)
+- [X] T011 [US2] Create `backend/internal/app/database/migrations/000001_init_schema.down.sql` with DROP TABLE statements in reverse dependency order: reservations, wishlist_items, gift_items, wishlists, users (all with IF EXISTS and CASCADE)
+- [X] T012 [US2] Run `make migrate-down` after `make migrate-up` and verify all tables are removed
+- [X] T013 [US2] Run `make migrate-up` again after rollback to verify re-apply works (idempotency via golang-migrate versioning)
 
 **Checkpoint**: Full migrate up → down → up cycle works cleanly.
 
@@ -77,11 +77,11 @@
 
 ### Verification for User Story 3
 
-- [ ] T014 [US3] Compare `backend/internal/domain/user/models/user.go` User struct db tags against `users` table columns in migration — verify all 14 columns match in name and compatible PostgreSQL type
-- [ ] T015 [P] [US3] Compare `backend/internal/domain/wishlist/models/wishlist.go` WishList struct db tags against `wishlists` table columns in migration — verify all 11 columns match
-- [ ] T016 [P] [US3] Compare `backend/internal/domain/item/models/item.go` GiftItem struct db tags against `gift_items` table columns in migration — verify all 17 columns match
-- [ ] T017 [P] [US3] Compare `backend/internal/domain/wishlist_item/models/wishlist_item.go` WishlistItem struct db tags against `wishlist_items` table columns in migration — verify all 3 columns match
-- [ ] T018 [P] [US3] Compare `backend/internal/domain/reservation/models/reservation.go` Reservation struct db tags against `reservations` table columns in migration — verify all 16 columns match
+- [X] T014 [US3] Compare `backend/internal/domain/user/models/user.go` User struct db tags against `users` table columns in migration — verify all 14 columns match in name and compatible PostgreSQL type
+- [X] T015 [P] [US3] Compare `backend/internal/domain/wishlist/models/wishlist.go` WishList struct db tags against `wishlists` table columns in migration — verify all 11 columns match
+- [X] T016 [P] [US3] Compare `backend/internal/domain/item/models/item.go` GiftItem struct db tags against `gift_items` table columns in migration — verify all 17 columns match
+- [X] T017 [P] [US3] Compare `backend/internal/domain/wishlist_item/models/wishlist_item.go` WishlistItem struct db tags against `wishlist_items` table columns in migration — verify all 3 columns match
+- [X] T018 [P] [US3] Compare `backend/internal/domain/reservation/models/reservation.go` Reservation struct db tags against `reservations` table columns in migration — verify all 16 columns match
 
 **Checkpoint**: All 5 model structs verified against migration SQL. Zero drift.
 
@@ -91,9 +91,9 @@
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T019 Add SQL comments to `backend/internal/app/database/migrations/000001_init_schema.up.sql` documenting table purposes and non-obvious design decisions (PII encryption columns, junction table rationale, soft delete pattern)
-- [ ] T020 Validate quickstart.md instructions by following them end-to-end on a clean database
-- [ ] T021 Run full application (`make backend`) after migration to verify CRUD operations work against the new schema
+- [X] T019 Add SQL comments to `backend/internal/app/database/migrations/000001_init_schema.up.sql` documenting table purposes and non-obvious design decisions (PII encryption columns, junction table rationale, soft delete pattern)
+- [X] T020 Validate quickstart.md instructions by following them end-to-end on a clean database
+- [X] T021 Run full application (`make backend`) after migration to verify CRUD operations work against the new schema
 
 ---
 
