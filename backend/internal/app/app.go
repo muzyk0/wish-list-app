@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"wish-list/internal/app/swagger"
 
 	"wish-list/internal/app/config"
 	"wish-list/internal/app/database"
@@ -42,8 +43,6 @@ import (
 	"wish-list/internal/pkg/validation"
 
 	_ "wish-list/internal/app/swagger/docs" // Import generated Swagger docs
-
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 // App is the main application struct that wires all dependencies together.
@@ -240,7 +239,7 @@ func (a *App) initServer() {
 	e := a.server.Echo
 
 	// Swagger
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	swagger.InitSwagger(e)
 
 	// Auth middleware for protected routes
 	authMiddleware := auth.JWTMiddleware(a.tokenManager)

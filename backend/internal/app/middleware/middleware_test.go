@@ -306,14 +306,14 @@ func TestRateLimiterMiddleware(t *testing.T) {
 
 func TestRateLimiterMiddlewareHealthEndpoint(t *testing.T) {
 	e := echo.New()
-	e.GET("/health", func(c echo.Context) error {
+	e.GET("/healthz", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
+	req := httptest.NewRequest(http.MethodGet, "/healthz", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/health")
+	c.SetPath("/healthz")
 
 	mw := RateLimiterMiddleware()
 	handler := mw(func(c echo.Context) error {

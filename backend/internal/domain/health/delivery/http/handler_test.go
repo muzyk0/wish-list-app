@@ -35,7 +35,7 @@ func TestHandler_Health(t *testing.T) {
 		mock.ExpectPing()
 
 		e := echo.New()
-		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/healthz", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -69,7 +69,7 @@ func TestHandler_Health(t *testing.T) {
 
 		e := echo.New()
 		e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
-		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/healthz", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -100,7 +100,7 @@ func TestHandler_Health(t *testing.T) {
 		mock.ExpectPing()
 
 		e := echo.New()
-		req := httptest.NewRequest(nethttp.MethodGet, "/health", nethttp.NoBody)
+		req := httptest.NewRequest(nethttp.MethodGet, "/healthz", nethttp.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
