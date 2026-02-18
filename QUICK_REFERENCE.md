@@ -169,7 +169,7 @@ Current migrations:
 docker ps | grep postgres
 
 # Is backend running?
-curl http://localhost:8080/health
+curl http://localhost:8080/healthz
 
 # Check migration version
 cd backend && go run cmd/migrate/main.go -action version
