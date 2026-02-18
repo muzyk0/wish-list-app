@@ -57,7 +57,6 @@ export default function CreateWishListScreen() {
         description: data.description || '',
         occasion: data.occasion || '',
         is_public: data.isPublic,
-        template_id: 'default',
       }),
     onSuccess: () => {
       Alert.alert('Success', 'Wishlist created successfully!', [

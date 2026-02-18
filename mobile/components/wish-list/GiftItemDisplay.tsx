@@ -15,13 +15,12 @@ export default function GiftItemDisplay({
   onRefresh,
   showPurchaseOption = false,
 }: GiftItemDisplayProps) {
-  const isReserved = !!item.reserved_by_user_id;
-  const isPurchased = !!item.purchased_by_user_id;
+  const isPurchased = !!item.is_purchased;
 
   const purchaseMutation = useMutation({
     mutationFn: (giftItemId: string) =>
       apiClient.markGiftItemAsPurchased(
-        item.wishlist_id,
+        item.wishlist_ids?.[0] || '',
         giftItemId,
         item.price || 0,
       ),
@@ -46,13 +45,13 @@ export default function GiftItemDisplay({
 
     Alert.alert(
       'Confirm Purchase',
-      `Are you sure you want to mark "${item.name}" as purchased?`,
+      `Are you sure you want to mark "${item.title}" as purchased?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Mark as Purchased',
           style: 'default',
-          onPress: () => purchaseMutation.mutate(item.id),
+          onPress: () => purchaseMutation.mutate(item.id || ''),
         },
       ],
     );
@@ -62,11 +61,10 @@ export default function GiftItemDisplay({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.name} numberOfLines={2}>
-          {item.name}
+          {item.title}
         </Text>
         <View style={styles.statusContainer}>
           {isPurchased && <Badge>Purchased</Badge>}
-          {isReserved && !isPurchased && <Badge>Reserved</Badge>}
         </View>
       </View>
 

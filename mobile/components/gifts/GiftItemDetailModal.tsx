@@ -29,11 +29,14 @@ export default function GiftItemDetailModal({
 
   if (!item) return null;
 
-  const isAttached = !!item.wishlist_id;
+  const isAttached = (item.wishlist_ids?.length ?? 0) > 0;
+  const primaryWishlistId = item.wishlist_ids?.[0] || '';
 
   const handleEdit = () => {
     onClose();
-    router.push(`/gift-items/${item.id}/edit?wishlistId=${item.wishlist_id || ''}`);
+    router.push(
+      `/gift-items/${item.id}/edit?wishlistId=${primaryWishlistId}`,
+    );
   };
 
   return (
@@ -84,7 +87,7 @@ export default function GiftItemDetailModal({
             <View style={styles.content}>
               {/* Title and Price */}
               <View style={styles.titleSection}>
-                <Text style={styles.title}>{item.name}</Text>
+                <Text style={styles.title}>{item.title}</Text>
                 {item.price !== undefined && item.price !== null && (
                   <LinearGradient
                     colors={['#FFD700', '#FFA500']}
@@ -99,20 +102,34 @@ export default function GiftItemDetailModal({
               <View style={styles.badgesRow}>
                 {isAttached ? (
                   <View style={styles.statusBadge}>
-                    <MaterialCommunityIcons name="link" size={16} color="#4CAF50" />
+                    <MaterialCommunityIcons
+                      name="link"
+                      size={16}
+                      color="#4CAF50"
+                    />
                     <Text style={styles.statusText}>Attached to List</Text>
                   </View>
                 ) : (
                   <View style={styles.statusBadge}>
-                    <MaterialCommunityIcons name="link-off" size={16} color="#FF9800" />
+                    <MaterialCommunityIcons
+                      name="link-off"
+                      size={16}
+                      color="#FF9800"
+                    />
                     <Text style={styles.statusText}>Standalone</Text>
                   </View>
                 )}
 
                 {item.priority && item.priority > 0 && (
                   <View style={styles.priorityBadge}>
-                    <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
-                    <Text style={styles.priorityText}>Priority: {item.priority}/10</Text>
+                    <MaterialCommunityIcons
+                      name="star"
+                      size={16}
+                      color="#FFD700"
+                    />
+                    <Text style={styles.priorityText}>
+                      Priority: {item.priority}/10
+                    </Text>
                   </View>
                 )}
               </View>
@@ -174,12 +191,19 @@ export default function GiftItemDetailModal({
               )}
 
               {/* Edit Button */}
-              <Pressable onPress={handleEdit} style={styles.editButtonContainer}>
+              <Pressable
+                onPress={handleEdit}
+                style={styles.editButtonContainer}
+              >
                 <LinearGradient
                   colors={['#FFD700', '#FFA500']}
                   style={styles.editButton}
                 >
-                  <MaterialCommunityIcons name="pencil" size={20} color="#000000" />
+                  <MaterialCommunityIcons
+                    name="pencil"
+                    size={20}
+                    color="#000000"
+                  />
                   <Text style={styles.editButtonText}>Edit Gift</Text>
                 </LinearGradient>
               </Pressable>

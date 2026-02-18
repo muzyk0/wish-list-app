@@ -32,7 +32,7 @@ const SelectableGiftItemCard = ({
         {/* Header */}
         <View style={styles.itemHeader}>
           <View style={styles.itemTitleContainer}>
-            <Text style={styles.itemTitle}>{item.name}</Text>
+            <Text style={styles.itemTitle}>{item.title}</Text>
             {item.price !== undefined && item.price !== null && (
               <View style={styles.priceContainer}>
                 <LinearGradient
@@ -55,7 +55,9 @@ const SelectableGiftItemCard = ({
         {item.priority && item.priority > 0 && (
           <View style={styles.priorityBadge}>
             <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
-            <Text style={styles.priorityText}>Priority: {item.priority}/10</Text>
+            <Text style={styles.priorityText}>
+              Priority: {item.priority}/10
+            </Text>
           </View>
         )}
 
@@ -103,23 +105,19 @@ export default function AttachItemsScreen() {
     enabled: !!id,
   });
 
-  // Fetch all standalone gift items (items not attached to this wishlist)
-  // TODO: This needs a proper API endpoint to fetch standalone items
-  // For now, we'll fetch all user's items and filter
+  // Fetch all standalone gift items (items not attached to any wishlist)
   const {
-    data: allItems,
+    data: itemsResponse,
     isLoading: itemsLoading,
     error: itemsError,
     refetch,
   } = useQuery({
     queryKey: ['standaloneGiftItems'],
-    queryFn: async () => {
-      // This is a placeholder - you need to implement getUserGiftItems in the API client
-      // For now, returning empty array
-      return [] as GiftItem[];
-    },
+    queryFn: () => apiClient.getUserGiftItems({ unattached: true }),
     enabled: !!id,
   });
+
+  const allItems = itemsResponse?.items || [];
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -156,8 +154,8 @@ export default function AttachItemsScreen() {
   });
 
   const handleAttachItem = (item: GiftItem) => {
-    setAttachingItemId(item.id);
-    attachMutation.mutate({ itemId: item.id });
+    setAttachingItemId(item.id ?? null);
+    attachMutation.mutate({ itemId: item.id ?? '' });
   };
 
   if (wishlistLoading || itemsLoading) {
@@ -280,7 +278,11 @@ export default function AttachItemsScreen() {
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="gift-off" size={64} color="#FFD700" />
+              <MaterialCommunityIcons
+                name="gift-off"
+                size={64}
+                color="#FFD700"
+              />
               <Text style={styles.emptyStateTitle}>No items available</Text>
               <Text style={styles.emptyStateText}>
                 Create standalone gift items first to attach them to wishlists

@@ -5,13 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
@@ -403,7 +397,8 @@ export default function CreateStandaloneGiftScreen() {
             color="rgba(255, 255, 255, 0.5)"
           />
           <Text style={styles.helpText}>
-            This gift won't be attached to any wishlist. You can attach it later.
+            This gift won't be attached to any wishlist. You can attach it
+            later.
           </Text>
         </View>
       </ScrollView>

@@ -49,12 +49,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="gifts"
+        options={{
+          title: 'Gifts',
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'gift' : 'gift-outline'}
+              size={focused ? 28 : 24}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="lists"
         options={{
           title: 'Lists',
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
-              name={focused ? 'gift' : 'gift-outline'}
+              name={focused ? 'format-list-bulleted' : 'format-list-bulleted'}
               size={focused ? 28 : 24}
               color={color}
             />
