@@ -160,9 +160,9 @@ export function MyReservations() {
                         );
                       }
                     } catch (_error) {
-toast.error(
-                          'An error occurred while canceling the reservation',
-                        );
+                      toast.error(
+                        'An error occurred while canceling the reservation',
+                      );
                     }
                   }}
                 >
