@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  HeroSection,
-  FeaturedListsSection,
-  AnnouncementBlock,
-} from '@/features/home';
-import { Header, Footer } from '@/widgets';
-import {
   DOMAIN_CONSTANTS,
   MOBILE_APP_REDIRECT_PATHS,
 } from '@/constants/domains';
+import {
+  AnnouncementBlock,
+  FeaturedListsSection,
+  HeroSection,
+} from '@/features/home';
+import { Footer, Header } from '@/widgets';
 
 export default function Home() {
   const handleMobileRedirect = () => {

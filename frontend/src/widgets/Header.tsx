@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
 
 export function Header() {
   const { t } = useTranslation();

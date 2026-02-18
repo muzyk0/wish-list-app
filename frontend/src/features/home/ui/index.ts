@@ -1,8 +1,8 @@
-export { ThemeToggle } from './ThemeToggle';
-export { HeroSection } from './HeroSection';
+export { AnnouncementBlock } from './AnnouncementBlock';
 export { FeaturedListCard } from './FeaturedListCard';
 export {
-  FeaturedListsSection,
   type FeaturedListData,
+  FeaturedListsSection,
 } from './FeaturedListsSection';
-export { AnnouncementBlock } from './AnnouncementBlock';
+export { HeroSection } from './HeroSection';
+export { ThemeToggle } from './ThemeToggle';
