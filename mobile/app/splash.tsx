@@ -1,13 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useId, useRef } from 'react';
 import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { isAuthenticated } from '@/lib/api/auth';
 
 const { width, height } = Dimensions.get('window');
-const ONBOARDING_KEY = 'hasSeenOnboarding';
 const SPLASH_DURATION = 2500;
 
 // Floating particle component
@@ -150,13 +147,10 @@ export default function SplashScreen() {
       }),
     ]).start();
 
-    // Check auth and navigation
-    const checkAuthAndNavigate = async () => {
-      try {
-        const hasSeenOnboarding = await AsyncStorage.getItem(ONBOARDING_KEY);
-        const authenticated = await isAuthenticated();
-        await new Promise((resolve) => setTimeout(resolve, SPLASH_DURATION));
-
+    // After animation — navigate away from splash.
+    // Auth check and redirect are handled by (tabs)/_layout.tsx guard.
+    const navigateAfterSplash = () => {
+      setTimeout(() => {
         Animated.parallel([
           Animated.timing(fadeAnim, {
             toValue: 0,
@@ -169,21 +163,12 @@ export default function SplashScreen() {
             useNativeDriver: true,
           }),
         ]).start(() => {
-          if (!hasSeenOnboarding) {
-            router.replace('/onboarding');
-          } else if (authenticated) {
-            router.replace('/(tabs)');
-          } else {
-            router.replace('/auth/login');
-          }
+          router.replace('/(tabs)');
         });
-      } catch (error) {
-        console.error('Splash navigation error:', error);
-        router.replace('/auth/login');
-      }
+      }, SPLASH_DURATION);
     };
 
-    checkAuthAndNavigate();
+    navigateAfterSplash();
   }, [
     router,
     fadeAnim,

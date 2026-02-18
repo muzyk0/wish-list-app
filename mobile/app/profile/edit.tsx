@@ -15,6 +15,7 @@ import {
 } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 const profileUpdateSchema = z.object({
   first_name: z.string().optional(),
@@ -51,12 +52,12 @@ export default function EditProfileScreen() {
   const updateProfileMutation = useMutation({
     mutationFn: (data: ProfileUpdateForm) => apiClient.updateProfile(data),
     onSuccess: () => {
-      Alert.alert('Success', 'Profile updated successfully!');
+      dialog.success('Profile updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       router.back();
     },
     onError: (error: Error) => {
-      Alert.alert('Error', error.message || 'Failed to update profile');
+      dialog.error(error.message || 'Failed to update profile');
     },
   });
 

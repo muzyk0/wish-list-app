@@ -1,9 +1,30 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { Tabs } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
+import { Redirect, Tabs } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { isAuthenticated } from '@/lib/api/auth';
 
 export default function TabLayout() {
+  const [authState, setAuthState] = useState<
+    'loading' | 'authenticated' | 'unauthenticated'
+  >('loading');
+
+  useEffect(() => {
+    isAuthenticated().then((ok) =>
+      setAuthState(ok ? 'authenticated' : 'unauthenticated'),
+    );
+  }, []);
+
+  if (authState === 'loading') {
+    // Blank screen matching app background — no flash of content
+    return <View style={{ flex: 1, backgroundColor: '#1a0a2e' }} />;
+  }
+
+  if (authState === 'unauthenticated') {
+    return <Redirect href="/auth/login" />;
+  }
+
   return (
     <Tabs
       screenOptions={{

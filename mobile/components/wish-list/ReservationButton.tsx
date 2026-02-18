@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
@@ -15,6 +15,7 @@ import {
 } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 // Zod schema for guest reservation form validation
 const guestReservationSchema = z.object({
@@ -68,13 +69,13 @@ export function ReservationButton({
         guest_email: data.guestEmail,
       }),
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item reserved successfully!');
+      dialog.success('Gift item reserved successfully!');
       setModalVisible(false);
       reset();
       onReservationSuccess?.();
     },
     onError: (error: Error) => {
-      Alert.alert('Error', error?.message || 'Failed to reserve gift item');
+      dialog.error(error?.message || 'Failed to reserve gift item');
     },
   });
 

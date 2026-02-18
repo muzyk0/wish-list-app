@@ -9,6 +9,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 // Zod schema for form validation
 const giftItemSchema = z.object({
@@ -77,16 +78,14 @@ export default function CreateStandaloneGiftScreen() {
       });
     },
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item created successfully!', [
-        {
-          text: 'OK',
-          onPress: () => router.push('/gifts'),
-        },
-      ]);
+      dialog.message({
+        title: 'Success',
+        message: 'Gift item created successfully!',
+        onPress: () => router.push('/gifts'),
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to create gift item. Please try again.',
       );
     },

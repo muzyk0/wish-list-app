@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   Linking,
   Pressable,
   RefreshControl,
@@ -16,6 +15,7 @@ import {
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { WishlistItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
 // Gift Item Card Component
 const GiftItemCard = ({
@@ -173,22 +173,18 @@ export default function WishListScreen() {
   };
 
   const handleReserveGift = (item: WishlistItem) => {
-    Alert.alert(
-      'Reserve Gift',
-      `You are reserving "${item.title}". In a real app, this would create a reservation.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reserve',
-          onPress: () => {
-            Alert.alert('Success', 'Gift reserved successfully!');
-            queryClient
-              .invalidateQueries({ queryKey: ['giftItems', id] })
-              .catch(console.error);
-          },
-        },
-      ],
-    );
+    dialog.confirm({
+      title: 'Reserve Gift',
+      message: `You are reserving "${item.title}". In a real app, this would create a reservation.`,
+      confirmLabel: 'Reserve',
+      cancelLabel: 'Cancel',
+      onConfirm: () => {
+        dialog.success('Gift reserved successfully!');
+        queryClient
+          .invalidateQueries({ queryKey: ['giftItems', id] })
+          .catch(console.error);
+      },
+    });
   };
 
   const handleEditGift = (item: WishlistItem) => {

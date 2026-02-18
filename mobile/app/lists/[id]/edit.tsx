@@ -6,14 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import {
   ActivityIndicator,
   HelperText,
@@ -23,6 +16,7 @@ import {
 import { z } from 'zod';
 
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 const updateWishListSchema = z.object({
   title: z.string().min(1, 'Please enter a title for your wishlist.').max(200),
@@ -82,20 +76,18 @@ export default function EditWishListScreen() {
         is_public: data.is_public,
       }),
     onSuccess: () => {
-      Alert.alert('Success', 'Wishlist updated successfully!', [
-        {
-          text: 'OK',
-          onPress: () =>
-            router.push({
-              pathname: `/lists/[id]`,
-              params: { id },
-            }),
-        },
-      ]);
+      dialog.message({
+        title: 'Success',
+        message: 'Wishlist updated successfully!',
+        onPress: () =>
+          router.push({
+            pathname: `/lists/[id]`,
+            params: { id },
+          }),
+      });
     },
     onError: (error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to update wishlist. Please try again.',
       );
     },
@@ -104,13 +96,14 @@ export default function EditWishListScreen() {
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteWishList(id),
     onSuccess: () => {
-      Alert.alert('Success', 'Wishlist deleted successfully!', [
-        { text: 'OK', onPress: () => router.push('/lists') },
-      ]);
+      dialog.message({
+        title: 'Success',
+        message: 'Wishlist deleted successfully!',
+        onPress: () => router.push('/lists'),
+      });
     },
     onError: (error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to delete wishlist. Please try again.',
       );
     },
@@ -121,18 +114,15 @@ export default function EditWishListScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMutation.mutate(),
-        },
-      ],
-    );
+    dialog.confirm({
+      title: 'Confirm Delete',
+      message:
+        'Are you sure you want to delete this wishlist? This action cannot be undone and will also delete all associated gift items.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: () => deleteMutation.mutate(),
+    });
   };
 
   if (isLoading) {

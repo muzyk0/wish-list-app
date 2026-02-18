@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -15,6 +14,7 @@ import {
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { GiftItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
 // Gift Item Card Component for Selection
 const SelectableGiftItemCard = ({
@@ -129,24 +129,22 @@ export default function AttachItemsScreen() {
     mutationFn: ({ itemId }: { itemId: string }) =>
       apiClient.attachGiftItemToWishlist(id, itemId),
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item attached to wishlist successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            queryClient
-              .invalidateQueries({ queryKey: ['giftItems', id] })
-              .catch(console.error);
-            queryClient
-              .invalidateQueries({ queryKey: ['standaloneGiftItems'] })
-              .catch(console.error);
-            setAttachingItemId(null);
-          },
+      dialog.message({
+        title: 'Success',
+        message: 'Gift item attached to wishlist successfully!',
+        onPress: () => {
+          queryClient
+            .invalidateQueries({ queryKey: ['giftItems', id] })
+            .catch(console.error);
+          queryClient
+            .invalidateQueries({ queryKey: ['standaloneGiftItems'] })
+            .catch(console.error);
+          setAttachingItemId(null);
         },
-      ]);
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to attach gift item. Please try again.',
       );
       setAttachingItemId(null);

@@ -9,6 +9,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 const emailChangeSchema = z.object({
   new_email: z.email('Invalid email address'),
@@ -36,13 +37,13 @@ export default function ChangeEmailScreen() {
         currentPassword: data.current_password,
       }),
     onSuccess: () => {
-      Alert.alert('Success', 'Email updated successfully!');
+      dialog.success('Email updated successfully!');
       emailForm.reset();
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       router.back();
     },
     onError: (error: Error) => {
-      Alert.alert('Error', error.message || 'Failed to change email');
+      dialog.error(error.message || 'Failed to change email');
     },
   });
 

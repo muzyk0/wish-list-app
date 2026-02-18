@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Badge } from '@/components/ui/Badge';
 import { apiClient } from '@/lib/api';
 import type { GiftItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
 interface GiftItemDisplayProps {
   item: GiftItem;
@@ -25,15 +26,14 @@ export default function GiftItemDisplay({
         item.price || 0,
       ),
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item marked as purchased successfully!');
+      dialog.success('Gift item marked as purchased successfully!');
       if (onRefresh) {
         onRefresh();
       }
     },
     // biome-ignore lint/suspicious/noExplicitAny: Error type
     onError: (error: any) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message ||
           'Failed to mark gift item as purchased. Please try again.',
       );
@@ -43,18 +43,13 @@ export default function GiftItemDisplay({
   const handlePurchase = () => {
     if (!item.id) return;
 
-    Alert.alert(
-      'Confirm Purchase',
-      `Are you sure you want to mark "${item.title}" as purchased?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Mark as Purchased',
-          style: 'default',
-          onPress: () => purchaseMutation.mutate(item.id || ''),
-        },
-      ],
-    );
+    dialog.confirm({
+      title: 'Confirm Purchase',
+      message: `Are you sure you want to mark "${item.title}" as purchased?`,
+      confirmLabel: 'Mark as Purchased',
+      cancelLabel: 'Cancel',
+      onConfirm: () => purchaseMutation.mutate(item.id || ''),
+    });
   };
 
   return (

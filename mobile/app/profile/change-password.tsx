@@ -9,6 +9,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 const passwordChangeSchema = z
   .object({
@@ -46,12 +47,12 @@ export default function ChangePasswordScreen() {
         newPassword: data.new_password,
       }),
     onSuccess: () => {
-      Alert.alert('Success', 'Password changed successfully!');
+      dialog.success('Password changed successfully!');
       passwordForm.reset();
       router.back();
     },
     onError: (error: Error) => {
-      Alert.alert('Error', error.message || 'Failed to change password');
+      dialog.error(error.message || 'Failed to change password');
     },
   });
 

@@ -4,11 +4,12 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Chip, Text } from 'react-native-paper';
 import { TabsLayout } from '@/components/TabsLayout';
 import { apiClient } from '@/lib/api';
 import type { WishList } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
 const { width } = Dimensions.get('window');
 
@@ -157,29 +158,25 @@ export default function ListsTab() {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this wishlist? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await apiClient.deleteWishList(id);
-              Alert.alert('Success', 'Wishlist deleted successfully!');
-              queryClient.invalidateQueries({ queryKey: ['wishlists'] });
-            } catch (error: any) {
-              Alert.alert(
-                'Error',
-                error.message || 'Failed to delete wishlist. Please try again.',
-              );
-            }
-          },
-        },
-      ],
-    );
+    dialog.confirm({
+      title: 'Confirm Delete',
+      message:
+        'Are you sure you want to delete this wishlist? This action cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await apiClient.deleteWishList(id);
+          dialog.success('Wishlist deleted successfully!');
+          queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+        } catch (error: any) {
+          dialog.error(
+            error.message || 'Failed to delete wishlist. Please try again.',
+          );
+        }
+      },
+    });
   };
 
   if (isLoading) {

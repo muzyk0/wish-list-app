@@ -4,11 +4,12 @@ import { useMutation } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import type { GiftItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 import ImageUpload from './ImageUpload';
 
 // Zod schema for form validation
@@ -108,26 +109,20 @@ export default function GiftItemForm({
       });
     },
     onSuccess: (_data) => {
-      Alert.alert(
-        'Success',
-        `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (onComplete) {
-                onComplete();
-              } else {
-                router.back();
-              }
-            },
-          },
-        ],
-      );
+      dialog.message({
+        title: 'Success',
+        message: `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
+        onPress: () => {
+          if (onComplete) {
+            onComplete();
+          } else {
+            router.back();
+          }
+        },
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message ||
           `Failed to ${existingItem ? 'update' : 'create'} gift item. Please try again.`,
       );
@@ -142,22 +137,20 @@ export default function GiftItemForm({
       return apiClient.deleteGiftItem(wishlistId, existingItem.id);
     },
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item deleted successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            if (onComplete) {
-              onComplete();
-            } else {
-              router.back();
-            }
-          },
+      dialog.message({
+        title: 'Success',
+        message: 'Gift item deleted successfully!',
+        onPress: () => {
+          if (onComplete) {
+            onComplete();
+          } else {
+            router.back();
+          }
         },
-      ]);
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to delete gift item. Please try again.',
       );
     },
@@ -170,18 +163,7 @@ export default function GiftItemForm({
   const handleDelete = () => {
     if (!existingItem) return;
 
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this gift item? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMutation.mutate(),
-        },
-      ],
-    );
+    dialog.confirmDelete('this gift item', () => deleteMutation.mutate());
   };
 
   return (

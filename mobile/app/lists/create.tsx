@@ -5,17 +5,11 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 // Zod schema for wishlist creation form validation
 const createWishlistSchema = z.object({
@@ -59,13 +53,14 @@ export default function CreateWishListScreen() {
         is_public: data.isPublic,
       }),
     onSuccess: () => {
-      Alert.alert('Success', 'Wishlist created successfully!', [
-        { text: 'OK', onPress: () => router.push('/lists') },
-      ]);
+      dialog.message({
+        title: 'Success',
+        message: 'Wishlist created successfully!',
+        onPress: () => router.push('/lists'),
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to create wishlist. Please try again.',
       );
     },

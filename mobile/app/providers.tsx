@@ -8,6 +8,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { PaperProvider } from 'react-native-paper';
+import { GlobalDialogs } from '@/components/GlobalDialogs';
 import { ThemeProvider, useThemeContext } from '@/contexts/ThemeContext';
 
 function makeQueryClient() {
@@ -57,7 +58,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <PaperThemeProvider>{children}</PaperThemeProvider>
+        <PaperThemeProvider>
+          {children}
+          <GlobalDialogs />
+        </PaperThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
