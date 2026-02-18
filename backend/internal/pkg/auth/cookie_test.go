@@ -50,7 +50,7 @@ func TestClearRefreshTokenCookie(t *testing.T) {
 
 		// Check cookie properties for clearing
 		assert.Equal(t, RefreshTokenCookieName, cookie.Name, "Cookie name mismatch")
-		assert.Equal(t, "", cookie.Value, "Cookie value should be empty")
+		assert.Empty(t, cookie.Value, "Cookie value should be empty")
 		assert.Equal(t, "/", cookie.Path, "Cookie path should be /")
 		assert.True(t, cookie.HttpOnly, "Cookie should be HttpOnly")
 		assert.True(t, cookie.Secure, "Cookie should be Secure")

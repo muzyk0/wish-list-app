@@ -3,7 +3,6 @@ package http
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
@@ -78,7 +77,7 @@ func TestHandler_Health(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusServiceUnavailable, appErr.Code)
 		assert.Contains(t, appErr.Message, "database connection failed")
 

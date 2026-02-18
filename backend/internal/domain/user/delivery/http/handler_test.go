@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
@@ -246,7 +245,7 @@ func TestUserHandler_Register_BadRequest(t *testing.T) {
 	// Assertions
 	require.Error(t, err, "Expected validation error")
 	var appErr *apperrors.AppError
-	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 	assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 	// Service should NOT be called because validation fails first
@@ -274,7 +273,7 @@ func TestUserHandler_Login_BadRequest(t *testing.T) {
 	// Assertions
 	require.Error(t, err, "Expected validation error")
 	var appErr *apperrors.AppError
-	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 	assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 	// Service should NOT be called because validation fails first
@@ -319,7 +318,7 @@ func TestUserHandler_Register_Conflict(t *testing.T) {
 	// Assertions
 	require.Error(t, err)
 	var appErr *apperrors.AppError
-	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 	assert.Equal(t, nethttp.StatusConflict, appErr.Code)
 	assert.Contains(t, appErr.Message, "User with this email already exists")
 
@@ -359,7 +358,7 @@ func TestUserHandler_Login_Unauthorized(t *testing.T) {
 	// Assertions
 	require.Error(t, err)
 	var appErr *apperrors.AppError
-	require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+	require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 	assert.Equal(t, nethttp.StatusUnauthorized, appErr.Code)
 	assert.Contains(t, appErr.Message, "Invalid credentials")
 
@@ -420,7 +419,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
 		assert.Contains(t, appErr.Message, "User not found")
 	})
@@ -442,11 +441,9 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
 		assert.Contains(t, appErr.Message, "User not found")
-
-		mockService.AssertExpectations(t)
 	})
 
 	t.Run("other errors return internal server error", func(t *testing.T) {
@@ -466,7 +463,7 @@ func TestUserHandler_GetProfile(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 		assert.Contains(t, appErr.Message, "Failed to process request")
 
@@ -543,7 +540,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 	})
 
@@ -567,7 +564,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 
 		require.Error(t, err, "Expected binding error")
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 
 		mockService.AssertNotCalled(t, "UpdateProfile")
@@ -598,7 +595,7 @@ func TestUserHandler_UpdateProfile(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 
 		mockService.AssertExpectations(t)

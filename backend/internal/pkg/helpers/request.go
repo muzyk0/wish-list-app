@@ -18,7 +18,7 @@ import (
 //	    }
 //	    // req is now bound and validated
 //	}
-func BindAndValidate(c echo.Context, req interface{}) error {
+func BindAndValidate(c echo.Context, req any) error {
 	if err := c.Bind(req); err != nil {
 		return apperrors.BadRequest("Invalid request body")
 	}

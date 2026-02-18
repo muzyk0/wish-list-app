@@ -37,9 +37,9 @@ type AuthResponse struct {
 	// User information
 	User *UserResponse `json:"user" validate:"required"`
 	// Access token (short-lived, 15 minutes)
-	AccessToken string `json:"accessToken" validate:"required"`
+	AccessToken string `json:"accessToken" validate:"required"` //nolint:gosec // API field name for auth response
 	// Refresh token (long-lived, 7 days) - also set as httpOnly cookie
-	RefreshToken string `json:"refreshToken" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"` //nolint:gosec // API field name for auth response
 }
 
 // ProfileResponse wraps user profile information
@@ -62,14 +62,14 @@ type ExportedGiftItemResponse struct {
 
 // ExportedWishlistResponse represents a wishlist in the data export
 type ExportedWishlistResponse struct {
-	ID          string                      `json:"id" example:"550e8400-e29b-41d4-a716-446655440001"`
-	Title       string                      `json:"title" example:"Birthday 2024"`
-	Description string                      `json:"description" example:"My birthday wishlist"`
-	Occasion    string                      `json:"occasion" example:"Birthday"`
-	IsPublic    bool                        `json:"is_public" example:"true"`
-	PublicSlug  string                      `json:"public_slug" example:"birthday-2024-abc123"`
-	CreatedAt   string                      `json:"created_at" example:"2024-01-01T12:00:00Z"`
-	GiftItems   []ExportedGiftItemResponse  `json:"gift_items"`
+	ID          string                     `json:"id" example:"550e8400-e29b-41d4-a716-446655440001"`
+	Title       string                     `json:"title" example:"Birthday 2024"`
+	Description string                     `json:"description" example:"My birthday wishlist"`
+	Occasion    string                     `json:"occasion" example:"Birthday"`
+	IsPublic    bool                       `json:"is_public" example:"true"`
+	PublicSlug  string                     `json:"public_slug" example:"birthday-2024-abc123"`
+	CreatedAt   string                     `json:"created_at" example:"2024-01-01T12:00:00Z"`
+	GiftItems   []ExportedGiftItemResponse `json:"gift_items"`
 }
 
 // ExportedUserResponse represents user info in the data export
@@ -83,10 +83,10 @@ type ExportedUserResponse struct {
 
 // ExportUserDataResponse represents the complete user data export
 type ExportUserDataResponse struct {
-	User         ExportedUserResponse        `json:"user" validate:"required"`
-	Wishlists    []ExportedWishlistResponse  `json:"wishlists" validate:"required"`
-	ExportedAt   string                      `json:"exported_at" example:"2024-01-01T12:00:00Z" validate:"required"`
-	ExportFormat string                      `json:"export_format" example:"json" validate:"required"`
+	User         ExportedUserResponse       `json:"user" validate:"required"`
+	Wishlists    []ExportedWishlistResponse `json:"wishlists" validate:"required"`
+	ExportedAt   string                     `json:"exported_at" example:"2024-01-01T12:00:00Z" validate:"required"`
+	ExportFormat string                     `json:"export_format" example:"json" validate:"required"`
 }
 
 // ExportUserDataResponseFromMap converts map[string]any from service to typed response

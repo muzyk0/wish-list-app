@@ -519,7 +519,7 @@ func TestGiftItemRepository_SQLInjectionPrevention(t *testing.T) {
 		}
 
 		for _, order := range maliciousOrders {
-			orderUpper := string(order)
+			orderUpper := order
 			if orderUpper == "" {
 				orderUpper = "DESC"
 			}

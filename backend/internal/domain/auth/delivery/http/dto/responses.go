@@ -14,15 +14,15 @@ type AuthResponse struct {
 	// User information
 	User *UserResponse `json:"user" validate:"required"`
 	// Access token (short-lived, 15 minutes)
-	AccessToken string `json:"accessToken" validate:"required"`
+	AccessToken string `json:"accessToken" validate:"required"` //nolint:gosec // API field name for auth response
 	// Refresh token (long-lived, 7 days)
-	RefreshToken string `json:"refreshToken" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"` //nolint:gosec // API field name for auth response
 }
 
 // RefreshResponse represents the response for token refresh
 type RefreshResponse struct {
-	AccessToken  string `json:"accessToken" validate:"required"`
-	RefreshToken string `json:"refreshToken" validate:"required"`
+	AccessToken  string `json:"accessToken" validate:"required"`  //nolint:gosec // API field name for token response
+	RefreshToken string `json:"refreshToken" validate:"required"` //nolint:gosec // API field name for token response
 }
 
 // HandoffResponse represents the response for mobile handoff code generation
@@ -33,8 +33,8 @@ type HandoffResponse struct {
 
 // ExchangeResponse represents the response for code exchange
 type ExchangeResponse struct {
-	AccessToken  string        `json:"accessToken" validate:"required"`
-	RefreshToken string        `json:"refreshToken" validate:"required"`
+	AccessToken  string        `json:"accessToken" validate:"required"`  //nolint:gosec // API field name for token response
+	RefreshToken string        `json:"refreshToken" validate:"required"` //nolint:gosec // API field name for token response
 	User         *UserResponse `json:"user" validate:"required"`
 }
 

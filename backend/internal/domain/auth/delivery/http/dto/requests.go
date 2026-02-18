@@ -2,7 +2,7 @@ package dto
 
 // RefreshRequest represents the request body for token refresh (mobile clients)
 type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token"` //nolint:gosec // API field name for token refresh request
 }
 
 // ExchangeRequest represents the request body for code exchange

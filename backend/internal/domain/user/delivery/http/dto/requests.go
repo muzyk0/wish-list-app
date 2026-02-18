@@ -7,7 +7,7 @@ import (
 // RegisterRequest represents the user registration request
 type RegisterRequest struct {
 	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=6"`
+	Password  string `json:"password" validate:"required,min=6"` //nolint:gosec // API field name for user registration
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	AvatarUrl string `json:"avatar_url"`
@@ -27,7 +27,7 @@ func (r *RegisterRequest) ToDomain() userservice.RegisterUserInput {
 // LoginRequest represents the user login request
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Password string `json:"password" validate:"required,min=6"` //nolint:gosec // API field name for user login
 }
 
 // ToDomain converts the request DTO to a service input

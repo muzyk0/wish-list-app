@@ -34,6 +34,7 @@ func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 
 	if dbURL == "" {
+		//nolint:gosec // This is a default connection string for local development only
 		dbURL = "postgres://user:password@localhost:5432/wishlist_db?sslmode=disable"
 	}
 
@@ -86,6 +87,7 @@ func main() {
 		if err != nil {
 			log.Printf("Version error: %v\n", err)
 		} else {
+			//nolint:gosec // Log output is for local development tool only
 			log.Printf("Version: %d, Dirty: %t\n", version, dirty)
 		}
 	default:

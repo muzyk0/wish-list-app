@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseUUID(t *testing.T) {
@@ -76,7 +76,7 @@ func TestParseUUID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create Echo context
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
@@ -84,13 +84,13 @@ func TestParseUUID(t *testing.T) {
 			result, err := ParseUUID(c, tt.uuidStr)
 
 			if tt.expectedValid {
-				assert.Nil(t, err, "Expected no error for valid UUID")
+				require.NoError(t, err, "Expected no error for valid UUID")
 				assert.True(t, result.Valid, "UUID should be valid")
 				assert.NotEqual(t, [16]byte{}, result.Bytes, "UUID bytes should not be zero")
 			} else {
-				assert.NotNil(t, err, "Expected non-nil error for invalid UUID")
+				require.Error(t, err, "Expected non-nil error for invalid UUID")
 				var httpErr *echo.HTTPError
-				assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+				require.ErrorAs(t, err, &httpErr, "Error should be echo.HTTPError")
 				assert.Equal(t, tt.expectedStatusCode, httpErr.Code, "Status code mismatch")
 			}
 		})
@@ -166,14 +166,14 @@ func TestParseUUIDConsistency(t *testing.T) {
 		validUUID := "550e8400-e29b-41d4-a716-446655440000"
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		result1, err := ParseUUID(c, validUUID)
 		result2 := MustParseUUID(validUUID)
 
-		assert.Nil(t, err, "ParseUUID should return nil error for valid UUID")
+		require.NoError(t, err, "ParseUUID should return nil error for valid UUID")
 		assert.True(t, result1.Valid, "ParseUUID result should be valid")
 		assert.True(t, result2.Valid, "MustParseUUID result should be valid")
 		assert.Equal(t, result1.Bytes, result2.Bytes, "Both functions should return same UUID bytes")
@@ -183,7 +183,7 @@ func TestParseUUIDConsistency(t *testing.T) {
 		invalidUUID := "not-a-uuid"
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -191,9 +191,9 @@ func TestParseUUIDConsistency(t *testing.T) {
 		result2 := MustParseUUID(invalidUUID)
 
 		// ParseUUID returns echo.HTTPError for invalid UUID
-		assert.NotNil(t, err, "ParseUUID returns non-nil error for invalid UUID")
+		require.Error(t, err, "ParseUUID returns non-nil error for invalid UUID")
 		var httpErr *echo.HTTPError
-		assert.True(t, errors.As(err, &httpErr), "Error should be echo.HTTPError")
+		require.ErrorAs(t, err, &httpErr, "Error should be echo.HTTPError")
 		assert.Equal(t, http.StatusBadRequest, httpErr.Code, "HTTP error should be 400")
 
 		// Both should have invalid UUID

@@ -48,7 +48,7 @@ func NewUserService(repo repository.UserRepositoryInterface) *UserService {
 // RegisterUserInput contains the data required to register a new user.
 type RegisterUserInput struct {
 	Email     string
-	Password  string
+	Password  string //nolint:gosec // Service input field name for user registration
 	FirstName string
 	LastName  string
 	AvatarUrl string
@@ -57,13 +57,13 @@ type RegisterUserInput struct {
 // LoginUserInput contains the data required for user login.
 type LoginUserInput struct {
 	Email    string
-	Password string
+	Password string //nolint:gosec // Service input field name for user login
 }
 
 // UpdateUserInput contains fields for updating a user (all optional).
 type UpdateUserInput struct {
 	Email     *string
-	Password  *string
+	Password  *string //nolint:gosec // Service input field name for user update
 	FirstName *string
 	LastName  *string
 	AvatarUrl *string
