@@ -80,7 +80,7 @@ export function useAuth(): UseAuthReturn {
 
     initAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [refreshAuth]); // Only run on mount
 
   return {
     isAuthenticated,
