@@ -97,6 +97,7 @@ type ItemOutput struct {
 	Notes       string
 	IsPurchased bool
 	IsArchived  bool
+	WishlistIDs []string // IDs of wishlists this item is attached to (empty for standalone)
 	CreatedAt   string
 	UpdatedAt   string
 }
@@ -141,10 +142,14 @@ func (s *ItemService) GetMyItems(ctx context.Context, userID string, filters rep
 		return nil, fmt.Errorf("failed to get items: %w", err)
 	}
 
-	// Convert to output
+	// Convert to output, attaching wishlist IDs from the batch-loaded map
 	items := make([]*ItemOutput, 0, len(result.Items))
 	for _, item := range result.Items {
-		items = append(items, s.convertToOutput(item))
+		output := s.convertToOutput(item)
+		if ids, ok := result.WishlistIDsMap[item.ID.String()]; ok {
+			output.WishlistIDs = ids
+		}
+		items = append(items, output)
 	}
 
 	totalPages := int((result.TotalCount + int64(filters.Limit) - 1) / int64(filters.Limit))

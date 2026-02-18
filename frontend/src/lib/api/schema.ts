@@ -2854,6 +2854,12 @@ export interface components {
             title?: string;
             /** @example 2024-01-01T12:00:00Z */
             updated_at?: string;
+            /**
+             * @example [
+             *       "550e8400-e29b-41d4-a716-446655440002"
+             *     ]
+             */
+            wishlist_ids?: string[];
         };
         "wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest": {
             /** @example 899.99 */

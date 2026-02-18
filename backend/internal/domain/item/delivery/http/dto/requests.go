@@ -12,7 +12,7 @@ type CreateItemRequest struct {
 	ImageURL    string  `json:"image_url" validate:"omitempty,url" example:"https://example.com/image.jpg"`
 	Price       float64 `json:"price" validate:"omitempty,gte=0" example:"999.99"`
 	Priority    int32   `json:"priority" validate:"omitempty,gte=0,lte=5" example:"3"`
-	Notes       string  `json:"notes" validate:"max:1000" example:"Preferred color: Blue"`
+	Notes       string  `json:"notes" validate:"max=1000" example:"Preferred color: Blue"`
 }
 
 // ToDomain converts CreateItemRequest to service input

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jmoiron/sqlx"
 
 	"wish-list/internal/app/database"
 	"wish-list/internal/domain/item/models"
@@ -64,8 +65,9 @@ type ItemFilters struct {
 
 // PaginatedResult represents paginated query result
 type PaginatedResult struct {
-	Items      []*models.GiftItem
-	TotalCount int64
+	Items          []*models.GiftItem
+	TotalCount     int64
+	WishlistIDsMap map[string][]string // item_id -> []wishlist_id, populated by GetByOwnerPaginated
 }
 
 // GiftItemRepositoryInterface defines the interface for gift item CRUD operations.
@@ -221,9 +223,47 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 		return nil, fmt.Errorf("failed to get items: %w", err)
 	}
 
+	// Fetch wishlist IDs for all items in a single batch query (no N+1)
+	wishlistIDsMap := make(map[string][]string, len(items))
+	if len(items) > 0 {
+		itemIDStrings := make([]string, len(items))
+		for i, item := range items {
+			itemIDStrings[i] = item.ID.String()
+		}
+
+		batchQuery, batchArgs, err := sqlx.In(
+			`SELECT gift_item_id::text, string_agg(wishlist_id::text, ',') AS wishlist_ids_csv
+			 FROM wishlist_items
+			 WHERE gift_item_id::text IN (?)
+			 GROUP BY gift_item_id`,
+			itemIDStrings,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build wishlist IDs query: %w", err)
+		}
+		batchQuery = r.db.Rebind(batchQuery)
+
+		type wishlistRow struct {
+			GiftItemID    string `db:"gift_item_id"`
+			WishlistIDsCSV string `db:"wishlist_ids_csv"`
+		}
+
+		var rows []wishlistRow
+		if err := r.db.SelectContext(ctx, &rows, batchQuery, batchArgs...); err != nil {
+			return nil, fmt.Errorf("failed to get wishlist IDs for items: %w", err)
+		}
+
+		for _, row := range rows {
+			if row.WishlistIDsCSV != "" {
+				wishlistIDsMap[row.GiftItemID] = strings.Split(row.WishlistIDsCSV, ",")
+			}
+		}
+	}
+
 	return &PaginatedResult{
-		Items:      items,
-		TotalCount: totalCount,
+		Items:          items,
+		TotalCount:     totalCount,
+		WishlistIDsMap: wishlistIDsMap,
 	}, nil
 }
 

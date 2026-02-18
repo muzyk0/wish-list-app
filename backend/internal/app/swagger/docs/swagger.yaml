@@ -139,6 +139,7 @@ definitions:
         type: string
       notes:
         example: 'Preferred color: Blue'
+        maxLength: 1000
         type: string
       price:
         example: 999.99
@@ -198,6 +199,12 @@ definitions:
       updated_at:
         example: "2024-01-01T12:00:00Z"
         type: string
+      wishlist_ids:
+        example:
+        - 550e8400-e29b-41d4-a716-446655440002
+        items:
+          type: string
+        type: array
     type: object
   wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest:
     properties:
