@@ -52,6 +52,7 @@ export function FeaturedListCard({ list, index }: FeaturedListCardProps) {
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <svg
+                role="presentation"
                 className="size-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -73,6 +74,7 @@ export function FeaturedListCard({ list, index }: FeaturedListCardProps) {
           {/* Arrow indicator */}
           <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
             <svg
+              role="presentation"
               className="size-5 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"

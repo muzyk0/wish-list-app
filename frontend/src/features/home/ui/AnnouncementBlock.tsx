@@ -14,6 +14,7 @@ const FEATURES: FeatureItem[] = [
     key: 'reservations',
     icon: (
       <svg
+        role="presentation"
         className="size-5"
         fill="none"
         viewBox="0 0 24 24"
@@ -32,6 +33,7 @@ const FEATURES: FeatureItem[] = [
     key: 'themes',
     icon: (
       <svg
+        role="presentation"
         className="size-5"
         fill="none"
         viewBox="0 0 24 24"
@@ -50,6 +52,7 @@ const FEATURES: FeatureItem[] = [
     key: 'privacy',
     icon: (
       <svg
+        role="presentation"
         className="size-5"
         fill="none"
         viewBox="0 0 24 24"
@@ -68,6 +71,7 @@ const FEATURES: FeatureItem[] = [
     key: 'guest',
     icon: (
       <svg
+        role="presentation"
         className="size-5"
         fill="none"
         viewBox="0 0 24 24"
@@ -151,6 +155,7 @@ export function AnnouncementBlock() {
               >
                 {t('announcement.cta')}
                 <svg
+                  role="presentation"
                   className="size-4"
                   fill="none"
                   viewBox="0 0 24 24"

@@ -10,7 +10,7 @@
     "lint:write": "biome check --write",
     "lint:write:unsafe": "biome check --write --unsafe",
     "format": "biome format --write",
-    "format:check": "biome format --check",
+    "format:check": "biome format",
     "type-check": "tsgo --noEmit",
     "type-check:watch": "tsgo --noEmit --watch",
     "test": "vitest run",
