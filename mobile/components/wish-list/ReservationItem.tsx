@@ -18,7 +18,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
+  status: 'active' | 'canceled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }
@@ -54,7 +54,7 @@ export function ReservationItem({
               );
 
               if (response.ok) {
-                Alert.alert('Success', 'Reservation cancelled successfully');
+                Alert.alert('Success', 'Reservation canceled successfully');
                 onRefresh();
               } else {
                 const data = await response.json();
@@ -83,11 +83,11 @@ export function ReservationItem({
           icon: 'clock-outline',
           label: 'Active',
         };
-      case 'cancelled':
+      case 'canceled':
         return {
           color: '#9E9E9E',
           icon: 'close-circle-outline',
-          label: 'Cancelled',
+          label: 'Canceled',
         };
       case 'fulfilled':
         return {

@@ -23,7 +23,7 @@ interface WishReservation {
     lastName?: string;
     email: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled';
+  status: 'active' | 'canceled' | 'fulfilled';
   reservedAt: string;
   isPurchased: boolean;
 }
@@ -82,11 +82,11 @@ export function MyWishesReserved() {
             label: 'Reserved',
             bg: 'rgba(255, 215, 0, 0.15)',
           };
-        case 'cancelled':
+        case 'canceled':
           return {
             color: '#9E9E9E',
             icon: 'close-circle-outline',
-            label: 'Cancelled',
+            label: 'Canceled',
             bg: 'rgba(158, 158, 158, 0.15)',
           };
         case 'fulfilled':

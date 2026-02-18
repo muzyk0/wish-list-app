@@ -179,4 +179,4 @@ CREATE INDEX idx_reservations_status ON reservations(status);
 -- 4. ON DELETE Behavior:
 --    - CASCADE: Owner relationships (delete user → delete their data)
 --    - SET NULL: Optional references (preserve history when referenced user deleted)
--- 5. Status Values: reservations.status = 'active'|'cancelled'|'fulfilled'|'expired'
+-- 5. Status Values: reservations.status = 'active'|'canceled'|'fulfilled'|'expired'

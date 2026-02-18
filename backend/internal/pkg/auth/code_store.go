@@ -104,7 +104,7 @@ func (cs *CodeStore) CleanupExpired() int {
 }
 
 // StartCleanupRoutine starts a background goroutine that cleans up
-// expired codes every 30 seconds. The goroutine stops when ctx is cancelled.
+// expired codes every 30 seconds. The goroutine stops when ctx is canceled.
 func (cs *CodeStore) StartCleanupRoutine(ctx context.Context) {
 	ticker := time.NewTicker(30 * time.Second)
 

@@ -19,7 +19,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
+  status: 'active' | 'canceled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }

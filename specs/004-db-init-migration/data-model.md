@@ -137,7 +137,7 @@
 | guest_email | TEXT | | | |
 | encrypted_guest_email | TEXT | | | PII encrypted |
 | reservation_token | UUID | UNIQUE | | Anonymous access token |
-| status | VARCHAR(50) | NOT NULL | 'active' | active/cancelled/fulfilled/expired |
+| status | VARCHAR(50) | NOT NULL | 'active' | active/canceled/fulfilled/expired |
 | reserved_at | TIMESTAMPTZ | NOT NULL | NOW() | |
 | expires_at | TIMESTAMPTZ | | | |
 | canceled_at | TIMESTAMPTZ | | | |

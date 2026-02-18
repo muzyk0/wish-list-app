@@ -88,10 +88,10 @@ A record of a guest reserving a gift item.
 - `guest_name` (VARCHAR(200), nullable): Name of the guest if not authenticated
 - `guest_email` (VARCHAR(255), nullable): Email of the guest if not authenticated
 - `reservation_token` (UUID, unique, not null): Token for anonymous reservation management
-- `status` (ENUM: active, cancelled, fulfilled, expired): Current status of the reservation
+- `status` (ENUM: active, canceled, fulfilled, expired): Current status of the reservation
 - `reserved_at` (TIMESTAMPTZ, not null): Timestamp when item was reserved
 - `expires_at` (TIMESTAMPTZ, nullable): Expiration timestamp for anonymous reservations
-- `canceled_at` (TIMESTAMPTZ, nullable): Timestamp when reservation was cancelled
+- `canceled_at` (TIMESTAMPTZ, nullable): Timestamp when reservation was canceled
 - `canceled_reason` (TEXT, nullable): Reason for cancellation
 - `notification_sent` (BOOLEAN, default: false): Whether reservation notification was sent
 
@@ -160,11 +160,11 @@ Purchased ← Reserved ← Available
 
 ### Reservation Status Transitions
 ```
-Active → Cancelled | Fulfilled | Expired
+Active → Canceled | Fulfilled | Expired
 ```
 
 - Starts as "Active" when created
-- Becomes "Cancelled" when user removes reservation
+- Becomes "Canceled" when user removes reservation
 - Becomes "Fulfilled" when gift is marked as purchased
 - Becomes "Expired" for anonymous reservations after timeout period
 
