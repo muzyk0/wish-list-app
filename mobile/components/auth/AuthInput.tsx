@@ -1,12 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import { HelperText, TextInput } from 'react-native-paper';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;

@@ -34,9 +34,7 @@ export default function GiftItemDetailModal({
 
   const handleEdit = () => {
     onClose();
-    router.push(
-      `/gift-items/${item.id}/edit?wishlistId=${primaryWishlistId}`,
-    );
+    router.push(`/gift-items/${item.id}/edit?wishlistId=${primaryWishlistId}`);
   };
 
   return (
