@@ -38,7 +38,7 @@ jobs:
         run: cd frontend && pnpm run lint
 
       - name: Check formatting
-        run: cd frontend && pnpm run format --check
+        run: cd frontend && pnpm run format:check
 
   type-check:
     name: TypeScript Type Check
