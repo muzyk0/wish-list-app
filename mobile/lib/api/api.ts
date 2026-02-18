@@ -366,7 +366,10 @@ class ApiClient {
     return data;
   }
 
-  async getGiftItemById(_wishlistId: string, itemId: string): Promise<GiftItem> {
+  async getGiftItemById(
+    _wishlistId: string,
+    itemId: string,
+  ): Promise<GiftItem> {
     const { data, error } = await this.client.GET('/items/{id}', {
       params: { path: { id: itemId } },
     });
