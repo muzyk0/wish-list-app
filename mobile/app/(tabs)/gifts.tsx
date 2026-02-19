@@ -1,9 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -16,7 +16,7 @@ import {
 import { ActivityIndicator, Text } from 'react-native-paper';
 import GiftItemDetailModal from '@/components/gifts/GiftItemDetailModal';
 import { apiClient } from '@/lib/api';
-import type { GiftItem } from '@/lib/api/types';
+import type { GiftItem, PaginatedGiftItems } from '@/lib/api/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_PADDING = 12;
@@ -168,6 +168,8 @@ const EmptyState = ({
   );
 };
 
+const PAGE_SIZE = 20;
+
 export default function GiftsTab() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
@@ -178,24 +180,43 @@ export default function GiftsTab() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const {
-    data: itemsResponse,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<PaginatedGiftItems, Error>({
     queryKey: ['userGiftItems', filter],
-    queryFn: () =>
+    queryFn: async ({ pageParam = 1 }) =>
       apiClient.getUserGiftItems({
+        page: pageParam as number,
+        limit: PAGE_SIZE,
         unattached: filter === 'unattached' ? true : undefined,
-        limit: 100,
+        attached: filter === 'attached' ? true : undefined,
       }),
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage?.page ?? 1;
+      const totalPages = lastPage?.total_pages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  const onRefresh = async () => {
+  const allItems = data?.pages?.flatMap((page) => page?.items ?? []) ?? [];
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  };
+  }, [refetch]);
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleItemPress = (item: GiftItem) => {
     setSelectedItem(item);
@@ -210,17 +231,6 @@ export default function GiftsTab() {
   const handleCreateGift = () => {
     router.push('/gifts/create');
   };
-
-  const allItems = itemsResponse?.items || [];
-  const isItemAttached = (item: GiftItem) =>
-    (item.wishlist_ids?.length ?? 0) > 0;
-
-  const filteredItems =
-    filter === 'attached'
-      ? allItems.filter(isItemAttached)
-      : filter === 'unattached'
-        ? allItems.filter((item) => !isItemAttached(item))
-        : allItems;
 
   // Loading State
   if (isLoading) {
@@ -284,18 +294,14 @@ export default function GiftsTab() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Decorative elements */}
       <View style={styles.decorCircle1} />
       <View style={styles.decorCircle2} />
 
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Gifts</Text>
       </View>
 
-      {/* Content */}
       <View style={styles.contentContainer}>
-        {/* Filter Tabs */}
         <BlurView intensity={20} style={styles.filterCard}>
           <View style={styles.filterContent}>
             <FilterTab
@@ -316,12 +322,10 @@ export default function GiftsTab() {
           </View>
         </BlurView>
 
-        {/* Stats */}
         <StatsCard allItems={allItems} />
 
-        {/* Gift Items List */}
         <FlatList
-          data={filteredItems}
+          data={allItems}
           renderItem={({ item }) => (
             <GiftItemCard item={item} onPress={handleItemPress} />
           )}
@@ -338,10 +342,19 @@ export default function GiftsTab() {
             />
           }
           ListEmptyComponent={<EmptyState filter={filter} />}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View style={styles.loadingMore}>
+                <ActivityIndicator size="small" color="#FFD700" />
+                <Text style={styles.loadingMoreText}>Loading more...</Text>
+              </View>
+            ) : null
+          }
         />
       </View>
 
-      {/* Floating Action Button */}
       <Pressable onPress={handleCreateGift} style={styles.fab}>
         <LinearGradient
           colors={['#FFD700', '#FFA500']}
@@ -351,7 +364,6 @@ export default function GiftsTab() {
         </LinearGradient>
       </Pressable>
 
-      {/* Gift Item Detail Modal */}
       <GiftItemDetailModal
         item={selectedItem}
         visible={modalVisible}
@@ -586,6 +598,17 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  loadingMore: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+    gap: 8,
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   fab: {
     position: 'absolute',
