@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
@@ -54,6 +54,7 @@ export default function GiftItemForm({
   onComplete,
 }: GiftItemFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -106,6 +107,8 @@ export default function GiftItemForm({
       });
     },
     onSuccess: (_data) => {
+      queryClient.invalidateQueries({ queryKey: ['giftItems', wishlistId] });
+      queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
       dialog.message({
         title: 'Success',
         message: `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
@@ -134,6 +137,8 @@ export default function GiftItemForm({
       return apiClient.deleteGiftItem(wishlistId, existingItem.id);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['giftItems', wishlistId] });
+      queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
       dialog.message({
         title: 'Success',
         message: 'Gift item deleted successfully!',

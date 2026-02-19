@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -42,6 +42,7 @@ type GiftItemFormData = z.infer<typeof giftItemSchema>;
 
 export default function CreateStandaloneGiftScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -78,6 +79,8 @@ export default function CreateStandaloneGiftScreen() {
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
+      queryClient.invalidateQueries({ queryKey: ['standaloneGiftItems'] });
       dialog.message({
         title: 'Success',
         message: 'Gift item created successfully!',
