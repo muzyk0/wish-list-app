@@ -188,7 +188,11 @@ export default function WishListScreen() {
   };
 
   const handleEditGift = (item: WishlistItem) => {
-    router.push(`/lists/${id}/gifts/${item.id}/edit`);
+    if (!item.id) return;
+    router.push({
+      pathname: '/gift-items/[id]/edit',
+      params: { id: item.id, wishlistId: id ?? '' },
+    });
   };
 
   const handleAddGiftItem = () => {
