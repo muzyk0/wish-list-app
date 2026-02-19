@@ -944,6 +944,8 @@ export interface paths {
                     order?: string;
                     /** @description Filter items not attached to any wishlist */
                     unattached?: boolean;
+                    /** @description Filter items attached to any wishlist */
+                    attached?: boolean;
                     /** @description Include archived items (default false) */
                     include_archived?: boolean;
                     /** @description Search in title and description */

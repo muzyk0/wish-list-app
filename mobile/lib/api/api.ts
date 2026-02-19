@@ -391,6 +391,7 @@ class ApiClient {
     sort?: string;
     order?: string;
     unattached?: boolean;
+    attached?: boolean;
     include_archived?: boolean;
     search?: string;
   }): Promise<PaginatedGiftItems> {
