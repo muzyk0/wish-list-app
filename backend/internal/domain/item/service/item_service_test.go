@@ -216,6 +216,64 @@ func TestItemService_GetMyItems_TotalPages(t *testing.T) {
 	assert.Equal(t, 3, result.TotalPages)
 }
 
+func TestItemService_GetMyItems_AttachedFilter(t *testing.T) {
+	_, ownerStr := newValidPgtypeUUID(t)
+
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByOwnerPaginatedFunc: func(ctx context.Context, oid pgtype.UUID, filters repository.ItemFilters) (*repository.PaginatedResult, error) {
+			assert.True(t, filters.Attached, "attached filter should be true")
+			assert.False(t, filters.Unattached, "unattached filter should be false when attached is set")
+			return &repository.PaginatedResult{Items: []*models.GiftItem{}, TotalCount: 0}, nil
+		},
+	}
+
+	svc := newItemService(itemRepo, &WishlistItemRepositoryInterfaceMock{})
+	_, err := svc.GetMyItems(context.Background(), ownerStr, repository.ItemFilters{
+		Attached: true,
+	})
+
+	require.NoError(t, err)
+	assert.Len(t, itemRepo.GetByOwnerPaginatedCalls(), 1)
+}
+
+func TestItemService_GetMyItems_UnattachedFilter(t *testing.T) {
+	_, ownerStr := newValidPgtypeUUID(t)
+
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByOwnerPaginatedFunc: func(ctx context.Context, oid pgtype.UUID, filters repository.ItemFilters) (*repository.PaginatedResult, error) {
+			assert.True(t, filters.Unattached, "unattached filter should be true")
+			assert.False(t, filters.Attached, "attached filter should be false when unattached is set")
+			return &repository.PaginatedResult{Items: []*models.GiftItem{}, TotalCount: 0}, nil
+		},
+	}
+
+	svc := newItemService(itemRepo, &WishlistItemRepositoryInterfaceMock{})
+	_, err := svc.GetMyItems(context.Background(), ownerStr, repository.ItemFilters{
+		Unattached: true,
+	})
+
+	require.NoError(t, err)
+	assert.Len(t, itemRepo.GetByOwnerPaginatedCalls(), 1)
+}
+
+func TestItemService_GetMyItems_NoAttachmentFilter(t *testing.T) {
+	_, ownerStr := newValidPgtypeUUID(t)
+
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByOwnerPaginatedFunc: func(ctx context.Context, oid pgtype.UUID, filters repository.ItemFilters) (*repository.PaginatedResult, error) {
+			assert.False(t, filters.Attached, "attached filter should be false when not set")
+			assert.False(t, filters.Unattached, "unattached filter should be false when not set")
+			return &repository.PaginatedResult{Items: []*models.GiftItem{}, TotalCount: 0}, nil
+		},
+	}
+
+	svc := newItemService(itemRepo, &WishlistItemRepositoryInterfaceMock{})
+	_, err := svc.GetMyItems(context.Background(), ownerStr, repository.ItemFilters{})
+
+	require.NoError(t, err)
+	assert.Len(t, itemRepo.GetByOwnerPaginatedCalls(), 1)
+}
+
 // ---------------------------------------------------------------------------
 // CreateItem
 // ---------------------------------------------------------------------------

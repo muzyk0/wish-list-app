@@ -620,3 +620,98 @@ func TestGiftItemRepository_EdgeCases(t *testing.T) {
 		}
 	})
 }
+
+func TestGiftItemRepository_ItemFilters(t *testing.T) {
+	t.Run("attached filter defaults to false", func(t *testing.T) {
+		filters := ItemFilters{}
+
+		if filters.Attached {
+			t.Error("attached filter should default to false")
+		}
+	})
+
+	t.Run("unattached filter defaults to false", func(t *testing.T) {
+		filters := ItemFilters{}
+
+		if filters.Unattached {
+			t.Error("unattached filter should default to false")
+		}
+	})
+
+	t.Run("attached filter can be set to true", func(t *testing.T) {
+		filters := ItemFilters{
+			Attached: true,
+		}
+
+		if !filters.Attached {
+			t.Error("attached filter should be true when set")
+		}
+	})
+
+	t.Run("attached and unattached are independent", func(t *testing.T) {
+		filters := ItemFilters{
+			Attached:   true,
+			Unattached: false,
+		}
+
+		if !filters.Attached {
+			t.Error("attached should be true")
+		}
+		if filters.Unattached {
+			t.Error("unattached should be false")
+		}
+	})
+
+	t.Run("both filters can be false for all items", func(t *testing.T) {
+		filters := ItemFilters{
+			Attached:   false,
+			Unattached: false,
+		}
+
+		if filters.Attached || filters.Unattached {
+			t.Error("both filters should be false for all items")
+		}
+	})
+}
+
+func TestGiftItemRepository_FilterLogic(t *testing.T) {
+	t.Run("attached=true filters for items with wishlist associations", func(t *testing.T) {
+		filters := ItemFilters{
+			Attached: true,
+		}
+
+		if !filters.Attached {
+			t.Error("attached=true should enable attached filter")
+		}
+		if filters.Unattached {
+			t.Error("attached=true should not enable unattached filter")
+		}
+	})
+
+	t.Run("unattached=true filters for items without wishlist associations", func(t *testing.T) {
+		filters := ItemFilters{
+			Unattached: true,
+		}
+
+		if !filters.Unattached {
+			t.Error("unattached=true should enable unattached filter")
+		}
+		if filters.Attached {
+			t.Error("unattached=true should not enable attached filter")
+		}
+	})
+
+	t.Run("attached takes precedence when both are set", func(t *testing.T) {
+		filters := ItemFilters{
+			Attached:   true,
+			Unattached: true,
+		}
+
+		if !filters.Attached {
+			t.Error("attached should be true")
+		}
+		if !filters.Unattached {
+			t.Error("unattached should be true")
+		}
+	})
+}

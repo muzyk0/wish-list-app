@@ -35,6 +35,7 @@ func NewHandler(svc service.ItemServiceInterface) *Handler {
 //	@Param			sort			query		string						false	"Sort field (created_at, updated_at, title, price)"
 //	@Param			order			query		string						false	"Sort order (asc, desc)"
 //	@Param			unattached		query		bool						false	"Filter items not attached to any wishlist"
+//	@Param			attached		query		bool						false	"Filter items attached to any wishlist"
 //	@Param			include_archived	query		bool						false	"Include archived items (default false)"
 //	@Param			search			query		string						false	"Search in title and description"
 //	@Success		200				{object}	dto.PaginatedItemsResponse	"List of items retrieved successfully"
@@ -52,6 +53,7 @@ func (h *Handler) GetMyItems(c echo.Context) error {
 		Sort:            c.QueryParam("sort"),
 		Order:           c.QueryParam("order"),
 		Unattached:      c.QueryParam("unattached") == "true",
+		Attached:        c.QueryParam("attached") == "true",
 		IncludeArchived: c.QueryParam("include_archived") == "true",
 		Search:          c.QueryParam("search"),
 		Page:            pagination.Page,

@@ -59,6 +59,7 @@ type ItemFilters struct {
 	Sort            string // created_at, updated_at, title, price
 	Order           string // asc, desc
 	Unattached      bool   // Items not attached to any wishlist
+	Attached        bool   // Items attached to any wishlist
 	IncludeArchived bool   // Include archived items
 	Search          string // Search in title and description
 }
@@ -166,7 +167,14 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 		whereConditions = append(whereConditions, "archived_at IS NULL")
 	}
 
-	if filters.Unattached {
+	if filters.Attached {
+		whereConditions = append(whereConditions, `
+			EXISTS (
+				SELECT 1 FROM wishlist_items wi
+				WHERE wi.gift_item_id = gift_items.id
+			)
+		`)
+	} else if filters.Unattached {
 		whereConditions = append(whereConditions, `
 			NOT EXISTS (
 				SELECT 1 FROM wishlist_items wi
@@ -244,7 +252,7 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 		batchQuery = r.db.Rebind(batchQuery)
 
 		type wishlistRow struct {
-			GiftItemID    string `db:"gift_item_id"`
+			GiftItemID     string `db:"gift_item_id"`
 			WishlistIDsCSV string `db:"wishlist_ids_csv"`
 		}
 
