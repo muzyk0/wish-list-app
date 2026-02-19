@@ -28,6 +28,11 @@ get:
       name: unattached
       schema:
         type: boolean
+    - description: Filter items attached to any wishlist
+      in: query
+      name: attached
+      schema:
+        type: boolean
     - description: Include archived items (default false)
       in: query
       name: include_archived

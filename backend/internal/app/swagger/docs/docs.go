@@ -780,6 +780,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
+                        "description": "Filter items attached to any wishlist",
+                        "name": "attached",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
                         "description": "Include archived items (default false)",
                         "name": "include_archived",
                         "in": "query"
