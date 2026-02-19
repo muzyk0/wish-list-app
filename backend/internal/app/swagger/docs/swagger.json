@@ -2627,7 +2627,7 @@
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },
@@ -2768,7 +2768,7 @@
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0
                 },
                 "title": {
@@ -3445,7 +3445,7 @@
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },

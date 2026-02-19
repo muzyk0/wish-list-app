@@ -79,33 +79,30 @@ export default function GiftItemForm({
 
   const mutation = useMutation({
     mutationFn: (data: GiftItemFormData) => {
-      // Parse numeric fields, set to undefined if empty or invalid
       const parsedPrice = data.price ? parseFloat(data.price) : undefined;
       const parsedPriority = data.priority
         ? parseInt(data.priority, 10)
         : undefined;
 
-      if (existingItem) {
-        // Update existing item
-        return apiClient.updateGiftItem(wishlistId, existingItem.id!, {
+      if (existingItem?.id) {
+        return apiClient.updateGiftItem(wishlistId, existingItem.id, {
           title: data.name,
-          description: data.description || '',
-          link: data.link || '',
-          image_url: data.imageUrl || '',
+          description: data.description || undefined,
+          link: data.link || undefined,
+          image_url: data.imageUrl || undefined,
           price: parsedPrice,
           priority: parsedPriority,
-          notes: data.notes || '',
+          notes: data.notes || undefined,
         });
       }
-      // Create new item
       return apiClient.createGiftItem(wishlistId, {
         title: data.name,
-        description: data.description || '',
-        link: data.link || '',
-        image_url: data.imageUrl || '',
+        description: data.description || undefined,
+        link: data.link || undefined,
+        image_url: data.imageUrl || undefined,
         price: parsedPrice,
         priority: parsedPriority,
-        notes: data.notes || '',
+        notes: data.notes || undefined,
       });
     },
     onSuccess: (_data) => {

@@ -2633,7 +2633,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },
@@ -2774,7 +2774,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0
                 },
                 "title": {
@@ -3451,7 +3451,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },

@@ -69,12 +69,12 @@ export default function CreateStandaloneGiftScreen() {
 
       return apiClient.createStandaloneGiftItem({
         title: data.name,
-        description: data.description || '',
-        link: data.link || '',
-        image_url: data.imageUrl || '',
+        description: data.description || undefined,
+        link: data.link || undefined,
+        image_url: data.imageUrl || undefined,
         price: parsedPrice,
         priority: parsedPriority,
-        notes: data.notes || '',
+        notes: data.notes || undefined,
       });
     },
     onSuccess: () => {

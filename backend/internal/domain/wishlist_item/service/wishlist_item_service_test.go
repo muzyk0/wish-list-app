@@ -17,6 +17,10 @@ import (
 
 // --- helpers ---
 
+func strPtr(s string) *string   { return &s }
+func f64Ptr(f float64) *float64 { return &f }
+func i32Ptr(i int32) *int32     { return &i }
+
 // uuidToPg converts a google/uuid to pgtype.UUID.
 func uuidToPg(t *testing.T, u uuid.UUID) pgtype.UUID {
 	t.Helper()
@@ -648,7 +652,7 @@ func TestCreateItemInWishlist_Success(t *testing.T) {
 
 	input := CreateItemInput{
 		Title:    "New Item",
-		Priority: 3,
+		Priority: i32Ptr(3),
 	}
 	result, err := svc.CreateItemInWishlist(context.Background(), wlID.String(), ownerID.String(), input)
 
@@ -703,12 +707,12 @@ func TestCreateItemInWishlist_Success_WithAllFields(t *testing.T) {
 
 	input := CreateItemInput{
 		Title:       "Full Item",
-		Description: "A description",
-		Link:        "https://example.com",
-		ImageURL:    "https://example.com/img.jpg",
-		Price:       19.99,
-		Priority:    5,
-		Notes:       "Some notes",
+		Description: strPtr("A description"),
+		Link:        strPtr("https://example.com"),
+		ImageURL:    strPtr("https://example.com/img.jpg"),
+		Price:       f64Ptr(19.99),
+		Priority:    i32Ptr(5),
+		Notes:       strPtr("Some notes"),
 	}
 	result, err := svc.CreateItemInWishlist(context.Background(), wlID.String(), ownerID.String(), input)
 
@@ -1141,7 +1145,7 @@ func TestCreateItemInWishlist_NoPriceSet(t *testing.T) {
 
 	input := CreateItemInput{
 		Title: "No Price Item",
-		Price: 0, // no price
+		// Price nil means no price
 	}
 	result, err := svc.CreateItemInWishlist(context.Background(), wlID.String(), ownerID.String(), input)
 

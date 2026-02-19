@@ -48,8 +48,8 @@ export default function CreateWishListScreen() {
     mutationFn: (data: CreateWishlistFormData) =>
       apiClient.createWishList({
         title: data.title,
-        description: data.description || '',
-        occasion: data.occasion || '',
+        description: data.description || undefined,
+        occasion: data.occasion || undefined,
         is_public: data.isPublic,
       }),
     onSuccess: () => {

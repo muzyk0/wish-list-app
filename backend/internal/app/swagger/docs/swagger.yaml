@@ -147,7 +147,7 @@ definitions:
         type: number
       priority:
         example: 3
-        maximum: 5
+        maximum: 10
         minimum: 0
         type: integer
       title:
@@ -250,7 +250,7 @@ definitions:
         minimum: 0
         type: number
       priority:
-        maximum: 5
+        maximum: 10
         minimum: 0
         type: integer
       title:
@@ -717,7 +717,7 @@ definitions:
         type: number
       priority:
         example: 3
-        maximum: 5
+        maximum: 10
         minimum: 0
         type: integer
       title:
