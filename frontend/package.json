@@ -16,7 +16,7 @@
     "test": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api": "mkdir -p ./src/lib/api && pnpm openapi-typescript ../api/openapi3.yaml -o ./src/lib/api/schema.ts --root-types --enum --enum-values --dedupe-enums"
+    "generate:api": "mkdir -p ./src/lib/api && pnpm openapi-typescript ../api/openapi3.yaml -o ./src/lib/api/generated-schema.ts --root-types --enum --enum-values --dedupe-enums"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

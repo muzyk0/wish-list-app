@@ -3,7 +3,7 @@
 // Used by both api.ts and auth.ts to avoid circular dependencies
 
 import createClient from 'openapi-fetch';
-import type { paths } from './schema';
+import type { paths } from './generated-schema';
 
 const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api';

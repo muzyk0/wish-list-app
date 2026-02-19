@@ -130,17 +130,7 @@ export default function EditGiftItemScreen() {
               <GiftItemForm
                 wishlistId={giftItem.wishlist_ids?.[0] || ''}
                 existingItem={giftItem}
-                onComplete={() => {
-                  const primaryWishlistId = giftItem.wishlist_ids?.[0];
-                  if (primaryWishlistId) {
-                    router.push({
-                      pathname: '/lists/[id]',
-                      params: { id: primaryWishlistId },
-                    });
-                  } else {
-                    router.push('/gifts');
-                  }
-                }}
+                onComplete={() => router.back()}
               />
             )}
           </View>

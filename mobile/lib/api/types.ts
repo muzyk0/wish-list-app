@@ -27,7 +27,7 @@ import type {
   SchemaWishListInternalDomainUserDeliveryHttpDtoUpdateProfileRequest as UserUpdate,
   SchemaWishListInternalDomainWishlistDeliveryHttpDtoWishListResponse as WishList,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse as WishlistItem,
-} from './schema';
+} from './generated-schema';
 
 export type {
   CancelReservationRequest,

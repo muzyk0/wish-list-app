@@ -110,7 +110,9 @@ export default function GiftItemForm({
       queryClient.invalidateQueries({ queryKey: ['giftItems', wishlistId] });
       queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
       if (existingItem?.id) {
-        queryClient.invalidateQueries({ queryKey: ['giftItem', existingItem.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['giftItem', existingItem.id],
+        });
       }
       dialog.message({
         title: 'Success',
