@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { HelperText, Text, TextInput } from 'react-native-paper';
@@ -62,7 +61,6 @@ export default function GiftItemForm({
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors },
   } = useForm<GiftItemFormData>({
     resolver: zodResolver(giftItemSchema),
@@ -77,21 +75,6 @@ export default function GiftItemForm({
       position: '0',
     },
   });
-
-  useEffect(() => {
-    if (existingItem) {
-      reset({
-        name: existingItem.title || '',
-        description: existingItem.description || '',
-        link: existingItem.link || '',
-        imageUrl: existingItem.image_url || '',
-        price: existingItem.price?.toString() || '',
-        priority: existingItem.priority?.toString() || '0',
-        notes: existingItem.notes || '',
-        position: '0',
-      });
-    }
-  }, [existingItem, reset]);
 
   const imageUrl = watch('imageUrl');
 
