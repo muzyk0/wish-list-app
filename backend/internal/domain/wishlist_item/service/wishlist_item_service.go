@@ -45,12 +45,12 @@ type GiftItemRepositoryInterface interface {
 // CreateItemInput represents input for creating an item in a wishlist
 type CreateItemInput struct {
 	Title       string
-	Description string
-	Link        string
-	ImageURL    string
-	Price       float64
-	Priority    int32
-	Notes       string
+	Description *string
+	Link        *string
+	ImageURL    *string
+	Price       *float64
+	Priority    *int32
+	Notes       *string
 }
 
 // ItemOutput represents an item in service responses
@@ -261,18 +261,29 @@ func (s *WishlistItemService) CreateItemInWishlist(ctx context.Context, wishlist
 
 	// Create item model
 	item := itemmodels.GiftItem{
-		OwnerID:     ownerID,
-		Name:        input.Title,
-		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
-		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
-		ImageUrl:    pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""},
-		Priority:    pgtype.Int4{Int32: input.Priority, Valid: true},
-		Notes:       pgtype.Text{String: input.Notes, Valid: input.Notes != ""},
+		OwnerID: ownerID,
+		Name:    input.Title,
+	}
+
+	if input.Description != nil && *input.Description != "" {
+		item.Description = pgtype.Text{String: *input.Description, Valid: true}
+	}
+	if input.Link != nil && *input.Link != "" {
+		item.Link = pgtype.Text{String: *input.Link, Valid: true}
+	}
+	if input.ImageURL != nil && *input.ImageURL != "" {
+		item.ImageUrl = pgtype.Text{String: *input.ImageURL, Valid: true}
+	}
+	if input.Priority != nil {
+		item.Priority = pgtype.Int4{Int32: *input.Priority, Valid: true}
+	}
+	if input.Notes != nil && *input.Notes != "" {
+		item.Notes = pgtype.Text{String: *input.Notes, Valid: true}
 	}
 
 	// Set price if provided
-	if input.Price > 0 {
-		if err := item.Price.Scan(fmt.Sprintf("%f", input.Price)); err != nil {
+	if input.Price != nil && *input.Price > 0 {
+		if err := item.Price.Scan(fmt.Sprintf("%f", *input.Price)); err != nil {
 			return nil, fmt.Errorf("invalid price: %w", err)
 		}
 	}

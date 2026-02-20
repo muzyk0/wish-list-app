@@ -583,6 +583,11 @@ paths:
           name: unattached
           schema:
             type: boolean
+        - description: Filter items attached to any wishlist
+          in: query
+          name: attached
+          schema:
+            type: boolean
         - description: Include archived items (default false)
           in: query
           name: include_archived
@@ -2003,6 +2008,7 @@ components:
           type: string
         notes:
           example: "Preferred color: Blue"
+          maxLength: 1000
           type: string
         price:
           example: 999.99
@@ -2010,7 +2016,7 @@ components:
           type: number
         priority:
           example: 3
-          maximum: 5
+          maximum: 10
           minimum: 0
           type: integer
         title:
@@ -2062,6 +2068,12 @@ components:
         updated_at:
           example: 2024-01-01T12:00:00Z
           type: string
+        wishlist_ids:
+          example:
+            - 550e8400-e29b-41d4-a716-446655440002
+          items:
+            type: string
+          type: array
       type: object
     wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest:
       properties:
@@ -2108,7 +2120,7 @@ components:
           minimum: 0
           type: number
         priority:
-          maximum: 5
+          maximum: 10
           minimum: 0
           type: integer
         title:
@@ -2583,7 +2595,7 @@ components:
           type: number
         priority:
           example: 3
-          maximum: 5
+          maximum: 10
           minimum: 0
           type: integer
         title:

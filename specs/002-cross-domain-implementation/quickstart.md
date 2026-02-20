@@ -150,7 +150,7 @@ curl -X OPTIONS http://localhost:8080/api/auth/login \
 ### 5. Health Check
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8080/healthz
 # Returns: {"status":"healthy"}
 ```
 

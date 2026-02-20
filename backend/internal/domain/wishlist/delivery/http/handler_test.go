@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
@@ -243,7 +242,7 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
 		assert.Contains(t, appErr.Message, "Wish list not found")
 
@@ -269,7 +268,7 @@ func TestHandler_GetWishListByPublicSlug(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
 		assert.Contains(t, appErr.Message, "Wish list not found")
 
@@ -374,7 +373,7 @@ func TestHandler_UpdateWishList(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusForbidden, appErr.Code)
 		assert.Contains(t, appErr.Message, "Access denied")
 	})
@@ -403,7 +402,7 @@ func TestHandler_UpdateWishList(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 		assert.Contains(t, appErr.Message, "Failed to process request")
 
@@ -455,7 +454,7 @@ func TestHandler_DeleteWishList(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusForbidden, appErr.Code)
 		assert.Contains(t, appErr.Message, "Access denied")
 	})
@@ -479,7 +478,7 @@ func TestHandler_DeleteWishList(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 		assert.Contains(t, appErr.Message, "Failed to process request")
 
@@ -512,7 +511,7 @@ func TestHandler_UpdateWishList_AuthorizationChecks(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusNotFound, appErr.Code)
 		assert.Contains(t, appErr.Message, "Wish list not found")
 

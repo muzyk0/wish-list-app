@@ -61,6 +61,7 @@ export function HeroSection({ onMobileRedirect }: HeroSectionProps) {
             className="w-full sm:w-auto min-w-[200px] h-12 sm:h-14 text-base font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/30"
           >
             <svg
+              role="presentation"
               className="size-5 mr-2"
               fill="none"
               viewBox="0 0 24 24"
@@ -84,6 +85,7 @@ export function HeroSection({ onMobileRedirect }: HeroSectionProps) {
           >
             <Link href="/auth/login">
               <svg
+                role="presentation"
                 className="size-5 mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -104,13 +106,23 @@ export function HeroSection({ onMobileRedirect }: HeroSectionProps) {
         {/* Trust indicators */}
         <div className="mt-16 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-muted-foreground/60 animate-fade-in-up animation-delay-400">
           <div className="flex items-center gap-2">
-            <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              role="presentation"
+              className="size-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z" />
             </svg>
             <span className="text-sm font-medium">{t('hero.trust.free')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              role="presentation"
+              className="size-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
             </svg>
             <span className="text-sm font-medium">
@@ -118,7 +130,12 @@ export function HeroSection({ onMobileRedirect }: HeroSectionProps) {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              role="presentation"
+              className="size-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
             <span className="text-sm font-medium">

@@ -61,7 +61,7 @@ make docker-ps
 make docker-logs-backend
 
 # 4. Test API
-curl http://localhost:8080/health
+curl http://localhost:8080/healthz
 ```
 
 ## Service URLs
@@ -114,7 +114,7 @@ curl http://localhost:8080/health
 
 3. **Access your API**:
    ```bash
-   curl http://localhost:8080/health
+   curl http://localhost:8080/healthz
    ```
 
 4. **For production**: Review DOCKER.md for production deployment guide

@@ -13,10 +13,11 @@
     "lint:write": "biome check --write",
     "lint:write:unsafe": "biome check --write --unsafe",
     "format": "biome format --write",
+    "format:check": "biome format",
     "type-check": "tsgo --noEmit",
     "type-check:watch": "tsgo --noEmit --watch",
     "test": "vitest run --passWithNoTests",
-    "generate:api": "pnpm openapi-typescript ../api/openapi3.yaml -o ./lib/api/schema.ts --root-types --enum --enum-values --dedupe-enums"
+    "generate:api": "pnpm openapi-typescript ../api/openapi3.yaml -o ./lib/api/generated-schema.ts --root-types --enum --enum-values --dedupe-enums"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -66,12 +67,14 @@
     "react-native-worklets": "0.5.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "~19.1.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "openapi-typescript": "^7.10.1",

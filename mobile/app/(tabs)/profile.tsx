@@ -1,14 +1,23 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { ActivityIndicator, Avatar, Text } from 'react-native-paper';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Avatar,
+  Button,
+  Dialog,
+  Portal,
+  Text,
+} from 'react-native-paper';
 import { TabsLayout } from '@/components/TabsLayout';
 import { useThemeContext } from '@/contexts/ThemeContext';
 import { apiClient } from '@/lib/api';
 import { clearTokens } from '@/lib/api/auth';
+import { dialog } from '@/stores/dialogStore';
 
 type MenuItemIcon = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -93,6 +102,8 @@ export default function ProfileScreen() {
   const _queryClient = useQueryClient();
   const router = useRouter();
   const { isDark, toggleTheme } = useThemeContext();
+  const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   const {
     data: user,
@@ -107,42 +118,17 @@ export default function ProfileScreen() {
   const deleteAccountMutation = useMutation({
     mutationFn: () => apiClient.deleteAccount(),
     onSuccess: async () => {
-      Alert.alert('Account Deleted', 'Your account has been deleted.');
       await clearTokens();
       router.replace('/auth/login');
     },
-    onError: (error: Error) => {
-      Alert.alert('Error', error.message || 'Failed to delete account');
+    onError: () => {
+      setDeleteDialogVisible(false);
     },
   });
 
-  const handleLogout = async () => {
-    Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await clearTokens();
-          router.replace('/auth/login');
-        },
-      },
-    ]);
-  };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteAccountMutation.mutate(),
-        },
-      ],
-    );
+  const doLogout = async () => {
+    await clearTokens();
+    router.replace('/auth/login');
   };
 
   if (isLoading) {
@@ -199,8 +185,7 @@ export default function ProfileScreen() {
         icon: 'two-factor-authentication',
         label: 'Two-Factor Authentication',
         value: 'Disabled',
-        onPress: () =>
-          Alert.alert('Coming Soon', 'This feature is coming soon!'),
+        onPress: () => dialog.comingSoon(),
       },
     ],
   };
@@ -225,15 +210,13 @@ export default function ProfileScreen() {
       {
         icon: 'bell',
         label: 'Notifications',
-        onPress: () =>
-          Alert.alert('Coming Soon', 'This feature is coming soon!'),
+        onPress: () => dialog.comingSoon(),
       },
       {
         icon: 'translate',
         label: 'Language',
         value: 'English',
-        onPress: () =>
-          Alert.alert('Coming Soon', 'This feature is coming soon!'),
+        onPress: () => dialog.comingSoon(),
       },
     ],
   };
@@ -245,19 +228,21 @@ export default function ProfileScreen() {
       {
         icon: 'help-circle',
         label: 'Help & Support',
-        onPress: () => Alert.alert('Help', 'Contact support@wishlist.app'),
+        onPress: () =>
+          dialog.message({
+            title: 'Help',
+            message: 'Contact support@wishlist.app',
+          }),
       },
       {
         icon: 'file-document',
         label: 'Terms of Service',
-        onPress: () =>
-          Alert.alert('Coming Soon', 'This feature is coming soon!'),
+        onPress: () => dialog.comingSoon(),
       },
       {
         icon: 'shield-check',
         label: 'Privacy Policy',
-        onPress: () =>
-          Alert.alert('Coming Soon', 'This feature is coming soon!'),
+        onPress: () => dialog.comingSoon(),
       },
       {
         icon: 'information-variant',
@@ -275,7 +260,7 @@ export default function ProfileScreen() {
       {
         icon: 'delete-forever',
         label: 'Delete Account',
-        onPress: handleDeleteAccount,
+        onPress: () => setDeleteDialogVisible(true),
       },
     ],
   };
@@ -325,7 +310,7 @@ export default function ProfileScreen() {
               Danger Zone
             </Text>
           </View>
-          <Pressable onPress={handleDeleteAccount}>
+          <Pressable onPress={() => setDeleteDialogVisible(true)}>
             <View style={styles.dangerMenuItem}>
               <View style={styles.menuItemLeft}>
                 <View
@@ -350,7 +335,10 @@ export default function ProfileScreen() {
       </BlurView>
 
       {/* Logout Button */}
-      <Pressable onPress={handleLogout} style={{ marginTop: 24 }}>
+      <Pressable
+        onPress={() => setLogoutDialogVisible(true)}
+        style={{ marginTop: 24 }}
+      >
         <LinearGradient
           colors={['#FFD700', '#FFA500']}
           style={styles.logoutButton}
@@ -359,9 +347,77 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Logout</Text>
         </LinearGradient>
       </Pressable>
+      {/* Logout dialog */}
+      <Portal>
+        <Dialog
+          visible={logoutDialogVisible}
+          onDismiss={() => setLogoutDialogVisible(false)}
+          style={dialogStyles.dialog}
+        >
+          <Dialog.Title style={dialogStyles.title}>Log out</Dialog.Title>
+          <Dialog.Content>
+            <Text style={dialogStyles.content}>
+              Are you sure you want to log out?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              onPress={() => setLogoutDialogVisible(false)}
+              textColor="rgba(255,255,255,0.6)"
+            >
+              Cancel
+            </Button>
+            <Button onPress={doLogout} textColor="#FF6B6B">
+              Log out
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={deleteDialogVisible}
+          onDismiss={() => setDeleteDialogVisible(false)}
+          style={dialogStyles.dialog}
+        >
+          <Dialog.Title style={dialogStyles.title}>Delete Account</Dialog.Title>
+          <Dialog.Content>
+            <Text style={dialogStyles.content}>
+              This will permanently delete your account and all your data. This
+              action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              onPress={() => setDeleteDialogVisible(false)}
+              textColor="rgba(255,255,255,0.6)"
+            >
+              Cancel
+            </Button>
+            <Button
+              onPress={() => deleteAccountMutation.mutate()}
+              loading={deleteAccountMutation.isPending}
+              textColor="#FF6B6B"
+            >
+              Delete
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </TabsLayout>
   );
 }
+
+const dialogStyles = StyleSheet.create({
+  dialog: {
+    backgroundColor: '#2d1b4e',
+    borderRadius: 20,
+  },
+  title: {
+    color: '#ffffff',
+  },
+  content: {
+    color: 'rgba(255,255,255,0.7)',
+  },
+});
 
 const styles = StyleSheet.create({
   loadingContainer: {

@@ -3,7 +3,7 @@
  * Frontend uses only public/guest operations - all authenticated CRUD is in Mobile
  */
 
-import type { components } from './schema';
+import type { components } from './generated-schema';
 
 // Wish list type from API (without gift_items - fetched separately)
 export type WishList =

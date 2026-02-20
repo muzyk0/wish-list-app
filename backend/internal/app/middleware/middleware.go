@@ -125,7 +125,7 @@ func RateLimiterMiddleware() echo.MiddlewareFunc {
 	return middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
 		Store: middleware.NewRateLimiterMemoryStore(20),
 		Skipper: func(c echo.Context) bool {
-			return c.Path() == "/health"
+			return c.Path() == "/healthz"
 		},
 		IdentifierExtractor: func(c echo.Context) (string, error) {
 			ip := c.RealIP()

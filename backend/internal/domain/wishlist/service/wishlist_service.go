@@ -627,9 +627,9 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
 		ImageUrl:    pgtype.Text{String: input.ImageURL, Valid: input.ImageURL != ""},
 		Price:       pgtype.Numeric{Int: priceBig, Exp: -2, Valid: input.Price > 0},
-		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is safe
+		Priority:    pgtype.Int4{Int32: int32(input.Priority), Valid: true},
 		Notes:       pgtype.Text{String: input.Notes, Valid: input.Notes != ""},
-		Position:    pgtype.Int4{Int32: int32(input.Position), Valid: true}, //nolint:gosec // Bounds checking performed above, conversion is safe
+		Position:    pgtype.Int4{Int32: int32(input.Position), Valid: true},
 	}
 
 	createdGiftItem, err := s.giftItemRepo.CreateWithOwner(ctx, giftItem)

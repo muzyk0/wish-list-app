@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { dialog } from '@/stores/dialogStore';
 
 interface Reservation {
   id: string;
@@ -18,7 +19,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
+  status: 'active' | 'canceled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }
@@ -33,46 +34,36 @@ export function ReservationItem({
   onRefresh,
 }: ReservationItemProps) {
   const handleCancelReservation = async () => {
-    Alert.alert(
-      'Cancel Reservation',
-      'Are you sure you want to cancel this reservation?',
-      [
-        { text: 'No', style: 'cancel' },
-        {
-          text: 'Yes, Cancel',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const response = await fetch(
-                `/api/reservations/${reservation.id}/cancel`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                },
-              );
+    dialog.confirm({
+      title: 'Cancel Reservation',
+      message: 'Are you sure you want to cancel this reservation?',
+      confirmLabel: 'Yes, Cancel',
+      cancelLabel: 'No',
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(
+            `/api/reservations/${reservation.id}/cancel`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          );
 
-              if (response.ok) {
-                Alert.alert('Success', 'Reservation cancelled successfully');
-                onRefresh();
-              } else {
-                const data = await response.json();
-                Alert.alert(
-                  'Error',
-                  data.error || 'Failed to cancel reservation',
-                );
-              }
-            } catch {
-              Alert.alert(
-                'Error',
-                'An error occurred while cancelling the reservation',
-              );
-            }
-          },
-        },
-      ],
-    );
+          if (response.ok) {
+            dialog.success('Reservation canceled successfully');
+            onRefresh();
+          } else {
+            const data = await response.json();
+            dialog.error(data.error || 'Failed to cancel reservation');
+          }
+        } catch {
+          dialog.error('An error occurred while cancelling the reservation');
+        }
+      },
+    });
   };
 
   const getStatusConfig = () => {
@@ -83,11 +74,11 @@ export function ReservationItem({
           icon: 'clock-outline',
           label: 'Active',
         };
-      case 'cancelled':
+      case 'canceled':
         return {
           color: '#9E9E9E',
           icon: 'close-circle-outline',
-          label: 'Cancelled',
+          label: 'Canceled',
         };
       case 'fulfilled':
         return {

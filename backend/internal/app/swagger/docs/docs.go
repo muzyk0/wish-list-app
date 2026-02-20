@@ -780,6 +780,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
+                        "description": "Filter items attached to any wishlist",
+                        "name": "attached",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
                         "description": "Include archived items (default false)",
                         "name": "include_archived",
                         "in": "query"
@@ -2623,6 +2629,7 @@ const docTemplate = `{
                 },
                 "notes": {
                     "type": "string",
+                    "maxLength": 1000,
                     "example": "Preferred color: Blue"
                 },
                 "price": {
@@ -2632,7 +2639,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },
@@ -2698,6 +2705,15 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
+                },
+                "wishlist_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "550e8400-e29b-41d4-a716-446655440002"
+                    ]
                 }
             }
         },
@@ -2764,7 +2780,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0
                 },
                 "title": {
@@ -3441,7 +3457,7 @@ const docTemplate = `{
                 },
                 "priority": {
                     "type": "integer",
-                    "maximum": 5,
+                    "maximum": 10,
                     "minimum": 0,
                     "example": 3
                 },

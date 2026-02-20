@@ -18,7 +18,7 @@ export function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <QuickActionsRow
-          onAddGift={() => router.push('/lists')}
+          onAddGift={() => router.push('/gifts')}
           onNewList={() => router.push('/lists/create')}
           onReserved={() => router.push('/reservations')}
         />

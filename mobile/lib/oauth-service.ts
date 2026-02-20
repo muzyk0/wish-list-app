@@ -130,7 +130,7 @@ export const startGoogleOAuth = async (): Promise<{
         return { success: false, error: 'Authorization code not received' };
       }
     } else if (result.type === 'dismiss' || result.type === 'cancel') {
-      return { success: false, error: 'OAuth flow was cancelled' };
+      return { success: false, error: 'OAuth flow was canceled' };
     } else if (result.type === 'error') {
       return {
         success: false,
@@ -234,7 +234,7 @@ export const startFacebookOAuth = async (): Promise<{
         return { success: false, error: 'Authorization code not received' };
       }
     } else if (result.type === 'dismiss' || result.type === 'cancel') {
-      return { success: false, error: 'OAuth flow was cancelled' };
+      return { success: false, error: 'OAuth flow was canceled' };
     } else if (result.type === 'error') {
       return {
         success: false,

@@ -196,7 +196,6 @@ func TestWishListRepository_Update(t *testing.T) {
 			t.Error("public wishlist should have a slug")
 		}
 	})
-
 }
 
 func TestWishListRepository_Delete(t *testing.T) {
@@ -335,5 +334,4 @@ func TestWishListRepository_EdgeCases(t *testing.T) {
 			t.Error("empty description should be invalid pgtype.Text")
 		}
 	})
-
 }

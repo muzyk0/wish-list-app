@@ -51,7 +51,7 @@ func TestMustGetUserID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create Echo context
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
@@ -133,7 +133,7 @@ func TestMustGetUserInfo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create Echo context
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
@@ -153,7 +153,7 @@ func TestMustGetUserInfo(t *testing.T) {
 func TestMustGetUserIDNoPanic(t *testing.T) {
 	t.Run("should not panic with empty context", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -164,7 +164,7 @@ func TestMustGetUserIDNoPanic(t *testing.T) {
 
 	t.Run("should not panic with nil context values", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -181,7 +181,7 @@ func TestMustGetUserIDNoPanic(t *testing.T) {
 func TestMustGetUserInfoNoPanic(t *testing.T) {
 	t.Run("should not panic with empty context", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -192,7 +192,7 @@ func TestMustGetUserInfoNoPanic(t *testing.T) {
 
 	t.Run("should not panic with nil context values", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -209,7 +209,7 @@ func TestMustGetUserInfoNoPanic(t *testing.T) {
 func TestMustHelpersConsistency(t *testing.T) {
 	t.Run("MustGetUserID and MustGetUserInfo should return consistent userID", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

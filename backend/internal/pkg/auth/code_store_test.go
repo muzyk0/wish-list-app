@@ -134,7 +134,7 @@ func TestCodeStore_CleanupExpired(t *testing.T) {
 
 	t.Run("removes expired codes", func(t *testing.T) {
 		// Add some codes
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			_, err := store.GenerateCode(uuid.New())
 			require.NoError(t, err)
 		}
@@ -239,9 +239,9 @@ func TestCodeStore_ConcurrentAccess(t *testing.T) {
 	t.Run("concurrent code generation", func(t *testing.T) {
 		done := make(chan bool, numGoroutines)
 
-		for i := 0; i < numGoroutines; i++ {
+		for range numGoroutines {
 			go func() {
-				for j := 0; j < codesPerGoroutine; j++ {
+				for range codesPerGoroutine {
 					_, err := store.GenerateCode(uuid.New())
 					if err != nil {
 						t.Errorf("failed to generate code: %v", err)
@@ -252,7 +252,7 @@ func TestCodeStore_ConcurrentAccess(t *testing.T) {
 		}
 
 		// Wait for all goroutines
-		for i := 0; i < numGoroutines; i++ {
+		for range numGoroutines {
 			<-done
 		}
 
@@ -265,7 +265,7 @@ func TestCodeStore_ConcurrentAccess(t *testing.T) {
 
 		// Generate codes first
 		codes := make([]string, 100)
-		for i := 0; i < 100; i++ {
+		for i := range 100 {
 			code, err := store.GenerateCode(uuid.New())
 			require.NoError(t, err)
 			codes[i] = code
@@ -286,7 +286,7 @@ func TestCodeStore_ConcurrentAccess(t *testing.T) {
 		}
 
 		// Wait for all exchanges
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			<-done
 		}
 
@@ -302,8 +302,11 @@ func BenchmarkCodeStore_GenerateCode(b *testing.B) {
 	userID := uuid.New()
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		store.GenerateCode(userID)
+	for i := range b.N {
+		_, _ = store.GenerateCode(userID)
+		if i%1000 == 0 {
+			store = NewCodeStore() // Reset to prevent memory issues
+		}
 	}
 }
 
@@ -313,13 +316,13 @@ func BenchmarkCodeStore_ExchangeCode(b *testing.B) {
 
 	// Pre-generate codes
 	codes := make([]string, b.N)
-	for i := 0; i < b.N; i++ {
+	for i := range b.N {
 		code, _ := store.GenerateCode(userID)
 		codes[i] = code
 	}
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for i := range b.N {
 		store.ExchangeCode(codes[i])
 	}
 }
@@ -330,7 +333,7 @@ func BenchmarkCodeStore_ConcurrentGenerate(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			store.GenerateCode(userID)
+			_, _ = store.GenerateCode(userID)
 		}
 	})
 }
@@ -342,7 +345,7 @@ func BenchmarkCodeStore_ConcurrentExchange(b *testing.B) {
 	// Pre-generate codes (each goroutine needs its own codes)
 	codes := make(chan string, b.N*10)
 	go func() {
-		for i := 0; i < b.N*10; i++ {
+		for range b.N * 10 {
 			code, _ := store.GenerateCode(userID)
 			codes <- code
 		}
@@ -369,7 +372,7 @@ func TestCodeStore_Performance(t *testing.T) {
 	// Add many codes
 	numCodes := 10000
 	codes := make([]string, numCodes)
-	for i := 0; i < numCodes; i++ {
+	for i := range numCodes {
 		code, err := store.GenerateCode(uuid.New())
 		require.NoError(t, err)
 		codes[i] = code

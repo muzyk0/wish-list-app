@@ -20,7 +20,7 @@ interface Reservation {
     ownerFirstName?: string;
     ownerLastName?: string;
   };
-  status: 'active' | 'cancelled' | 'fulfilled' | 'expired';
+  status: 'active' | 'canceled' | 'fulfilled' | 'expired';
   reservedAt: string;
   expiresAt?: string;
 }
@@ -101,7 +101,7 @@ export function MyReservations() {
                 variant={
                   reservation.status === 'active'
                     ? 'default'
-                    : reservation.status === 'cancelled'
+                    : reservation.status === 'canceled'
                       ? 'secondary'
                       : reservation.status === 'fulfilled'
                         ? 'outline'
@@ -151,7 +151,7 @@ export function MyReservations() {
                       );
 
                       if (response.ok) {
-                        toast.success('Reservation cancelled successfully');
+                        toast.success('Reservation canceled successfully');
                         fetchReservations(); // Refresh the list
                       } else {
                         const data = await response.json();
@@ -161,7 +161,7 @@ export function MyReservations() {
                       }
                     } catch (_error) {
                       toast.error(
-                        'An error occurred while cancelling the reservation',
+                        'An error occurred while canceling the reservation',
                       );
                     }
                   }}

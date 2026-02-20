@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	nethttp "net/http"
 	"net/http/httptest"
 	"testing"
@@ -242,7 +241,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 		assert.Contains(t, appErr.Message, "Reservation token is required")
 	})
@@ -273,7 +272,7 @@ func TestReservationHandler_CancelReservation(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusInternalServerError, appErr.Code)
 		assert.Contains(t, appErr.Message, "Failed to process request")
 
@@ -377,7 +376,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		// Assertions
 		require.Error(t, err)
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 		assert.Contains(t, appErr.Message, "Guest name and email are required")
 	})
@@ -406,7 +405,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		require.Error(t, err, "Expected error for invalid UUID")
 
 		var appErr *apperrors.AppError
-		require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
 	})
 

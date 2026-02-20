@@ -290,6 +290,7 @@ func (h *OAuthHandler) getGoogleUserInfo(ctx context.Context, accessToken string
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
+	//nolint:gosec // Intentional external API call to Google OAuth
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -324,6 +325,7 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
+	//nolint:gosec // Intentional external API call to Facebook OAuth
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -388,13 +390,12 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 	}
 
 	// Distinguish between "user not found" (expected) and database errors (unexpected)
-	if errors.Is(err, repository.ErrUserNotFound) {
-		// User doesn't exist - this is the expected path for first-time OAuth users
-		// Fall through to user creation below
-	} else {
+	if !errors.Is(err, repository.ErrUserNotFound) {
 		// Other database errors (connection failure, timeout, etc.) should be returned
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
+	// User doesn't exist - this is the expected path for first-time OAuth users
+	// Fall through to user creation below
 
 	// Create new user from OAuth profile data
 	// Note: OAuth users don't have passwords

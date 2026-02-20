@@ -460,7 +460,7 @@ func (r *ReservationRepository) ListUserReservationsWithDetails(ctx context.Cont
 		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		JOIN wishlists w ON wi.wishlist_id = w.id
 		LEFT JOIN users u ON w.owner_id = u.id
-		WHERE r.reserved_by_user_id = $1 AND r.status IN ('active', 'cancelled')
+		WHERE r.reserved_by_user_id = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
 	`
@@ -511,7 +511,7 @@ func (r *ReservationRepository) ListGuestReservationsWithDetails(ctx context.Con
 		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		JOIN wishlists w ON wi.wishlist_id = w.id
 		LEFT JOIN users u ON w.owner_id = u.id
-		WHERE r.reservation_token = $1 AND r.status IN ('active', 'cancelled')
+		WHERE r.reservation_token = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 	`
 
@@ -535,7 +535,7 @@ func (r *ReservationRepository) CountUserReservations(ctx context.Context, userI
 	query := `
 		SELECT COUNT(*)
 		FROM reservations
-		WHERE reserved_by_user_id = $1 AND status IN ('active', 'cancelled')
+		WHERE reserved_by_user_id = $1 AND status IN ('active', 'canceled')
 	`
 
 	var count int

@@ -11,8 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  MOBILE_APP_URLS,
   MOBILE_APP_REDIRECT_PATHS,
+  MOBILE_APP_URLS,
 } from '@/constants/domains';
 
 export default function LoginPage() {

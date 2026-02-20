@@ -31,7 +31,7 @@ func TestConstructors(t *testing.T) {
 			err := tt.fn(tt.message)
 			assert.Equal(t, tt.wantCode, err.Code)
 			assert.Equal(t, tt.message, err.Message)
-			assert.Nil(t, err.Err)
+			require.NoError(t, err.Err)
 			assert.Nil(t, err.Details)
 		})
 	}
@@ -65,7 +65,7 @@ func TestWrap(t *testing.T) {
 	assert.NotSame(t, original, wrapped)
 
 	// Original is not mutated
-	assert.Nil(t, original.Err)
+	require.NoError(t, original.Err)
 
 	// Wrapped carries the cause
 	assert.Equal(t, cause, wrapped.Err)
@@ -78,17 +78,17 @@ func TestUnwrap(t *testing.T) {
 	err := Internal("failed").Wrap(cause)
 
 	// errors.Is works through Unwrap
-	assert.True(t, errors.Is(err, cause))
+	assert.ErrorIs(t, err, cause)
 }
 
 func TestUnwrapChain(t *testing.T) {
 	sentinel := errors.New("ErrUserNotFound")
 	appErr := NotFound("User not found").Wrap(sentinel)
 
-	require.True(t, errors.Is(appErr, sentinel))
+	require.ErrorIs(t, appErr, sentinel)
 
 	var target *AppError
-	require.True(t, errors.As(appErr, &target))
+	require.ErrorAs(t, appErr, &target)
 	assert.Equal(t, http.StatusNotFound, target.Code)
 }
 

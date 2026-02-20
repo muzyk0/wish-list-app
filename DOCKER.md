@@ -88,7 +88,7 @@ The backend service uses environment variables for configuration. You can:
 ### Backend Service
 
 - **Port**: 8080
-- **Health Check**: `http://localhost:8080/health`
+- **Health Check**: `http://localhost:8080/healthz`
 
 ### PostgreSQL Database
 
@@ -450,7 +450,7 @@ cd backend && go run cmd/server/main.go
 ### How do I check backend health?
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8080/healthz
 ```
 
 **Expected response:**

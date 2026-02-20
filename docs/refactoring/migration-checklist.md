@@ -484,7 +484,7 @@ grep -r "wish-list/internal/repositories\"" backend/
 ### Build & Run
 - [ ] Build application: `go build ./cmd/server`
 - [ ] Start server: `./server &`
-- [ ] Test health endpoint: `curl http://localhost:8080/health`
+- [ ] Test health endpoint: `curl http://localhost:8080/healthz`
 - [ ] Stop server: `kill $SERVER_PID`
 
 ### Check Import Cycles

@@ -56,8 +56,7 @@ export function GiftItemCard({
     }).start();
   };
 
-  const isReserved = !!item.reserved_by_user_id;
-  const isPurchased = !!item.purchased_by_user_id;
+  const isPurchased = !!item.is_purchased;
 
   return (
     <Animated.View
@@ -85,7 +84,7 @@ export function GiftItemCard({
               {/* Gift Info */}
               <View style={styles.giftInfo}>
                 <Text style={styles.giftName} numberOfLines={1}>
-                  {item.name}
+                  {item.title}
                 </Text>
                 <View style={styles.giftMeta}>
                   <MaterialCommunityIcons
@@ -114,14 +113,6 @@ export function GiftItemCard({
                       name="check-circle"
                       size={12}
                       color="#4CAF50"
-                    />
-                  </View>
-                ) : isReserved ? (
-                  <View style={[styles.statusBadge, styles.reservedBadge]}>
-                    <MaterialCommunityIcons
-                      name="lock"
-                      size={12}
-                      color="#FF9800"
                     />
                   </View>
                 ) : (

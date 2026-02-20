@@ -1,11 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   Linking,
   Pressable,
   RefreshControl,
@@ -16,132 +16,264 @@ import {
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { WishlistItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
-// Gift Item Card Component
+// ─── Color tokens ────────────────────────────────────────────────────
+const C = {
+  bg0: '#060411',
+  bg1: '#0d0920',
+  bg2: '#16112e',
+  gold: '#E2B96C',
+  goldBright: '#F5D38A',
+  goldDim: 'rgba(226, 185, 108, 0.14)',
+  goldBorder: 'rgba(226, 185, 108, 0.22)',
+  surface: 'rgba(255, 255, 255, 0.04)',
+  surfaceMid: 'rgba(255, 255, 255, 0.07)',
+  border: 'rgba(255, 255, 255, 0.07)',
+  white: '#EEE8FF',
+  muted: 'rgba(238, 232, 255, 0.45)',
+  faint: 'rgba(238, 232, 255, 0.18)',
+  green: '#5EEAD4',
+  greenBg: 'rgba(94, 234, 212, 0.13)',
+  amber: '#FCD34D',
+  amberBg: 'rgba(252, 211, 77, 0.13)',
+  violet: '#C4B5FD',
+  violetBg: 'rgba(196, 181, 253, 0.13)',
+  slate: '#94A3B8',
+  slateBg: 'rgba(148, 163, 184, 0.13)',
+} as const;
+
+// ─── Placeholder gradient palette ───────────────────────────────────
+const GRADIENTS: [string, string][] = [
+  ['#FF7BAC', '#C13584'],
+  ['#4FD1C5', '#2B6CB0'],
+  ['#81E6D9', '#2F855A'],
+  ['#B794F4', '#553C9A'],
+  ['#FBD38D', '#DD6B20'],
+  ['#FC8181', '#C53030'],
+];
+
+function gradientForItem(
+  id: string | undefined,
+  idx: number,
+): [string, string] {
+  if (!id) return GRADIENTS[idx % GRADIENTS.length];
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return GRADIENTS[Math.abs(h) % GRADIENTS.length];
+}
+
+// ─── Gift Item Card ──────────────────────────────────────────────────
 const GiftItemCard = ({
   item,
+  index,
   onReserve,
   onEdit,
 }: {
   item: WishlistItem;
+  index: number;
   onReserve: (item: WishlistItem) => void;
   onEdit: (item: WishlistItem) => void;
 }) => {
-  const isReserved = item.is_purchased || item.is_archived;
-  const isPurchased = item.is_purchased;
+  const isPurchased = !!item.is_purchased;
+  const isReserved = !!item.is_reserved && !isPurchased;
+  const isArchived = !!item.is_archived;
+  const isAvailable = !isReserved && !isPurchased && !isArchived;
+
+  const status = isPurchased
+    ? {
+        color: C.violet,
+        bg: C.violetBg,
+        label: 'Purchased',
+        icon: 'check-circle' as const,
+      }
+    : isReserved
+      ? {
+          color: C.amber,
+          bg: C.amberBg,
+          label: 'Reserved',
+          icon: 'lock' as const,
+        }
+      : isArchived
+        ? {
+            color: C.slate,
+            bg: C.slateBg,
+            label: 'Archived',
+            icon: 'archive' as const,
+          }
+        : {
+            color: C.green,
+            bg: C.greenBg,
+            label: 'Available',
+            icon: 'gift-open-outline' as const,
+          };
+
+  const grad = gradientForItem(item.id, index);
 
   return (
-    <BlurView intensity={20} style={styles.giftItemCard}>
-      <View style={styles.cardContent}>
-        {/* Header */}
-        <View style={styles.itemHeader}>
-          <View style={styles.itemTitleContainer}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            {item.price !== undefined && item.price !== null && (
-              <View style={styles.priceContainer}>
-                <LinearGradient
-                  colors={['#FFD700', '#FFA500']}
-                  style={styles.priceGradient}
-                >
-                  <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-                </LinearGradient>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Description */}
-        {item.description && (
-          <Text style={styles.itemDescription}>{item.description}</Text>
+    <View style={card.wrapper}>
+      {/* ── Image strip ── */}
+      <View style={card.imageWrap}>
+        {item.image_url ? (
+          <Image
+            source={{ uri: item.image_url }}
+            style={card.image}
+            contentFit="cover"
+            transition={300}
+          />
+        ) : (
+          <LinearGradient
+            colors={grad}
+            style={card.imagePlaceholder}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialCommunityIcons
+              name="gift-outline"
+              size={44}
+              color="rgba(255,255,255,0.4)"
+            />
+          </LinearGradient>
         )}
 
-        {/* Link */}
-        {item.link && (
-          <Pressable onPress={() => Linking.openURL(item.link || '')}>
-            <View style={styles.linkContainer}>
+        {/* Darken overlay when not available */}
+        {!isAvailable && <View style={card.imageScrim} />}
+
+        {/* Priority chip — top-left */}
+        {item.priority !== undefined &&
+          item.priority !== null &&
+          item.priority > 0 && (
+            <View style={card.priorityChip}>
+              <MaterialCommunityIcons name="star" size={10} color="#FFD166" />
+              <Text style={card.priorityChipText}>{item.priority}</Text>
+            </View>
+          )}
+
+        {/* Status badge — top-right */}
+        <View style={[card.statusChip, { backgroundColor: status.bg }]}>
+          <MaterialCommunityIcons
+            name={status.icon}
+            size={12}
+            color={status.color}
+          />
+          <Text style={[card.statusChipText, { color: status.color }]}>
+            {status.label}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── Content ── */}
+      <View style={card.body}>
+        {/* Title + price */}
+        <View style={card.titleRow}>
+          <Text
+            style={[card.title, !isAvailable && card.titleFaded]}
+            numberOfLines={2}
+          >
+            {item.title ?? 'Unnamed Gift'}
+          </Text>
+          {item.price != null && (
+            <Text style={card.price}>${item.price.toFixed(0)}</Text>
+          )}
+        </View>
+
+        {/* Description / notes */}
+        {item.description || item.notes ? (
+          <Text style={card.subtitle} numberOfLines={2}>
+            {item.description || item.notes}
+          </Text>
+        ) : null}
+
+        {/* Action bar */}
+        <View style={card.actions}>
+          {/* Link pill */}
+          {item.link ? (
+            <Pressable
+              onPress={() => Linking.openURL(item.link ?? '')}
+              style={card.linkPill}
+            >
               <MaterialCommunityIcons
                 name="open-in-new"
-                size={16}
-                color="#FFD700"
+                size={12}
+                color={C.gold}
               />
-              <Text style={styles.linkText}>Visit Website</Text>
-            </View>
+              <Text style={card.linkPillText}>Open</Text>
+            </Pressable>
+          ) : null}
+
+          <View style={{ flex: 1 }} />
+
+          {/* Edit */}
+          <Pressable
+            onPress={() => onEdit(item)}
+            style={card.iconBtn}
+            hitSlop={8}
+          >
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={15}
+              color={C.faint}
+            />
           </Pressable>
-        )}
 
-        {/* Footer with status and priority */}
-        <View style={styles.itemFooter}>
-          {isPurchased ? (
-            <View style={styles.statusBadge}>
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={16}
-                color="#4CAF50"
-              />
-              <Text style={styles.statusText}>Purchased</Text>
-            </View>
-          ) : isReserved ? (
-            <View style={styles.statusBadge}>
-              <MaterialCommunityIcons name="lock" size={16} color="#FF9800" />
-              <Text style={styles.statusText}>Reserved</Text>
-            </View>
-          ) : (
-            <View style={styles.statusBadge}>
-              <MaterialCommunityIcons
-                name="gift-open"
-                size={16}
-                color="#FFD700"
-              />
-              <Text style={styles.statusText}>Available</Text>
-            </View>
-          )}
-
-          {item.priority && item.priority > 0 && (
-            <View style={styles.priorityBadge}>
-              <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
-              <Text style={styles.priorityText}>{item.priority}/10</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Actions */}
-        <View style={styles.cardActions}>
-          {!isReserved && !isPurchased && (
-            <Pressable onPress={() => onReserve(item)} style={{ flex: 1 }}>
+          {/* Reserve */}
+          {isAvailable && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onReserve(item);
+              }}
+              style={card.reserveBtn}
+            >
               <LinearGradient
-                colors={['#FFD700', '#FFA500']}
-                style={styles.reserveButton}
+                colors={[C.goldBright, '#C48A3A']}
+                style={card.reserveBtnGrad}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
               >
-                <MaterialCommunityIcons name="gift" size={18} color="#000000" />
-                <Text style={styles.reserveButtonText}>Reserve</Text>
+                <MaterialCommunityIcons name="gift" size={13} color="#1a0f05" />
+                <Text style={card.reserveBtnText}>Reserve</Text>
               </LinearGradient>
             </Pressable>
           )}
-          <Pressable
-            onPress={() => onEdit(item)}
-            style={[
-              styles.editButton,
-              !isReserved && !isPurchased && { flex: 1 },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="pencil"
-              size={18}
-              color="rgba(255, 255, 255, 0.7)"
-            />
-            <Text style={styles.editButtonText}>Edit</Text>
-          </Pressable>
         </View>
       </View>
-    </BlurView>
+    </View>
   );
 };
 
+// ─── Empty state ─────────────────────────────────────────────────────
+const EmptyGifts = ({ onAdd }: { onAdd: () => void }) => (
+  <View style={empty.wrap}>
+    <LinearGradient
+      colors={['rgba(226, 185, 108, 0.18)', 'rgba(226, 185, 108, 0.04)']}
+      style={empty.iconCircle}
+    >
+      <MaterialCommunityIcons name="gift-outline" size={40} color={C.gold} />
+    </LinearGradient>
+    <Text style={empty.title}>No gifts yet</Text>
+    <Text style={empty.subtitle}>
+      Tap the button below to add your first gift item
+    </Text>
+    <Pressable onPress={onAdd} style={empty.cta}>
+      <LinearGradient
+        colors={[C.goldBright, '#C48A3A']}
+        style={empty.ctaGrad}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <MaterialCommunityIcons name="plus" size={16} color="#1a0f05" />
+        <Text style={empty.ctaText}>Add Gift</Text>
+      </LinearGradient>
+    </Pressable>
+  </View>
+);
+
+// ─── Main screen ─────────────────────────────────────────────────────
 export default function WishListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
-
   const [refreshing, setRefreshing] = useState(false);
 
   const {
@@ -173,548 +305,567 @@ export default function WishListScreen() {
   };
 
   const handleReserveGift = (item: WishlistItem) => {
-    Alert.alert(
-      'Reserve Gift',
-      `You are reserving "${item.title}". In a real app, this would create a reservation.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reserve',
-          onPress: () => {
-            Alert.alert('Success', 'Gift reserved successfully!');
-            queryClient
-              .invalidateQueries({ queryKey: ['giftItems', id] })
-              .catch(console.error);
-          },
-        },
-      ],
-    );
+    dialog.confirm({
+      title: 'Reserve Gift',
+      message: `You are reserving "${item.title}". In a real app, this would create a reservation.`,
+      confirmLabel: 'Reserve',
+      cancelLabel: 'Cancel',
+      onConfirm: () => {
+        dialog.success('Gift reserved successfully!');
+        queryClient
+          .invalidateQueries({ queryKey: ['giftItems', id] })
+          .catch(console.error);
+      },
+    });
   };
 
   const handleEditGift = (item: WishlistItem) => {
-    router.push(`/lists/${id}/gifts/${item.id}/edit`);
+    if (!item.id) return;
+    router.push({
+      pathname: '/gift-items/[id]/edit',
+      params: { id: item.id, wishlistId: id ?? '' },
+    });
   };
 
-  const handleAddGiftItem = () => {
-    router.push(`/lists/${id}/gifts/create`);
-  };
+  const handleAddGiftItem = () => router.push(`/lists/${id}/gifts/create`);
+  const handleEditWishList = () => router.push(`/lists/${id}/edit`);
 
-  const handleEditWishList = () => {
-    router.push(`/lists/${id}/edit`);
-  };
-
+  // ── Loading ──
   if (isLoading || itemsLoading) {
     return (
-      <View style={styles.container}>
+      <View style={s.root}>
         <LinearGradient
-          colors={['#1a0a2e', '#2d1b4e', '#3d2a6e']}
+          colors={[C.bg0, C.bg1, C.bg2]}
           style={StyleSheet.absoluteFill}
         />
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#FFD700" />
-          <Text style={styles.loadingText}>Loading wishlist...</Text>
+        <View style={s.center}>
+          <ActivityIndicator size="large" color={C.gold} />
+          <Text style={s.loadingText}>Loading wishlist…</Text>
         </View>
       </View>
     );
   }
 
+  // ── Error ──
   if (error || itemsError || !wishList) {
     return (
-      <View style={styles.container}>
+      <View style={s.root}>
         <LinearGradient
-          colors={['#1a0a2e', '#2d1b4e', '#3d2a6e']}
+          colors={[C.bg0, C.bg1, C.bg2]}
           style={StyleSheet.absoluteFill}
         />
-        <View style={styles.decorCircle1} />
-        <View style={styles.decorCircle2} />
-
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <View style={s.headerRow}>
+          <Pressable onPress={() => router.back()} style={s.circleBtn}>
             <MaterialCommunityIcons
               name="arrow-left"
-              size={24}
-              color="#ffffff"
+              size={22}
+              color={C.white}
             />
           </Pressable>
-          <Text style={styles.headerTitle}>Error</Text>
-          <View style={{ width: 40 }} />
         </View>
-
-        <View style={styles.centerContainer}>
-          <BlurView intensity={20} style={styles.errorCard}>
-            <MaterialCommunityIcons
-              name="alert-circle"
-              size={64}
-              color="#FF6B6B"
-            />
-            <Text style={styles.errorTitle}>
-              {!wishList ? 'Wishlist not found' : 'Error loading wishlist'}
-            </Text>
-            {(error || itemsError) && (
-              <Text style={styles.errorMessage}>
-                {error?.message || itemsError?.message}
-              </Text>
-            )}
-            <Pressable onPress={() => router.back()}>
-              <LinearGradient
-                colors={['#FFD700', '#FFA500']}
-                style={styles.backHomeButton}
-              >
-                <Text style={styles.backHomeButtonText}>Go Back</Text>
-              </LinearGradient>
-            </Pressable>
-          </BlurView>
+        <View style={s.center}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={56}
+            color="#F87171"
+          />
+          <Text style={s.errorTitle}>
+            {!wishList ? 'Wishlist not found' : 'Something went wrong'}
+          </Text>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backBtnText}>Go Back</Text>
+          </Pressable>
         </View>
       </View>
     );
   }
 
+  const items = giftItems?.items ?? [];
+  const totalCount = items.length;
+  const reservedCount = items.filter((i) => i.is_reserved).length;
+  const purchasedCount = items.filter((i) => i.is_purchased).length;
+
   return (
-    <View style={styles.container}>
+    <View style={s.root}>
+      {/* Background */}
       <LinearGradient
-        colors={['#1a0a2e', '#2d1b4e', '#3d2a6e']}
+        colors={[C.bg0, C.bg1, C.bg2]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Decorative elements */}
-      <View style={styles.decorCircle1} />
-      <View style={styles.decorCircle2} />
+      {/* Ambient glow circles */}
+      <View style={s.glow1} />
+      <View style={s.glow2} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#ffffff" />
+      {/* ── Header ── */}
+      <View style={s.headerRow}>
+        <Pressable onPress={() => router.back()} style={s.circleBtn}>
+          <MaterialCommunityIcons name="arrow-left" size={22} color={C.white} />
         </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {wishList.title}
-        </Text>
-        <Pressable onPress={handleEditWishList} style={styles.editIconButton}>
-          <MaterialCommunityIcons name="pencil" size={20} color="#FFD700" />
-        </Pressable>
-      </View>
 
-      {/* Wishlist Info Card */}
-      <View style={styles.contentContainer}>
-        <BlurView intensity={20} style={styles.infoCard}>
-          <View style={styles.infoContent}>
-            {wishList.occasion && (
-              <View style={styles.occasionContainer}>
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={16}
-                  color="#FFD700"
-                />
-                <Text style={styles.occasionText}>{wishList.occasion}</Text>
-              </View>
-            )}
-
-            {wishList.description && (
-              <Text style={styles.descriptionText}>{wishList.description}</Text>
-            )}
-
-            {/* Stats */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>
-                  {giftItems?.items?.length || 0}
-                </Text>
-                <Text style={styles.statLabel}>Items</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValueSecondary}>
-                  {giftItems?.items?.filter((item) => item.is_reserved)
-                    .length || 0}
-                </Text>
-                <Text style={styles.statLabel}>Reserved</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>
-                  {giftItems?.items?.filter((item) => item.is_purchased)
-                    .length || 0}
-                </Text>
-                <Text style={styles.statLabel}>Purchased</Text>
-              </View>
-            </View>
-          </View>
-        </BlurView>
-
-        {/* Gift Items List */}
-        <ScrollView
-          style={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#FFD700"
-            />
-          }
-        >
-          {giftItems?.items && giftItems?.items?.length > 0 ? (
-            <View style={styles.listContainer}>
-              {giftItems.items.map((item) => (
-                <GiftItemCard
-                  key={item.id}
-                  item={item}
-                  onReserve={handleReserveGift}
-                  onEdit={handleEditGift}
-                />
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="gift" size={64} color="#FFD700" />
-              <Text style={styles.emptyStateTitle}>No gift items yet</Text>
-              <Text style={styles.emptyStateText}>
-                Add your first gift item to get started
-              </Text>
+        <View style={s.headerCenter}>
+          {wishList.occasion && (
+            <View style={s.occasionPill}>
+              <MaterialCommunityIcons
+                name="calendar-star"
+                size={11}
+                color={C.gold}
+              />
+              <Text style={s.occasionPillText}>{wishList.occasion}</Text>
             </View>
           )}
-        </ScrollView>
+          <Text style={s.headerTitle} numberOfLines={1}>
+            {wishList.title}
+          </Text>
+        </View>
+
+        <Pressable onPress={handleEditWishList} style={s.circleBtn}>
+          <MaterialCommunityIcons name="pencil" size={18} color={C.gold} />
+        </Pressable>
       </View>
 
-      {/* Floating Action Button */}
-      <Pressable onPress={handleAddGiftItem} style={styles.fab}>
-        <LinearGradient
-          colors={['#FFD700', '#FFA500']}
-          style={styles.fabGradient}
+      {/* ── Stats strip ── */}
+      <View style={s.statsStrip}>
+        <View style={s.statCell}>
+          <Text style={s.statNum}>{totalCount}</Text>
+          <Text style={s.statLabel}>Gifts</Text>
+        </View>
+        <View style={s.statSep} />
+        <View style={s.statCell}>
+          <Text style={[s.statNum, { color: C.amber }]}>{reservedCount}</Text>
+          <Text style={s.statLabel}>Reserved</Text>
+        </View>
+        <View style={s.statSep} />
+        <View style={s.statCell}>
+          <Text style={[s.statNum, { color: C.violet }]}>{purchasedCount}</Text>
+          <Text style={s.statLabel}>Purchased</Text>
+        </View>
+      </View>
+
+      {/* ── Description (if exists) ── */}
+      {wishList.description && (
+        <View style={s.descStrip}>
+          <Text style={s.descText} numberOfLines={2}>
+            {wishList.description}
+          </Text>
+        </View>
+      )}
+
+      {/* ── Gift items scroll ── */}
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.gold}
+          />
+        }
+      >
+        {items.length > 0 ? (
+          items.map((item, idx) => (
+            <GiftItemCard
+              key={item.id}
+              item={item}
+              index={idx}
+              onReserve={handleReserveGift}
+              onEdit={handleEditGift}
+            />
+          ))
+        ) : (
+          <EmptyGifts onAdd={handleAddGiftItem} />
+        )}
+      </ScrollView>
+
+      {/* ── FAB ── */}
+      {items.length > 0 && (
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleAddGiftItem();
+          }}
+          style={s.fab}
         >
-          <MaterialCommunityIcons name="plus" size={28} color="#000000" />
-        </LinearGradient>
-      </Pressable>
+          <LinearGradient
+            colors={[C.goldBright, '#C48A3A']}
+            style={s.fabGrad}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialCommunityIcons name="plus" size={26} color="#1a0f05" />
+          </LinearGradient>
+        </Pressable>
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+// ─── Card styles ─────────────────────────────────────────────────────
+const card = StyleSheet.create({
+  wrapper: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    marginBottom: 16,
   },
-  decorCircle1: {
+  imageWrap: {
+    height: 168,
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(6, 4, 17, 0.50)',
+  },
+  priorityChip: {
     position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: 'rgba(255, 215, 0, 0.06)',
-    top: -80,
-    right: -60,
+    top: 10,
+    left: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backdropFilter: 'blur(4px)',
   },
-  decorCircle2: {
+  priorityChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFD166',
+  },
+  statusChip: {
     position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: 'rgba(107, 78, 230, 0.12)',
-    bottom: 200,
-    left: -40,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 12,
-  },
-  editIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: 16,
-  },
-  errorCard: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 32,
-    alignItems: 'center',
-    maxWidth: 400,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FF6B6B',
-    marginTop: 16,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  errorMessage: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  backHomeButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-  },
-  backHomeButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  infoCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 16,
-  },
-  infoContent: {
-    padding: 20,
-  },
-  occasionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  occasionText: {
-    fontSize: 14,
-    color: '#FFD700',
-    fontWeight: '600',
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFD700',
-    marginBottom: 4,
-  },
-  statValueSecondary: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FF9800',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  listContainer: {
-    gap: 12,
-    paddingBottom: 100,
-  },
-  giftItemCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 12,
-  },
-  cardContent: {
-    padding: 16,
-  },
-  itemHeader: {
-    marginBottom: 8,
-  },
-  itemTitleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    flex: 1,
-  },
-  priceContainer: {
-    marginLeft: 12,
-  },
-  priceGradient: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  itemDescription: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 12,
-  },
-  linkText: {
-    fontSize: 13,
-    color: '#FFD700',
-    fontWeight: '500',
-  },
-  itemFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  statusText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontWeight: '600',
-  },
-  priorityBadge: {
+    top: 10,
+    right: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
-  priorityText: {
+  statusChipText: {
     fontSize: 11,
-    color: '#FFD700',
-    fontWeight: '600',
-  },
-  cardActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  reserveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    gap: 6,
-  },
-  reserveButtonText: {
-    fontSize: 14,
     fontWeight: '700',
-    color: '#000000',
+    letterSpacing: 0.2,
   },
-  editButton: {
+  body: {
+    padding: 16,
+  },
+  titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    gap: 6,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 6,
   },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
+  title: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    color: C.white,
+    lineHeight: 22,
   },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
+  titleFaded: {
+    color: C.muted,
   },
-  emptyStateTitle: {
+  price: {
     fontSize: 18,
+    fontWeight: '800',
+    color: C.goldBright,
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: C.muted,
+    lineHeight: 19,
+    marginBottom: 14,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+  },
+  linkPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.goldBorder,
+    backgroundColor: C.goldDim,
+  },
+  linkPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.gold,
+  },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reserveBtn: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  reserveBtnGrad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  reserveBtnText: {
+    fontSize: 13,
     fontWeight: '700',
-    color: '#ffffff',
-    marginTop: 16,
+    color: '#1a0f05',
+  },
+});
+
+// ─── Empty state styles ──────────────────────────────────────────────
+const empty = StyleSheet.create({
+  wrap: {
+    alignItems: 'center',
+    paddingVertical: 64,
+    paddingHorizontal: 32,
+  },
+  iconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: C.white,
     marginBottom: 8,
   },
-  emptyStateText: {
+  subtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: C.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 28,
+  },
+  cta: {
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  ctaGrad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  ctaText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1a0f05',
+  },
+});
+
+// ─── Page styles ─────────────────────────────────────────────────────
+const s = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  glow1: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(226, 185, 108, 0.05)',
+    top: -100,
+    right: -80,
+  },
+  glow2: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(100, 70, 200, 0.08)',
+    bottom: 180,
+    left: -60,
+  },
+  // header
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  occasionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 20,
+    backgroundColor: C.goldDim,
+    borderWidth: 1,
+    borderColor: C.goldBorder,
+  },
+  occasionPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: C.gold,
+    letterSpacing: 0.3,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: C.white,
+    letterSpacing: -0.3,
+  },
+  circleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: C.surfaceMid,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // stats
+  statsStrip: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  statCell: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statNum: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: C.white,
+    letterSpacing: -0.5,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: C.muted,
+    marginTop: 2,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  statSep: {
+    width: 1,
+    height: 32,
+    backgroundColor: C.border,
+  },
+  // description
+  descStrip: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+  descText: {
+    fontSize: 13,
+    color: C.muted,
+    lineHeight: 19,
+  },
+  // scroll
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 100,
+  },
+  // loading/error
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: 32,
+  },
+  loadingText: {
+    fontSize: 15,
+    color: C.muted,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#F87171',
     textAlign: 'center',
   },
+  backBtn: {
+    marginTop: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: C.surfaceMid,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  backBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: C.white,
+  },
+  // fab
   fab: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 28,
     right: 24,
-    borderRadius: 28,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 30,
+    shadowColor: C.gold,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 10,
   },
-  fabGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
+  fabGrad: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     alignItems: 'center',
+    justifyContent: 'center',
   },
 });

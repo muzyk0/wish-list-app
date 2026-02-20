@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -110,12 +109,12 @@ func TestBindAndValidate(t *testing.T) {
 			err := BindAndValidate(c, &testReq)
 
 			if tt.expectedError {
-				require.NotNil(t, err, "Expected non-nil error for invalid input")
+				require.Error(t, err, "Expected non-nil error for invalid input")
 				var appErr *apperrors.AppError
-				require.True(t, errors.As(err, &appErr), "Error should be apperrors.AppError")
+				require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 				assert.Equal(t, tt.expectedStatusCode, appErr.Code, "Status code mismatch")
 			} else {
-				assert.Nil(t, err, "Expected no error but got: %v", err)
+				require.NoError(t, err, "Expected no error but got: %v", err)
 				assert.Equal(t, "John Doe", testReq.Name)
 				assert.Equal(t, "john@example.com", testReq.Email)
 				assert.Equal(t, 30, testReq.Age)
@@ -138,7 +137,7 @@ func TestBindAndValidateWithoutValidator(t *testing.T) {
 		err := BindAndValidate(c, &testReq)
 
 		// When validator is not set, c.Validate() returns error
-		require.NotNil(t, err, "Expected non-nil error when validator is not set")
+		require.Error(t, err, "Expected non-nil error when validator is not set")
 		assert.Contains(t, err.Error(), "validator", "Error should mention validator not being registered")
 	})
 }
@@ -157,7 +156,7 @@ func TestBindAndValidateEdgeCases(t *testing.T) {
 		var testReq TestRequest
 		err := BindAndValidate(c, &testReq)
 
-		assert.Nil(t, err, "Should handle large JSON successfully")
+		assert.NoError(t, err, "Should handle large JSON successfully")
 	})
 
 	t.Run("special characters in JSON", func(t *testing.T) {
@@ -173,7 +172,7 @@ func TestBindAndValidateEdgeCases(t *testing.T) {
 		var testReq TestRequest
 		err := BindAndValidate(c, &testReq)
 
-		assert.Nil(t, err, "Should handle special characters")
+		require.NoError(t, err, "Should handle special characters")
 		assert.Equal(t, `John "The Rock" Doe`, testReq.Name)
 	})
 }

@@ -13,7 +13,7 @@ properties:
     minimum: 0
     type: number
   priority:
-    maximum: 5
+    maximum: 10
     minimum: 0
     type: integer
   title:

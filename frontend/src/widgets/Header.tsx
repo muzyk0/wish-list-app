@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
 
 export function Header() {
   const { t } = useTranslation();
@@ -15,6 +15,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 group">
           <div className="size-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 transition-shadow">
             <svg
+              role="presentation"
               className="size-5 text-white"
               fill="none"
               viewBox="0 0 24 24"

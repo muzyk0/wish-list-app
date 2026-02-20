@@ -38,7 +38,7 @@ jobs:
         run: cd frontend && pnpm run lint
 
       - name: Check formatting
-        run: cd frontend && pnpm run format --check
+        run: cd frontend && pnpm run format:check
 
   type-check:
     name: TypeScript Type Check
@@ -86,6 +86,9 @@ jobs:
 
       - name: Install dependencies
         run: cd frontend && pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: cd frontend && pnpm exec playwright install chromium
 
       - name: Run tests
         run: cd frontend && pnpm run test --coverage

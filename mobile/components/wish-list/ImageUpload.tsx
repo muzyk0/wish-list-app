@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 interface ImageUploadProps {
   onImageUpload: (url: string) => void;
@@ -30,9 +31,9 @@ export default function ImageUpload({
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
+        dialog.error(
           'Sorry, we need camera roll permissions to upload images.',
+          'Permission Denied',
         );
         return;
       }
@@ -49,7 +50,7 @@ export default function ImageUpload({
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      dialog.error('Failed to pick image. Please try again.');
     }
   };
 
@@ -60,9 +61,9 @@ export default function ImageUpload({
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
+        dialog.error(
           'Sorry, we need camera permissions to take photos.',
+          'Permission Denied',
         );
         return;
       }
@@ -79,7 +80,7 @@ export default function ImageUpload({
       }
     } catch (error) {
       console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo. Please try again.');
+      dialog.error('Failed to take photo. Please try again.');
     }
   };
 
@@ -91,10 +92,9 @@ export default function ImageUpload({
       const fileInfo = await getFileSize(uri);
 
       if (fileInfo.size > 10 * 1024 * 1024) {
-        // 10MB limit
-        Alert.alert(
-          'File Too Large',
+        dialog.error(
           'Please select an image smaller than 10MB.',
+          'File Too Large',
         );
         setUploading(false);
         return;
@@ -105,9 +105,9 @@ export default function ImageUpload({
       const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
       if (!fileExtension || !validExtensions.includes(fileExtension)) {
-        Alert.alert(
-          'Invalid File Type',
+        dialog.error(
           'Please select a valid image file (JPG, PNG, GIF, WEBP).',
+          'Invalid File Type',
         );
         setUploading(false);
         return;
@@ -145,14 +145,14 @@ export default function ImageUpload({
       const result = await response.json();
       setImageUri(result.url);
       onImageUpload(result.url);
-      Alert.alert('Success', 'Image uploaded successfully!');
+      dialog.success('Image uploaded successfully!');
     } catch (error: unknown) {
       console.error('Upload error:', error);
       const errorMessage =
         error instanceof Error
           ? error.message
           : 'Failed to upload image. Please try again.';
-      Alert.alert('Upload Failed', errorMessage);
+      dialog.error(errorMessage, 'Upload Failed');
     } finally {
       setUploading(false);
     }

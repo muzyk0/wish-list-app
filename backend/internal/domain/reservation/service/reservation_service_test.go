@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var errMockNotConfigured = errors.New("mock reserve function not configured")
+
 // Simple mock for GiftItemReservationRepositoryInterface
 type mockGiftItemReservationRepo struct {
 	reserveFunc func(ctx context.Context, giftItemID, userID pgtype.UUID) (*itemmodels.GiftItem, error)
@@ -23,7 +26,7 @@ func (m *mockGiftItemReservationRepo) ReserveIfNotReserved(ctx context.Context, 
 	if m.reserveFunc != nil {
 		return m.reserveFunc(ctx, giftItemID, userID)
 	}
-	return nil, nil
+	return nil, errMockNotConfigured
 }
 
 func TestReservationService_GetReservationStatus(t *testing.T) {

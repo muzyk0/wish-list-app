@@ -4,7 +4,7 @@
 // - Automatically attempts token refresh on mount
 // - Handles loading and error states
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { authManager } from '@/lib/auth';
 
 interface UseAuthReturn {
@@ -43,7 +43,7 @@ export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -63,7 +63,7 @@ export function useAuth(): UseAuthReturn {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Attempt to refresh token on mount (silent authentication)
   useEffect(() => {
@@ -79,8 +79,7 @@ export function useAuth(): UseAuthReturn {
     };
 
     initAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [refreshAuth]);
 
   return {
     isAuthenticated,

@@ -182,7 +182,7 @@ func TestParsePagination(t *testing.T) {
 			for key, value := range tt.queryParams {
 				q.Set(key, value)
 			}
-			req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+			req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), http.NoBody)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
@@ -200,7 +200,7 @@ func TestParsePagination(t *testing.T) {
 func TestParsePaginationEdgeCases(t *testing.T) {
 	t.Run("empty query string", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -213,7 +213,7 @@ func TestParsePaginationEdgeCases(t *testing.T) {
 
 	t.Run("multiple query params with same key (uses first)", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/?page=1&page=3", nil)
+		req := httptest.NewRequest(http.MethodGet, "/?page=1&page=3", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -225,7 +225,7 @@ func TestParsePaginationEdgeCases(t *testing.T) {
 
 	t.Run("very large page number", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/?page=999999", nil)
+		req := httptest.NewRequest(http.MethodGet, "/?page=999999", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

@@ -34,6 +34,7 @@ export function ThemeToggle() {
     >
       {isDark ? (
         <svg
+          role="presentation"
           className="size-5 text-foreground transition-transform duration-500"
           fill="none"
           viewBox="0 0 24 24"
@@ -48,6 +49,7 @@ export function ThemeToggle() {
         </svg>
       ) : (
         <svg
+          role="presentation"
           className="size-5 text-foreground transition-transform duration-500"
           fill="none"
           viewBox="0 0 24 24"

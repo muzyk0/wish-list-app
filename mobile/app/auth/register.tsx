@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { z } from 'zod';
 import {
   AuthDivider,
@@ -15,6 +15,7 @@ import {
 import { OAuthButtonGroup } from '@/components/OAuthButton';
 import { useOAuthHandler } from '@/hooks/useOAuthHandler';
 import { registerUser } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 
 // Zod schema for registration form validation
 const registerSchema = z.object({
@@ -70,10 +71,7 @@ export default function RegisterScreen() {
       router.replace('/(tabs)');
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
-        error.message || 'Registration failed. Please try again.',
-      );
+      dialog.error(error.message || 'Registration failed. Please try again.');
     },
   });
 

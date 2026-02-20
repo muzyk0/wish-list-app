@@ -1,3 +1,6 @@
+# Browser automation screenshots
+.playwright-mcp/
+
 # IDEs and Editors
 .idea
 .vscode

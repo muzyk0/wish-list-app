@@ -34,7 +34,7 @@ func TestAuthRateLimiter_Allow(t *testing.T) {
 		identifier := "test-client-2"
 
 		// Use up burst limit
-		for i := 0; i < config.BurstSize; i++ {
+		for range config.BurstSize {
 			limiter.Allow(identifier)
 		}
 
@@ -46,7 +46,7 @@ func TestAuthRateLimiter_Allow(t *testing.T) {
 		limiter := NewAuthRateLimiter(config)
 
 		// Use up burst for first client
-		for i := 0; i < config.BurstSize; i++ {
+		for range config.BurstSize {
 			limiter.Allow("client-a")
 		}
 
@@ -98,7 +98,7 @@ func TestAuthRateLimiter_Remaining(t *testing.T) {
 
 	t.Run("returns zero when limit exceeded", func(t *testing.T) {
 		// Use up all burst
-		for i := 0; i < config.BurstSize; i++ {
+		for range config.BurstSize {
 			limiter.Allow(identifier)
 		}
 
@@ -116,7 +116,7 @@ func TestAuthRateLimiter_Reset(t *testing.T) {
 	identifier := "test-reset"
 
 	// Use up burst
-	for i := 0; i < config.BurstSize; i++ {
+	for range config.BurstSize {
 		limiter.Allow(identifier)
 	}
 
@@ -149,7 +149,7 @@ func TestAuthRateLimitMiddleware(t *testing.T) {
 	})
 
 	t.Run("allows requests within limit", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -162,15 +162,15 @@ func TestAuthRateLimitMiddleware(t *testing.T) {
 
 	t.Run("returns 429 when rate limited", func(t *testing.T) {
 		// Use up burst
-		for i := 0; i < config.BurstSize; i++ {
-			req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		for range config.BurstSize {
+			req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			handler(c)
+			_ = handler(c)
 		}
 
 		// Next request should be rate limited
-		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -193,7 +193,7 @@ func TestNewAuthRateLimiterWithContext(t *testing.T) {
 		limiter := NewAuthRateLimiterWithContext(ctx, config)
 
 		// Add some entries
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			limiter.Allow(string(rune('a' + i)))
 		}
 
@@ -233,7 +233,7 @@ func TestRateLimitConfigs(t *testing.T) {
 
 func TestIdentifierFunctions(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
 	req.Header.Set("X-Forwarded-For", "192.168.1.1")
 
 	t.Run("IPIdentifier extracts real IP", func(t *testing.T) {
@@ -273,9 +273,9 @@ func TestAuthRateLimiter_ConcurrentAccess(t *testing.T) {
 
 	// Run concurrent allows
 	done := make(chan bool, 10)
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
-			for j := 0; j < 10; j++ {
+			for range 10 {
 				limiter.Allow(identifier)
 			}
 			done <- true
@@ -283,7 +283,7 @@ func TestAuthRateLimiter_ConcurrentAccess(t *testing.T) {
 	}
 
 	// Wait for all goroutines
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		<-done
 	}
 
@@ -303,7 +303,7 @@ func BenchmarkAuthRateLimiter_Allow(b *testing.B) {
 	identifier := "bench-client"
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		limiter.Allow(identifier)
 	}
 }

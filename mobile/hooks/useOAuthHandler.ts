@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { setTokens } from '@/lib/api/auth';
 import {
   startAppleOAuth,
   startFacebookOAuth,
   startGoogleOAuth,
 } from '@/lib/oauth-service';
+import { dialog } from '@/stores/dialogStore';
 
 type OAuthProvider = 'google' | 'facebook' | 'apple';
 
@@ -45,16 +45,13 @@ export function useOAuthHandler() {
           router.replace('/(tabs)');
         } catch (error) {
           console.error('Error storing OAuth tokens:', error);
-          Alert.alert(
-            'Error',
-            'Failed to save authentication. Please try again.',
-          );
+          dialog.error('Failed to save authentication. Please try again.');
         }
       } else if (result.error) {
-        Alert.alert('OAuth Error', result.error);
+        dialog.error(result.error, 'OAuth Error');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'An error occurred during OAuth');
+      dialog.error(error.message || 'An error occurred during OAuth');
     } finally {
       setOauthLoading(null);
     }

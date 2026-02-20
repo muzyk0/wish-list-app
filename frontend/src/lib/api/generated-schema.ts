@@ -944,6 +944,8 @@ export interface paths {
                     order?: string;
                     /** @description Filter items not attached to any wishlist */
                     unattached?: boolean;
+                    /** @description Filter items attached to any wishlist */
+                    attached?: boolean;
                     /** @description Include archived items (default false) */
                     include_archived?: boolean;
                     /** @description Search in title and description */
@@ -2854,6 +2856,12 @@ export interface components {
             title?: string;
             /** @example 2024-01-01T12:00:00Z */
             updated_at?: string;
+            /**
+             * @example [
+             *       "550e8400-e29b-41d4-a716-446655440002"
+             *     ]
+             */
+            wishlist_ids?: string[];
         };
         "wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest": {
             /** @example 899.99 */

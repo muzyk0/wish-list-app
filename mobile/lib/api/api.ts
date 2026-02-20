@@ -7,13 +7,14 @@ import {
   setTokens,
 } from './auth';
 import { API_BASE_URL } from './client';
-import type { paths } from './schema';
+import type { paths } from './generated-schema';
 import type {
   CreateGiftItemRequest,
   CreateReservationRequest,
   CreateWishListRequest,
   GiftItem,
   LoginResponse,
+  PaginatedGiftItems,
   Reservation,
   UpdateGiftItemRequest,
   UpdateWishListRequest,
@@ -21,52 +22,11 @@ import type {
   UserLogin,
   UserRegistration,
   WishList,
+  WishlistItem,
 } from './types';
 
 // Routes that don't require authentication
 const UNPROTECTED_ROUTES = ['/auth/login', '/auth/register'];
-
-// Type converter: ItemResponse (camelCase from API) -> GiftItem (snake_case for UI)
-type ItemResponse = {
-  createdAt?: string;
-  description?: string;
-  id?: string;
-  imageUrl?: string;
-  isArchived?: boolean;
-  isPurchased?: boolean;
-  link?: string;
-  notes?: string;
-  ownerId?: string;
-  price?: number;
-  priority?: number;
-  title?: string;
-  updatedAt?: string;
-};
-
-function convertItemResponseToGiftItem(
-  item: ItemResponse,
-  wishlistId?: string,
-): GiftItem {
-  return {
-    created_at: item.createdAt || '',
-    description: item.description,
-    id: item.id || '',
-    image_url: item.imageUrl,
-    link: item.link,
-    name: item.title || '',
-    notes: item.notes,
-    position: undefined,
-    price: item.price,
-    priority: item.priority,
-    purchased_at: undefined,
-    purchased_by_user_id: undefined,
-    purchased_price: undefined,
-    reserved_at: undefined,
-    reserved_by_user_id: undefined,
-    updated_at: item.updatedAt || '',
-    wishlist_id: wishlistId || '',
-  };
-}
 
 class ApiClient {
   private client: ReturnType<typeof createClient<paths>>;
@@ -406,7 +366,10 @@ class ApiClient {
     return data;
   }
 
-  async getGiftItemById(wishlistId: string, itemId: string): Promise<GiftItem> {
+  async getGiftItemById(
+    _wishlistId: string,
+    itemId: string,
+  ): Promise<GiftItem> {
     const { data, error } = await this.client.GET('/items/{id}', {
       params: { path: { id: itemId } },
     });
@@ -419,13 +382,43 @@ class ApiClient {
       throw new Error('No data received from gift item');
     }
 
-    return convertItemResponseToGiftItem(data, wishlistId);
+    return data;
+  }
+
+  async getUserGiftItems(options?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    order?: string;
+    unattached?: boolean;
+    attached?: boolean;
+    include_archived?: boolean;
+    search?: string;
+  }): Promise<PaginatedGiftItems> {
+    const { data, error } = await this.client.GET('/items', {
+      params: {
+        query: options,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from user gift items');
+    }
+
+    return {
+      ...data,
+      items: (data.items as GiftItem[]) || [],
+    };
   }
 
   async createGiftItem(
     wishlistId: string,
     data: CreateGiftItemRequest,
-  ): Promise<GiftItem> {
+  ): Promise<WishlistItem> {
     const { data: responseData, error } = await this.client.POST(
       '/wishlists/{id}/items/new',
       {
@@ -442,11 +435,11 @@ class ApiClient {
       throw new Error('No data received from gift item creation');
     }
 
-    return convertItemResponseToGiftItem(responseData, wishlistId);
+    return responseData;
   }
 
   async updateGiftItem(
-    wishlistId: string,
+    _wishlistId: string,
     itemId: string,
     data: UpdateGiftItemRequest,
   ): Promise<GiftItem> {
@@ -463,7 +456,7 @@ class ApiClient {
       throw new Error('No data received from gift item update');
     }
 
-    return convertItemResponseToGiftItem(responseData, wishlistId);
+    return responseData;
   }
 
   async deleteGiftItem(_wishlistId: string, itemId: string): Promise<void> {
@@ -476,8 +469,40 @@ class ApiClient {
     }
   }
 
-  async markGiftItemAsPurchased(
+  async createStandaloneGiftItem(
+    data: CreateGiftItemRequest,
+  ): Promise<GiftItem> {
+    const { data: responseData, error } = await this.client.POST('/items', {
+      body: data,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!responseData) {
+      throw new Error('No data received from standalone gift item creation');
+    }
+
+    return responseData;
+  }
+
+  async attachGiftItemToWishlist(
     wishlistId: string,
+    itemId: string,
+  ): Promise<void> {
+    const { error } = await this.client.POST('/wishlists/{id}/items', {
+      params: { path: { id: wishlistId } },
+      body: { item_id: itemId },
+    });
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  async markGiftItemAsPurchased(
+    _wishlistId: string,
     itemId: string,
     purchasedPrice: number,
   ): Promise<GiftItem> {
@@ -497,7 +522,7 @@ class ApiClient {
       throw new Error('No data received from mark purchased');
     }
 
-    return convertItemResponseToGiftItem(data, wishlistId);
+    return data;
   }
 
   // Reservation methods

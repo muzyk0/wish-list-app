@@ -12,33 +12,33 @@ import (
 
 func TestInitialize(t *testing.T) {
 	tests := []struct {
-		name     string
-		env      string
+		name      string
+		env       string
 		wantLevel slog.Level
 	}{
 		{
-			name:     "development environment",
-			env:      "development",
+			name:      "development environment",
+			env:       "development",
 			wantLevel: slog.LevelDebug,
 		},
 		{
-			name:     "production environment",
-			env:      "production",
+			name:      "production environment",
+			env:       "production",
 			wantLevel: slog.LevelInfo,
 		},
 		{
-			name:     "test environment",
-			env:      "test",
+			name:      "test environment",
+			env:       "test",
 			wantLevel: slog.LevelWarn,
 		},
 		{
-			name:     "dev shorthand",
-			env:      "dev",
+			name:      "dev shorthand",
+			env:       "dev",
 			wantLevel: slog.LevelDebug,
 		},
 		{
-			name:     "prod shorthand",
-			env:      "prod",
+			name:      "prod shorthand",
+			env:       "prod",
 			wantLevel: slog.LevelInfo,
 		},
 	}
@@ -88,21 +88,20 @@ func TestLoggingWithContext(t *testing.T) {
 	ErrorContext(ctx, "context error", "error", "failed")
 
 	// Read output
-	w.Close()
+	_ = w.Close()
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Restore stdout
 	os.Stdout = oldStdout
 
 	// Verify JSON structure
-	lines := strings.Split(strings.TrimSpace(output), "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(strings.TrimSpace(output), "\n") {
 		if line == "" {
 			continue
 		}
-		var logEntry map[string]interface{}
+		var logEntry map[string]any
 		if err := json.Unmarshal([]byte(line), &logEntry); err != nil {
 			t.Errorf("failed to parse JSON log: %v", err)
 		}
@@ -121,7 +120,7 @@ func TestWith(t *testing.T) {
 	}
 
 	// Verify it's a valid logger
-	if _, ok := interface{}(contextLogger).(*slog.Logger); !ok {
+	if _, ok := any(contextLogger).(*slog.Logger); !ok {
 		t.Error("With() did not return a *slog.Logger")
 	}
 }
@@ -134,7 +133,7 @@ func TestGetLogger(t *testing.T) {
 		t.Fatal("GetLogger() returned nil")
 	}
 
-	if _, ok := interface{}(logger).(*slog.Logger); !ok {
+	if _, ok := any(logger).(*slog.Logger); !ok {
 		t.Error("GetLogger() did not return a *slog.Logger")
 	}
 }
@@ -149,16 +148,16 @@ func TestJSONFormatting(t *testing.T) {
 	Info("test message", "key1", "value1", "key2", 123)
 
 	// Read output
-	w.Close()
+	_ = w.Close()
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Restore stdout
 	os.Stdout = oldStdout
 
 	// Verify JSON format
-	var logEntry map[string]interface{}
+	var logEntry map[string]any
 	if err := json.Unmarshal([]byte(strings.TrimSpace(output)), &logEntry); err != nil {
 		t.Fatalf("failed to parse JSON log: %v\nOutput: %s", err, output)
 	}

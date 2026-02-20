@@ -522,7 +522,7 @@ go build ./cmd/server
 ./server &
 SERVER_PID=$!
 sleep 3
-curl http://localhost:8080/health
+curl http://localhost:8080/healthz
 # Expected: 200 OK
 kill $SERVER_PID
 

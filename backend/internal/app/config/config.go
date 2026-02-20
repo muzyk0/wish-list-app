@@ -16,7 +16,7 @@ type Config struct {
 	ServerEnv            string
 	DatabaseURL          string
 	DatabaseMaxConns     int
-	JWTSecret            string
+	JWTSecret            string //nolint:gosec // Field name matches config key, value loaded from env
 	JWTExpiryHours       int
 	AWSRegion            string
 	AWSAccessKeyID       string

@@ -1,16 +1,15 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import {
-  Button as PaperButton,
-  HelperText,
-  TextInput as PaperTextInput,
-} from 'react-native-paper';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import type { GiftItem } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 import ImageUpload from './ImageUpload';
 
 // Zod schema for form validation
@@ -55,6 +54,7 @@ export default function GiftItemForm({
   onComplete,
 }: GiftItemFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -65,14 +65,14 @@ export default function GiftItemForm({
   } = useForm<GiftItemFormData>({
     resolver: zodResolver(giftItemSchema),
     defaultValues: {
-      name: existingItem?.name || '',
+      name: existingItem?.title || '',
       description: existingItem?.description || '',
       link: existingItem?.link || '',
       imageUrl: existingItem?.image_url || '',
       price: existingItem?.price?.toString() || '',
       priority: existingItem?.priority?.toString() || '0',
       notes: existingItem?.notes || '',
-      position: existingItem?.position?.toString() || '0',
+      position: '0',
     },
   });
 
@@ -80,56 +80,54 @@ export default function GiftItemForm({
 
   const mutation = useMutation({
     mutationFn: (data: GiftItemFormData) => {
-      // Parse numeric fields, set to undefined if empty or invalid
       const parsedPrice = data.price ? parseFloat(data.price) : undefined;
       const parsedPriority = data.priority
         ? parseInt(data.priority, 10)
         : undefined;
 
-      if (existingItem) {
-        // Update existing item
+      if (existingItem?.id) {
         return apiClient.updateGiftItem(wishlistId, existingItem.id, {
           title: data.name,
-          description: data.description || '',
-          link: data.link || '',
-          image_url: data.imageUrl || '',
+          description: data.description || undefined,
+          link: data.link || undefined,
+          image_url: data.imageUrl || undefined,
           price: parsedPrice,
           priority: parsedPriority,
-          notes: data.notes || '',
+          notes: data.notes || undefined,
         });
       }
-      // Create new item
       return apiClient.createGiftItem(wishlistId, {
         title: data.name,
-        description: data.description || '',
-        link: data.link || '',
-        image_url: data.imageUrl || '',
+        description: data.description || undefined,
+        link: data.link || undefined,
+        image_url: data.imageUrl || undefined,
         price: parsedPrice,
         priority: parsedPriority,
-        notes: data.notes || '',
+        notes: data.notes || undefined,
       });
     },
     onSuccess: (_data) => {
-      Alert.alert(
-        'Success',
-        `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (onComplete) {
-                onComplete();
-              } else {
-                router.back();
-              }
-            },
-          },
-        ],
-      );
+      queryClient.invalidateQueries({ queryKey: ['giftItems', wishlistId] });
+      queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
+      if (existingItem?.id) {
+        queryClient.invalidateQueries({
+          queryKey: ['giftItem', existingItem.id],
+        });
+      }
+      dialog.message({
+        title: 'Success',
+        message: `Gift item ${existingItem ? 'updated' : 'created'} successfully!`,
+        onPress: () => {
+          if (onComplete) {
+            onComplete();
+          } else {
+            router.back();
+          }
+        },
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message ||
           `Failed to ${existingItem ? 'update' : 'create'} gift item. Please try again.`,
       );
@@ -144,22 +142,22 @@ export default function GiftItemForm({
       return apiClient.deleteGiftItem(wishlistId, existingItem.id);
     },
     onSuccess: () => {
-      Alert.alert('Success', 'Gift item deleted successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            if (onComplete) {
-              onComplete();
-            } else {
-              router.back();
-            }
-          },
+      queryClient.invalidateQueries({ queryKey: ['giftItems', wishlistId] });
+      queryClient.invalidateQueries({ queryKey: ['userGiftItems'] });
+      dialog.message({
+        title: 'Success',
+        message: 'Gift item deleted successfully!',
+        onPress: () => {
+          if (onComplete) {
+            onComplete();
+          } else {
+            router.back();
+          }
         },
-      ]);
+      });
     },
     onError: (error: Error) => {
-      Alert.alert(
-        'Error',
+      dialog.error(
         error.message || 'Failed to delete gift item. Please try again.',
       );
     },
@@ -172,41 +170,35 @@ export default function GiftItemForm({
   const handleDelete = () => {
     if (!existingItem) return;
 
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this gift item? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMutation.mutate(),
-        },
-      ],
-    );
+    dialog.confirmDelete('this gift item', () => deleteMutation.mutate());
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>
-        {existingItem ? 'Edit Gift Item' : 'Add New Gift Item'}
-      </Text>
-
+    <View style={styles.container}>
       <Controller
         control={control}
         name="name"
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <PaperTextInput
+            <TextInput
               label="Name *"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              mode="outlined"
               maxLength={255}
               style={styles.input}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               disabled={mutation.isPending}
               error={!!errors.name}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                },
+              }}
             />
             {errors.name && (
               <HelperText type="error" visible={!!errors.name}>
@@ -221,17 +213,43 @@ export default function GiftItemForm({
         control={control}
         name="description"
         render={({ field: { onChange, onBlur, value } }) => (
-          <PaperTextInput
-            label="Description"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            mode="outlined"
-            multiline
-            numberOfLines={3}
-            style={styles.multilineInput}
-            disabled={mutation.isPending}
-          />
+          <View style={styles.textAreaWrapper}>
+            <TextInput
+              label="Description"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              multiline
+              numberOfLines={3}
+              mode="flat"
+              style={styles.textArea}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
+              disabled={mutation.isPending}
+              contentStyle={{
+                backgroundColor: 'transparent',
+              }}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                  background: 'transparent',
+                  surface: 'transparent',
+                  surfaceVariant: 'transparent',
+                  elevation: {
+                    level0: 'transparent',
+                    level1: 'transparent',
+                    level2: 'transparent',
+                    level3: 'transparent',
+                    level4: 'transparent',
+                    level5: 'transparent',
+                  },
+                },
+              }}
+            />
+          </View>
         )}
       />
 
@@ -240,16 +258,25 @@ export default function GiftItemForm({
         name="link"
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <PaperTextInput
+            <TextInput
               label="Link (URL)"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              mode="outlined"
               keyboardType="url"
               style={styles.input}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               disabled={mutation.isPending}
               error={!!errors.link}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                },
+              }}
             />
             {errors.link && (
               <HelperText type="error" visible={!!errors.link}>
@@ -271,16 +298,25 @@ export default function GiftItemForm({
         name="price"
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <PaperTextInput
+            <TextInput
               label="Price"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              mode="outlined"
               keyboardType="decimal-pad"
               style={styles.input}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               disabled={mutation.isPending}
               error={!!errors.price}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                },
+              }}
             />
             {errors.price && (
               <HelperText type="error" visible={!!errors.price}>
@@ -296,16 +332,25 @@ export default function GiftItemForm({
         name="priority"
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <PaperTextInput
+            <TextInput
               label="Priority (0-10)"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              mode="outlined"
               keyboardType="numeric"
               style={styles.input}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               disabled={mutation.isPending}
               error={!!errors.priority}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                },
+              }}
             />
             {errors.priority && (
               <HelperText type="error" visible={!!errors.priority}>
@@ -320,101 +365,141 @@ export default function GiftItemForm({
         control={control}
         name="notes"
         render={({ field: { onChange, onBlur, value } }) => (
-          <PaperTextInput
-            label="Notes"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            mode="outlined"
-            multiline
-            numberOfLines={3}
-            style={styles.multilineInput}
-            disabled={mutation.isPending}
-          />
+          <View style={styles.textAreaWrapper}>
+            <TextInput
+              label="Notes"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              multiline
+              numberOfLines={3}
+              mode="flat"
+              style={styles.textArea}
+              textColor="#ffffff"
+              underlineColor="transparent"
+              activeUnderlineColor="#FFD700"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
+              disabled={mutation.isPending}
+              contentStyle={{
+                backgroundColor: 'transparent',
+              }}
+              theme={{
+                colors: {
+                  primary: '#FFD700',
+                  onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+                  background: 'transparent',
+                  surface: 'transparent',
+                  surfaceVariant: 'transparent',
+                  elevation: {
+                    level0: 'transparent',
+                    level1: 'transparent',
+                    level2: 'transparent',
+                    level3: 'transparent',
+                    level4: 'transparent',
+                    level5: 'transparent',
+                  },
+                },
+              }}
+            />
+          </View>
         )}
       />
 
-      <Controller
-        control={control}
-        name="position"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <PaperTextInput
-            label="Position"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            mode="outlined"
-            keyboardType="numeric"
-            style={styles.input}
-            disabled={mutation.isPending}
-          />
-        )}
-      />
-
-      <PaperButton
-        mode="contained"
-        onPress={handleSubmit(onSubmit)}
-        loading={mutation.isPending}
-        disabled={mutation.isPending}
-        style={styles.button}
-      >
-        {mutation.isPending ? (
-          <Text style={styles.buttonText}>Processing...</Text>
-        ) : (
-          <Text style={styles.buttonText}>
-            {existingItem ? 'Update Item' : 'Add Item'}
-          </Text>
-        )}
-      </PaperButton>
-
-      {existingItem?.id && (
-        <PaperButton
-          mode="contained-tonal"
-          onPress={handleDelete}
-          loading={deleteMutation.isPending}
-          disabled={mutation.isPending || deleteMutation.isPending}
-          style={styles.deleteButton}
-        >
-          {deleteMutation.isPending ? (
+      {/* Create/Update Button */}
+      <Pressable onPress={handleSubmit(onSubmit)} disabled={mutation.isPending}>
+        <LinearGradient colors={['#FFD700', '#FFA500']} style={styles.button}>
+          {mutation.isPending ? (
             <Text style={styles.buttonText}>Processing...</Text>
           ) : (
-            <Text style={styles.buttonText}>Delete Item</Text>
+            <>
+              <MaterialCommunityIcons
+                name={existingItem ? 'pencil' : 'plus'}
+                size={20}
+                color="#000000"
+              />
+              <Text style={styles.buttonText}>
+                {existingItem ? 'Update Item' : 'Add Item'}
+              </Text>
+            </>
           )}
-        </PaperButton>
+        </LinearGradient>
+      </Pressable>
+
+      {existingItem?.id && (
+        <Pressable
+          onPress={handleDelete}
+          disabled={mutation.isPending || deleteMutation.isPending}
+          style={{ marginTop: 12 }}
+        >
+          <View style={styles.deleteButton}>
+            {deleteMutation.isPending ? (
+              <Text style={styles.deleteButtonText}>Processing...</Text>
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="delete"
+                  size={20}
+                  color="#FF6B6B"
+                />
+                <Text style={styles.deleteButtonText}>Delete Item</Text>
+              </>
+            )}
+          </View>
+        </Pressable>
       )}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
   },
   input: {
-    marginBottom: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 16,
+    borderRadius: 12,
   },
-  multilineInput: {
-    marginBottom: 15,
+  textAreaWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    marginBottom: 16,
+  },
+  textArea: {
+    backgroundColor: 'transparent',
+    minHeight: 100,
   },
   button: {
-    marginTop: 10,
-    paddingVertical: 5,
-  },
-  deleteButton: {
-    marginTop: 10,
-    paddingVertical: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+    marginTop: 24,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#000000',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+    gap: 8,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF6B6B',
   },
 });

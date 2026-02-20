@@ -14,6 +14,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <div className="size-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
               <svg
+                role="presentation"
                 className="size-4 text-white"
                 fill="none"
                 viewBox="0 0 24 24"

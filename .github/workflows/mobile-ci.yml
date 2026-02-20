@@ -38,7 +38,7 @@ jobs:
         run: cd mobile && pnpm run lint
 
       - name: Check formatting
-        run: cd mobile && pnpm run format --check
+        run: cd mobile && pnpm run format:check
 
   type-check:
     name: TypeScript Type Check
