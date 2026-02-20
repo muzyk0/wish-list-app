@@ -2,10 +2,12 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './generated-schema';
 import type {
+  CancelReservationRequest,
   CreateReservationRequest,
   GetGiftItemsResponse,
   MobileHandoffResponse,
   Reservation,
+  ReservationDetailsResponse,
   WishList,
 } from './types';
 
@@ -183,6 +185,55 @@ class ApiClient {
     }
 
     return data;
+  }
+
+  /**
+   * Get guest reservations by token
+   * Returns all reservations made with the given reservation token
+   */
+  async getGuestReservations(
+    token: string,
+  ): Promise<ReservationDetailsResponse[]> {
+    const { data, error } = await this.client.GET('/guest/reservations', {
+      params: { query: { token } },
+    });
+
+    if (error || !data) {
+      throw new Error(
+        (error as { error?: string })?.error ||
+          'Failed to fetch guest reservations',
+      );
+    }
+
+    return data;
+  }
+
+  /**
+   * Cancel a reservation for a gift item
+   * Guests must provide the reservation_token in the request body
+   */
+  async cancelReservation(
+    wishlistId: string,
+    itemId: string,
+    data?: CancelReservationRequest,
+  ): Promise<Reservation> {
+    const { data: responseData, error } = await this.client.DELETE(
+      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+      {
+        params: { path: { wishlistId, itemId } },
+        body: data,
+        headers: this.getHeaders(),
+        credentials: 'include',
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error(
+        (error as { error?: string })?.error || 'Failed to cancel reservation',
+      );
+    }
+
+    return responseData;
   }
 
   /**

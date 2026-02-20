@@ -24,12 +24,12 @@
 
 **Purpose**: API client extensions, type exports, i18n keys, and shared utilities needed by all user stories
 
-- [ ] T001 [P] Add new type exports (`ReservationDetailsResponse`, `GiftItemSummary`, `WishListSummary`, `CancelReservationRequest`, `ReservationStatusResponse`) in `frontend/src/lib/api/types.ts`
-- [ ] T002 [P] Add `getGuestReservations(token)` method to API client in `frontend/src/lib/api/client.ts`
-- [ ] T003 [P] Add `cancelReservation(wishlistId, itemId, data)` method to API client in `frontend/src/lib/api/client.ts`
-- [ ] T004 [P] Add public wishlist translation keys (titles, labels, badges, empty states, errors) to `frontend/src/i18n/locales/en.json`
-- [ ] T005 [P] Add public wishlist translation keys (titles, labels, badges, empty states, errors) to `frontend/src/i18n/locales/ru.json`
-- [ ] T006 [P] Create `guest-reservations` localStorage utility module with `getStoredReservations()`, `addReservation()`, `removeReservation()`, `getAllTokens()` helpers in `frontend/src/lib/guest-reservations.ts`
+- [x] T001 [P] Add new type exports (`ReservationDetailsResponse`, `GiftItemSummary`, `WishListSummary`, `CancelReservationRequest`, `ReservationStatusResponse`) in `frontend/src/lib/api/types.ts`
+- [x] T002 [P] Add `getGuestReservations(token)` method to API client in `frontend/src/lib/api/client.ts`
+- [x] T003 [P] Add `cancelReservation(wishlistId, itemId, data)` method to API client in `frontend/src/lib/api/client.ts`
+- [x] T004 [P] Add public wishlist translation keys (titles, labels, badges, empty states, errors) to `frontend/src/i18n/locales/en.json`
+- [x] T005 [P] Add public wishlist translation keys (titles, labels, badges, empty states, errors) to `frontend/src/i18n/locales/ru.json`
+- [x] T006 [P] Create `guest-reservations` localStorage utility module with `getStoredReservations()`, `addReservation()`, `removeReservation()`, `getAllTokens()` helpers in `frontend/src/lib/guest-reservations.ts`
 
 **Checkpoint**: Foundation ready — API client methods, types, i18n keys, and localStorage utilities available for all stories
 
