@@ -2526,6 +2526,9 @@ components:
           type: string
         occasion_date:
           type: string
+        public_slug:
+          maxLength: 100
+          type: string
         title:
           maxLength: 200
           type: string

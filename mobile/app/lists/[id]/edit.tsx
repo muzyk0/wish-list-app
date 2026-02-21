@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import {
   ActivityIndicator,
@@ -17,15 +17,125 @@ import { z } from 'zod';
 
 import { apiClient } from '@/lib/api';
 import { dialog } from '@/stores/dialogStore';
+import type { Control, FieldErrors } from 'react-hook-form';
+
+const slugRegex = /^[a-z0-9-]*$/;
 
 const updateWishListSchema = z.object({
   title: z.string().min(1, 'Please enter a title for your wishlist.').max(200),
   description: z.string().optional(),
   occasion: z.string().max(100).optional(),
   is_public: z.boolean(),
+  public_slug: z
+    .string()
+    .max(100, 'URL slug must be 100 characters or less')
+    .regex(
+      slugRegex,
+      'Only lowercase letters, digits, and hyphens (e.g. my-birthday-2026)',
+    )
+    .optional()
+    .or(z.literal('')),
 });
 
 type UpdateWishListFormData = z.infer<typeof updateWishListSchema>;
+
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
+
+// ─── Slug field sub-component ─────────────────────────────────────────
+function SlugField({
+  control,
+  errors,
+  isPending,
+  webDomain,
+}: {
+  control: Control<UpdateWishListFormData>;
+  errors: FieldErrors<UpdateWishListFormData>;
+  isPending: boolean;
+  webDomain: string;
+}) {
+  const isPublic = useWatch({ control, name: 'is_public' });
+  const slugValue = useWatch({ control, name: 'public_slug' });
+
+  if (!isPublic) return null;
+
+  const previewSlug = slugValue?.trim() || '<your-slug>';
+
+  return (
+    <View style={slugStyles.wrapper}>
+      <View style={slugStyles.labelRow}>
+        <MaterialCommunityIcons name="link-variant" size={16} color="#FFD700" />
+        <Text style={slugStyles.label}>Custom URL (optional)</Text>
+      </View>
+      <Controller
+        control={control}
+        name="public_slug"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            value={value}
+            onChangeText={(t) => onChange(t.toLowerCase())}
+            onBlur={onBlur}
+            placeholder="my-birthday-2026"
+            maxLength={100}
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={slugStyles.input}
+            textColor="#ffffff"
+            underlineColor="transparent"
+            activeUnderlineColor="#FFD700"
+            placeholderTextColor="rgba(255, 255, 255, 0.3)"
+            disabled={isPending}
+            theme={{
+              colors: {
+                primary: '#FFD700',
+                onSurfaceVariant: 'rgba(255, 255, 255, 0.5)',
+              },
+            }}
+          />
+        )}
+      />
+      {errors.public_slug ? (
+        <HelperText type="error" style={slugStyles.error}>
+          {errors.public_slug.message}
+        </HelperText>
+      ) : (
+        <Text style={slugStyles.preview} numberOfLines={1}>
+          {webDomain}/public/{previewSlug}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+const slugStyles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 24,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFD700',
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+  },
+  preview: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.4)',
+    marginTop: 6,
+    paddingHorizontal: 4,
+  },
+  error: {
+    color: '#FF6B6B',
+    marginTop: 2,
+  },
+});
 
 export default function EditWishListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,6 +153,7 @@ export default function EditWishListScreen() {
       description: '',
       occasion: '',
       is_public: false,
+      public_slug: '',
     },
   });
 
@@ -63,6 +174,7 @@ export default function EditWishListScreen() {
         description: wishList.description || '',
         occasion: wishList.occasion || '',
         is_public: wishList.is_public,
+        public_slug: wishList.public_slug || '',
       });
     }
   }, [wishList, reset]);
@@ -74,6 +186,7 @@ export default function EditWishListScreen() {
         description: data.description?.trim() || undefined,
         occasion: data.occasion?.trim() || undefined,
         is_public: data.is_public,
+        public_slug: data.public_slug?.trim() || undefined,
       }),
     onSuccess: () => {
       dialog.message({
@@ -356,6 +469,14 @@ export default function EditWishListScreen() {
                 )}
               />
             </View>
+
+            {/* Public URL Slug */}
+            <SlugField
+              control={control}
+              errors={errors}
+              isPending={updateMutation.isPending}
+              webDomain={WEB_DOMAIN}
+            />
 
             {/* Update Button */}
             <Pressable

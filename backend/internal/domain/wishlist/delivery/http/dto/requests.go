@@ -26,6 +26,7 @@ type UpdateWishListRequest struct {
 	Occasion     *string `json:"occasion"`
 	OccasionDate *string `json:"occasion_date"`
 	IsPublic     *bool   `json:"is_public"`
+	PublicSlug   *string `json:"public_slug" validate:"omitempty,max=100"`
 }
 
 func (r *UpdateWishListRequest) ToServiceInput() service.UpdateWishListInput {
@@ -35,6 +36,7 @@ func (r *UpdateWishListRequest) ToServiceInput() service.UpdateWishListInput {
 		Occasion:     r.Occasion,
 		OccasionDate: r.OccasionDate,
 		IsPublic:     r.IsPublic,
+		PublicSlug:   r.PublicSlug,
 	}
 }
 

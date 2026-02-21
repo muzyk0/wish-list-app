@@ -10,6 +10,7 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
   View,
 } from 'react-native';
@@ -17,6 +18,8 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { WishlistItem } from '@/lib/api/types';
 import { dialog } from '@/stores/dialogStore';
+
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
 
 // ─── Color tokens ────────────────────────────────────────────────────
 const C = {
@@ -242,6 +245,36 @@ const GiftItemCard = ({
   );
 };
 
+// ─── Share strip ─────────────────────────────────────────────────────
+const ShareStrip = ({ slug }: { slug: string }) => {
+  const publicUrl = `https://${WEB_DOMAIN}/public/${slug}`;
+
+  const handleShare = async () => {
+    try {
+      await Share.share({ message: publicUrl, url: publicUrl });
+    } catch {
+      // user dismissed
+    }
+  };
+
+  const handleOpen = () => Linking.openURL(publicUrl);
+
+  return (
+    <View style={share.strip}>
+      <MaterialCommunityIcons name="earth" size={14} color={C.green} />
+      <Text style={share.url} numberOfLines={1}>
+        {WEB_DOMAIN}/public/{slug}
+      </Text>
+      <Pressable onPress={handleOpen} style={share.iconBtn} hitSlop={8}>
+        <MaterialCommunityIcons name="open-in-new" size={16} color={C.gold} />
+      </Pressable>
+      <Pressable onPress={handleShare} style={share.iconBtn} hitSlop={8}>
+        <MaterialCommunityIcons name="share-variant" size={16} color={C.gold} />
+      </Pressable>
+    </View>
+  );
+};
+
 // ─── Empty state ─────────────────────────────────────────────────────
 const EmptyGifts = ({
   onAdd,
@@ -455,6 +488,11 @@ export default function WishListScreen() {
           <Text style={s.statLabel}>Purchased</Text>
         </View>
       </View>
+
+      {/* ── Share strip (public wishlist with slug) ── */}
+      {wishList.is_public && wishList.public_slug && (
+        <ShareStrip slug={wishList.public_slug} />
+      )}
 
       {/* ── Description (if exists) ── */}
       {wishList.description && (
@@ -680,6 +718,36 @@ const card = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#1a0f05',
+  },
+});
+
+// ─── Share strip styles ──────────────────────────────────────────────
+const share = StyleSheet.create({
+  strip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(94, 234, 212, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(94, 234, 212, 0.2)',
+  },
+  url: {
+    flex: 1,
+    fontSize: 12,
+    color: 'rgba(94, 234, 212, 0.85)',
+  },
+  iconBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: C.goldDim,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

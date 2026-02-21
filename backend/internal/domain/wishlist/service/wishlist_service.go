@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// slugPattern accepts only lowercase letters, digits, and hyphens.
+var slugPattern = regexp.MustCompile(`^[a-z0-9-]+$`)
 
 // Cross-domain interfaces - only methods actually used by WishListService
 
@@ -75,6 +79,8 @@ var (
 	ErrPositionOutOfRange      = errors.New("position value out of int32 range")
 	ErrGiftItemIDRequired      = errors.New("gift item ID is required")
 	ErrUserIDRequired          = errors.New("user ID is required")
+	ErrSlugTaken               = errors.New("public slug is already taken by another wishlist")
+	ErrSlugInvalid             = errors.New("public slug must contain only lowercase letters, digits, and hyphens")
 )
 
 // WishListServiceInterface defines the interface for wishlist-related operations
@@ -138,6 +144,7 @@ type UpdateWishListInput struct {
 	Occasion     *string
 	OccasionDate *string
 	IsPublic     *bool
+	PublicSlug   *string // nil = no change; empty string = clear slug; non-empty = set custom slug
 }
 
 type WishListOutput struct {
@@ -490,10 +497,31 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 		updatedWishList.OccasionDate = wishList.OccasionDate
 	}
 
-	// Generate public slug if making the list public and no slug exists
+	// Handle custom public slug provided by the user
+	if input.PublicSlug != nil {
+		customSlug := strings.TrimSpace(*input.PublicSlug)
+		if customSlug != "" {
+			// Validate format: lowercase letters, digits, hyphens only
+			if !slugPattern.MatchString(customSlug) {
+				return nil, ErrSlugInvalid
+			}
+			// Check uniqueness (exclude current wishlist)
+			taken, err := s.wishListRepo.IsSlugTaken(ctx, customSlug, id)
+			if err != nil {
+				return nil, fmt.Errorf("failed to check slug uniqueness: %w", err)
+			}
+			if taken {
+				return nil, ErrSlugTaken
+			}
+			updatedWishList.PublicSlug = pgtype.Text{String: customSlug, Valid: true}
+		}
+		// empty string → keep existing slug (do not clear it)
+	}
+
+	// Auto-generate slug if making the list public and it still has no slug
 	currentIsPublic := input.IsPublic != nil && *input.IsPublic
 	if currentIsPublic && !updatedWishList.PublicSlug.Valid {
-		titleToUse := updatedWishList.Title // Use the updated title
+		titleToUse := updatedWishList.Title
 		if input.Title != nil {
 			titleToUse = *input.Title
 		}

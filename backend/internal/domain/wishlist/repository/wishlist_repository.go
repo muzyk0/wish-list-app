@@ -26,6 +26,7 @@ type WishListRepositoryInterface interface {
 	GetByOwner(ctx context.Context, ownerID pgtype.UUID) ([]*models.WishList, error)
 	GetByPublicSlug(ctx context.Context, publicSlug string) (*models.WishList, error)
 	GetByOwnerWithItemCount(ctx context.Context, ownerID pgtype.UUID) ([]*models.WishListWithItemCount, error)
+	IsSlugTaken(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error)
 	Update(ctx context.Context, wishList models.WishList) (*models.WishList, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
 	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
@@ -134,6 +135,18 @@ func (r *WishListRepository) GetByOwner(ctx context.Context, ownerID pgtype.UUID
 }
 
 // Update modifies an existing wishlist
+// IsSlugTaken reports whether the given public slug is already used by another wishlist.
+// excludeID is the wishlist being updated so its own slug does not count as a conflict.
+func (r *WishListRepository) IsSlugTaken(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM wishlists WHERE public_slug = $1 AND id != $2)`
+	err := r.db.GetContext(ctx, &exists, query, slug, excludeID)
+	if err != nil {
+		return false, fmt.Errorf("failed to check slug uniqueness: %w", err)
+	}
+	return exists, nil
+}
+
 func (r *WishListRepository) Update(ctx context.Context, wishList models.WishList) (*models.WishList, error) {
 	query := `
 		UPDATE wishlists SET
