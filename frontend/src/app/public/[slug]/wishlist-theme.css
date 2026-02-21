@@ -1,0 +1,16 @@
+/**
+ * Public Wishlist Theme
+ * CSS custom properties for occasion-based theming (R-003).
+ * Override these in a parent element to apply a different theme.
+ */
+
+:root {
+  --wishlist-primary: hsl(var(--foreground));
+  --wishlist-bg: hsl(var(--card));
+  --wishlist-accent: hsl(var(--border));
+}
+
+/* Future occasion themes can be applied via data attributes:
+ *   <div data-wishlist-theme="birthday"> … </div>
+ *   <div data-wishlist-theme="wedding"> … </div>
+ */

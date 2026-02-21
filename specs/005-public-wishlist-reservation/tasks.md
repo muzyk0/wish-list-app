@@ -43,14 +43,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Create `WishlistHeader` component (title, occasion, occasion date, description, item count) in `frontend/src/components/public-wishlist/WishlistHeader.tsx`
-- [ ] T008 [P] [US1] Create `GiftItemCard` component (name, image/placeholder, price, product link, priority badge, reservation status badge) in `frontend/src/components/public-wishlist/GiftItemCard.tsx`
-- [ ] T009 [P] [US1] Create `WishlistNotFound` component (user-friendly 404 message) in `frontend/src/components/public-wishlist/WishlistNotFound.tsx`
-- [ ] T010 [P] [US1] Create `WishlistEmptyState` component (no items message) in `frontend/src/components/public-wishlist/WishlistEmptyState.tsx`
-- [ ] T011 [P] [US1] Create `GiftItemSkeleton` loading component in `frontend/src/components/public-wishlist/GiftItemSkeleton.tsx`
-- [ ] T012 [US1] Refactor `frontend/src/app/public/[slug]/page.tsx` to use new components (`WishlistHeader`, `GiftItemCard`, `WishlistNotFound`, `WishlistEmptyState`, `GiftItemSkeleton`), add i18n with `useTranslation`, wire up TanStack Query for `getPublicWishList` and `getPublicGiftItems`
-- [ ] T013 [US1] Add CSS custom properties for theming support (`--wishlist-primary`, `--wishlist-bg`, `--wishlist-accent`) in `frontend/src/app/public/[slug]/layout.tsx` or a dedicated CSS file per R-003 decision
-- [ ] T014 [US1] Ensure responsive design (320px mobile to desktop) for all public wishlist components; verify no horizontal scrolling
+- [x] T007 [P] [US1] Create `WishlistHeader` component (title, occasion, occasion date, description, item count) in `frontend/src/components/public-wishlist/WishlistHeader.tsx`
+- [x] T008 [P] [US1] Create `GiftItemCard` component (name, image/placeholder, price, product link, priority badge, reservation status badge) in `frontend/src/components/public-wishlist/GiftItemCard.tsx`
+- [x] T009 [P] [US1] Create `WishlistNotFound` component (user-friendly 404 message) in `frontend/src/components/public-wishlist/WishlistNotFound.tsx`
+- [x] T010 [P] [US1] Create `WishlistEmptyState` component (no items message) in `frontend/src/components/public-wishlist/WishlistEmptyState.tsx`
+- [x] T011 [P] [US1] Create `GiftItemSkeleton` loading component in `frontend/src/components/public-wishlist/GiftItemSkeleton.tsx`
+- [x] T012 [US1] Refactor `frontend/src/app/public/[slug]/page.tsx` to use new components (`WishlistHeader`, `GiftItemCard`, `WishlistNotFound`, `WishlistEmptyState`, `GiftItemSkeleton`), add i18n with `useTranslation`, wire up TanStack Query for `getPublicWishList` and `getPublicGiftItems`
+- [x] T013 [US1] Add CSS custom properties for theming support (`--wishlist-primary`, `--wishlist-bg`, `--wishlist-accent`) in `frontend/src/app/public/[slug]/layout.tsx` or a dedicated CSS file per R-003 decision
+- [x] T014 [US1] Ensure responsive design (320px mobile to desktop) for all public wishlist components; verify no horizontal scrolling
 
 **Checkpoint**: User Story 1 complete — visitors can view any public wishlist with items, statuses, and a polished responsive UI
 

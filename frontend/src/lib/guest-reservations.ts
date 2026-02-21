@@ -69,6 +69,8 @@ export function addReservation(reservation: StoredReservation): void {
 /** Removes a reservation entry by its token */
 export function removeReservation(reservationToken: string): void {
   const current = readFromStorage();
-  const updated = current.filter((r) => r.reservationToken !== reservationToken);
+  const updated = current.filter(
+    (r) => r.reservationToken !== reservationToken,
+  );
   writeToStorage(updated);
 }
