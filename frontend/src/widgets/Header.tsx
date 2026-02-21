@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/features/home/ui/ThemeToggle';
+import { BookmarkIcon } from 'lucide-react';
 
 export function Header() {
   const { t } = useTranslation();
@@ -36,6 +37,15 @@ export function Header() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/my/reservations"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md"
+          >
+            <BookmarkIcon className="size-4" />
+            <span className="hidden sm:inline">
+              {t('myReservations.title')}
+            </span>
+          </Link>
           <LanguageSwitcher />
           <ThemeToggle />
         </div>

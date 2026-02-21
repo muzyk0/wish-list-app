@@ -83,10 +83,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Rewrite `MyReservations` component in `frontend/src/components/wish-list/MyReservations.tsx` — read all tokens from `guest-reservations` localStorage utility, call `apiClient.getGuestReservations(token)` for each token, aggregate and display results, add i18n, show loading/error/empty states per R-005 decision
-- [ ] T020 [US3] Update `frontend/src/app/my/reservations/page.tsx` to use rewritten `MyReservations` component with proper data fetching and i18n
-- [ ] T021 [US3] Add "My Reservations" navigation link in `frontend/src/widgets/Footer.tsx` (persistent link per FR-008)
-- [ ] T022 [P] [US3] Add "My Reservations" navigation link in `frontend/src/widgets/Header.tsx` (persistent link per FR-008)
+- [x] T019 [US3] Rewrite `MyReservations` component in `frontend/src/components/wish-list/MyReservations.tsx` — read all tokens from `guest-reservations` localStorage utility, call `apiClient.getGuestReservations(token)` for each token, aggregate and display results, add i18n, show loading/error/empty states per R-005 decision
+- [x] T020 [US3] Update `frontend/src/app/my/reservations/page.tsx` to use rewritten `MyReservations` component with proper data fetching and i18n
+- [x] T021 [US3] Add "My Reservations" navigation link in `frontend/src/widgets/Footer.tsx` (persistent link per FR-008)
+- [x] T022 [P] [US3] Add "My Reservations" navigation link in `frontend/src/widgets/Header.tsx` (persistent link per FR-008)
 
 **Checkpoint**: User Story 3 complete — guests can view all their reservations across wishlists from any page via header/footer link
 
@@ -102,9 +102,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T023 [US4] Add cancel button and confirmation dialog to `MyReservations` component in `frontend/src/components/wish-list/MyReservations.tsx` — use `apiClient.cancelReservation(wishlistId, itemId, { reservation_token })`, invalidate `guest-reservations` query on success, show Sonner toast, handle invalid/expired token errors
-- [ ] T024 [US4] Update localStorage on cancellation — remove canceled reservation from `guest_reservations` array via utility in `frontend/src/lib/guest-reservations.ts`, or keep with "canceled" status for display
-- [ ] T025 [US4] Handle edge case: cancellation with invalid/expired token shows appropriate i18n error message and guides user to contact wishlist owner
+- [x] T023 [US4] Add cancel button and confirmation dialog to `MyReservations` component in `frontend/src/components/wish-list/MyReservations.tsx` — use `apiClient.cancelReservation(wishlistId, itemId, { reservation_token })`, invalidate `guest-reservations` query on success, show Sonner toast, handle invalid/expired token errors
+- [x] T024 [US4] Update localStorage on cancellation — remove canceled reservation from `guest_reservations` array via utility in `frontend/src/lib/guest-reservations.ts`, or keep with "canceled" status for display
+- [x] T025 [US4] Handle edge case: cancellation with invalid/expired token shows appropriate i18n error message and guides user to contact wishlist owner
 
 **Checkpoint**: User Story 4 complete — guests can cancel reservations, items return to available status
 
@@ -114,13 +114,13 @@
 
 **Purpose**: Quality, accessibility, and validation improvements across all stories
 
-- [ ] T026 [P] Verify all components meet responsive design requirements (320px–desktop) — test on multiple viewport sizes
-- [ ] T027 [P] Verify i18n completeness — every user-visible string uses `t()`, language switcher works on all public pages
-- [ ] T028 [P] Verify edge cases: no-image items show placeholder, slow network shows loading states, failed requests show retry-able error messages
-- [ ] T029 [P] Verify localStorage loss scenario — "My Reservations" empty state includes guidance message about contacting wishlist owner
-- [ ] T030 Run `cd frontend && pnpm type-check` to verify TypeScript correctness across all new/modified files
-- [ ] T031 Run `cd frontend && pnpm format` to ensure Biome formatting compliance
-- [ ] T032 Validate quickstart.md scenarios end-to-end (view wishlist → reserve → view reservations → cancel)
+- [x] T026 [P] Verify all components meet responsive design requirements (320px–desktop) — test on multiple viewport sizes
+- [x] T027 [P] Verify i18n completeness — every user-visible string uses `t()`, language switcher works on all public pages
+- [x] T028 [P] Verify edge cases: no-image items show placeholder, slow network shows loading states, failed requests show retry-able error messages
+- [x] T029 [P] Verify localStorage loss scenario — "My Reservations" empty state includes guidance message about contacting wishlist owner
+- [x] T030 Run `cd frontend && pnpm type-check` to verify TypeScript correctness across all new/modified files
+- [x] T031 Run `cd frontend && pnpm format` to ensure Biome formatting compliance
+- [x] T032 Validate quickstart.md scenarios end-to-end (view wishlist → reserve → view reservations → cancel)
 
 ---
 
