@@ -3358,6 +3358,10 @@ const docTemplate = `{
                 "occasion_date": {
                     "type": "string"
                 },
+                "public_slug": {
+                    "type": "string",
+                    "maxLength": 100
+                },
                 "title": {
                     "type": "string",
                     "maxLength": 200
