@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
   Image,
   Linking,
@@ -12,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { Text } from 'react-native-paper';
+import WishlistPickerModal from '@/components/gifts/WishlistPickerModal';
 import type { GiftItem } from '@/lib/api/types';
 
 interface GiftItemDetailModalProps {
@@ -26,6 +28,7 @@ export default function GiftItemDetailModal({
   onClose,
 }: GiftItemDetailModalProps) {
   const router = useRouter();
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   if (!item) return null;
 
@@ -35,6 +38,10 @@ export default function GiftItemDetailModal({
   const handleEdit = () => {
     onClose();
     router.push(`/gift-items/${item.id}/edit?wishlistId=${primaryWishlistId}`);
+  };
+
+  const handleAttachPress = () => {
+    setPickerVisible(true);
   };
 
   return (
@@ -188,6 +195,21 @@ export default function GiftItemDetailModal({
                 </BlurView>
               )}
 
+              {/* Attach to List Button */}
+              <Pressable
+                onPress={handleAttachPress}
+                style={styles.attachButtonContainer}
+              >
+                <View style={styles.attachButton}>
+                  <MaterialCommunityIcons
+                    name="link-plus"
+                    size={20}
+                    color="#FFD700"
+                  />
+                  <Text style={styles.attachButtonText}>Attach to List</Text>
+                </View>
+              </Pressable>
+
               {/* Edit Button */}
               <Pressable
                 onPress={handleEdit}
@@ -209,6 +231,15 @@ export default function GiftItemDetailModal({
           </ScrollView>
         </View>
       </View>
+
+      {/* Wishlist Picker */}
+      <WishlistPickerModal
+        visible={pickerVisible}
+        itemId={item.id ?? ''}
+        itemName={item.title ?? ''}
+        attachedWishlistIds={item.wishlist_ids ?? []}
+        onClose={() => setPickerVisible(false)}
+      />
     </Modal>
   );
 }
@@ -369,8 +400,28 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontStyle: 'italic',
   },
-  editButtonContainer: {
+  attachButtonContainer: {
     marginTop: 8,
+    marginBottom: 8,
+  },
+  attachButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.35)',
+    backgroundColor: 'rgba(255, 215, 0, 0.08)',
+  },
+  attachButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFD700',
+  },
+  editButtonContainer: {
+    marginTop: 0,
   },
   editButton: {
     flexDirection: 'row',

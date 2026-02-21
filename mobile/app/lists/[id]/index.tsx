@@ -243,7 +243,13 @@ const GiftItemCard = ({
 };
 
 // ─── Empty state ─────────────────────────────────────────────────────
-const EmptyGifts = ({ onAdd }: { onAdd: () => void }) => (
+const EmptyGifts = ({
+  onAdd,
+  onAttach,
+}: {
+  onAdd: () => void;
+  onAttach: () => void;
+}) => (
   <View style={empty.wrap}>
     <LinearGradient
       colors={['rgba(226, 185, 108, 0.18)', 'rgba(226, 185, 108, 0.04)']}
@@ -253,19 +259,25 @@ const EmptyGifts = ({ onAdd }: { onAdd: () => void }) => (
     </LinearGradient>
     <Text style={empty.title}>No gifts yet</Text>
     <Text style={empty.subtitle}>
-      Tap the button below to add your first gift item
+      Create a new gift or attach an existing one to this wishlist
     </Text>
-    <Pressable onPress={onAdd} style={empty.cta}>
-      <LinearGradient
-        colors={[C.goldBright, '#C48A3A']}
-        style={empty.ctaGrad}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <MaterialCommunityIcons name="plus" size={16} color="#1a0f05" />
-        <Text style={empty.ctaText}>Add Gift</Text>
-      </LinearGradient>
-    </Pressable>
+    <View style={empty.actions}>
+      <Pressable onPress={onAdd} style={empty.cta}>
+        <LinearGradient
+          colors={[C.goldBright, '#C48A3A']}
+          style={empty.ctaGrad}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <MaterialCommunityIcons name="plus" size={16} color="#1a0f05" />
+          <Text style={empty.ctaText}>New Gift</Text>
+        </LinearGradient>
+      </Pressable>
+      <Pressable onPress={onAttach} style={empty.ctaSecondary}>
+        <MaterialCommunityIcons name="link-plus" size={16} color={C.gold} />
+        <Text style={empty.ctaSecondaryText}>Attach Existing</Text>
+      </Pressable>
+    </View>
   </View>
 );
 
@@ -328,6 +340,8 @@ export default function WishListScreen() {
   };
 
   const handleAddGiftItem = () => router.push(`/lists/${id}/gifts/create`);
+  const handleAttachExistingItem = () =>
+    router.push(`/lists/${id}/attach-items`);
   const handleEditWishList = () => router.push(`/lists/${id}/edit`);
 
   // ── Loading ──
@@ -475,28 +489,51 @@ export default function WishListScreen() {
             />
           ))
         ) : (
-          <EmptyGifts onAdd={handleAddGiftItem} />
+          <EmptyGifts
+            onAdd={handleAddGiftItem}
+            onAttach={handleAttachExistingItem}
+          />
         )}
       </ScrollView>
 
-      {/* ── FAB ── */}
+      {/* ── FABs ── */}
       {items.length > 0 && (
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            handleAddGiftItem();
-          }}
-          style={s.fab}
-        >
-          <LinearGradient
-            colors={[C.goldBright, '#C48A3A']}
-            style={s.fabGrad}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+        <View style={s.fabGroup}>
+          {/* Attach existing gift */}
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleAttachExistingItem();
+            }}
+            style={s.fabSecondary}
           >
-            <MaterialCommunityIcons name="plus" size={26} color="#1a0f05" />
-          </LinearGradient>
-        </Pressable>
+            <View style={s.fabSecondaryInner}>
+              <MaterialCommunityIcons
+                name="link-plus"
+                size={22}
+                color={C.gold}
+              />
+            </View>
+          </Pressable>
+
+          {/* Create new gift */}
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              handleAddGiftItem();
+            }}
+            style={s.fab}
+          >
+            <LinearGradient
+              colors={[C.goldBright, '#C48A3A']}
+              style={s.fabGrad}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <MaterialCommunityIcons name="plus" size={26} color="#1a0f05" />
+            </LinearGradient>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -674,6 +711,11 @@ const empty = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 28,
   },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
   cta: {
     borderRadius: 24,
     overflow: 'hidden',
@@ -689,6 +731,22 @@ const empty = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1a0f05',
+  },
+  ctaSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: C.goldBorder,
+    backgroundColor: C.goldDim,
+  },
+  ctaSecondaryText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: C.gold,
   },
 });
 
@@ -849,11 +907,16 @@ const s = StyleSheet.create({
     fontWeight: '600',
     color: C.white,
   },
-  // fab
-  fab: {
+  // fab group
+  fabGroup: {
     position: 'absolute',
     bottom: 28,
     right: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  fab: {
     borderRadius: 30,
     shadowColor: C.gold,
     shadowOffset: { width: 0, height: 6 },
@@ -865,6 +928,24 @@ const s = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fabSecondary: {
+    borderRadius: 26,
+    shadowColor: C.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabSecondaryInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: C.bg2,
+    borderWidth: 1.5,
+    borderColor: C.goldBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
