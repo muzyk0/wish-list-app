@@ -30,6 +30,8 @@ func mapWishlistItemServiceError(err error) error {
 		return apperrors.BadRequest("Invalid user ID")
 	case errors.Is(err, service.ErrWishlistItemTitleRequired):
 		return apperrors.BadRequest("Title is required")
+	case errors.Is(err, service.ErrManualReservedNameEmpty):
+		return apperrors.BadRequest("reserved_by_name is required")
 	default:
 		return apperrors.Internal("Failed to process request").Wrap(err)
 	}

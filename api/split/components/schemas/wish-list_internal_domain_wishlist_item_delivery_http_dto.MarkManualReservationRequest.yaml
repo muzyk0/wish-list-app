@@ -1,0 +1,13 @@
+properties:
+  note:
+    example: Сказали что купят велосипед
+    maxLength: 1000
+    type: string
+  reserved_by_name:
+    example: Бабушка и дедушка
+    maxLength: 255
+    minLength: 1
+    type: string
+required:
+  - reserved_by_name
+type: object

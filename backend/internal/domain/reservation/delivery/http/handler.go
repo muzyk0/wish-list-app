@@ -40,8 +40,7 @@ func NewHandler(svc service.ReservationServiceInterface) *Handler {
 //	@Failure		400					{object}	map[string]string				"Invalid request body or validation error"
 //	@Failure		401					{object}	map[string]string				"Unauthorized (guests need name and email)"
 //	@Failure		500					{object}	map[string]string				"Internal server error"
-//	@Security		BearerAuth
-//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [post]
+//	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [post]
 func (h *Handler) CreateReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -97,8 +96,7 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 //	@Failure		400				{object}	map[string]string				"Invalid request body or validation error"
 //	@Failure		401				{object}	map[string]string				"Unauthorized (guests need reservation token)"
 //	@Failure		500				{object}	map[string]string				"Internal server error"
-//	@Security		BearerAuth
-//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
+//	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
 func (h *Handler) CancelReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")

@@ -18,9 +18,12 @@ type GiftItem struct {
 	PurchasedByUserID pgtype.UUID        `db:"purchased_by_user_id"`
 	PurchasedAt       pgtype.Timestamptz `db:"purchased_at"`
 	PurchasedPrice    pgtype.Numeric     `db:"purchased_price"`
-	Notes             pgtype.Text        `db:"notes"`
-	Position          pgtype.Int4        `db:"position"`
-	ArchivedAt        pgtype.Timestamptz `db:"archived_at"` // Soft delete
-	CreatedAt         pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `db:"updated_at"`
+	Notes                  pgtype.Text        `db:"notes"`
+	Position               pgtype.Int4        `db:"position"`
+	ManualReservedByName   pgtype.Text        `db:"manual_reserved_by_name"`
+	ManualReservationNote  pgtype.Text        `db:"manual_reservation_note"`
+	ManualReservedAt       pgtype.Timestamptz `db:"manual_reserved_at"`
+	ArchivedAt             pgtype.Timestamptz `db:"archived_at"` // Soft delete
+	CreatedAt              pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt              pgtype.Timestamptz `db:"updated_at"`
 }

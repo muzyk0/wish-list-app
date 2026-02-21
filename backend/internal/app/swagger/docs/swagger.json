@@ -1454,6 +1454,152 @@
                 }
             }
         },
+        "/public/reservations/wishlist/{wishlistId}/item/{itemId}": {
+            "post": {
+                "description": "Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Create a reservation for a gift item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gift Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reservation information (required for guests)",
+                        "name": "reservation_request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (guests need name and email)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Cancel a reservation for a gift item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wish List ID",
+                        "name": "wishlistId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gift Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cancellation information (required for guests)",
+                        "name": "cancel_request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation canceled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (guests need reservation token)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/public/wishlists/{slug}": {
             "get": {
                 "description": "Get a public wish list by its public slug. The wish list must be marked as public.",
@@ -1589,162 +1735,6 @@
                     },
                     "401": {
                         "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/reservations/wishlist/{wishlistId}/item/{itemId}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Reservations"
-                ],
-                "summary": "Create a reservation for a gift item",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wish List ID",
-                        "name": "wishlistId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Gift Item ID",
-                        "name": "itemId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Reservation information (required for guests)",
-                        "name": "reservation_request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Reservation created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body or validation error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized (guests need name and email)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Reservations"
-                ],
-                "summary": "Cancel a reservation for a gift item",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wish List ID",
-                        "name": "wishlistId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Gift Item ID",
-                        "name": "itemId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Cancellation information (required for guests)",
-                        "name": "cancel_request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Reservation canceled successfully",
-                        "schema": {
-                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body or validation error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized (guests need reservation token)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2373,6 +2363,104 @@
                 "responses": {
                     "204": {
                         "description": "Item detached successfully"
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Wishlist or item not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wishlists/{id}/items/{itemId}/mark-reserved": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Owner marks a wishlist item as reserved by someone offline (e.g., a family member who said they'll buy it). This is separate from the public reservation flow.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wishlists"
+                ],
+                "summary": "Mark item as manually reserved",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wishlist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Manual reservation details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item updated with manual reservation",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "401": {
                         "description": "Not authenticated",
@@ -3490,6 +3578,10 @@
                     "type": "boolean",
                     "example": false
                 },
+                "is_manually_reserved": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "is_purchased": {
                     "type": "boolean",
                     "example": false
@@ -3501,6 +3593,14 @@
                 "link": {
                     "type": "string",
                     "example": "https://apple.com/iphone-15-pro"
+                },
+                "manual_reservation_note": {
+                    "type": "string",
+                    "example": "Сказали что купят велосипед"
+                },
+                "manual_reserved_by_name": {
+                    "type": "string",
+                    "example": "Бабушка и дедушка"
                 },
                 "notes": {
                     "type": "string",
@@ -3525,6 +3625,25 @@
                 "updated_at": {
                     "type": "string",
                     "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        },
+        "wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest": {
+            "type": "object",
+            "required": [
+                "reserved_by_name"
+            ],
+            "properties": {
+                "note": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "Сказали что купят велосипед"
+                },
+                "reserved_by_name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "example": "Бабушка и дедушка"
                 }
             }
         },

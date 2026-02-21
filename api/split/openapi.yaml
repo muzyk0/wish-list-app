@@ -54,14 +54,14 @@ paths:
     $ref: paths/protected_profile.yaml
   /public/reservations/list/{slug}/item/{itemId}:
     $ref: paths/public_reservations_list_{slug}_item_{itemId}.yaml
+  /public/reservations/wishlist/{wishlistId}/item/{itemId}:
+    $ref: paths/public_reservations_wishlist_{wishlistId}_item_{itemId}.yaml
   /public/wishlists/{slug}:
     $ref: paths/public_wishlists_{slug}.yaml
   /public/wishlists/{slug}/gift-items:
     $ref: paths/public_wishlists_{slug}_gift-items.yaml
   /reservations/user:
     $ref: paths/reservations_user.yaml
-  /reservations/wishlist/{wishlistId}/item/{itemId}:
-    $ref: paths/reservations_wishlist_{wishlistId}_item_{itemId}.yaml
   /wishlists:
     $ref: paths/wishlists.yaml
   /wishlists/{id}:
@@ -70,6 +70,8 @@ paths:
     $ref: paths/wishlists_{id}_items.yaml
   /wishlists/{id}/items/{itemId}:
     $ref: paths/wishlists_{id}_items_{itemId}.yaml
+  /wishlists/{id}/items/{itemId}/mark-reserved:
+    $ref: paths/wishlists_{id}_items_{itemId}_mark-reserved.yaml
   /wishlists/{id}/items/new:
     $ref: paths/wishlists_{id}_items_new.yaml
 servers:

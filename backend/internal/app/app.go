@@ -243,6 +243,7 @@ func (a *App) initServer() {
 
 	// Auth middleware for protected routes
 	authMiddleware := auth.JWTMiddleware(a.tokenManager)
+	optionalAuthMiddleware := auth.OptionalJWTMiddleware(a.tokenManager)
 
 	// Register all domain routes
 	healthhttp.RegisterRoutes(e, a.healthHandler)
@@ -251,7 +252,7 @@ func (a *App) initServer() {
 	wishlisthttp.RegisterRoutes(e, a.wishlistHandler, authMiddleware)
 	itemhttp.RegisterRoutes(e, a.itemHandler, authMiddleware)
 	wishlistitemhttp.RegisterRoutes(e, a.wishlistItemHandler, authMiddleware)
-	reservationhttp.RegisterRoutes(e, a.reservationHandler, authMiddleware)
+	reservationhttp.RegisterRoutes(e, a.reservationHandler, optionalAuthMiddleware, authMiddleware)
 
 	if a.storageHandler != nil {
 		storagehttp.RegisterRoutes(e, a.storageHandler, a.tokenManager)

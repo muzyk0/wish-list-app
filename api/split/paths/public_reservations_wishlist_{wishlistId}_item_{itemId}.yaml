@@ -54,8 +54,6 @@ delete:
             additionalProperties:
               type: string
             type: object
-  security:
-    - BearerAuth: []
   summary: Cancel a reservation for a gift item
   tags:
     - Reservations
@@ -115,8 +113,6 @@ post:
             additionalProperties:
               type: string
             type: object
-  security:
-    - BearerAuth: []
   summary: Create a reservation for a gift item
   tags:
     - Reservations

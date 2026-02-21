@@ -27,6 +27,7 @@ import type {
   SchemaWishListInternalDomainUserDeliveryHttpDtoUpdateProfileRequest as UserUpdate,
   SchemaWishListInternalDomainWishlistDeliveryHttpDtoWishListResponse as WishList,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse as WishlistItem,
+  SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest as MarkManualReservationRequest,
 } from './generated-schema';
 
 export type {
@@ -53,4 +54,5 @@ export type {
   UserUpdate,
   WishList,
   WishlistItem,
+  MarkManualReservationRequest,
 };

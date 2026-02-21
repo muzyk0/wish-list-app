@@ -134,6 +134,45 @@ func (h *Handler) CreateItemInWishlist(c echo.Context) error {
 	return c.JSON(nethttp.StatusCreated, dto.ItemResponseFromService(item))
 }
 
+// MarkManualReservation godoc
+//
+//	@Summary		Mark item as manually reserved
+//	@Description	Owner marks a wishlist item as reserved by someone offline (e.g., a family member who said they'll buy it). This is separate from the public reservation flow.
+//	@Tags			Wishlists
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string									true	"Wishlist ID"
+//	@Param			itemId	path		string									true	"Item ID"
+//	@Param			request	body		dto.MarkManualReservationRequest		true	"Manual reservation details"
+//	@Success		200		{object}	dto.ItemResponse						"Item updated with manual reservation"
+//	@Failure		400		{object}	map[string]string						"Invalid request body"
+//	@Failure		401		{object}	map[string]string						"Not authenticated"
+//	@Failure		403		{object}	map[string]string						"Access denied"
+//	@Failure		404		{object}	map[string]string						"Wishlist or item not found"
+//	@Failure		500		{object}	map[string]string						"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/wishlists/{id}/items/{itemId}/mark-reserved [patch]
+func (h *Handler) MarkManualReservation(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+
+	wishlistID := c.Param("id")
+	itemID := c.Param("itemId")
+
+	var req dto.MarkManualReservationRequest
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	item, err := h.service.MarkManualReservation(ctx, wishlistID, itemID, userID, req.ReservedByName, req.Note)
+	if err != nil {
+		return mapWishlistItemServiceError(err)
+	}
+
+	return c.JSON(nethttp.StatusOK, dto.ItemResponseFromService(item))
+}
+
 // DetachItemFromWishlist godoc
 //
 //	@Summary		Detach item from wishlist

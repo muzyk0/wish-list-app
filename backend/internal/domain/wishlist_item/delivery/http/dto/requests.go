@@ -20,6 +20,12 @@ type CreateItemRequest struct {
 	Notes       *string  `json:"notes" validate:"max=1000" example:"Preferred color: Blue"`
 }
 
+// MarkManualReservationRequest represents the request to manually mark a wishlist item as reserved
+type MarkManualReservationRequest struct {
+	ReservedByName string  `json:"reserved_by_name" validate:"required,min=1,max=255" example:"Бабушка и дедушка"`
+	Note           *string `json:"note" validate:"omitempty,max=1000" example:"Сказали что купят велосипед"`
+}
+
 // ToDomain converts CreateItemRequest to service input
 func (r *CreateItemRequest) ToDomain() service.CreateItemInput {
 	return service.CreateItemInput{

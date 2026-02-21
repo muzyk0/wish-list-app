@@ -14,6 +14,9 @@ properties:
   is_archived:
     example: false
     type: boolean
+  is_manually_reserved:
+    example: false
+    type: boolean
   is_purchased:
     example: false
     type: boolean
@@ -22,6 +25,12 @@ properties:
     type: boolean
   link:
     example: https://apple.com/iphone-15-pro
+    type: string
+  manual_reservation_note:
+    example: Сказали что купят велосипед
+    type: string
+  manual_reserved_by_name:
+    example: Бабушка и дедушка
     type: string
   notes:
     example: 'Preferred color: Blue'

@@ -14,6 +14,7 @@ import type {
   CreateWishListRequest,
   GiftItem,
   LoginResponse,
+  MarkManualReservationRequest,
   PaginatedGiftItems,
   Reservation,
   UpdateGiftItemRequest,
@@ -525,6 +526,30 @@ class ApiClient {
     return data;
   }
 
+  async markItemAsManuallyReserved(
+    wishlistId: string,
+    itemId: string,
+    data: MarkManualReservationRequest,
+  ): Promise<WishlistItem> {
+    const { data: responseData, error } = await this.client.PATCH(
+      '/wishlists/{id}/items/{itemId}/mark-reserved',
+      {
+        params: { path: { id: wishlistId, itemId } },
+        body: data,
+      },
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    if (!responseData) {
+      throw new Error('No data received from mark manual reservation');
+    }
+
+    return responseData;
+  }
+
   // Reservation methods
   async createReservation(
     wishlistId: string,
@@ -532,7 +557,7 @@ class ApiClient {
     data: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data: responseData, error } = await this.client.POST(
-      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: data,
@@ -572,7 +597,7 @@ class ApiClient {
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     const { error } = await this.client.DELETE(
-      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
       },

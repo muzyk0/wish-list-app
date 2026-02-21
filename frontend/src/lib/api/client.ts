@@ -160,8 +160,8 @@ class ApiClient {
   }
 
   /**
-   * Create guest reservation for a gift item
-   * Allows unauthenticated users to reserve items by providing name/email
+   * Create a reservation for a gift item (public endpoint)
+   * Guests provide name/email; authenticated users are identified by token.
    */
   async createReservation(
     wishlistId: string,
@@ -169,7 +169,7 @@ class ApiClient {
     reservationData?: CreateReservationRequest,
   ): Promise<Reservation> {
     const { data, error } = await this.client.POST(
-      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: reservationData,
@@ -209,8 +209,8 @@ class ApiClient {
   }
 
   /**
-   * Cancel a reservation for a gift item
-   * Guests must provide the reservation_token in the request body
+   * Cancel a reservation for a gift item (public endpoint)
+   * Guests provide reservation_token; authenticated users are identified by token.
    */
   async cancelReservation(
     wishlistId: string,
@@ -218,7 +218,7 @@ class ApiClient {
     data?: CancelReservationRequest,
   ): Promise<Reservation> {
     const { data: responseData, error } = await this.client.DELETE(
-      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: data,

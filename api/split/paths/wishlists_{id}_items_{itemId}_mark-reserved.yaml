@@ -1,0 +1,79 @@
+patch:
+  description: >-
+    Owner marks a wishlist item as reserved by someone offline (e.g., a family
+    member who said they'll buy it). This is separate from the public
+    reservation flow.
+  parameters:
+    - description: Wishlist ID
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    - description: Item ID
+      in: path
+      name: itemId
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: >-
+            ../components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest.yaml
+    description: Manual reservation details
+    required: true
+  responses:
+    '200':
+      description: Item updated with manual reservation
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse.yaml
+    '400':
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '403':
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '404':
+      description: Wishlist or item not found
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Mark item as manually reserved
+  tags:
+    - Wishlists

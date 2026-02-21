@@ -49,13 +49,13 @@ export default function PublicWishListPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-3xl">
-        <div className="mb-6 space-y-3">
-          <div className="h-8 w-1/2 bg-muted rounded animate-pulse" />
-          <div className="h-5 w-1/3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className="space-y-3 mb-10">
+          <div className="h-4 w-28 rounded-full bg-muted animate-pulse" />
+          <div className="h-12 w-2/3 rounded-lg bg-muted animate-pulse" />
+          <div className="h-4 w-full max-w-sm rounded bg-muted animate-pulse" />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: skeleton list
             <GiftItemSkeleton key={i} />
@@ -74,41 +74,64 @@ export default function PublicWishListPage() {
     (a, b) => (a.position ?? 0) - (b.position ?? 0),
   );
 
+  const reservedCount = sortedItems.filter(
+    (item) => item.reserved_by_user_id || item.purchased_by_user_id,
+  ).length;
+
+  // Promo block appears after all items are done animating
+  const promoDelay = Math.min(sortedItems.length, 9) + 2;
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
-      {/* Wishlist header */}
-      <WishlistHeader wishlist={wishList} />
+    <div className="max-w-3xl mx-auto px-4 py-12">
+      {/* Wishlist header with staggered entrance */}
+      <div className="wl-fade-up wl-delay-0">
+        <WishlistHeader wishlist={wishList} reservedCount={reservedCount} />
+      </div>
 
       {/* Gift items */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {sortedItems.length === 0 ? (
           <WishlistEmptyState />
         ) : (
-          sortedItems.map((item) => (
-            <GiftItemCard
+          sortedItems.map((item, index) => (
+            <div
               key={item.id}
-              item={item}
-              reserveAction={
-                <GuestReservationDialog
-                  wishlistSlug={slug}
-                  wishlistId={wishList.id}
-                  itemId={item.id}
-                  itemName={item.name}
-                  isReserved={!!item.reserved_by_user_id}
-                  isPurchased={!!item.purchased_by_user_id}
-                />
-              }
-            />
+              className={`wl-fade-up wl-delay-${Math.min(index + 1, 9)}`}
+            >
+              <GiftItemCard
+                item={item}
+                reserveAction={
+                  <GuestReservationDialog
+                    wishlistSlug={slug}
+                    wishlistId={wishList.id}
+                    itemId={item.id}
+                    itemName={item.name}
+                    isReserved={!!item.reserved_by_user_id}
+                    isPurchased={!!item.purchased_by_user_id}
+                  />
+                }
+              />
+            </div>
           ))
         )}
       </div>
 
       {/* Mobile app promo */}
-      <div className="mt-10 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+      <div
+        className="wl-fade-up mt-12 rounded-2xl p-6"
+        style={{
+          background: 'var(--wl-accent-light)',
+          border: '1px solid var(--wl-card-border)',
+          animationDelay: `${promoDelay * 70}ms`,
+        }}
+      >
+        <h3
+          className="wl-display font-semibold text-lg mb-1"
+          style={{ color: 'var(--wl-text)' }}
+        >
           {t('publicWishlist.mobilePromo.title')}
         </h3>
-        <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
+        <p className="text-sm mb-4" style={{ color: 'var(--wl-muted)' }}>
           {t('publicWishlist.mobilePromo.description')}
         </p>
         <Button
@@ -123,6 +146,7 @@ export default function PublicWishListPage() {
               }
             }, 1500);
           }}
+          style={{ borderColor: 'var(--wl-accent)', color: 'var(--wl-accent)' }}
         >
           {t('publicWishlist.mobilePromo.action')}
         </Button>
