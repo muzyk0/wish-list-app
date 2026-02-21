@@ -66,10 +66,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Refactor `GuestReservationDialog` in `frontend/src/components/guest/GuestReservationDialog.tsx` — add i18n translations, use `apiClient.createReservation()`, integrate with `guest-reservations` localStorage utility (R-005), add Zod validation for name (required, max 255) and email (required, valid format)
-- [ ] T016 [US2] Add "Reserve Gift" button to `GiftItemCard` component in `frontend/src/components/public-wishlist/GiftItemCard.tsx` — disabled with "Reserved"/"Already Purchased" label when item is not available, opens `GuestReservationDialog` when available
-- [ ] T017 [US2] Wire reservation mutation in `frontend/src/app/public/[slug]/page.tsx` — use TanStack Query `useMutation` for `createReservation`, invalidate `public-gift-items` query on success, show Sonner success toast with reservation token
-- [ ] T018 [US2] Handle race condition: if `createReservation` returns error (item already reserved), show "already reserved" toast and refresh item list
+- [x] T015 [US2] Refactor `GuestReservationDialog` in `frontend/src/components/guest/GuestReservationDialog.tsx` — add i18n translations, use `apiClient.createReservation()`, integrate with `guest-reservations` localStorage utility (R-005), add Zod validation for name (required, max 255) and email (required, valid format)
+- [x] T016 [US2] Add "Reserve Gift" button to `GiftItemCard` component in `frontend/src/components/public-wishlist/GiftItemCard.tsx` — disabled with "Reserved"/"Already Purchased" label when item is not available, opens `GuestReservationDialog` when available
+- [x] T017 [US2] Wire reservation mutation in `frontend/src/app/public/[slug]/page.tsx` — use TanStack Query `useMutation` for `createReservation`, invalidate `public-gift-items` query on success, show Sonner success toast with reservation token
+- [x] T018 [US2] Handle race condition: if `createReservation` returns error (item already reserved), show "already reserved" toast and refresh item list
 
 **Checkpoint**: User Story 2 complete — guests can reserve available items, see immediate status updates, tokens stored locally
 

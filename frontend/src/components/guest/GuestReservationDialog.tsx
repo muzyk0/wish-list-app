@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -20,17 +21,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiClient } from '@/lib/api/client';
+import { addReservation } from '@/lib/guest-reservations';
 
-// Zod schema for guest reservation form validation
 const guestReservationSchema = z.object({
-  guestName: z
-    .string()
-    .min(1, 'Name is required')
-    .max(255, 'Name must be less than 255 characters'),
-  guestEmail: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Invalid email address'),
+  guestName: z.string().min(1).max(255),
+  guestEmail: z.string().min(1).email(),
 });
 
 type GuestReservationFormData = z.infer<typeof guestReservationSchema>;
@@ -60,8 +55,20 @@ export function GuestReservationDialog({
   isReserved,
   isPurchased,
 }: GuestReservationDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const schema = z.object({
+    guestName: z
+      .string()
+      .min(1, t('reservation.dialog.validation.nameRequired'))
+      .max(255, t('reservation.dialog.validation.nameTooLong')),
+    guestEmail: z
+      .string()
+      .min(1, t('reservation.dialog.validation.emailRequired'))
+      .email(t('reservation.dialog.validation.emailInvalid')),
+  });
 
   const {
     register,
@@ -70,11 +77,8 @@ export function GuestReservationDialog({
     getValues,
     formState: { errors },
   } = useForm<GuestReservationFormData>({
-    resolver: zodResolver(guestReservationSchema),
-    defaultValues: {
-      guestName: '',
-      guestEmail: '',
-    },
+    resolver: zodResolver(schema),
+    defaultValues: { guestName: '', guestEmail: '' },
   });
 
   const reservationMutation = useMutation({
@@ -86,37 +90,56 @@ export function GuestReservationDialog({
     },
     onSuccess: (data) => {
       const { guestName, guestEmail } = getValues();
-      toast.success('Reservation Successful!', {
-        description: `You have reserved "${itemName}". A confirmation has been sent to ${guestEmail}`,
+
+      toast.success(t('reservation.success.title'), {
+        description: t('reservation.success.description', {
+          itemName,
+          email: guestEmail,
+        }),
       });
 
-      // Save reservation token to localStorage for future reference
-      const reservations = JSON.parse(
-        localStorage.getItem('guest_reservations') || '[]',
-      );
-      reservations.push({
+      // Persist reservation token using localStorage utility (R-004, R-005)
+      addReservation({
         itemId,
         itemName,
         reservationToken: data.reservation_token,
         reservedAt: data.reserved_at,
         guestName,
         guestEmail,
+        wishlistId,
       });
-      localStorage.setItem('guest_reservations', JSON.stringify(reservations));
 
-      // Invalidate and refetch the wishlist query to update UI
+      // Invalidate gift items list so status badges update immediately (T017)
       queryClient.invalidateQueries({
-        queryKey: ['public-wishlist', wishlistSlug],
+        queryKey: ['public-gift-items', wishlistSlug],
       });
 
-      // Close dialog and reset form
       setOpen(false);
       reset();
     },
     onError: (error: Error) => {
-      toast.error('Reservation Failed', {
-        description: error.message,
-      });
+      // Race condition: item was reserved by someone else between load and submit (T018)
+      const isAlreadyReserved =
+        error.message.toLowerCase().includes('already reserved') ||
+        error.message.toLowerCase().includes('already been reserved') ||
+        error.message.includes('409') ||
+        error.message.includes('conflict');
+
+      if (isAlreadyReserved) {
+        toast.error(t('reservation.errors.failed'), {
+          description: t('reservation.errors.alreadyReserved'),
+        });
+        // Refresh item list to show current reservation status
+        queryClient.invalidateQueries({
+          queryKey: ['public-gift-items', wishlistSlug],
+        });
+        setOpen(false);
+        reset();
+      } else {
+        toast.error(t('reservation.errors.failed'), {
+          description: error.message || t('reservation.errors.generic'),
+        });
+      }
     },
   });
 
@@ -133,12 +156,13 @@ export function GuestReservationDialog({
           disabled={isReserved || isPurchased}
         >
           {isPurchased ? (
-            'Already Purchased'
+            t('publicWishlist.item.alreadyPurchased')
           ) : isReserved ? (
-            'Reserved'
+            t('publicWishlist.item.alreadyReserved')
           ) : (
             <>
-              <Heart className="mr-2 h-4 w-4" /> Reserve Gift
+              <Heart className="mr-2 h-4 w-4" />
+              {t('publicWishlist.item.reserve')}
             </>
           )}
         </Button>
@@ -146,18 +170,21 @@ export function GuestReservationDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Reserve "{itemName}"</DialogTitle>
+            <DialogTitle>
+              {t('reservation.dialog.title', { itemName })}
+            </DialogTitle>
             <DialogDescription>
-              Enter your name and email to reserve this gift. You'll receive a
-              confirmation with a reservation token.
+              {t('reservation.dialog.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="guest-name">Your Name</Label>
+              <Label htmlFor="guest-name">
+                {t('reservation.dialog.nameLabel')}
+              </Label>
               <Input
                 id="guest-name"
-                placeholder="John Doe"
+                placeholder={t('reservation.dialog.namePlaceholder')}
                 {...register('guestName')}
                 maxLength={255}
                 aria-invalid={!!errors.guestName}
@@ -169,11 +196,13 @@ export function GuestReservationDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="guest-email">Your Email</Label>
+              <Label htmlFor="guest-email">
+                {t('reservation.dialog.emailLabel')}
+              </Label>
               <Input
                 id="guest-email"
                 type="email"
-                placeholder="john@example.com"
+                placeholder={t('reservation.dialog.emailPlaceholder')}
                 {...register('guestEmail')}
                 aria-invalid={!!errors.guestEmail}
               />
@@ -183,7 +212,7 @@ export function GuestReservationDialog({
                 </p>
               )}
               <p className="text-sm text-muted-foreground">
-                We'll send you a confirmation email with your reservation token
+                {t('reservation.dialog.emailHint')}
               </p>
             </div>
           </div>
@@ -193,10 +222,12 @@ export function GuestReservationDialog({
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('reservation.dialog.cancel')}
             </Button>
             <Button type="submit" disabled={reservationMutation.isPending}>
-              {reservationMutation.isPending ? 'Reserving...' : 'Reserve Gift'}
+              {reservationMutation.isPending
+                ? t('reservation.dialog.submitting')
+                : t('reservation.dialog.submit')}
             </Button>
           </DialogFooter>
         </form>
