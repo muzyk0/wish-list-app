@@ -660,7 +660,10 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 	// Resolve wishlist owner; item owner must be a user ID.
 	wishList, err := s.wishListRepo.GetByID(ctx, listID)
 	if err != nil {
-		return nil, ErrWishListNotFound
+		if errors.Is(err, repository.ErrWishListNotFound) {
+			return nil, ErrWishListNotFound
+		}
+		return nil, fmt.Errorf("failed to get wishlist: %w", err)
 	}
 
 	// Create price numeric
@@ -867,7 +870,10 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*GiftItemOutput, int, error) {
 	wishList, err := s.wishListRepo.GetByPublicSlug(ctx, publicSlug)
 	if err != nil {
-		return nil, 0, ErrWishListNotFound
+		if errors.Is(err, repository.ErrWishListNotFound) {
+			return nil, 0, ErrWishListNotFound
+		}
+		return nil, 0, fmt.Errorf("failed to get wishlist by public slug: %w", err)
 	}
 
 	giftItems, totalCount, err := s.giftItemRepo.GetPublicWishListGiftItemsPaginated(ctx, publicSlug, limit, offset)

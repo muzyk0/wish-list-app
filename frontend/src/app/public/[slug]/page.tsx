@@ -28,8 +28,16 @@ type SortOption =
   | 'price_desc'
   | 'priority_desc';
 
-const isItemReserved = (item: GiftItem) =>
-  item.is_reserved ?? (!!item.reserved_by_user_id || !!item.reserved_at);
+const isItemReserved = (item: GiftItem) => {
+  const isManuallyReserved = (
+    item as GiftItem & { is_manually_reserved?: boolean }
+  ).is_manually_reserved;
+
+  return (
+    !!isManuallyReserved ||
+    (item.is_reserved ?? (!!item.reserved_by_user_id || !!item.reserved_at))
+  );
+};
 
 const isItemPurchased = (item: GiftItem) => !!item.purchased_by_user_id;
 
