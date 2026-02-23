@@ -67,7 +67,7 @@ export function WishlistHeader({
 
       {/* Title */}
       <h1
-        className="wl-display text-4xl sm:text-5xl font-bold leading-tight mb-4"
+        className="wl-display text-4xl sm:text-5xl font-bold leading-tight mb-4 break-words"
         style={{ color: 'var(--wl-text)' }}
       >
         {wishlist.title}
@@ -76,7 +76,7 @@ export function WishlistHeader({
       {/* Description */}
       {wishlist.description && (
         <p
-          className="text-base sm:text-lg leading-relaxed mb-6"
+          className="text-base sm:text-lg leading-relaxed mb-6 break-words"
           style={{ color: 'var(--wl-muted)', maxWidth: '58ch' }}
         >
           {wishlist.description}
@@ -94,7 +94,7 @@ export function WishlistHeader({
 
       {/* Stats row */}
       {(totalItems > 0 || viewCount !== null) && (
-        <div className="flex flex-wrap items-center gap-5 mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-3 sm:gap-5">
           {totalItems > 0 && (
             <div className="flex items-center gap-1.5">
               <Gift

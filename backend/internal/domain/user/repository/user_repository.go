@@ -129,6 +129,11 @@ func (r *UserRepository) decryptUserPII(ctx context.Context, user *models.User) 
 
 // Create inserts a new user into the database
 func (r *UserRepository) Create(ctx context.Context, user models.User) (*models.User, error) {
+	isVerified := user.IsVerified
+	if !isVerified.Valid {
+		isVerified = pgtype.Bool{Bool: false, Valid: true}
+	}
+
 	// Encrypt PII before inserting
 	if err := r.encryptUserPII(ctx, &user); err != nil {
 		return nil, fmt.Errorf("failed to encrypt user PII: %w", err)
@@ -136,10 +141,10 @@ func (r *UserRepository) Create(ctx context.Context, user models.User) (*models.
 
 	query := `
 		INSERT INTO users (
-			email, password_hash, first_name, last_name, avatar_url,
+			email, password_hash, first_name, last_name, avatar_url, is_verified,
 			encrypted_email, encrypted_first_name, encrypted_last_name
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8
+			$1, $2, $3, $4, $5, $6, $7, $8, $9
 		) RETURNING
 			id, email, encrypted_email, first_name, encrypted_first_name,
 			last_name, encrypted_last_name, avatar_url, is_verified,
@@ -153,6 +158,7 @@ func (r *UserRepository) Create(ctx context.Context, user models.User) (*models.
 		user.FirstName,
 		user.LastName,
 		user.AvatarUrl,
+		isVerified,
 		user.EncryptedEmail,
 		user.EncryptedFirstName,
 		user.EncryptedLastName,
@@ -242,8 +248,9 @@ func (r *UserRepository) Update(ctx context.Context, user models.User) (*models.
 			last_name = $5,
 			encrypted_last_name = $6,
 			avatar_url = $7,
+			is_verified = $8,
 			updated_at = NOW()
-		WHERE id = $8
+		WHERE id = $9
 		RETURNING
 			id, email, encrypted_email, first_name, encrypted_first_name,
 			last_name, encrypted_last_name, avatar_url, is_verified,
@@ -259,6 +266,7 @@ func (r *UserRepository) Update(ctx context.Context, user models.User) (*models.
 		user.LastName,
 		user.EncryptedLastName,
 		user.AvatarUrl,
+		user.IsVerified,
 		user.ID,
 	).StructScan(&updatedUser)
 

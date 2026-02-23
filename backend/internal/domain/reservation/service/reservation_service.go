@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	itemmodels "wish-list/internal/domain/item/models"
@@ -34,7 +35,7 @@ var (
 	ErrInvalidReservationWishlist  = errors.New("invalid wishlist id")
 	ErrGiftItemNotInWishlist       = errors.New("gift item not found in the specified wishlist")
 	ErrGiftItemAlreadyReserved     = errors.New("gift item is already reserved")
-	ErrGuestInfoRequired           = errors.New("guest name and email are required for guest reservations")
+	ErrGuestInfoRequired           = errors.New("guest name is required for guest reservations")
 	ErrReservationNotFound         = errors.New("no reservation found for this user and gift item")
 	ErrMissingUserOrToken          = errors.New("either user ID or reservation token must be provided")
 	ErrGiftItemNotInPublicWishlist = errors.New("gift item not found in the specified public wishlist")
@@ -173,16 +174,24 @@ func (s *ReservationService) CreateReservation(ctx context.Context, input Create
 	}
 
 	// Create the guest reservation
-	if input.GuestName == nil || input.GuestEmail == nil {
+	if input.GuestName == nil || strings.TrimSpace(*input.GuestName) == "" {
 		return nil, ErrGuestInfoRequired
+	}
+	guestName := strings.TrimSpace(*input.GuestName)
+	guestEmail := pgtype.Text{Valid: false}
+	if input.GuestEmail != nil {
+		email := strings.TrimSpace(*input.GuestEmail)
+		if email != "" {
+			guestEmail = pgtype.Text{String: email, Valid: true}
+		}
 	}
 
 	// Attempt to create the reservation record atomically
 	detail := repository.ReservationDetail{
 		WishlistID: wishlistID,
 		GiftItemID: giftItemID,
-		GuestName:  pgtype.Text{String: *input.GuestName, Valid: true},
-		GuestEmail: pgtype.Text{String: *input.GuestEmail, Valid: true},
+		GuestName:  pgtype.Text{String: guestName, Valid: true},
+		GuestEmail: guestEmail,
 		Status:     "active",
 		ReservedAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		// Set expiration time for guest reservations (e.g., 30 days)
@@ -326,13 +335,22 @@ func (s *ReservationService) CreateGuestReservation(ctx context.Context, giftIte
 	if activeReservation != nil {
 		return nil, ErrGiftItemAlreadyReserved
 	}
+	guestName = strings.TrimSpace(guestName)
+	if guestName == "" {
+		return nil, ErrGuestInfoRequired
+	}
+	guestEmailField := pgtype.Text{Valid: false}
+	guestEmail = strings.TrimSpace(guestEmail)
+	if guestEmail != "" {
+		guestEmailField = pgtype.Text{String: guestEmail, Valid: true}
+	}
 
 	// Create the guest reservation
 	detail := repository.ReservationDetail{
 		WishlistID: wishlistUUID,
 		GiftItemID: itemID,
 		GuestName:  pgtype.Text{String: guestName, Valid: true},
-		GuestEmail: pgtype.Text{String: guestEmail, Valid: true},
+		GuestEmail: guestEmailField,
 		Status:     "active",
 		ReservedAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		// Set expiration time for guest reservations (e.g., 30 days)

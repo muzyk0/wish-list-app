@@ -4,8 +4,10 @@ import (
 	"context"
 	"math/big"
 	"testing"
+	"time"
 
 	itemmodels "wish-list/internal/domain/item/models"
+	wishlistmodels "wish-list/internal/domain/wishlist/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -82,6 +84,18 @@ func TestWishListService_CreateGiftItem(t *testing.T) {
 			mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{}
 
 			if tt.mockReturn != nil || tt.mockError != nil {
+				mockWishListRepo.GetByIDFunc = func(ctx context.Context, id pgtype.UUID) (*wishlistmodels.WishList, error) {
+					ownerID := pgtype.UUID{Valid: true}
+					if tt.mockReturn != nil {
+						ownerID = tt.mockReturn.OwnerID
+					}
+
+					return &wishlistmodels.WishList{
+						ID:      id,
+						OwnerID: ownerID,
+					}, nil
+				}
+
 				mockGiftItemRepo.CreateWithOwnerFunc = func(ctx context.Context, gi itemmodels.GiftItem) (*itemmodels.GiftItem, error) {
 					return tt.mockReturn, tt.mockError
 				}
@@ -186,4 +200,53 @@ func TestWishListService_GetGiftItem(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWishListService_GetGiftItemsByPublicSlugPaginated_MapsGuestReservationStatus(t *testing.T) {
+	reservedAt := time.Now().UTC().Truncate(time.Second)
+	giftID := pgtype.UUID{
+		Bytes: [16]byte{7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+		Valid: true,
+	}
+	ownerID := pgtype.UUID{
+		Bytes: [16]byte{8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
+		Valid: true,
+	}
+
+	mockWishListRepo := &WishListRepositoryInterfaceMock{}
+	mockWishListRepo.GetByPublicSlugFunc = func(ctx context.Context, publicSlug string) (*wishlistmodels.WishList, error) {
+		return &wishlistmodels.WishList{
+			ID:       pgtype.UUID{Bytes: [16]byte{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9}, Valid: true},
+			IsPublic: pgtype.Bool{Bool: true, Valid: true},
+		}, nil
+	}
+	mockGiftItemRepo := &GiftItemRepositoryInterfaceMock{
+		GetPublicWishListGiftItemsPaginatedFunc: func(
+			ctx context.Context,
+			publicSlug string,
+			limit int,
+			offset int,
+		) ([]*itemmodels.GiftItem, int, error) {
+			return []*itemmodels.GiftItem{
+				{
+					ID:               giftID,
+					OwnerID:          ownerID,
+					Name:             "Guest Reserved Item",
+					ReservedByUserID: pgtype.UUID{Valid: false}, // guest reservation should stay anonymous
+					ReservedAt:       pgtype.Timestamptz{Time: reservedAt, Valid: true},
+					CreatedAt:        pgtype.Timestamptz{Time: reservedAt, Valid: true},
+					UpdatedAt:        pgtype.Timestamptz{Time: reservedAt, Valid: true},
+				},
+			}, 1, nil
+		},
+	}
+
+	svc := NewWishListService(mockWishListRepo, mockGiftItemRepo, nil, nil, nil, nil, nil)
+
+	items, total, err := svc.GetGiftItemsByPublicSlugPaginated(context.Background(), "public-slug", 10, 0)
+	require.NoError(t, err)
+	require.Equal(t, 1, total)
+	require.Len(t, items, 1)
+	assert.NotEmpty(t, items[0].ReservedAt)
+	assert.Empty(t, items[0].ReservedByUserID)
 }

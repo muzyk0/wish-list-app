@@ -54,6 +54,17 @@ const giftItemColumnsAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.
 	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
 	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`
 
+// giftItemColumnsPublicAliased includes guest reservation fallback from reservations table.
+// For guest reservations, gift_items.reserved_* can remain NULL; this projection keeps
+// public API reservation status accurate without exposing guest identity.
+const giftItemColumnsPublicAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
+	gi.price, gi.priority,
+	COALESCE(gi.reserved_by_user_id, ar.reserved_by_user_id) AS reserved_by_user_id,
+	COALESCE(gi.reserved_at, ar.reserved_at) AS reserved_at,
+	gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
+	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
+	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`
+
 // ItemFilters contains filter and pagination parameters for querying items
 type ItemFilters struct {
 	Page            int
@@ -306,11 +317,19 @@ func (r *GiftItemRepository) GetPublicWishListGiftItems(ctx context.Context, pub
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE w.public_slug = $1 AND w.is_public = true
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT 100
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	err := r.db.SelectContext(ctx, &giftItems, query, publicSlug)
@@ -344,11 +363,19 @@ func (r *GiftItemRepository) GetPublicWishListGiftItemsPaginated(ctx context.Con
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE w.public_slug = $1 AND w.is_public = true
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT $2 OFFSET $3
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	if err := r.db.SelectContext(ctx, &giftItems, query, publicSlug, limit, offset); err != nil {

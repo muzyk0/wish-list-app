@@ -111,6 +111,28 @@
       "description": "Download our mobile app to create and manage your own wishlists!",
       "action": "Open Mobile App"
     },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search gifts by name or description",
+      "statusLabel": "Status",
+      "sortLabel": "Sort",
+      "reset": "Reset",
+      "noResults": "No gifts match your current filters.",
+      "status": {
+        "all": "All",
+        "available": "Available",
+        "reserved": "Reserved",
+        "purchased": "Purchased"
+      },
+      "sort": {
+        "position": "Default order",
+        "nameAsc": "Name (A-Z)",
+        "nameDesc": "Name (Z-A)",
+        "priceAsc": "Price (Low to High)",
+        "priceDesc": "Price (High to Low)",
+        "priorityDesc": "Priority (High to Low)"
+      }
+    },
     "errors": {
       "loadFailed": "Failed to load wishlist. Please try again.",
       "retry": "Retry"
@@ -119,25 +141,24 @@
   "reservation": {
     "dialog": {
       "title": "Reserve \"{{itemName}}\"",
-      "description": "Enter your name and email to reserve this gift. You'll receive a confirmation with a reservation token.",
+      "description": "Enter your name to reserve this gift. Email is optional.",
       "nameLabel": "Your Name",
       "namePlaceholder": "John Doe",
-      "emailLabel": "Your Email",
+      "emailLabel": "Your Email (optional)",
       "emailPlaceholder": "john@example.com",
-      "emailHint": "We'll send you a confirmation email with your reservation token",
+      "emailHint": "If you register later, we'll use this email to link your existing reservations to your account",
       "cancel": "Cancel",
       "submit": "Reserve Gift",
       "submitting": "Reserving...",
       "validation": {
         "nameRequired": "Name is required",
         "nameTooLong": "Name must be less than 255 characters",
-        "emailRequired": "Email is required",
         "emailInvalid": "Invalid email address"
       }
     },
     "success": {
       "title": "Reservation Successful!",
-      "description": "You have reserved \"{{itemName}}\". A confirmation has been sent to {{email}}"
+      "description": "You have reserved \"{{itemName}}\"."
     },
     "errors": {
       "failed": "Reservation Failed",

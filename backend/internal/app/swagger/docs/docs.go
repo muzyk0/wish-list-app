@@ -1462,7 +1462,7 @@ const docTemplate = `{
         },
         "/public/reservations/wishlist/{wishlistId}/item/{itemId}": {
             "post": {
-                "description": "Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).",
+                "description": "Create a reservation for a gift item. Can be done by authenticated users or guests (with name, email optional).",
                 "consumes": [
                     "application/json"
                 ],
@@ -1489,7 +1489,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Reservation information (required for guests)",
+                        "description": "Reservation information (guest name required, email optional)",
                         "name": "reservation_request",
                         "in": "body",
                         "schema": {
@@ -1505,16 +1505,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body or validation error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized (guests need name and email)",
+                        "description": "Invalid request body or validation error (guests need name)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -3389,6 +3380,9 @@ const docTemplate = `{
                 },
                 "image_url": {
                     "type": "string"
+                },
+                "is_reserved": {
+                    "type": "boolean"
                 },
                 "link": {
                     "type": "string"

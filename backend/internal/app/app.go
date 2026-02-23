@@ -201,7 +201,7 @@ func (a *App) initDomains() {
 	// --- Services ---
 
 	emailService := jobs.NewEmailService()
-	userSvc := userservice.NewUserService(userRepo)
+	userSvc := userservice.NewUserService(userRepo, reservationRepo)
 	wishlistSvc := wishlistservice.NewWishListService(wishlistRepo, giftItemRepo, giftItemReservationRepo, giftItemPurchaseRepo, emailService, reservationRepo, a.redisCache)
 	itemSvc := itemservice.NewItemService(giftItemRepo, wishlistItemRepo)
 	wishlistItemSvc := wishlistitemservice.NewWishlistItemService(wishlistRepo, giftItemRepo, wishlistItemRepo)
@@ -222,6 +222,7 @@ func (a *App) initDomains() {
 		a.cfg.FacebookClientSecret,
 		a.cfg.OAuthRedirectURL,
 		a.cfg.OAuthHTTPTimeout,
+		reservationRepo,
 	)
 	a.wishlistHandler = wishlisthttp.NewHandler(wishlistSvc)
 	a.itemHandler = itemhttp.NewHandler(itemSvc)

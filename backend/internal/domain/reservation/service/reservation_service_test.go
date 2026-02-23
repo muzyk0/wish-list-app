@@ -332,6 +332,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 				return nil, repository.ErrNoActiveReservation
 			},
 			CreateFunc: func(ctx context.Context, reservation models.Reservation) (*models.Reservation, error) {
+				assert.False(t, reservation.GuestEmail.Valid)
 				return createdReservation, nil
 			},
 		}
@@ -339,13 +340,11 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		service := NewReservationService(mockRepo, mockGiftItemRepo, &mockGiftItemReservationRepo{})
 
 		guestName := "Test Guest"
-		guestEmail := "guest@example.com"
 		input := CreateReservationInput{
 			WishListID: wishlistID.String(),
 			GiftItemID: giftItemID.String(),
 			UserID:     pgtype.UUID{Valid: false},
 			GuestName:  &guestName,
-			GuestEmail: &guestEmail,
 		}
 
 		reservation, err := service.CreateReservation(context.Background(), input)
@@ -355,7 +354,7 @@ func TestReservationService_CreateReservation(t *testing.T) {
 		assert.Equal(t, "active", reservation.Status)
 	})
 
-	t.Run("guest reservation requires name and email", func(t *testing.T) {
+	t.Run("guest reservation requires name", func(t *testing.T) {
 		giftItemID := pgtype.UUID{Bytes: [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, Valid: true}
 		wishlistID := pgtype.UUID{Bytes: [16]byte{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, Valid: true}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
@@ -35,13 +36,25 @@ type UserServiceInterface interface {
 
 // UserService implements business logic for user operations.
 type UserService struct {
-	repo repository.UserRepositoryInterface
+	repo              repository.UserRepositoryInterface
+	reservationLinker GuestReservationLinker
+}
+
+// GuestReservationLinker links guest reservations to an authenticated user by email.
+type GuestReservationLinker interface {
+	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 }
 
 // NewUserService creates a new UserService instance.
-func NewUserService(repo repository.UserRepositoryInterface) *UserService {
+func NewUserService(repo repository.UserRepositoryInterface, reservationLinker ...GuestReservationLinker) *UserService {
+	var linker GuestReservationLinker
+	if len(reservationLinker) > 0 {
+		linker = reservationLinker[0]
+	}
+
 	return &UserService{
-		repo: repo,
+		repo:              repo,
+		reservationLinker: linker,
 	}
 }
 
@@ -130,11 +143,22 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 			String: input.AvatarUrl,
 			Valid:  input.AvatarUrl != "",
 		},
+		IsVerified: pgtype.Bool{
+			Bool:  false,
+			Valid: true,
+		},
 	}
 
 	createdUser, err := s.repo.Create(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	if s.reservationLinker != nil && createdUser.ID.Valid && createdUser.IsVerified.Valid && createdUser.IsVerified.Bool {
+		if _, linkErr := s.reservationLinker.LinkGuestReservationsToUserByEmail(ctx, createdUser.Email, createdUser.ID); linkErr != nil {
+			// Best-effort linking: registration should not fail if linking fails.
+			log.Printf("Warning: failed to link guest reservations for %s: %v", createdUser.Email, linkErr)
+		}
 	}
 
 	output := &UserOutput{

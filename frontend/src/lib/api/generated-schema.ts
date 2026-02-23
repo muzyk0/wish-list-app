@@ -1727,7 +1727,7 @@ export interface paths {
         put?: never;
         /**
          * Create a reservation for a gift item
-         * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
+         * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name, email optional).
          */
         post: {
             parameters: {
@@ -1741,7 +1741,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            /** @description Reservation information (required for guests) */
+            /** @description Reservation information (guest name required, email optional) */
             requestBody?: {
                 content: {
                     "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"];
@@ -1757,19 +1757,8 @@ export interface paths {
                         "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
                     };
                 };
-                /** @description Invalid request body or validation error */
+                /** @description Invalid request body or validation error (guests need name) */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized (guests need name and email) */
-                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3155,6 +3144,7 @@ export interface components {
             description?: string;
             id: string;
             image_url?: string;
+            is_reserved?: boolean;
             link?: string;
             name: string;
             notes?: string;

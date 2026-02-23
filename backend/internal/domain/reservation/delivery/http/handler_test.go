@@ -352,15 +352,79 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("guest reservation requires name and email", func(t *testing.T) {
+	t.Run("guest reservation succeeds without email", func(t *testing.T) {
 		e := setupTestEcho()
 		mockService := new(MockReservationService)
 		handler := NewHandler(mockService)
 
-		// Missing guest email
 		guestName := "John Doe"
 		reqBody := dto.CreateReservationRequest{
 			GuestName: &guestName,
+		}
+
+		generatedToken := pgtype.UUID{
+			Bytes: [16]byte{11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26},
+			Valid: true,
+		}
+
+		expectedReservation := &service.ReservationOutput{
+			ID: pgtype.UUID{
+				Bytes: [16]byte{21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36},
+				Valid: true,
+			},
+			GiftItemID:       pgtype.UUID{Valid: true},
+			GuestName:        &guestName,
+			GuestEmail:       nil,
+			ReservationToken: generatedToken,
+			Status:           "active",
+			ReservedAt: pgtype.Timestamptz{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			NotificationSent: pgtype.Bool{Bool: false, Valid: true},
+		}
+
+		mockService.
+			On("CreateReservation", mock.Anything, mock.AnythingOfType("service.CreateReservationInput")).
+			Run(func(args mock.Arguments) {
+				input := args.Get(1).(service.CreateReservationInput)
+				require.NotNil(t, input.GuestName)
+				assert.Equal(t, guestName, *input.GuestName)
+				assert.Nil(t, input.GuestEmail)
+			}).
+			Return(expectedReservation, nil)
+
+		jsonBody, _ := json.Marshal(reqBody)
+		req := httptest.NewRequest(nethttp.MethodPost, "/wishlists/list-123/items/item-456/reserve", bytes.NewReader(jsonBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("wishlistId", "itemId")
+		c.SetParamValues("list-123", "item-456")
+
+		err := handler.CreateReservation(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, nethttp.StatusOK, rec.Code)
+
+		var response dto.CreateReservationResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		require.NoError(t, err)
+		assert.NotEmpty(t, response.ReservationToken)
+		assert.Equal(t, generatedToken.String(), response.ReservationToken)
+		assert.Nil(t, response.GuestEmail)
+
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("guest reservation requires name", func(t *testing.T) {
+		e := setupTestEcho()
+		mockService := new(MockReservationService)
+		handler := NewHandler(mockService)
+
+		guestEmail := "john@example.com"
+		reqBody := dto.CreateReservationRequest{
+			GuestEmail: &guestEmail,
 		}
 
 		jsonBody, _ := json.Marshal(reqBody)
@@ -378,7 +442,7 @@ func TestReservationHandler_GuestReservationToken(t *testing.T) {
 		var appErr *apperrors.AppError
 		require.ErrorAs(t, err, &appErr, "Error should be apperrors.AppError")
 		assert.Equal(t, nethttp.StatusBadRequest, appErr.Code)
-		assert.Contains(t, appErr.Message, "Guest name and email are required")
+		assert.Contains(t, appErr.Message, "Guest name is required")
 	})
 
 	t.Run("invalid reservation token format", func(t *testing.T) {

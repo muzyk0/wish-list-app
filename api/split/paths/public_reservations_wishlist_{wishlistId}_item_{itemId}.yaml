@@ -60,7 +60,7 @@ delete:
 post:
   description: >-
     Create a reservation for a gift item. Can be done by authenticated users or
-    guests (with name and email).
+    guests (with name, email optional).
   parameters:
     - description: Wish List ID
       in: path
@@ -80,7 +80,7 @@ post:
         schema:
           $ref: >-
             ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest.yaml
-    description: Reservation information (required for guests)
+    description: Reservation information (guest name required, email optional)
   responses:
     '200':
       description: Reservation created successfully
@@ -90,15 +90,7 @@ post:
             $ref: >-
               ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse.yaml
     '400':
-      description: Invalid request body or validation error
-      content:
-        application/json:
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-    '401':
-      description: Unauthorized (guests need name and email)
+      description: Invalid request body or validation error (guests need name)
       content:
         application/json:
           schema:

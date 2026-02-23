@@ -605,6 +605,8 @@ definitions:
         type: string
       image_url:
         type: string
+      is_reserved:
+        type: boolean
       link:
         type: string
       name:
@@ -1829,7 +1831,7 @@ paths:
       consumes:
       - application/json
       description: Create a reservation for a gift item. Can be done by authenticated
-        users or guests (with name and email).
+        users or guests (with name, email optional).
       parameters:
       - description: Wish List ID
         in: path
@@ -1841,7 +1843,7 @@ paths:
         name: itemId
         required: true
         type: string
-      - description: Reservation information (required for guests)
+      - description: Reservation information (guest name required, email optional)
         in: body
         name: reservation_request
         schema:
@@ -1854,13 +1856,7 @@ paths:
           schema:
             $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'
         "400":
-          description: Invalid request body or validation error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized (guests need name and email)
+          description: Invalid request body or validation error (guests need name)
           schema:
             additionalProperties:
               type: string

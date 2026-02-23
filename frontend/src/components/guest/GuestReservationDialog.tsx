@@ -23,12 +23,10 @@ import { Label } from '@/components/ui/label';
 import { apiClient } from '@/lib/api/client';
 import { addReservation } from '@/lib/guest-reservations';
 
-const guestReservationSchema = z.object({
-  guestName: z.string().min(1).max(255),
-  guestEmail: z.string().min(1).email(),
-});
-
-type GuestReservationFormData = z.infer<typeof guestReservationSchema>;
+type GuestReservationFormData = {
+  guestName: string;
+  guestEmail?: string;
+};
 
 interface GuestReservationDialogProps {
   wishlistSlug: string;
@@ -62,12 +60,18 @@ export function GuestReservationDialog({
   const schema = z.object({
     guestName: z
       .string()
+      .trim()
       .min(1, t('reservation.dialog.validation.nameRequired'))
       .max(255, t('reservation.dialog.validation.nameTooLong')),
     guestEmail: z
       .string()
-      .min(1, t('reservation.dialog.validation.emailRequired'))
-      .email(t('reservation.dialog.validation.emailInvalid')),
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        const trimmed = value.trim();
+        if (!trimmed) return true;
+        return z.string().email().safeParse(trimmed).success;
+      }, t('reservation.dialog.validation.emailInvalid')),
   });
 
   const {
@@ -85,7 +89,7 @@ export function GuestReservationDialog({
     mutationFn: async (data: GuestReservationFormData) => {
       return apiClient.createReservation(wishlistId, itemId, {
         guest_name: data.guestName.trim(),
-        guest_email: data.guestEmail.trim(),
+        guest_email: data.guestEmail?.trim() || undefined,
       }) as Promise<ReservationResponse>;
     },
     onSuccess: (data) => {
@@ -94,7 +98,6 @@ export function GuestReservationDialog({
       toast.success(t('reservation.success.title'), {
         description: t('reservation.success.description', {
           itemName,
-          email: guestEmail,
         }),
       });
 
@@ -105,7 +108,7 @@ export function GuestReservationDialog({
         reservationToken: data.reservation_token,
         reservedAt: data.reserved_at,
         guestName,
-        guestEmail,
+        guestEmail: guestEmail?.trim() || undefined,
         wishlistId,
       });
 

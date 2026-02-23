@@ -44,7 +44,8 @@ function PriorityDots({ priority }: { priority: number }) {
 export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
   const { t } = useTranslation();
 
-  const isReserved = !!item.reserved_by_user_id;
+  const isReserved =
+    item.is_reserved ?? (!!item.reserved_by_user_id || !!item.reserved_at);
   const isPurchased = !!item.purchased_by_user_id;
   const priority = item.priority ?? 0;
 
@@ -116,15 +117,15 @@ export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0 p-4 sm:p-5 flex flex-col justify-between gap-3">
             <div>
-              <div className="flex items-start gap-2 mb-1.5">
+              <div className="mb-1.5 flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-2">
                 <h3
-                  className="wl-display text-base sm:text-lg font-semibold leading-snug flex-1 min-w-0"
+                  className="wl-display text-base sm:text-lg font-semibold leading-snug flex-1 min-w-0 break-words"
                   style={{ color: 'var(--wl-text)' }}
                 >
                   {item.name}
                 </h3>
                 <span
-                  className="text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap mt-0.5"
+                  className="self-start text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 mt-0.5"
                   style={{
                     color: statusConfig.color,
                     background: statusConfig.bg,
@@ -144,7 +145,7 @@ export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
               )}
             </div>
 
-            <div className="flex items-end justify-between gap-3 flex-wrap">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex flex-col gap-1.5">
                 {item.price !== undefined && item.price !== null && (
                   <span
@@ -168,7 +169,11 @@ export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
               </div>
 
               {/* Reserve button — stopPropagation so it doesn't open the sheet */}
-              <div role="none" onClick={(e) => e.stopPropagation()}>
+              <div
+                role="none"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full sm:w-auto [&>button]:w-full sm:[&>button]:w-auto"
+              >
                 {reserveAction}
               </div>
             </div>
@@ -211,7 +216,7 @@ export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
           {/* Content */}
           <div className="p-5 pb-2 space-y-5">
             {/* Name + status */}
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <h2
                 className="wl-display text-2xl sm:text-3xl font-bold leading-tight flex-1"
                 style={{ color: 'var(--wl-text)' }}
@@ -219,7 +224,7 @@ export function GiftItemCard({ item, reserveAction }: GiftItemCardProps) {
                 {item.name}
               </h2>
               <span
-                className="text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0 mt-1"
+                className="self-start text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0 mt-1"
                 style={{
                   color: statusConfig.color,
                   background: statusConfig.bg,

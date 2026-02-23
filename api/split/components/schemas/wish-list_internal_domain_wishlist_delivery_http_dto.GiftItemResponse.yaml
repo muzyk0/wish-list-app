@@ -7,6 +7,8 @@ properties:
     type: string
   image_url:
     type: string
+  is_reserved:
+    type: boolean
   link:
     type: string
   name:

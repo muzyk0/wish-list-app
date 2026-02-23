@@ -21,7 +21,7 @@ func mapReservationServiceError(err error) error {
 	case errors.Is(err, service.ErrGiftItemAlreadyReserved):
 		return apperrors.Conflict("Gift item is already reserved")
 	case errors.Is(err, service.ErrGuestInfoRequired):
-		return apperrors.BadRequest("Guest name and email are required")
+		return apperrors.BadRequest("Guest name is required")
 	case errors.Is(err, service.ErrReservationNotFound):
 		return apperrors.NotFound("Reservation not found")
 	case errors.Is(err, service.ErrMissingUserOrToken):
