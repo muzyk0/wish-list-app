@@ -21,6 +21,7 @@ import (
 var (
 	ErrGiftItemNotFound          = errors.New("gift item not found")
 	ErrGiftItemAlreadyReserved   = errors.New("gift item is already reserved")
+	ErrGiftItemNotAvailable      = errors.New("gift item is not available for manual reservation")
 	ErrGiftItemAlreadyArchived   = errors.New("item not found or already archived")
 	ErrGiftItemConcurrentReserve = errors.New("gift item was reserved by another transaction")
 	ErrInvalidSortField          = errors.New("invalid sort field")
@@ -502,12 +503,25 @@ func (r *GiftItemRepository) UpdateWithNewSchema(ctx context.Context, giftItem *
 // This is used by the wishlist owner to record that someone (e.g., grandma) will buy the item offline.
 func (r *GiftItemRepository) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
 	query := fmt.Sprintf(`
-		UPDATE gift_items
+		UPDATE gift_items gi
 		SET manual_reserved_by_name = $2,
 		    manual_reservation_note = $3,
 		    manual_reserved_at = NOW(),
 		    updated_at = NOW()
-		WHERE id = $1 AND archived_at IS NULL
+		WHERE gi.id = $1
+		  AND gi.archived_at IS NULL
+		  AND gi.purchased_by_user_id IS NULL
+		  AND gi.purchased_at IS NULL
+		  AND gi.reserved_by_user_id IS NULL
+		  AND gi.reserved_at IS NULL
+		  AND gi.manual_reserved_by_name IS NULL
+		  AND gi.manual_reserved_at IS NULL
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+		  )
 		RETURNING %s
 	`, giftItemColumns)
 
@@ -520,7 +534,15 @@ func (r *GiftItemRepository) MarkManualReservation(ctx context.Context, itemID p
 	err := r.db.GetContext(ctx, &updated, query, itemID, reservedByName, noteVal)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrGiftItemNotFound
+			existsQuery := `SELECT EXISTS(SELECT 1 FROM gift_items WHERE id = $1 AND archived_at IS NULL)`
+			var exists bool
+			if existsErr := r.db.GetContext(ctx, &exists, existsQuery, itemID); existsErr != nil {
+				return nil, fmt.Errorf("failed to verify gift item existence: %w", existsErr)
+			}
+			if !exists {
+				return nil, ErrGiftItemNotFound
+			}
+			return nil, ErrGiftItemNotAvailable
 		}
 		return nil, fmt.Errorf("failed to mark manual reservation: %w", err)
 	}

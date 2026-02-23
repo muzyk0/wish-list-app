@@ -116,6 +116,9 @@ export function GuestReservationDialog({
       queryClient.invalidateQueries({
         queryKey: ['public-gift-items', wishlistSlug],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['guest-reservations'],
+      });
 
       setOpen(false);
       reset();

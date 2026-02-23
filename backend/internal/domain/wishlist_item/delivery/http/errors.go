@@ -32,6 +32,8 @@ func mapWishlistItemServiceError(err error) error {
 		return apperrors.BadRequest("Title is required")
 	case errors.Is(err, service.ErrManualReservedNameEmpty):
 		return apperrors.BadRequest("reserved_by_name is required")
+	case errors.Is(err, service.ErrItemNotAvailable):
+		return apperrors.Conflict("Item is already reserved or purchased")
 	default:
 		return apperrors.Internal("Failed to process request").Wrap(err)
 	}

@@ -6,9 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	itemmodels "wish-list/internal/domain/item/models"
+	itemrepository "wish-list/internal/domain/item/repository"
 	wishlistmodels "wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist_item/repository"
 
@@ -28,6 +30,7 @@ var (
 	ErrItemNotFound              = errors.New("item not found")
 	ErrItemForbidden             = errors.New("not authorized to access this item")
 	ErrManualReservedNameEmpty   = errors.New("reserved_by_name is required")
+	ErrItemNotAvailable          = errors.New("item is already reserved or purchased")
 )
 
 // WishListRepositoryInterface defines what the wishlist_item service needs from wishlist repository (cross-domain)
@@ -57,23 +60,23 @@ type CreateItemInput struct {
 
 // ItemOutput represents an item in service responses
 type ItemOutput struct {
-	ID                   string
-	OwnerID              string
-	Name                 string
-	Description          string
-	Link                 string
-	ImageURL             string
-	Price                float64
-	Priority             int
-	Notes                string
-	IsPurchased          bool
-	IsReserved           bool
-	IsManuallyReserved   bool
-	ManualReservedByName string
+	ID                    string
+	OwnerID               string
+	Name                  string
+	Description           string
+	Link                  string
+	ImageURL              string
+	Price                 float64
+	Priority              int
+	Notes                 string
+	IsPurchased           bool
+	IsReserved            bool
+	IsManuallyReserved    bool
+	ManualReservedByName  string
 	ManualReservationNote string
-	IsArchived           bool
-	CreatedAt            string
-	UpdatedAt            string
+	IsArchived            bool
+	CreatedAt             string
+	UpdatedAt             string
 }
 
 // PaginatedItemsOutput represents paginated list of items
@@ -411,8 +414,13 @@ func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *It
 // MarkManualReservation marks an item as reserved by someone specified by the wishlist owner.
 // This is for offline reservations (e.g., "Grandma said she'll buy the bicycle").
 func (s *WishlistItemService) MarkManualReservation(ctx context.Context, wishlistID, itemID, userID string, reservedByName string, note *string) (*ItemOutput, error) {
+	reservedByName = strings.TrimSpace(reservedByName)
 	if reservedByName == "" {
 		return nil, ErrManualReservedNameEmpty
+	}
+	if note != nil {
+		trimmed := strings.TrimSpace(*note)
+		note = &trimmed
 	}
 
 	wlID := pgtype.UUID{}
@@ -451,6 +459,12 @@ func (s *WishlistItemService) MarkManualReservation(ctx context.Context, wishlis
 	// Mark manual reservation
 	updated, err := s.itemRepo.MarkManualReservation(ctx, itID, reservedByName, note)
 	if err != nil {
+		if errors.Is(err, itemrepository.ErrGiftItemNotAvailable) {
+			return nil, ErrItemNotAvailable
+		}
+		if errors.Is(err, itemrepository.ErrGiftItemNotFound) {
+			return nil, ErrItemNotFound
+		}
 		return nil, fmt.Errorf("failed to mark manual reservation: %w", err)
 	}
 

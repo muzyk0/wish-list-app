@@ -335,7 +335,7 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		"https://graph.facebook.com/me?fields=id,name,email,picture",
+		"https://graph.facebook.com/me?fields=id,name,email,picture,verified",
 		http.NoBody,
 	)
 	if err != nil {
