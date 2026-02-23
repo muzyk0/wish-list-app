@@ -14,6 +14,16 @@ import type {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
+export class ApiClientError extends Error {
+  statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
+    super(message);
+    this.name = 'ApiClientError';
+    this.statusCode = statusCode;
+  }
+}
+
 class AuthManager {
   private accessToken: string | null = null;
   private refreshPromise: Promise<string | null> | null = null;
@@ -168,7 +178,7 @@ class ApiClient {
     itemId: string,
     reservationData?: CreateReservationRequest,
   ): Promise<Reservation> {
-    const { data, error } = await this.client.POST(
+    const { data, error, response } = await this.client.POST(
       '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
@@ -179,8 +189,9 @@ class ApiClient {
     );
 
     if (error || !data) {
-      throw new Error(
+      throw new ApiClientError(
         (error as { error?: string })?.error || 'Failed to create reservation',
+        response?.status,
       );
     }
 

@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { apiClient } from '@/lib/api/client';
+import { ApiClientError, apiClient } from '@/lib/api/client';
 import { addReservation } from '@/lib/guest-reservations';
 
 type GuestReservationFormData = {
@@ -124,11 +124,10 @@ export function GuestReservationDialog({
     },
     onError: (error: Error) => {
       // Race condition: item was reserved by someone else between load and submit (T018)
+      const apiError = error as ApiClientError;
       const isAlreadyReserved =
-        error.message.toLowerCase().includes('already reserved') ||
-        error.message.toLowerCase().includes('already been reserved') ||
-        error.message.includes('409') ||
-        error.message.includes('conflict');
+        apiError.statusCode === 409 ||
+        error.message.toLowerCase().includes('already reserved');
 
       if (isAlreadyReserved) {
         toast.error(t('reservation.errors.failed'), {
