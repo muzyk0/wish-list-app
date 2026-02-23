@@ -72,7 +72,7 @@ export default function PublicWishListPage() {
 
     if (query) {
       items = items.filter((item) => {
-        const haystack = [item.name, item.description, item.notes]
+        const haystack = [item.name, item.description]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();

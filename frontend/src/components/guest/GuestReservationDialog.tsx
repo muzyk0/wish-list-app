@@ -62,7 +62,7 @@ export function GuestReservationDialog({
       .string()
       .trim()
       .min(1, t('reservation.dialog.validation.nameRequired'))
-      .max(255, t('reservation.dialog.validation.nameTooLong')),
+      .max(200, t('reservation.dialog.validation.nameTooLong')),
     guestEmail: z
       .string()
       .optional()
@@ -93,7 +93,7 @@ export function GuestReservationDialog({
       }) as Promise<ReservationResponse>;
     },
     onSuccess: (data) => {
-      const { guestName, guestEmail } = getValues();
+      const { guestName } = getValues();
 
       toast.success(t('reservation.success.title'), {
         description: t('reservation.success.description', {
@@ -108,7 +108,6 @@ export function GuestReservationDialog({
         reservationToken: data.reservation_token,
         reservedAt: data.reserved_at,
         guestName,
-        guestEmail: guestEmail?.trim() || undefined,
         wishlistId,
       });
 
@@ -192,7 +191,7 @@ export function GuestReservationDialog({
                 id="guest-name"
                 placeholder={t('reservation.dialog.namePlaceholder')}
                 {...register('guestName')}
-                maxLength={255}
+                maxLength={200}
                 aria-invalid={!!errors.guestName}
               />
               {errors.guestName && (

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { expect, test } from '@playwright/test';
+import { API_BASE } from '../shared/test-helpers';
 
-const API_BASE = 'http://localhost:8080/api';
 const FRONTEND_BASE = 'http://localhost:3000';
 
 interface PublicFixture {
@@ -104,7 +104,7 @@ test.describe('Frontend Public Wishlist Responsive', () => {
       expect(hasHorizontalOverflow).toBeFalsy();
 
       // Reserved item should not be reservable again.
-      const reserveButton = card.locator('button').first();
+      const reserveButton = card.getByRole('button', { name: /reserved/i });
       await expect(reserveButton).toBeDisabled();
 
       // Public page must not reveal who reserved the gift.

@@ -79,6 +79,18 @@ type ItemOutput struct {
 	UpdatedAt             string
 }
 
+func isItemReserved(item *itemmodels.GiftItem) bool {
+	if item == nil {
+		return false
+	}
+
+	if item.PurchasedByUserID.Valid || item.PurchasedAt.Valid {
+		return false
+	}
+
+	return item.ReservedByUserID.Valid || item.ReservedAt.Valid || item.ManualReservedByName.Valid
+}
+
 // PaginatedItemsOutput represents paginated list of items
 type PaginatedItemsOutput struct {
 	Items      []*ItemOutput
@@ -373,7 +385,7 @@ func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *It
 		Priority:           0,
 		Notes:              "",
 		IsPurchased:        item.PurchasedByUserID.Valid,
-		IsReserved:         item.ReservedByUserID.Valid || item.ManualReservedByName.Valid,
+		IsReserved:         isItemReserved(item),
 		IsManuallyReserved: item.ManualReservedByName.Valid,
 		IsArchived:         item.ArchivedAt.Valid,
 		CreatedAt:          item.CreatedAt.Time.Format(time.RFC3339),

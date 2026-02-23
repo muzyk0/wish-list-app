@@ -50,23 +50,30 @@ export function MyReservations() {
       const stored = getStoredReservations();
       if (stored.length === 0) return [];
 
-      const results = await Promise.all(
+      const results = await Promise.allSettled(
         stored.map(async (s) => {
-          try {
-            const details = await apiClient.getGuestReservations(
-              s.reservationToken,
-            );
-            return details.map((d) => ({
-              ...d,
-              reservationToken: s.reservationToken,
-            }));
-          } catch {
-            return [];
-          }
+          const details = await apiClient.getGuestReservations(
+            s.reservationToken,
+          );
+          return details.map((d) => ({
+            ...d,
+            reservationToken: s.reservationToken,
+          }));
         }),
       );
 
-      return results.flat();
+      const successful = results.flatMap((result) =>
+        result.status === 'fulfilled' ? result.value : [],
+      );
+      const hasFailures = results.some(
+        (result) => result.status === 'rejected',
+      );
+
+      if (successful.length === 0 && hasFailures) {
+        throw new Error('Failed to load guest reservations');
+      }
+
+      return successful;
     },
     staleTime: 30_000,
   });

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/mail"
 	"net/url"
@@ -20,6 +19,7 @@ import (
 	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -461,7 +461,13 @@ func (h *OAuthHandler) linkGuestReservationsByEmail(ctx context.Context, email s
 
 	if _, err := h.reservationLinker.LinkGuestReservationsToUserByEmail(ctx, email, userID); err != nil {
 		// Best-effort linking: OAuth login should still succeed.
-		log.Printf("Warning: failed to link guest reservations for OAuth user %s: %v", email, err)
+		logger.Warn(
+			"failed to link guest reservations for OAuth user",
+			"error",
+			err,
+			"user_id",
+			userID.String(),
+		)
 	}
 }
 

@@ -525,7 +525,7 @@ func (r *GiftItemRepository) MarkManualReservation(ctx context.Context, itemID p
 		RETURNING %s
 	`, giftItemColumns)
 
-	var noteVal interface{}
+	var noteVal any
 	if note != nil {
 		noteVal = *note
 	}

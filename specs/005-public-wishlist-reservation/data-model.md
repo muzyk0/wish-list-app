@@ -44,6 +44,7 @@ Retrieved via `GET /public/wishlists/{slug}/gift-items` (paginated).
 | wishlist_id | string (UUID) | Yes | Parent wishlist ID |
 | reserved_at | string (ISO datetime) | No | When item was reserved (null = available) |
 | reserved_by_user_id | string (UUID) | No | Who reserved (null = available) |
+| is_reserved | boolean | Yes | Aggregated reservation flag (covers guest/auth/manual reservation) |
 | purchased_at | string (ISO datetime) | No | When item was purchased (null = not purchased) |
 | purchased_by_user_id | string (UUID) | No | Who purchased |
 | purchased_price | number | No | Actual purchase price |
@@ -51,8 +52,8 @@ Retrieved via `GET /public/wishlists/{slug}/gift-items` (paginated).
 | updated_at | string (ISO datetime) | Yes | Last update timestamp |
 
 **Derived States**:
-- `available`: `reserved_by_user_id === null && purchased_by_user_id === null`
-- `reserved`: `reserved_by_user_id !== null && purchased_by_user_id === null`
+- `available`: `is_reserved === false && purchased_by_user_id === null`
+- `reserved`: `is_reserved === true && purchased_by_user_id === null`
 - `purchased`: `purchased_by_user_id !== null`
 
 ### Reservation (created via API, stored partially in localStorage)
@@ -116,9 +117,7 @@ Stored in `localStorage` under key `guest_reservations` as a JSON array.
 | reservationToken | string | Server-issued token |
 | reservedAt | string (ISO datetime) | When reserved |
 | guestName | string | Guest's name |
-| guestEmail | string | Guest's email |
 | wishlistId | string (UUID) | Parent wishlist ID |
-| wishlistSlug | string | Wishlist slug (for linking back) |
 
 ## State Transitions
 

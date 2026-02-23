@@ -7,12 +7,17 @@ import (
 
 	usermodels "wish-list/internal/domain/user/models"
 	userrepo "wish-list/internal/domain/user/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	logger.Initialize("test")
+}
 
 type userRepoMock struct {
 	getByEmailFunc func(ctx context.Context, email string) (*usermodels.User, error)
@@ -77,7 +82,7 @@ func TestOAuthHandler_findOrCreateUser_LinksGuestReservations_ExistingUser(t *te
 		},
 		createFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			t.Fatal("create should not be called for existing user")
-			return nil, nil
+			return nil, errors.New("unexpected create call")
 		},
 		updateFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			return &user, nil
@@ -151,7 +156,7 @@ func TestOAuthHandler_findOrCreateUser_LinkingErrorIsNonFatal(t *testing.T) {
 			return existingUser, nil
 		},
 		createFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
-			return nil, nil
+			return nil, errors.New("unexpected create call")
 		},
 		updateFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			return &user, nil
@@ -178,11 +183,11 @@ func TestOAuthHandler_findOrCreateUser_InvalidEmail(t *testing.T) {
 	repo := &userRepoMock{
 		getByEmailFunc: func(ctx context.Context, email string) (*usermodels.User, error) {
 			t.Fatal("GetByEmail should not be called for invalid email")
-			return nil, nil
+			return nil, errors.New("unexpected get by email call")
 		},
 		createFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			t.Fatal("Create should not be called for invalid email")
-			return nil, nil
+			return nil, errors.New("unexpected create call")
 		},
 		updateFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			return &user, nil
@@ -213,7 +218,7 @@ func TestOAuthHandler_findOrCreateUser_DoesNotLinkWhenEmailNotVerified(t *testin
 			return existingUser, nil
 		},
 		createFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
-			return nil, nil
+			return nil, errors.New("unexpected create call")
 		},
 		updateFunc: func(ctx context.Context, user usermodels.User) (*usermodels.User, error) {
 			return &user, nil

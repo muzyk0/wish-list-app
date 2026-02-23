@@ -91,8 +91,8 @@ A guest who previously reserved a gift decides they can no longer fulfill it. Th
 - **FR-001**: System MUST display a public wishlist with all its gift items when accessed via the wishlist's public slug URL, without requiring authentication.
 - **FR-002**: System MUST show each gift item's name, description, price, image (or placeholder), product link, and priority level.
 - **FR-003**: System MUST visually indicate the reservation status of each item (available, reserved, or purchased) using distinct badges or labels.
-- **FR-004**: System MUST allow unauthenticated visitors to reserve an available gift by providing their name and email address.
-- **FR-005**: System MUST validate guest name (required, max 255 characters) and email (required, valid format) before submitting a reservation.
+- **FR-004**: System MUST allow unauthenticated visitors to reserve an available gift by providing their name; email is optional.
+- **FR-005**: System MUST validate guest name (required, max 200 characters) and email (optional, valid format when provided) before submitting a reservation.
 - **FR-006**: System MUST return a reservation token upon successful reservation and persist it in the guest's browser for future reference.
 - **FR-007**: System MUST prevent reserving an item that is already reserved or purchased.
 - **FR-008**: System MUST provide a dedicated "My Reservations" page at `/my/reservations` where guests can view their previously made reservations using stored reservation tokens. This page MUST be accessible via a persistent link in the site header or footer.

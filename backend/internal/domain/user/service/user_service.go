@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
@@ -157,7 +157,7 @@ func (s *UserService) Register(ctx context.Context, input RegisterUserInput) (*U
 	if s.reservationLinker != nil && createdUser.ID.Valid && createdUser.IsVerified.Valid && createdUser.IsVerified.Bool {
 		if _, linkErr := s.reservationLinker.LinkGuestReservationsToUserByEmail(ctx, createdUser.Email, createdUser.ID); linkErr != nil {
 			// Best-effort linking: registration should not fail if linking fails.
-			log.Printf("Warning: failed to link guest reservations for %s: %v", createdUser.Email, linkErr)
+			logger.Warn("failed to link guest reservations", "user_id", createdUser.ID.String(), "error", linkErr)
 		}
 	}
 

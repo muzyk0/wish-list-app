@@ -17,8 +17,6 @@ export interface StoredReservation {
   reservedAt: string;
   /** Guest name provided during reservation */
   guestName: string;
-  /** Guest email provided during reservation (legacy; optional) */
-  guestEmail?: string;
   /** Optional: wishlist ID for cancel operations */
   wishlistId?: string;
 }

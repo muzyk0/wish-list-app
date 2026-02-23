@@ -915,20 +915,11 @@ func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context,
 		if giftItem.Priority.Valid {
 			output.Priority = int(giftItem.Priority.Int32)
 		}
-		if giftItem.Notes.Valid {
-			output.Notes = giftItem.Notes.String
-		}
 		if giftItem.Position.Valid {
 			output.Position = int(giftItem.Position.Int32)
 		}
-		if giftItem.ReservedByUserID.Valid {
-			output.ReservedByUserID = giftItem.ReservedByUserID.String()
-		}
 		if giftItem.ReservedAt.Valid {
 			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
-		}
-		if giftItem.PurchasedByUserID.Valid {
-			output.PurchasedByUserID = giftItem.PurchasedByUserID.String()
 		}
 		if giftItem.PurchasedAt.Valid {
 			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)
@@ -1113,7 +1104,15 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 			err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItemForCache.Name, wishlistTitle)
 			if err != nil {
 				// Log the error but don't fail the deletion
-				logger.Warn("failed to send reservation removal notification", "error", err, "recipient_email", recipientEmail, "item_name", giftItemForCache.Name)
+				logger.Warn(
+					"failed to send reservation removal notification",
+					"error",
+					err,
+					"reservation_id",
+					reservation.ID.String(),
+					"item_id",
+					id.String(),
+				)
 			}
 		}
 	}
@@ -1193,7 +1192,15 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 				)
 				if err != nil {
 					// Log the error but don't fail the purchase marking
-					logger.Warn("failed to send gift purchased notification", "error", err, "recipient_email", recipientEmail, "item_name", updatedGiftItem.Name)
+					logger.Warn(
+						"failed to send gift purchased notification",
+						"error",
+						err,
+						"reservation_id",
+						reservation.ID.String(),
+						"item_id",
+						updatedGiftItem.ID.String(),
+					)
 				}
 			}
 		}

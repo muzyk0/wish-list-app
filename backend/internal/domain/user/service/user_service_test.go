@@ -8,6 +8,7 @@ import (
 
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,6 +16,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func init() {
+	logger.Initialize("test")
+}
 
 // --- helpers ---
 

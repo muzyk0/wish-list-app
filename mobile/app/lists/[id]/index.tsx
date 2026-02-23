@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Keyboard,
   Linking,
@@ -285,6 +285,13 @@ const MarkReservedModal = ({
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
 
+  useEffect(() => {
+    if (visible) {
+      setName('');
+      setNote('');
+    }
+  }, [visible]);
+
   const handleConfirm = () => {
     if (!name.trim()) return;
     onConfirm(name.trim(), note.trim());
@@ -303,7 +310,13 @@ const MarkReservedModal = ({
       animationType="slide"
       onRequestClose={handleCancel}
     >
-      <Pressable style={modal.overlay} onPress={Keyboard.dismiss}>
+      <Pressable
+        style={modal.overlay}
+        onPress={() => {
+          Keyboard.dismiss();
+          handleCancel();
+        }}
+      >
         <View style={modal.sheet}>
           {/* Drag handle */}
           <View style={modal.handle} />

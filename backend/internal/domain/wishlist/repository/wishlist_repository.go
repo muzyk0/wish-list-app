@@ -139,8 +139,18 @@ func (r *WishListRepository) GetByOwner(ctx context.Context, ownerID pgtype.UUID
 // excludeID is the wishlist being updated so its own slug does not count as a conflict.
 func (r *WishListRepository) IsSlugTaken(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {
 	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM wishlists WHERE public_slug = $1 AND id != $2)`
-	err := r.db.GetContext(ctx, &exists, query, slug, excludeID)
+
+	if excludeID.Valid {
+		query := `SELECT EXISTS(SELECT 1 FROM wishlists WHERE public_slug = $1 AND id != $2)`
+		err := r.db.GetContext(ctx, &exists, query, slug, excludeID)
+		if err != nil {
+			return false, fmt.Errorf("failed to check slug uniqueness: %w", err)
+		}
+		return exists, nil
+	}
+
+	query := `SELECT EXISTS(SELECT 1 FROM wishlists WHERE public_slug = $1)`
+	err := r.db.GetContext(ctx, &exists, query, slug)
 	if err != nil {
 		return false, fmt.Errorf("failed to check slug uniqueness: %w", err)
 	}
