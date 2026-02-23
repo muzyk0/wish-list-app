@@ -3203,40 +3203,52 @@ export interface components {
             title: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
-            /** @example 2024-01-01T12:00:00Z */
-            created_at?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T12:00:00Z
+             */
+            created_at: string;
             /** @example 256GB, Blue Titanium */
             description?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id?: string;
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            id: string;
             /** @example https://example.com/image.jpg */
             image_url?: string;
             /** @example false */
-            is_archived?: boolean;
+            is_archived: boolean;
             /** @example false */
-            is_manually_reserved?: boolean;
+            is_manually_reserved: boolean;
             /** @example false */
-            is_purchased?: boolean;
+            is_purchased: boolean;
             /** @example false */
-            is_reserved?: boolean;
+            is_reserved: boolean;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
             /** @example Сказали что купят велосипед */
-            manual_reservation_note?: string;
+            manual_reservation_note: string;
             /** @example Бабушка и дедушка */
-            manual_reserved_by_name?: string;
+            manual_reserved_by_name: string;
             /** @example Preferred color: Blue */
             notes?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440001 */
-            owner_id?: string;
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440001
+             */
+            owner_id: string;
             /** @example 999.99 */
-            price?: number;
+            price: number;
             /** @example 3 */
-            priority?: number;
+            priority: number;
             /** @example iPhone 15 Pro */
-            title?: string;
-            /** @example 2024-01-01T12:00:00Z */
-            updated_at?: string;
+            title: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T12:00:00Z
+             */
+            updated_at: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest": {
             /** @example Сказали что купят велосипед */

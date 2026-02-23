@@ -3557,9 +3557,25 @@ const docTemplate = `{
         },
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
             "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "is_archived",
+                "is_manually_reserved",
+                "is_purchased",
+                "is_reserved",
+                "manual_reservation_note",
+                "manual_reserved_by_name",
+                "owner_id",
+                "price",
+                "priority",
+                "title",
+                "updated_at"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string",
+                    "format": "date-time",
                     "example": "2024-01-01T12:00:00Z"
                 },
                 "description": {
@@ -3568,6 +3584,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
+                    "format": "uuid",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "image_url": {
@@ -3608,6 +3625,7 @@ const docTemplate = `{
                 },
                 "owner_id": {
                     "type": "string",
+                    "format": "uuid",
                     "example": "550e8400-e29b-41d4-a716-446655440001"
                 },
                 "price": {
@@ -3624,6 +3642,7 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string",
+                    "format": "date-time",
                     "example": "2024-01-01T12:00:00Z"
                 }
             }

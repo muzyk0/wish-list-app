@@ -2682,12 +2682,14 @@ components:
       properties:
         created_at:
           example: 2024-01-01T12:00:00Z
+          format: date-time
           type: string
         description:
           example: 256GB, Blue Titanium
           type: string
         id:
           example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
           type: string
         image_url:
           example: https://example.com/image.jpg
@@ -2718,6 +2720,7 @@ components:
           type: string
         owner_id:
           example: 550e8400-e29b-41d4-a716-446655440001
+          format: uuid
           type: string
         price:
           example: 999.99
@@ -2730,7 +2733,22 @@ components:
           type: string
         updated_at:
           example: 2024-01-01T12:00:00Z
+          format: date-time
           type: string
+      required:
+        - created_at
+        - id
+        - is_archived
+        - is_manually_reserved
+        - is_purchased
+        - is_reserved
+        - manual_reservation_note
+        - manual_reserved_by_name
+        - owner_id
+        - price
+        - priority
+        - title
+        - updated_at
       type: object
     wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest:
       properties:
