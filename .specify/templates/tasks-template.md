@@ -79,9 +79,9 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (MANDATORY - following Test-First principle) ⚠️
+### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation - Constitution Requirement**
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
@@ -105,9 +105,7 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (MANDATORY - following Test-First principle) ⚠️
-
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation - Constitution Requirement**
+### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
@@ -129,9 +127,7 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (MANDATORY - following Test-First principle) ⚠️
-
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation - Constitution Requirement**
+### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
@@ -155,13 +151,10 @@ Examples of foundational tasks (adjust based on your project):
 **Purpose**: Improvements that affect multiple user stories
 
 - [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring to meet quality standards
+- [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
-- [ ] TXXX Data privacy compliance check - ensure no PII stored without encryption
-- [ ] TXXX API contract validation against OpenAPI/Swagger specifications
-- [ ] TXXX Versioning documentation update following semantic versioning
 - [ ] TXXX Run quickstart.md validation
 
 ---
@@ -252,12 +245,7 @@ With multiple developers:
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
-- Verify tests fail before implementing (Constitution Requirement: Test-First)
+- Verify tests fail before implementing
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- All code must meet quality standards (Constitution Requirement: Code Quality)
-- API contracts must be maintained (Constitution Requirement: API Contract Integrity)
-- No PII stored without proper encryption (Constitution Requirement: Data Privacy)
-- Follow semantic versioning (Constitution Requirement: Semantic Versioning)
-- Specifications must be complete before implementation (Constitution Requirement: Specification Checkpoints)
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
