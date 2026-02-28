@@ -379,6 +379,38 @@ definitions:
     - id
     - title
     type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse:
+    properties:
+      expires_at:
+        type: string
+      gift_item:
+        $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary'
+      id:
+        type: string
+      reserved_at:
+        type: string
+      status:
+        type: string
+      wishlist:
+        $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'
+    required:
+    - gift_item
+    - id
+    - reserved_at
+    - status
+    - wishlist
+    type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse'
+        type: array
+      pagination: {}
+    required:
+    - data
+    - pagination
+    type: object
   wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse:
     properties:
       url:
@@ -1988,6 +2020,44 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all reservations made by the authenticated user
+      tags:
+      - Reservations
+  /reservations/wishlist-owner:
+    get:
+      description: Returns all reservations (by guests or authenticated users) on
+        gift items belonging to the calling user's wishlists. The reserver identity
+        is intentionally hidden.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 10, max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of reservations on owner's items
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get reservations on items in the authenticated user's wishlists
       tags:
       - Reservations
   /wishlists:

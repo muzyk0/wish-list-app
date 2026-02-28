@@ -35,6 +35,8 @@ type ReservationRepositoryInterface interface {
 	ListUserReservationsWithDetails(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	ListGuestReservationsWithDetails(ctx context.Context, token pgtype.UUID) ([]ReservationDetail, error)
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
+	ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
+	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
 	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 }
 
@@ -60,6 +62,9 @@ type ReservationDetail struct {
 	WishlistTitle       pgtype.Text
 	OwnerFirstName      pgtype.Text
 	OwnerLastName       pgtype.Text
+	// Populated only for owner-perspective queries (who reserved my items)
+	ReserverFirstName pgtype.Text `db:"reserver_first_name"`
+	ReserverLastName  pgtype.Text `db:"reserver_last_name"`
 }
 
 type ReservationRepository struct {
@@ -544,6 +549,77 @@ func (r *ReservationRepository) CountUserReservations(ctx context.Context, userI
 	err := r.db.GetContext(ctx, &count, query, userID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to count user reservations: %w", err)
+	}
+
+	return count, nil
+}
+
+// ListWishlistOwnerReservations retrieves all reservations on items belonging to the specified user's wishlists.
+// This is the "owner view": who reserved my wishlist items (includes both guest and authenticated reservations).
+func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error) {
+	query := `
+		SELECT
+			r.id,
+			r.gift_item_id,
+			r.reserved_by_user_id,
+			r.guest_name,
+			r.encrypted_guest_name,
+			r.guest_email,
+			r.encrypted_guest_email,
+			r.reservation_token,
+			r.status,
+			r.reserved_at,
+			r.expires_at,
+			r.canceled_at,
+			r.cancel_reason,
+			r.notification_sent,
+			gi.name as gift_item_name,
+			gi.image_url as gift_item_image_url,
+			gi.price as gift_item_price,
+			w.id as wishlist_id,
+			w.title as wishlist_title,
+			reserver.first_name as reserver_first_name,
+			reserver.last_name as reserver_last_name
+		FROM reservations r
+		JOIN gift_items gi ON r.gift_item_id = gi.id
+		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN users reserver ON r.reserved_by_user_id = reserver.id
+		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
+		ORDER BY r.reserved_at DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	var reservations []ReservationDetail
+	err := r.db.SelectContext(ctx, &reservations, query, ownerUserID, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list wishlist owner reservations: %w", err)
+	}
+
+	for i := range reservations {
+		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
+			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
+		}
+	}
+
+	return reservations, nil
+}
+
+// CountWishlistOwnerReservations counts all reservations on items belonging to the specified user's wishlists.
+func (r *ReservationRepository) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM reservations r
+		JOIN gift_items gi ON r.gift_item_id = gi.id
+		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		JOIN wishlists w ON wi.wishlist_id = w.id
+		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
+	`
+
+	var count int
+	err := r.db.GetContext(ctx, &count, query, ownerUserID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count wishlist owner reservations: %w", err)
 	}
 
 	return count, nil

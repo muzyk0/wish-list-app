@@ -24,6 +24,7 @@ import type {
   UserRegistration,
   WishList,
   WishlistItem,
+  WishlistOwnerReservation,
 } from './types';
 
 // Routes that don't require authentication
@@ -593,6 +594,19 @@ class ApiClient {
 
     // Fallback if response is direct array
     return data as unknown as Reservation[];
+  }
+
+  async getWishlistOwnerReservations(): Promise<WishlistOwnerReservation[]> {
+    const { data, error } = await this.client.GET(
+      '/reservations/wishlist-owner',
+      {},
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data?.data ?? [];
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {

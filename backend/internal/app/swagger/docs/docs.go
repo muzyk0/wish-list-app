@@ -1751,6 +1751,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/reservations/wishlist-owner": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Get reservations on items in the authenticated user's wishlists",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default 10, max 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of reservations on owner's items",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/wishlists": {
             "get": {
                 "security": [
@@ -3045,6 +3102,52 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse": {
+            "type": "object",
+            "required": [
+                "gift_item",
+                "id",
+                "reserved_at",
+                "status",
+                "wishlist"
+            ],
+            "properties": {
+                "expires_at": {
+                    "type": "string"
+                },
+                "gift_item": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reserved_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "wishlist": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "pagination"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"
+                    }
+                },
+                "pagination": {}
             }
         },
         "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {

@@ -165,3 +165,65 @@ type UserReservationsResponse struct {
 	Data       []ReservationDetailsResponse `json:"data" validate:"required"`
 	Pagination any                          `json:"pagination" validate:"required"`
 }
+
+// WishlistOwnerReservationResponse is the "My Wishes" view: items from the owner's wishlists
+// that have been reserved. The identity of the reserver is intentionally hidden — only the
+// fact that the item is reserved (and its status) is shown.
+type WishlistOwnerReservationResponse struct {
+	ID         string          `json:"id" validate:"required"`
+	GiftItem   GiftItemSummary `json:"gift_item" validate:"required"`
+	Wishlist   WishListSummary `json:"wishlist" validate:"required"`
+	Status     string          `json:"status" validate:"required"`
+	ReservedAt string          `json:"reserved_at" validate:"required"`
+	ExpiresAt  *string         `json:"expires_at"`
+}
+
+type WishlistOwnerReservationsResponse struct {
+	Data       []WishlistOwnerReservationResponse `json:"data" validate:"required"`
+	Pagination any                                `json:"pagination" validate:"required"`
+}
+
+func FromWishlistOwnerReservationDetail(res repository.ReservationDetail) WishlistOwnerReservationResponse {
+	itemSummary := GiftItemSummary{
+		ID:   res.GiftItemID.String(),
+		Name: res.GiftItemName.String,
+	}
+	if res.GiftItemImageURL.Valid {
+		itemSummary.ImageURL = &res.GiftItemImageURL.String
+	}
+	if res.GiftItemPrice.Valid {
+		priceFloat, err := res.GiftItemPrice.Float64Value()
+		if err == nil {
+			priceStr := fmt.Sprintf("%.2f", priceFloat.Float64)
+			itemSummary.Price = &priceStr
+		}
+	}
+
+	listSummary := WishListSummary{
+		ID:    res.WishlistID.String(),
+		Title: res.WishlistTitle.String,
+	}
+
+	detail := WishlistOwnerReservationResponse{
+		ID:         res.ID.String(),
+		GiftItem:   itemSummary,
+		Wishlist:   listSummary,
+		Status:     res.Status,
+		ReservedAt: res.ReservedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+	}
+
+	if res.ExpiresAt.Valid {
+		expiresAtStr := res.ExpiresAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		detail.ExpiresAt = &expiresAtStr
+	}
+
+	return detail
+}
+
+func FromWishlistOwnerReservationDetails(details []repository.ReservationDetail) []WishlistOwnerReservationResponse {
+	responses := make([]WishlistOwnerReservationResponse, 0, len(details))
+	for _, d := range details {
+		responses = append(responses, FromWishlistOwnerReservationDetail(d))
+	}
+	return responses
+}

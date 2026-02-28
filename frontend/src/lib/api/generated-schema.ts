@@ -2041,6 +2041,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reservations/wishlist-owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get reservations on items in the authenticated user's wishlists
+         * @description Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number (default 1) */
+                    page?: number;
+                    /** @description Items per page (default 10, max 100) */
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description List of reservations on owner's items */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/wishlists": {
         parameters: {
             query?: never;
@@ -3031,6 +3097,18 @@ export interface components {
             owner_last_name?: string;
             title: string;
         };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse": {
+            expires_at?: string;
+            gift_item: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"];
+            id: string;
+            reserved_at: string;
+            status: string;
+            wishlist: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"];
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse": {
+            data: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"][];
+            pagination: unknown;
+        };
         "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
             /** @example https://s3.amazonaws.com/bucket/images/uuid.jpg */
             url: string;
@@ -3298,6 +3376,8 @@ export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationDet
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationStatusResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoUserReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishListSummary = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse'];
 export type SchemaWishListInternalDomainStorageDeliveryHttpDtoUploadImageResponse = components['schemas']['wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoAuthResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.AuthResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'];

@@ -238,6 +238,58 @@ func (h *Handler) GetGuestReservations(c echo.Context) error {
 	return c.JSON(nethttp.StatusOK, dto.FromReservationDetails(reservations))
 }
 
+// GetWishlistOwnerReservations godoc
+//
+//	@Summary		Get reservations on items in the authenticated user's wishlists
+//	@Description	Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.
+//	@Tags			Reservations
+//	@Produce		json
+//	@Param			page	query		int									false	"Page number (default 1)"
+//	@Param			limit	query		int									false	"Items per page (default 10, max 100)"
+//	@Success		200		{object}	dto.WishlistOwnerReservationsResponse	"List of reservations on owner's items"
+//	@Failure		401		{object}	map[string]string					"Unauthorized"
+//	@Failure		500		{object}	map[string]string					"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/reservations/wishlist-owner [get]
+func (h *Handler) GetWishlistOwnerReservations(c echo.Context) error {
+	userIDStr := auth.MustGetUserID(c)
+	pagination := helpers.ParsePagination(c)
+
+	userID, err := helpers.ParseUUID(c, userIDStr)
+	if err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	totalCount, err := h.service.CountWishlistOwnerReservations(ctx, userID)
+	if err != nil {
+		return apperrors.Internal("Failed to count wishlist owner reservations").Wrap(err)
+	}
+
+	reservations, err := h.service.GetWishlistOwnerReservations(ctx, userID, pagination.Limit, pagination.Offset)
+	if err != nil {
+		return apperrors.Internal("Failed to get wishlist owner reservations").Wrap(err)
+	}
+
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	response := dto.WishlistOwnerReservationsResponse{
+		Data: dto.FromWishlistOwnerReservationDetails(reservations),
+		Pagination: map[string]any{
+			"page":       pagination.Page,
+			"limit":      pagination.Limit,
+			"total":      totalCount,
+			"totalPages": totalPages,
+		},
+	}
+
+	return c.JSON(nethttp.StatusOK, response)
+}
+
 // GetReservationStatus godoc
 //
 //	@Summary		Get the reservation status for a gift item in a public wish list

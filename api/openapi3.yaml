@@ -1341,6 +1341,51 @@ paths:
       summary: Get all reservations made by the authenticated user
       tags:
         - Reservations
+  /reservations/wishlist-owner:
+    get:
+      description: Returns all reservations (by guests or authenticated users) on gift
+        items belonging to the calling user's wishlists. The reserver identity
+        is intentionally hidden.
+      parameters:
+        - description: Page number (default 1)
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: Items per page (default 10, max 100)
+          in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reservations on owner's items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+                  _dto.WishlistOwnerReservationsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get reservations on items in the authenticated user's wishlists
+      tags:
+        - Reservations
   /wishlists:
     get:
       description: Get all wish lists owned by the currently authenticated user.
@@ -2318,6 +2363,41 @@ components:
       required:
         - id
         - title
+      type: object
+    wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse:
+      properties:
+        expires_at:
+          type: string
+        gift_item:
+          $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+            _dto.GiftItemSummary"
+        id:
+          type: string
+        reserved_at:
+          type: string
+        status:
+          type: string
+        wishlist:
+          $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+            _dto.WishListSummary"
+      required:
+        - gift_item
+        - id
+        - reserved_at
+        - status
+        - wishlist
+      type: object
+    wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+              _dto.WishlistOwnerReservationResponse"
+          type: array
+        pagination: {}
+      required:
+        - data
+        - pagination
       type: object
     wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse:
       properties:

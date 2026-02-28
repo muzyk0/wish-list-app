@@ -17,7 +17,7 @@ const OAUTH_CONFIG = {
     process.env.EXPO_PUBLIC_FACEBOOK_CLIENT_ID || 'FACEBOOK_CLIENT_ID',
 
   // Backend API URL for OAuth callback
-  backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080',
+  backendUrl: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080', // 10.0.2.2 for Android emulator
 };
 
 // Google OAuth discovery endpoint

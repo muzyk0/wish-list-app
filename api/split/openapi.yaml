@@ -62,6 +62,8 @@ paths:
     $ref: paths/public_wishlists_{slug}_gift-items.yaml
   /reservations/user:
     $ref: paths/reservations_user.yaml
+  /reservations/wishlist-owner:
+    $ref: paths/reservations_wishlist-owner.yaml
   /wishlists:
     $ref: paths/wishlists.yaml
   /wishlists/{id}:

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import { dialog } from '@/stores/dialogStore';
@@ -22,6 +22,8 @@ export default function ImageUpload({
     currentImageUrl || null,
   );
   const [uploading, setUploading] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
 
   const pickImage = async () => {
     if (disabled) return;
@@ -168,12 +170,50 @@ export default function ImageUpload({
     }
   };
 
+  const isValidUrl = (s: string) =>
+    s.startsWith('http://') || s.startsWith('https://');
+
+  const applyUrl = () => {
+    const trimmed = urlInput.trim();
+    if (!isValidUrl(trimmed)) {
+      dialog.error(
+        'Please enter a valid URL starting with http:// or https://',
+        'Invalid URL',
+      );
+      return;
+    }
+    setImageUri(trimmed);
+    onImageUpload(trimmed);
+    setShowUrlInput(false);
+    setUrlInput('');
+  };
+
   const removeImage = () => {
     setImageUri(null);
     onImageUpload('');
   };
 
   const theme = useTheme();
+
+  const styles = StyleSheet.create({
+    urlRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    urlInput: {
+      flex: 1,
+      height: 40,
+      borderWidth: 1,
+      borderRadius: 4,
+      paddingHorizontal: 10,
+      fontSize: 14,
+      marginRight: 8,
+    },
+    urlApply: {
+      flexShrink: 0,
+    },
+  });
 
   return (
     <View style={{ marginBottom: 20 }}>
@@ -241,7 +281,43 @@ export default function ImageUpload({
         >
           Camera
         </Button>
+
+        <Button
+          mode="contained"
+          onPress={() => setShowUrlInput((v) => !v)}
+          disabled={disabled || uploading}
+          icon="link"
+          style={{ flex: 1, marginHorizontal: 2 }}
+        >
+          URL
+        </Button>
       </View>
+
+      {showUrlInput && (
+        <View style={styles.urlRow}>
+          <TextInput
+            style={[
+              styles.urlInput,
+              {
+                color: theme.colors.onSurface,
+                borderColor: theme.colors.outline,
+              },
+            ]}
+            placeholder="Paste image URL..."
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+            value={urlInput}
+            onChangeText={setUrlInput}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            returnKeyType="go"
+            onSubmitEditing={applyUrl}
+          />
+          <Button mode="contained" onPress={applyUrl} style={styles.urlApply}>
+            Apply
+          </Button>
+        </View>
+      )}
     </View>
   );
 }

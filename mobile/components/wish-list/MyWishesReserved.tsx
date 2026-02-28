@@ -4,44 +4,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-
-interface WishReservation {
-  id: string;
-  giftItem: {
-    id: string;
-    name: string;
-    price?: number;
-    imageUrl?: string;
-  };
-  wishlist: {
-    id: string;
-    title: string;
-  };
-  reservedBy: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    email: string;
-  };
-  status: 'active' | 'canceled' | 'fulfilled';
-  reservedAt: string;
-  isPurchased: boolean;
-}
+import { apiClient } from '@/lib/api';
+import type { WishlistOwnerReservation } from '@/lib/api/types';
 
 export function MyWishesReserved() {
-  const [reservations, setReservations] = useState<WishReservation[]>([]);
+  const [reservations, setReservations] = useState<WishlistOwnerReservation[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      // Fetch reservations of items from user's wishlists
-      const response = await fetch('/api/users/me/wishlists/reservations');
-      if (response.ok) {
-        const data = await response.json();
-        setReservations(data.data || []);
-      }
+      const data = await apiClient.getWishlistOwnerReservations();
+      setReservations(data);
     } catch (error) {
       console.error('Failed to load wish reservations:', error);
     } finally {
@@ -60,46 +37,27 @@ export function MyWishesReserved() {
     fetchReservations();
   };
 
-  const renderItem = ({ item }: { item: WishReservation }) => {
-    const reservedByName =
-      `${item.reservedBy.firstName || ''} ${item.reservedBy.lastName || ''}`.trim() ||
-      item.reservedBy.email;
-
+  const renderItem = ({ item }: { item: WishlistOwnerReservation }) => {
     const getStatusConfig = () => {
-      if (item.isPurchased) {
-        return {
-          color: '#4CAF50',
-          icon: 'check-circle',
-          label: 'Purchased',
-          bg: 'rgba(76, 175, 80, 0.15)',
-        };
-      }
       switch (item.status) {
         case 'active':
           return {
             color: '#FFD700',
-            icon: 'clock-outline',
+            icon: 'clock-outline' as const,
             label: 'Reserved',
             bg: 'rgba(255, 215, 0, 0.15)',
           };
         case 'canceled':
           return {
             color: '#9E9E9E',
-            icon: 'close-circle-outline',
+            icon: 'close-circle-outline' as const,
             label: 'Canceled',
             bg: 'rgba(158, 158, 158, 0.15)',
-          };
-        case 'fulfilled':
-          return {
-            color: '#4CAF50',
-            icon: 'check-circle',
-            label: 'Fulfilled',
-            bg: 'rgba(76, 175, 80, 0.15)',
           };
         default:
           return {
             color: '#FFD700',
-            icon: 'help-circle-outline',
+            icon: 'help-circle-outline' as const,
             label: item.status,
             bg: 'rgba(255, 215, 0, 0.15)',
           };
@@ -115,16 +73,16 @@ export function MyWishesReserved() {
           <View style={styles.header}>
             <View style={styles.itemInfo}>
               <Text style={styles.itemName} numberOfLines={2}>
-                {item.giftItem.name}
+                {item.gift_item.name}
               </Text>
-              {item.giftItem.price !== undefined && (
+              {item.gift_item.price !== undefined && (
                 <View style={styles.priceContainer}>
                   <LinearGradient
                     colors={['#FFD700', '#FFA500']}
                     style={styles.priceGradient}
                   >
                     <Text style={styles.priceText}>
-                      ${item.giftItem.price.toFixed(2)}
+                      ${item.gift_item.price}
                     </Text>
                   </LinearGradient>
                 </View>
@@ -135,7 +93,7 @@ export function MyWishesReserved() {
               style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}
             >
               <MaterialCommunityIcons
-                name={statusConfig.icon as any}
+                name={statusConfig.icon}
                 size={14}
                 color={statusConfig.color}
               />
@@ -153,25 +111,8 @@ export function MyWishesReserved() {
               color="rgba(255, 255, 255, 0.5)"
             />
             <Text style={styles.infoText} numberOfLines={1}>
-              From: {item.wishlist.title}
+              {item.wishlist.title}
             </Text>
-          </View>
-
-          {/* Reserved By */}
-          <View style={styles.reservedByContainer}>
-            <View style={styles.avatarCircle}>
-              <MaterialCommunityIcons
-                name="account"
-                size={16}
-                color="#FFD700"
-              />
-            </View>
-            <View style={styles.reservedByInfo}>
-              <Text style={styles.reservedByLabel}>Reserved by</Text>
-              <Text style={styles.reservedByName} numberOfLines={1}>
-                {reservedByName}
-              </Text>
-            </View>
           </View>
 
           {/* Date */}
@@ -182,7 +123,7 @@ export function MyWishesReserved() {
               color="rgba(255, 255, 255, 0.4)"
             />
             <Text style={styles.dateText}>
-              {new Date(item.reservedAt).toLocaleDateString('en-US', {
+              {new Date(item.reserved_at).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
@@ -229,14 +170,10 @@ export function MyWishesReserved() {
           <Text style={styles.statLabel}>Total Reserved</Text>
         </BlurView>
         <BlurView intensity={15} style={styles.statCard}>
-          <Text style={styles.statValueGreen}>
-            {
-              reservations.filter(
-                (r) => r.isPurchased || r.status === 'fulfilled',
-              ).length
-            }
+          <Text style={styles.statValue}>
+            {reservations.filter((r) => r.status === 'active').length}
           </Text>
-          <Text style={styles.statLabel}>Purchased</Text>
+          <Text style={styles.statLabel}>Active</Text>
         </BlurView>
       </View>
 
@@ -287,12 +224,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#FFD700',
-    marginBottom: 4,
-  },
-  statValueGreen: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#4CAF50',
     marginBottom: 4,
   },
   statLabel: {
@@ -364,37 +295,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255, 255, 255, 0.7)',
     flex: 1,
-  },
-  reservedByContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255, 215, 0, 0.08)',
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reservedByInfo: {
-    flex: 1,
-  },
-  reservedByLabel: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginBottom: 2,
-  },
-  reservedByName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFD700',
   },
   dateRow: {
     flexDirection: 'row',

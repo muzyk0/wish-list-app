@@ -28,6 +28,8 @@ import type {
   SchemaWishListInternalDomainWishlistDeliveryHttpDtoWishListResponse as WishList,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse as WishlistItem,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest as MarkManualReservationRequest,
+  SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse as WishlistOwnerReservation,
+  SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsResponse as WishlistOwnerReservationsResponse,
 } from './generated-schema';
 
 export type {
@@ -55,4 +57,6 @@ export type {
   WishList,
   WishlistItem,
   MarkManualReservationRequest,
+  WishlistOwnerReservation,
+  WishlistOwnerReservationsResponse,
 };

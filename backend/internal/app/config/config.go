@@ -70,7 +70,14 @@ func Load() *Config {
 		AWSAccessKeyID:       getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),
 		AWSSecretAccessKey:   getEnvOrDefault("AWS_SECRET_ACCESS_KEY", ""),
 		AWSS3BucketName:      getEnvOrDefault("AWS_S3_BUCKET_NAME", ""),
-		CorsAllowedOrigins:   getSliceEnvOrDefault("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://localhost:19006"}),
+		CorsAllowedOrigins: getSliceEnvOrDefault("CORS_ALLOWED_ORIGINS", []string{
+			"http://localhost:3000",  // Frontend
+			"http://localhost:19006", // Expo
+			"http://localhost:19000", // Expo
+			"http://localhost:8081",   // React Native Metro
+			"http://127.0.0.1:19006", // Expo (alternative)
+			"http://127.0.0.1:8081",  // React Native Metro (alternative)
+		}),
 		RedisAddr:            getEnvOrDefault("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:        getEnvOrDefault("REDIS_PASSWORD", ""),
 		RedisDB:              getIntEnvOrDefault("REDIS_DB", 0),

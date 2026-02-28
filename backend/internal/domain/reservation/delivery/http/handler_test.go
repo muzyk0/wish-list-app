@@ -118,6 +118,19 @@ func (m *MockReservationService) CountUserReservations(ctx context.Context, user
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockReservationService) GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error) {
+	args := m.Called(ctx, ownerUserID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]repository.ReservationDetail), args.Error(1)
+}
+
+func (m *MockReservationService) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	args := m.Called(ctx, ownerUserID)
+	return args.Int(0), args.Error(1)
+}
+
 // T062a: Unit tests for reservation cancellation endpoint (valid cancellation, unauthorized cancellation)
 func TestReservationHandler_CancelReservation(t *testing.T) {
 	t.Run("valid cancellation by authenticated user", func(t *testing.T) {
