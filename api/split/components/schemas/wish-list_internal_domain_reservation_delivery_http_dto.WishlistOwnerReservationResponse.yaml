@@ -1,0 +1,22 @@
+properties:
+  expires_at:
+    type: string
+  gift_item:
+    $ref: >-
+      ./wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary.yaml
+  id:
+    type: string
+  reserved_at:
+    type: string
+  status:
+    type: string
+  wishlist:
+    $ref: >-
+      ./wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary.yaml
+required:
+  - gift_item
+  - id
+  - reserved_at
+  - status
+  - wishlist
+type: object

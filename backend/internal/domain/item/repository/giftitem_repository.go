@@ -290,17 +290,27 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 	}, nil
 }
 
-// GetByWishList retrieves gift items by wishlist ID via the wishlist_items junction table
+// GetByWishList retrieves gift items by wishlist ID via the wishlist_items junction table.
+// Includes a LATERAL JOIN on reservations to surface guest reservations (where gift_items.reserved_*
+// fields are not set) so the wishlist owner sees correct reservation status.
 func (r *GiftItemRepository) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE wi.wishlist_id = $1
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT 100
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	err := r.db.SelectContext(ctx, &giftItems, query, wishlistID)
