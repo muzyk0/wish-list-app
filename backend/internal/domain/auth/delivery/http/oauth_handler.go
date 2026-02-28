@@ -19,6 +19,7 @@ import (
 	"wish-list/internal/pkg/apperrors"
 	"wish-list/internal/pkg/auth"
 	"wish-list/internal/pkg/helpers"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -35,13 +36,19 @@ type UserRepositoryInterface interface {
 	Update(ctx context.Context, user usermodels.User) (*usermodels.User, error)
 }
 
+// GuestReservationLinker links guest reservations to an authenticated user by email.
+type GuestReservationLinker interface {
+	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
+}
+
 // OAuthHandler handles OAuth authentication flows
 type OAuthHandler struct {
-	userRepo     UserRepositoryInterface
-	tokenManager *auth.TokenManager
-	googleConfig *oauth2.Config
-	fbConfig     *oauth2.Config
-	httpTimeout  time.Duration
+	userRepo          UserRepositoryInterface
+	reservationLinker GuestReservationLinker
+	tokenManager      *auth.TokenManager
+	googleConfig      *oauth2.Config
+	fbConfig          *oauth2.Config
+	httpTimeout       time.Duration
 }
 
 // NewOAuthHandler creates a new OAuth handler
@@ -54,15 +61,22 @@ func NewOAuthHandler(
 	fbClientSecret string,
 	redirectURL string,
 	httpTimeout int,
+	reservationLinker ...GuestReservationLinker,
 ) *OAuthHandler {
 	timeout := time.Duration(httpTimeout) * time.Second
 	if httpTimeout <= 0 {
 		timeout = config.DefaultOAuthHTTPTimeout
 	}
 
+	var linker GuestReservationLinker
+	if len(reservationLinker) > 0 {
+		linker = reservationLinker[0]
+	}
+
 	return &OAuthHandler{
-		userRepo:     userRepo,
-		tokenManager: tokenManager,
+		userRepo:          userRepo,
+		reservationLinker: linker,
+		tokenManager:      tokenManager,
 		googleConfig: &oauth2.Config{
 			ClientID:     googleClientID,
 			ClientSecret: googleClientSecret,
@@ -97,10 +111,11 @@ type GoogleUserInfo struct {
 
 // FacebookUserInfo represents user info from Facebook OAuth
 type FacebookUserInfo struct {
-	ID      string `json:"id"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-	Picture struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Verified bool   `json:"verified"`
+	Name     string `json:"name"`
+	Picture  struct {
 		Data struct {
 			URL string `json:"url"`
 		} `json:"data"`
@@ -126,7 +141,7 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 	}
 
 	// Exchange authorization code for token
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	token, err := h.googleConfig.Exchange(ctx, req.Code)
 	if err != nil {
 		return h.handleOAuthExchangeError(c, "Google", err)
@@ -145,10 +160,12 @@ func (h *OAuthHandler) GoogleOAuth(c echo.Context) error {
 
 	// Create or find user in database
 	user, err := h.findOrCreateUser(
+		ctx,
 		userInfo.Email,
 		userInfo.GivenName,
 		userInfo.FamilyName,
 		userInfo.Picture,
+		userInfo.VerifiedEmail,
 	)
 	if err != nil {
 		return apperrors.Internal("Failed to process user").Wrap(err)
@@ -211,7 +228,7 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 	}
 
 	// Exchange authorization code for token
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	token, err := h.fbConfig.Exchange(ctx, req.Code)
 	if err != nil {
 		return h.handleOAuthExchangeError(c, "Facebook", err)
@@ -228,10 +245,12 @@ func (h *OAuthHandler) FacebookOAuth(c echo.Context) error {
 
 	// Create or find user in database
 	user, err := h.findOrCreateUser(
+		ctx,
 		userInfo.Email,
 		firstName,
 		lastName,
 		userInfo.Picture.Data.URL,
+		userInfo.Verified,
 	)
 	if err != nil {
 		return apperrors.Internal("Failed to process user").Wrap(err)
@@ -316,7 +335,7 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		"https://graph.facebook.com/me?fields=id,name,email,picture",
+		"https://graph.facebook.com/me?fields=id,name,email,picture,verified",
 		http.NoBody,
 	)
 	if err != nil {
@@ -346,9 +365,7 @@ func (h *OAuthHandler) getFacebookUserInfo(ctx context.Context, accessToken stri
 }
 
 // findOrCreateUser finds existing user or creates new one from OAuth data
-func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL string) (*usermodels.User, error) {
-	ctx := context.Background()
-
+func (h *OAuthHandler) findOrCreateUser(ctx context.Context, email, firstName, lastName, avatarURL string, emailVerified bool) (*usermodels.User, error) {
 	// Validate email format
 	if _, err := mail.ParseAddress(email); err != nil {
 		return nil, fmt.Errorf("invalid email format: %w", err)
@@ -377,14 +394,29 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 	user, err := h.userRepo.GetByEmail(ctx, email)
 
 	if err == nil {
-		// User exists - update avatar if provided and not currently set
+		// User exists - update avatar and/or verification state if needed.
+		needsUpdate := false
+
 		// Check both Valid (not NULL) and String (not empty)
 		if avatarURL != "" && (!user.AvatarUrl.Valid || user.AvatarUrl.String == "") {
 			user.AvatarUrl = pgtype.Text{String: avatarURL, Valid: true}
+			needsUpdate = true
+		}
+
+		if emailVerified && (!user.IsVerified.Valid || !user.IsVerified.Bool) {
+			user.IsVerified = pgtype.Bool{Bool: true, Valid: true}
+			needsUpdate = true
+		}
+
+		if needsUpdate {
 			user, err = h.userRepo.Update(ctx, *user)
 			if err != nil {
-				return nil, fmt.Errorf("failed to update user avatar: %w", err)
+				return nil, fmt.Errorf("failed to update oauth user profile: %w", err)
 			}
+		}
+
+		if user.IsVerified.Valid && user.IsVerified.Bool {
+			h.linkGuestReservationsByEmail(ctx, email, user.ID)
 		}
 		return user, nil
 	}
@@ -407,6 +439,7 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 		FirstName:    pgtype.Text{String: firstName, Valid: firstName != ""},
 		LastName:     pgtype.Text{String: lastName, Valid: lastName != ""},
 		AvatarUrl:    pgtype.Text{String: avatarURL, Valid: avatarURL != ""},
+		IsVerified:   pgtype.Bool{Bool: emailVerified, Valid: true},
 	}
 
 	createdUser, err := h.userRepo.Create(ctx, newUser)
@@ -414,7 +447,28 @@ func (h *OAuthHandler) findOrCreateUser(email, firstName, lastName, avatarURL st
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
+	if createdUser.IsVerified.Valid && createdUser.IsVerified.Bool {
+		h.linkGuestReservationsByEmail(ctx, email, createdUser.ID)
+	}
+
 	return createdUser, nil
+}
+
+func (h *OAuthHandler) linkGuestReservationsByEmail(ctx context.Context, email string, userID pgtype.UUID) {
+	if h.reservationLinker == nil || !userID.Valid {
+		return
+	}
+
+	if _, err := h.reservationLinker.LinkGuestReservationsToUserByEmail(ctx, email, userID); err != nil {
+		// Best-effort linking: OAuth login should still succeed.
+		logger.Warn(
+			"failed to link guest reservations for OAuth user",
+			"error",
+			err,
+			"user_id",
+			userID.String(),
+		)
+	}
 }
 
 // handleOAuthExchangeError returns appropriate HTTP status code based on error type.

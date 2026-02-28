@@ -1,22 +1,28 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Keyboard,
   Linking,
+  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
+  TextInput,
   View,
 } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { WishlistItem } from '@/lib/api/types';
 import { dialog } from '@/stores/dialogStore';
+
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
 
 // ─── Color tokens ────────────────────────────────────────────────────
 const C = {
@@ -67,16 +73,17 @@ function gradientForItem(
 const GiftItemCard = ({
   item,
   index,
-  onReserve,
+  onMarkReserved,
   onEdit,
 }: {
   item: WishlistItem;
   index: number;
-  onReserve: (item: WishlistItem) => void;
+  onMarkReserved: (item: WishlistItem) => void;
   onEdit: (item: WishlistItem) => void;
 }) => {
   const isPurchased = !!item.is_purchased;
-  const isReserved = !!item.is_reserved && !isPurchased;
+  const isManuallyReserved = !!item.is_manually_reserved;
+  const isReserved = (!!item.is_reserved && !isPurchased) || isManuallyReserved;
   const isArchived = !!item.is_archived;
   const isAvailable = !isReserved && !isPurchased && !isArchived;
 
@@ -109,6 +116,7 @@ const GiftItemCard = ({
           };
 
   const grad = gradientForItem(item.id, index);
+  const manualReservedByName = item.manual_reserved_by_name;
 
   return (
     <View style={card.wrapper}>
@@ -184,6 +192,20 @@ const GiftItemCard = ({
           </Text>
         ) : null}
 
+        {/* Manual reservation info */}
+        {isManuallyReserved && manualReservedByName ? (
+          <View style={card.manualReservationBadge}>
+            <MaterialCommunityIcons
+              name="account-check"
+              size={13}
+              color={C.amber}
+            />
+            <Text style={card.manualReservationText} numberOfLines={1}>
+              {manualReservedByName}
+            </Text>
+          </View>
+        ) : null}
+
         {/* Action bar */}
         <View style={card.actions}>
           {/* Link pill */}
@@ -216,12 +238,12 @@ const GiftItemCard = ({
             />
           </Pressable>
 
-          {/* Reserve */}
+          {/* Mark as Reserved (owner action — available items only) */}
           {isAvailable && (
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onReserve(item);
+                onMarkReserved(item);
               }}
               style={card.reserveBtn}
             >
@@ -231,8 +253,12 @@ const GiftItemCard = ({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
-                <MaterialCommunityIcons name="gift" size={13} color="#1a0f05" />
-                <Text style={card.reserveBtnText}>Reserve</Text>
+                <MaterialCommunityIcons
+                  name="account-check"
+                  size={13}
+                  color="#1a0f05"
+                />
+                <Text style={card.reserveBtnText}>Mark Reserved</Text>
               </LinearGradient>
             </Pressable>
           )}
@@ -242,8 +268,159 @@ const GiftItemCard = ({
   );
 };
 
+// ─── Mark Reserved Modal ─────────────────────────────────────────────
+const MarkReservedModal = ({
+  visible,
+  itemTitle,
+  loading,
+  onConfirm,
+  onCancel,
+}: {
+  visible: boolean;
+  itemTitle: string;
+  loading: boolean;
+  onConfirm: (name: string, note: string) => void;
+  onCancel: () => void;
+}) => {
+  const [name, setName] = useState('');
+  const [note, setNote] = useState('');
+
+  useEffect(() => {
+    if (visible) {
+      setName('');
+      setNote('');
+    }
+  }, [visible]);
+
+  const handleConfirm = () => {
+    if (!name.trim()) return;
+    onConfirm(name.trim(), note.trim());
+  };
+
+  const handleCancel = () => {
+    setName('');
+    setNote('');
+    onCancel();
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={handleCancel}
+    >
+      <Pressable
+        style={modal.overlay}
+        onPress={() => {
+          Keyboard.dismiss();
+          handleCancel();
+        }}
+      >
+        <View style={modal.sheet}>
+          {/* Drag handle */}
+          <View style={modal.handle} />
+
+          <Text style={modal.title}>Mark as Reserved</Text>
+          <Text style={modal.subtitle} numberOfLines={2}>
+            {itemTitle}
+          </Text>
+
+          <Text style={modal.label}>Who will buy this gift?</Text>
+          <TextInput
+            style={modal.input}
+            placeholder="e.g. Grandma & Grandpa"
+            placeholderTextColor={C.muted}
+            value={name}
+            onChangeText={setName}
+            autoFocus
+            returnKeyType="next"
+            maxLength={255}
+          />
+
+          <Text style={modal.label}>Note (optional)</Text>
+          <TextInput
+            style={[modal.input, modal.inputMultiline]}
+            placeholder="e.g. Said they'll buy the bicycle"
+            placeholderTextColor={C.muted}
+            value={note}
+            onChangeText={setNote}
+            multiline
+            numberOfLines={3}
+            maxLength={1000}
+            returnKeyType="done"
+          />
+
+          <View style={modal.actions}>
+            <Pressable onPress={handleCancel} style={modal.cancelBtn}>
+              <Text style={modal.cancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleConfirm}
+              style={[
+                modal.confirmBtn,
+                !name.trim() && modal.confirmBtnDisabled,
+              ]}
+              disabled={!name.trim() || loading}
+            >
+              {loading ? (
+                <ActivityIndicator size={16} color="#1a0f05" />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    name="account-check"
+                    size={16}
+                    color="#1a0f05"
+                  />
+                  <Text style={modal.confirmText}>Confirm</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        </View>
+      </Pressable>
+    </Modal>
+  );
+};
+
+// ─── Share strip ─────────────────────────────────────────────────────
+const ShareStrip = ({ slug }: { slug: string }) => {
+  const publicUrl = `https://${WEB_DOMAIN}/public/${slug}`;
+
+  const handleShare = async () => {
+    try {
+      await Share.share({ message: publicUrl, url: publicUrl });
+    } catch {
+      // user dismissed
+    }
+  };
+
+  const handleOpen = () => Linking.openURL(publicUrl);
+
+  return (
+    <View style={share.strip}>
+      <MaterialCommunityIcons name="earth" size={14} color={C.green} />
+      <Text style={share.url} numberOfLines={1}>
+        {WEB_DOMAIN}/public/{slug}
+      </Text>
+      <Pressable onPress={handleOpen} style={share.iconBtn} hitSlop={8}>
+        <MaterialCommunityIcons name="open-in-new" size={16} color={C.gold} />
+      </Pressable>
+      <Pressable onPress={handleShare} style={share.iconBtn} hitSlop={8}>
+        <MaterialCommunityIcons name="share-variant" size={16} color={C.gold} />
+      </Pressable>
+    </View>
+  );
+};
+
 // ─── Empty state ─────────────────────────────────────────────────────
-const EmptyGifts = ({ onAdd }: { onAdd: () => void }) => (
+const EmptyGifts = ({
+  onAdd,
+  onAttach,
+}: {
+  onAdd: () => void;
+  onAttach: () => void;
+}) => (
   <View style={empty.wrap}>
     <LinearGradient
       colors={['rgba(226, 185, 108, 0.18)', 'rgba(226, 185, 108, 0.04)']}
@@ -253,19 +430,25 @@ const EmptyGifts = ({ onAdd }: { onAdd: () => void }) => (
     </LinearGradient>
     <Text style={empty.title}>No gifts yet</Text>
     <Text style={empty.subtitle}>
-      Tap the button below to add your first gift item
+      Create a new gift or attach an existing one to this wishlist
     </Text>
-    <Pressable onPress={onAdd} style={empty.cta}>
-      <LinearGradient
-        colors={[C.goldBright, '#C48A3A']}
-        style={empty.ctaGrad}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <MaterialCommunityIcons name="plus" size={16} color="#1a0f05" />
-        <Text style={empty.ctaText}>Add Gift</Text>
-      </LinearGradient>
-    </Pressable>
+    <View style={empty.actions}>
+      <Pressable onPress={onAdd} style={empty.cta}>
+        <LinearGradient
+          colors={[C.goldBright, '#C48A3A']}
+          style={empty.ctaGrad}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <MaterialCommunityIcons name="plus" size={16} color="#1a0f05" />
+          <Text style={empty.ctaText}>New Gift</Text>
+        </LinearGradient>
+      </Pressable>
+      <Pressable onPress={onAttach} style={empty.ctaSecondary}>
+        <MaterialCommunityIcons name="link-plus" size={16} color={C.gold} />
+        <Text style={empty.ctaSecondaryText}>Attach Existing</Text>
+      </Pressable>
+    </View>
   </View>
 );
 
@@ -275,6 +458,9 @@ export default function WishListScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const [markReservedItem, setMarkReservedItem] = useState<WishlistItem | null>(
+    null,
+  );
 
   const {
     data: wishList,
@@ -298,24 +484,48 @@ export default function WishListScreen() {
     enabled: !!id,
   });
 
+  const markReservedMutation = useMutation({
+    mutationFn: ({
+      itemId,
+      reservedByName,
+      note,
+    }: {
+      itemId: string;
+      reservedByName: string;
+      note: string;
+    }) =>
+      apiClient.markItemAsManuallyReserved(id, itemId, {
+        reserved_by_name: reservedByName,
+        note: note || undefined,
+      }),
+    onSuccess: () => {
+      setMarkReservedItem(null);
+      queryClient
+        .invalidateQueries({ queryKey: ['giftItems', id] })
+        .catch(console.error);
+      dialog.success('Gift marked as reserved!');
+    },
+    onError: () => {
+      dialog.error('Failed to mark gift as reserved. Please try again.');
+    },
+  });
+
   const onRefresh = async () => {
     setRefreshing(true);
     await Promise.all([refetch(), refetchItems()]);
     setRefreshing(false);
   };
 
-  const handleReserveGift = (item: WishlistItem) => {
-    dialog.confirm({
-      title: 'Reserve Gift',
-      message: `You are reserving "${item.title}". In a real app, this would create a reservation.`,
-      confirmLabel: 'Reserve',
-      cancelLabel: 'Cancel',
-      onConfirm: () => {
-        dialog.success('Gift reserved successfully!');
-        queryClient
-          .invalidateQueries({ queryKey: ['giftItems', id] })
-          .catch(console.error);
-      },
+  const handleMarkReserved = (item: WishlistItem) => {
+    setMarkReservedItem(item);
+  };
+
+  const handleMarkReservedConfirm = (name: string, note: string) => {
+    if (!markReservedItem?.id) return;
+    markReservedMutation.mutate({
+      itemId: markReservedItem.id,
+      reservedByName: name,
+      note,
     });
   };
 
@@ -328,6 +538,8 @@ export default function WishListScreen() {
   };
 
   const handleAddGiftItem = () => router.push(`/lists/${id}/gifts/create`);
+  const handleAttachExistingItem = () =>
+    router.push(`/lists/${id}/attach-items`);
   const handleEditWishList = () => router.push(`/lists/${id}/edit`);
 
   // ── Loading ──
@@ -442,6 +654,11 @@ export default function WishListScreen() {
         </View>
       </View>
 
+      {/* ── Share strip (public wishlist with slug) ── */}
+      {wishList.is_public && wishList.public_slug && (
+        <ShareStrip slug={wishList.public_slug} />
+      )}
+
       {/* ── Description (if exists) ── */}
       {wishList.description && (
         <View style={s.descStrip}>
@@ -470,34 +687,66 @@ export default function WishListScreen() {
               key={item.id}
               item={item}
               index={idx}
-              onReserve={handleReserveGift}
+              onMarkReserved={handleMarkReserved}
               onEdit={handleEditGift}
             />
           ))
         ) : (
-          <EmptyGifts onAdd={handleAddGiftItem} />
+          <EmptyGifts
+            onAdd={handleAddGiftItem}
+            onAttach={handleAttachExistingItem}
+          />
         )}
       </ScrollView>
 
-      {/* ── FAB ── */}
+      {/* ── FABs ── */}
       {items.length > 0 && (
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            handleAddGiftItem();
-          }}
-          style={s.fab}
-        >
-          <LinearGradient
-            colors={[C.goldBright, '#C48A3A']}
-            style={s.fabGrad}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+        <View style={s.fabGroup}>
+          {/* Attach existing gift */}
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleAttachExistingItem();
+            }}
+            style={s.fabSecondary}
           >
-            <MaterialCommunityIcons name="plus" size={26} color="#1a0f05" />
-          </LinearGradient>
-        </Pressable>
+            <View style={s.fabSecondaryInner}>
+              <MaterialCommunityIcons
+                name="link-plus"
+                size={22}
+                color={C.gold}
+              />
+            </View>
+          </Pressable>
+
+          {/* Create new gift */}
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              handleAddGiftItem();
+            }}
+            style={s.fab}
+          >
+            <LinearGradient
+              colors={[C.goldBright, '#C48A3A']}
+              style={s.fabGrad}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <MaterialCommunityIcons name="plus" size={26} color="#1a0f05" />
+            </LinearGradient>
+          </Pressable>
+        </View>
       )}
+
+      {/* ── Mark Reserved Modal ── */}
+      <MarkReservedModal
+        visible={!!markReservedItem}
+        itemTitle={markReservedItem?.title ?? ''}
+        loading={markReservedMutation.isPending}
+        onConfirm={handleMarkReservedConfirm}
+        onCancel={() => setMarkReservedItem(null)}
+      />
     </View>
   );
 }
@@ -596,6 +845,24 @@ const card = StyleSheet.create({
     lineHeight: 19,
     marginBottom: 14,
   },
+  manualReservationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    backgroundColor: 'rgba(252, 211, 77, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(252, 211, 77, 0.20)',
+    alignSelf: 'flex-start',
+  },
+  manualReservationText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.amber,
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -636,13 +903,141 @@ const card = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 7,
   },
   reserveBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#1a0f05',
+  },
+});
+
+// ─── Modal styles ─────────────────────────────────────────────────────
+const modal = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#16112e',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 40,
+    borderTopWidth: 1,
+    borderColor: 'rgba(226, 185, 108, 0.15)',
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#EEE8FF',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: 'rgba(238, 232, 255, 0.5)',
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(238, 232, 255, 0.55)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 185, 108, 0.2)',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    fontSize: 15,
+    color: '#EEE8FF',
+    marginBottom: 20,
+  },
+  inputMultiline: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+  },
+  cancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: 'rgba(238, 232, 255, 0.7)',
+  },
+  confirmBtn: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: '#E2B96C',
+  },
+  confirmBtnDisabled: {
+    opacity: 0.4,
+  },
+  confirmText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1a0f05',
+  },
+});
+
+// ─── Share strip styles ──────────────────────────────────────────────
+const share = StyleSheet.create({
+  strip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(94, 234, 212, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(94, 234, 212, 0.2)',
+  },
+  url: {
+    flex: 1,
+    fontSize: 12,
+    color: 'rgba(94, 234, 212, 0.85)',
+  },
+  iconBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: C.goldDim,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -674,6 +1069,11 @@ const empty = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 28,
   },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
   cta: {
     borderRadius: 24,
     overflow: 'hidden',
@@ -689,6 +1089,22 @@ const empty = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1a0f05',
+  },
+  ctaSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: C.goldBorder,
+    backgroundColor: C.goldDim,
+  },
+  ctaSecondaryText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: C.gold,
   },
 });
 
@@ -849,11 +1265,16 @@ const s = StyleSheet.create({
     fontWeight: '600',
     color: C.white,
   },
-  // fab
-  fab: {
+  // fab group
+  fabGroup: {
     position: 'absolute',
     bottom: 28,
     right: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  fab: {
     borderRadius: 30,
     shadowColor: C.gold,
     shadowOffset: { width: 0, height: 6 },
@@ -865,6 +1286,24 @@ const s = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fabSecondary: {
+    borderRadius: 26,
+    shadowColor: C.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabSecondaryInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: C.bg2,
+    borderWidth: 1.5,
+    borderColor: C.goldBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },

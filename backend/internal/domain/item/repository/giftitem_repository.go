@@ -21,6 +21,7 @@ import (
 var (
 	ErrGiftItemNotFound          = errors.New("gift item not found")
 	ErrGiftItemAlreadyReserved   = errors.New("gift item is already reserved")
+	ErrGiftItemNotAvailable      = errors.New("gift item is not available for manual reservation")
 	ErrGiftItemAlreadyArchived   = errors.New("item not found or already archived")
 	ErrGiftItemConcurrentReserve = errors.New("gift item was reserved by another transaction")
 	ErrInvalidSortField          = errors.New("invalid sort field")
@@ -44,13 +45,26 @@ var validSortOrders = map[string]bool{
 // giftItemColumns is the standard column list for gift_items queries
 const giftItemColumns = `id, owner_id, name, description, link, image_url, price, priority,
 	reserved_by_user_id, reserved_at, purchased_by_user_id, purchased_at,
-	purchased_price, notes, position, archived_at, created_at, updated_at`
+	purchased_price, notes, position, manual_reserved_by_name, manual_reservation_note,
+	manual_reserved_at, archived_at, created_at, updated_at`
 
 // giftItemColumnsAliased is the column list prefixed with gi. alias
 const giftItemColumnsAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
 	gi.price, gi.priority, gi.reserved_by_user_id, gi.reserved_at,
 	gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
-	gi.notes, gi.position, gi.archived_at, gi.created_at, gi.updated_at`
+	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
+	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`
+
+// giftItemColumnsPublicAliased includes guest reservation fallback from reservations table.
+// For guest reservations, gift_items.reserved_* can remain NULL; this projection keeps
+// public API reservation status accurate without exposing guest identity.
+const giftItemColumnsPublicAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
+	gi.price, gi.priority,
+	COALESCE(gi.reserved_by_user_id, ar.reserved_by_user_id) AS reserved_by_user_id,
+	COALESCE(gi.reserved_at, ar.reserved_at) AS reserved_at,
+	gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
+	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
+	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`
 
 // ItemFilters contains filter and pagination parameters for querying items
 type ItemFilters struct {
@@ -84,6 +98,7 @@ type GiftItemRepositoryInterface interface {
 	GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
 	Update(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	UpdateWithNewSchema(ctx context.Context, giftItem *models.GiftItem) (*models.GiftItem, error)
+	MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error)
 	Delete(ctx context.Context, id pgtype.UUID) error
 	DeleteWithExecutor(ctx context.Context, executor database.Executor, id pgtype.UUID) error
 	SoftDelete(ctx context.Context, id pgtype.UUID) error
@@ -303,11 +318,19 @@ func (r *GiftItemRepository) GetPublicWishListGiftItems(ctx context.Context, pub
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE w.public_slug = $1 AND w.is_public = true
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT 100
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	err := r.db.SelectContext(ctx, &giftItems, query, publicSlug)
@@ -341,11 +364,19 @@ func (r *GiftItemRepository) GetPublicWishListGiftItemsPaginated(ctx context.Con
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE w.public_slug = $1 AND w.is_public = true
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT $2 OFFSET $3
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	if err := r.db.SelectContext(ctx, &giftItems, query, publicSlug, limit, offset); err != nil {
@@ -463,6 +494,57 @@ func (r *GiftItemRepository) UpdateWithNewSchema(ctx context.Context, giftItem *
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update gift item: %w", err)
+	}
+
+	return &updated, nil
+}
+
+// MarkManualReservation sets the manual_reserved_by_name and optional note on a gift item.
+// This is used by the wishlist owner to record that someone (e.g., grandma) will buy the item offline.
+func (r *GiftItemRepository) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
+	query := fmt.Sprintf(`
+		UPDATE gift_items gi
+		SET manual_reserved_by_name = $2,
+		    manual_reservation_note = $3,
+		    manual_reserved_at = NOW(),
+		    updated_at = NOW()
+		WHERE gi.id = $1
+		  AND gi.archived_at IS NULL
+		  AND gi.purchased_by_user_id IS NULL
+		  AND gi.purchased_at IS NULL
+		  AND gi.reserved_by_user_id IS NULL
+		  AND gi.reserved_at IS NULL
+		  AND gi.manual_reserved_by_name IS NULL
+		  AND gi.manual_reserved_at IS NULL
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+		  )
+		RETURNING %s
+	`, giftItemColumns)
+
+	var noteVal any
+	if note != nil {
+		noteVal = *note
+	}
+
+	var updated models.GiftItem
+	err := r.db.GetContext(ctx, &updated, query, itemID, reservedByName, noteVal)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			existsQuery := `SELECT EXISTS(SELECT 1 FROM gift_items WHERE id = $1 AND archived_at IS NULL)`
+			var exists bool
+			if existsErr := r.db.GetContext(ctx, &exists, existsQuery, itemID); existsErr != nil {
+				return nil, fmt.Errorf("failed to verify gift item existence: %w", existsErr)
+			}
+			if !exists {
+				return nil, ErrGiftItemNotFound
+			}
+			return nil, ErrGiftItemNotAvailable
+		}
+		return nil, fmt.Errorf("failed to mark manual reservation: %w", err)
 	}
 
 	return &updated, nil

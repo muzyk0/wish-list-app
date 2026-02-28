@@ -101,6 +101,9 @@ type GiftItemRepositoryInterfaceMock struct {
 	// UpdateWithNewSchemaFunc mocks the UpdateWithNewSchema method.
 	UpdateWithNewSchemaFunc func(ctx context.Context, giftItem *models.GiftItem) (*models.GiftItem, error)
 
+	// MarkManualReservationFunc mocks the MarkManualReservation method.
+	MarkManualReservationFunc func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error)
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// CreateWithOwner holds details about calls to the CreateWithOwner method.
@@ -195,6 +198,17 @@ type GiftItemRepositoryInterfaceMock struct {
 			// GiftItem is the giftItem argument value.
 			GiftItem *models.GiftItem
 		}
+		// MarkManualReservation holds details about calls to the MarkManualReservation method.
+		MarkManualReservation []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
+			// ReservedByName is the reservedByName argument value.
+			ReservedByName string
+			// Note is the note argument value.
+			Note *string
+		}
 	}
 	lockCreateWithOwner                     sync.RWMutex
 	lockDelete                              sync.RWMutex
@@ -208,6 +222,7 @@ type GiftItemRepositoryInterfaceMock struct {
 	lockSoftDelete                          sync.RWMutex
 	lockUpdate                              sync.RWMutex
 	lockUpdateWithNewSchema                 sync.RWMutex
+	lockMarkManualReservation               sync.RWMutex
 }
 
 // CreateWithOwner calls CreateWithOwnerFunc.
@@ -655,5 +670,46 @@ func (mock *GiftItemRepositoryInterfaceMock) UpdateWithNewSchemaCalls() []struct
 	mock.lockUpdateWithNewSchema.RLock()
 	calls = mock.calls.UpdateWithNewSchema
 	mock.lockUpdateWithNewSchema.RUnlock()
+	return calls
+}
+
+// MarkManualReservation calls MarkManualReservationFunc.
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
+	if mock.MarkManualReservationFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.MarkManualReservationFunc: method is nil but GiftItemRepositoryInterface.MarkManualReservation was just called")
+	}
+	callInfo := struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}{
+		Ctx:            ctx,
+		ItemID:         itemID,
+		ReservedByName: reservedByName,
+		Note:           note,
+	}
+	mock.lockMarkManualReservation.Lock()
+	mock.calls.MarkManualReservation = append(mock.calls.MarkManualReservation, callInfo)
+	mock.lockMarkManualReservation.Unlock()
+	return mock.MarkManualReservationFunc(ctx, itemID, reservedByName, note)
+}
+
+// MarkManualReservationCalls gets all the calls that were made to MarkManualReservation.
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservationCalls() []struct {
+	Ctx            context.Context
+	ItemID         pgtype.UUID
+	ReservedByName string
+	Note           *string
+} {
+	var calls []struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}
+	mock.lockMarkManualReservation.RLock()
+	calls = mock.calls.MarkManualReservation
+	mock.lockMarkManualReservation.RUnlock()
 	return calls
 }

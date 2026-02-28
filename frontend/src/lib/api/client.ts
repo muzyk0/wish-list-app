@@ -2,15 +2,27 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './generated-schema';
 import type {
+  CancelReservationRequest,
   CreateReservationRequest,
   GetGiftItemsResponse,
   MobileHandoffResponse,
   Reservation,
+  ReservationDetailsResponse,
   WishList,
 } from './types';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
+export class ApiClientError extends Error {
+  statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
+    super(message);
+    this.name = 'ApiClientError';
+    this.statusCode = statusCode;
+  }
+}
 
 class AuthManager {
   private accessToken: string | null = null;
@@ -158,16 +170,16 @@ class ApiClient {
   }
 
   /**
-   * Create guest reservation for a gift item
-   * Allows unauthenticated users to reserve items by providing name/email
+   * Create a reservation for a gift item (public endpoint)
+   * Guests provide name/email; authenticated users are identified by token.
    */
   async createReservation(
     wishlistId: string,
     itemId: string,
     reservationData?: CreateReservationRequest,
   ): Promise<Reservation> {
-    const { data, error } = await this.client.POST(
-      '/reservations/wishlist/{wishlistId}/item/{itemId}',
+    const { data, error, response } = await this.client.POST(
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
       {
         params: { path: { wishlistId, itemId } },
         body: reservationData,
@@ -177,12 +189,62 @@ class ApiClient {
     );
 
     if (error || !data) {
-      throw new Error(
+      throw new ApiClientError(
         (error as { error?: string })?.error || 'Failed to create reservation',
+        response?.status,
       );
     }
 
     return data;
+  }
+
+  /**
+   * Get guest reservations by token
+   * Returns all reservations made with the given reservation token
+   */
+  async getGuestReservations(
+    token: string,
+  ): Promise<ReservationDetailsResponse[]> {
+    const { data, error } = await this.client.GET('/guest/reservations', {
+      params: { query: { token } },
+    });
+
+    if (error || !data) {
+      throw new Error(
+        (error as { error?: string })?.error ||
+          'Failed to fetch guest reservations',
+      );
+    }
+
+    return data;
+  }
+
+  /**
+   * Cancel a reservation for a gift item (public endpoint)
+   * Guests provide reservation_token; authenticated users are identified by token.
+   */
+  async cancelReservation(
+    wishlistId: string,
+    itemId: string,
+    data?: CancelReservationRequest,
+  ): Promise<Reservation> {
+    const { data: responseData, error } = await this.client.DELETE(
+      '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
+      {
+        params: { path: { wishlistId, itemId } },
+        body: data,
+        headers: this.getHeaders(),
+        credentials: 'include',
+      },
+    );
+
+    if (error || !responseData) {
+      throw new Error(
+        (error as { error?: string })?.error || 'Failed to cancel reservation',
+      );
+    }
+
+    return responseData;
   }
 
   /**

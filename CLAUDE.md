@@ -473,6 +473,8 @@ instead of "JWT ".
 - PostgreSQL (via pgx/sqlx), Redis (caching), AWS S3 (file uploads), AWS KMS (encryption) (003-backend-arch-migration)
 - Go 1.25.5 (migration runner), SQL (migration files) + golang-migrate/v4, lib/pq (migration driver) (004-db-init-migration)
 - PostgreSQL 14+ with pgcrypto extension (004-db-init-migration)
+- TypeScript 5.x, Next.js 16.1.1, React 19.2.3 + TanStack Query 5.90, React Hook Form 7.71, Zod 4.3, i18next 25.8, react-i18next 16.5, openapi-fetch 0.15, shadcn/ui (Radix UI), Tailwind CSS 4, Sonner 2.0, next-themes 0.4 (005-public-wishlist-reservation)
+- Browser localStorage (reservation tokens), server-side PostgreSQL (via backend API) (005-public-wishlist-reservation)
 
 ## Recent Changes
 - 002-cross-domain-implementation: Added PostgreSQL (users, tokens metadata), In-memory (handoff codes)

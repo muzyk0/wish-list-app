@@ -21,12 +21,18 @@ import { dialog } from '@/stores/dialogStore';
 const guestReservationSchema = z.object({
   guestName: z
     .string()
+    .trim()
     .min(1, 'Name is required')
     .max(255, 'Name must be less than 255 characters'),
   guestEmail: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email address'),
+    .optional()
+    .refine((value) => {
+      if (!value) return true;
+      const trimmed = value.trim();
+      if (!trimmed) return true;
+      return z.string().email().safeParse(trimmed).success;
+    }, 'Invalid email address'),
 });
 
 type GuestReservationFormData = z.infer<typeof guestReservationSchema>;
@@ -35,7 +41,6 @@ interface ReservationButtonProps {
   giftItemId: string;
   wishlistId: string;
   isReserved?: boolean;
-  reservedByName?: string;
   onReservationSuccess?: () => void;
 }
 
@@ -43,7 +48,6 @@ export function ReservationButton({
   giftItemId,
   wishlistId,
   isReserved = false,
-  reservedByName,
   onReservationSuccess,
 }: ReservationButtonProps) {
   const theme = useTheme();
@@ -65,8 +69,8 @@ export function ReservationButton({
   const reservationMutation = useMutation({
     mutationFn: (data: GuestReservationFormData) =>
       apiClient.createReservation(wishlistId, giftItemId, {
-        guest_name: data.guestName,
-        guest_email: data.guestEmail,
+        guest_name: data.guestName.trim(),
+        guest_email: data.guestEmail?.trim() || undefined,
       }),
     onSuccess: () => {
       dialog.success('Gift item reserved successfully!');
@@ -91,7 +95,7 @@ export function ReservationButton({
         style={styles.disabledButton}
         labelStyle={styles.disabledButtonText}
       >
-        Reserved by {reservedByName || 'someone'}
+        Reserved
       </Button>
     );
   }
@@ -116,8 +120,7 @@ export function ReservationButton({
           <Dialog.Title>Reserve this gift</Dialog.Title>
           <Dialog.Content>
             <Paragraph style={styles.modalText}>
-              Enter your details to reserve this gift item. This will prevent
-              others from reserving the same gift.
+              Enter your name to reserve this gift item. Email is optional.
             </Paragraph>
 
             <Controller
@@ -149,7 +152,7 @@ export function ReservationButton({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View>
                   <TextInput
-                    label="Your Email"
+                    label="Your Email (optional)"
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -163,6 +166,10 @@ export function ReservationButton({
                       {errors.guestEmail.message}
                     </HelperText>
                   )}
+                  <HelperText type="info" visible>
+                    Optional: if you sign up later, we can link these
+                    reservations to your account.
+                  </HelperText>
                 </View>
               )}
             />

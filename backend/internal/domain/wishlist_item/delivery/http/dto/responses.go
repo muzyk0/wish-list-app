@@ -6,39 +6,45 @@ import (
 
 // ItemResponse represents a gift item in API responses
 type ItemResponse struct {
-	ID          string  `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	OwnerID     string  `json:"owner_id" example:"550e8400-e29b-41d4-a716-446655440001"`
-	Title       string  `json:"title" example:"iPhone 15 Pro"`
-	Description string  `json:"description" example:"256GB, Blue Titanium"`
-	Link        string  `json:"link" example:"https://apple.com/iphone-15-pro"`
-	ImageURL    string  `json:"image_url" example:"https://example.com/image.jpg"`
-	Price       float64 `json:"price" example:"999.99"`
-	Priority    int     `json:"priority" example:"3"`
-	Notes       string  `json:"notes" example:"Preferred color: Blue"`
-	IsPurchased bool    `json:"is_purchased" example:"false"`
-	IsReserved  bool    `json:"is_reserved" example:"false"`
-	IsArchived  bool    `json:"is_archived" example:"false"`
-	CreatedAt   string  `json:"created_at" example:"2024-01-01T12:00:00Z"`
-	UpdatedAt   string  `json:"updated_at" example:"2024-01-01T12:00:00Z"`
+	ID                    string  `json:"id" validate:"required" format:"uuid" example:"550e8400-e29b-41d4-a716-446655440000"`
+	OwnerID               string  `json:"owner_id" validate:"required" format:"uuid" example:"550e8400-e29b-41d4-a716-446655440001"`
+	Title                 string  `json:"title" validate:"required" example:"iPhone 15 Pro"`
+	Description           string  `json:"description" example:"256GB, Blue Titanium"`
+	Link                  string  `json:"link" example:"https://apple.com/iphone-15-pro"`
+	ImageURL              string  `json:"image_url" example:"https://example.com/image.jpg"`
+	Price                 float64 `json:"price" validate:"required" example:"999.99"`
+	Priority              int     `json:"priority" validate:"required" example:"3"`
+	Notes                 string  `json:"notes" example:"Preferred color: Blue"`
+	IsPurchased           bool    `json:"is_purchased" validate:"required" example:"false"`
+	IsReserved            bool    `json:"is_reserved" validate:"required" example:"false"`
+	IsManuallyReserved    bool    `json:"is_manually_reserved" validate:"required" example:"false"`
+	ManualReservedByName  string  `json:"manual_reserved_by_name" validate:"required" example:"Бабушка и дедушка"`
+	ManualReservationNote string  `json:"manual_reservation_note" validate:"required" example:"Сказали что купят велосипед"`
+	IsArchived            bool    `json:"is_archived" validate:"required" example:"false"`
+	CreatedAt             string  `json:"created_at" validate:"required" format:"date-time" example:"2024-01-01T12:00:00Z"`
+	UpdatedAt             string  `json:"updated_at" validate:"required" format:"date-time" example:"2024-01-01T12:00:00Z"`
 }
 
 // ItemResponseFromService converts service output to API response
 func ItemResponseFromService(item *service.ItemOutput) ItemResponse {
 	return ItemResponse{
-		ID:          item.ID,
-		OwnerID:     item.OwnerID,
-		Title:       item.Name,
-		Description: item.Description,
-		Link:        item.Link,
-		ImageURL:    item.ImageURL,
-		Price:       item.Price,
-		Priority:    item.Priority,
-		Notes:       item.Notes,
-		IsPurchased: item.IsPurchased,
-		IsReserved:  item.IsReserved,
-		IsArchived:  item.IsArchived,
-		CreatedAt:   item.CreatedAt,
-		UpdatedAt:   item.UpdatedAt,
+		ID:                    item.ID,
+		OwnerID:               item.OwnerID,
+		Title:                 item.Name,
+		Description:           item.Description,
+		Link:                  item.Link,
+		ImageURL:              item.ImageURL,
+		Price:                 item.Price,
+		Priority:              item.Priority,
+		Notes:                 item.Notes,
+		IsPurchased:           item.IsPurchased,
+		IsReserved:            item.IsReserved,
+		IsManuallyReserved:    item.IsManuallyReserved,
+		ManualReservedByName:  item.ManualReservedByName,
+		ManualReservationNote: item.ManualReservationNote,
+		IsArchived:            item.IsArchived,
+		CreatedAt:             item.CreatedAt,
+		UpdatedAt:             item.UpdatedAt,
 	}
 }
 

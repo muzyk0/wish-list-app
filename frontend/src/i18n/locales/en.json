@@ -78,5 +78,125 @@
   "theme": {
     "switchToDark": "Switch to dark mode",
     "switchToLight": "Switch to light mode"
+  },
+  "publicWishlist": {
+    "title": "Wishlist",
+    "publicBadge": "Public List",
+    "views": "{{count}} views",
+    "items": "{{count}} items",
+    "occasion": "Occasion",
+    "loading": "Loading wishlist...",
+    "notFound": {
+      "title": "Wishlist Not Found",
+      "description": "This wishlist doesn't exist or is no longer public.",
+      "action": "Go Home"
+    },
+    "empty": {
+      "title": "No gifts yet",
+      "description": "This wishlist has no gift items yet."
+    },
+    "item": {
+      "priority": "Priority",
+      "viewProduct": "View Product",
+      "reserved": "Reserved",
+      "purchased": "Purchased",
+      "available": "Available",
+      "reserve": "Reserve Gift",
+      "alreadyReserved": "Already Reserved",
+      "alreadyPurchased": "Already Purchased",
+      "noImage": "No image"
+    },
+    "mobilePromo": {
+      "title": "Manage your own wishlists?",
+      "description": "Download our mobile app to create and manage your own wishlists!",
+      "action": "Open Mobile App"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search gifts by name or description",
+      "statusLabel": "Status",
+      "sortLabel": "Sort",
+      "reset": "Reset",
+      "noResults": "No gifts match your current filters.",
+      "status": {
+        "all": "All",
+        "available": "Available",
+        "reserved": "Reserved",
+        "purchased": "Purchased"
+      },
+      "sort": {
+        "position": "Default order",
+        "nameAsc": "Name (A-Z)",
+        "nameDesc": "Name (Z-A)",
+        "priceAsc": "Price (Low to High)",
+        "priceDesc": "Price (High to Low)",
+        "priorityDesc": "Priority (High to Low)"
+      }
+    },
+    "errors": {
+      "loadFailed": "Failed to load wishlist. Please try again.",
+      "retry": "Retry"
+    }
+  },
+  "reservation": {
+    "dialog": {
+      "title": "Reserve \"{{itemName}}\"",
+      "description": "Enter your name to reserve this gift. Email is optional.",
+      "nameLabel": "Your Name",
+      "namePlaceholder": "John Doe",
+      "emailLabel": "Your Email (optional)",
+      "emailPlaceholder": "john@example.com",
+      "emailHint": "If you register later, we'll use this email to link your existing reservations to your account",
+      "cancel": "Cancel",
+      "submit": "Reserve Gift",
+      "submitting": "Reserving...",
+      "validation": {
+        "nameRequired": "Name is required",
+        "nameTooLong": "Name must be less than 255 characters",
+        "emailInvalid": "Invalid email address"
+      }
+    },
+    "success": {
+      "title": "Reservation Successful!",
+      "description": "You have reserved \"{{itemName}}\"."
+    },
+    "errors": {
+      "failed": "Reservation Failed",
+      "alreadyReserved": "This item has already been reserved. The list will refresh.",
+      "generic": "An error occurred. Please try again."
+    }
+  },
+  "myReservations": {
+    "title": "My Reservations",
+    "empty": {
+      "title": "No reservations yet",
+      "description": "You haven't reserved any gifts yet.",
+      "hint": "If you've lost access to your reservations, please contact the wishlist owner."
+    },
+    "loading": "Loading your reservations...",
+    "item": {
+      "reservedFor": "Reserved for {{wishlist}} by {{owner}}",
+      "reservedOn": "Reserved on {{date}}",
+      "expiresOn": "Expires on {{date}}",
+      "status": {
+        "active": "Active",
+        "canceled": "Canceled",
+        "fulfilled": "Fulfilled",
+        "expired": "Expired"
+      },
+      "cancelButton": "Cancel Reservation",
+      "cancelConfirm": "Are you sure you want to cancel this reservation?",
+      "cancelConfirmYes": "Yes, cancel",
+      "cancelConfirmNo": "Keep it"
+    },
+    "cancel": {
+      "success": "Reservation canceled successfully",
+      "error": "Failed to cancel reservation",
+      "invalidToken": "This reservation token is invalid or expired. Please contact the wishlist owner."
+    },
+    "errors": {
+      "loadFailed": "Failed to load reservations. Please try again.",
+      "retry": "Retry"
+    }
   }
 }

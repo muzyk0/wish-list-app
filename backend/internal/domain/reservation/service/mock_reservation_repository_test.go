@@ -42,6 +42,9 @@ var _ repository.ReservationRepositoryInterface = &ReservationRepositoryInterfac
 //			GetReservationsByUserFunc: func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]*models.Reservation, error) {
 //				panic("mock out the GetReservationsByUser method")
 //			},
+//			LinkGuestReservationsToUserByEmailFunc: func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+//				panic("mock out the LinkGuestReservationsToUserByEmail method")
+//			},
 //			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error) {
 //				panic("mock out the ListGuestReservationsWithDetails method")
 //			},
@@ -81,6 +84,9 @@ type ReservationRepositoryInterfaceMock struct {
 
 	// GetReservationsByUserFunc mocks the GetReservationsByUser method.
 	GetReservationsByUserFunc func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]*models.Reservation, error)
+
+	// LinkGuestReservationsToUserByEmailFunc mocks the LinkGuestReservationsToUserByEmail method.
+	LinkGuestReservationsToUserByEmailFunc func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 
 	// ListGuestReservationsWithDetailsFunc mocks the ListGuestReservationsWithDetails method.
 	ListGuestReservationsWithDetailsFunc func(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error)
@@ -149,6 +155,15 @@ type ReservationRepositoryInterfaceMock struct {
 			// Offset is the offset argument value.
 			Offset int
 		}
+		// LinkGuestReservationsToUserByEmail holds details about calls to the LinkGuestReservationsToUserByEmail method.
+		LinkGuestReservationsToUserByEmail []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// GuestEmail is the guestEmail argument value.
+			GuestEmail string
+			// UserID is the userID argument value.
+			UserID pgtype.UUID
+		}
 		// ListGuestReservationsWithDetails holds details about calls to the ListGuestReservationsWithDetails method.
 		ListGuestReservationsWithDetails []struct {
 			// Ctx is the ctx argument value.
@@ -194,17 +209,18 @@ type ReservationRepositoryInterfaceMock struct {
 			CancelReason pgtype.Text
 		}
 	}
-	lockCountUserReservations            sync.RWMutex
-	lockCreate                           sync.RWMutex
-	lockGetActiveReservationForGiftItem  sync.RWMutex
-	lockGetByGiftItem                    sync.RWMutex
-	lockGetByID                          sync.RWMutex
-	lockGetByToken                       sync.RWMutex
-	lockGetReservationsByUser            sync.RWMutex
-	lockListGuestReservationsWithDetails sync.RWMutex
-	lockListUserReservationsWithDetails  sync.RWMutex
-	lockUpdateStatus                     sync.RWMutex
-	lockUpdateStatusByToken              sync.RWMutex
+	lockCountUserReservations              sync.RWMutex
+	lockCreate                             sync.RWMutex
+	lockGetActiveReservationForGiftItem    sync.RWMutex
+	lockGetByGiftItem                      sync.RWMutex
+	lockGetByID                            sync.RWMutex
+	lockGetByToken                         sync.RWMutex
+	lockGetReservationsByUser              sync.RWMutex
+	lockLinkGuestReservationsToUserByEmail sync.RWMutex
+	lockListGuestReservationsWithDetails   sync.RWMutex
+	lockListUserReservationsWithDetails    sync.RWMutex
+	lockUpdateStatus                       sync.RWMutex
+	lockUpdateStatusByToken                sync.RWMutex
 }
 
 // CountUserReservations calls CountUserReservationsFunc.
@@ -464,6 +480,46 @@ func (mock *ReservationRepositoryInterfaceMock) GetReservationsByUserCalls() []s
 	mock.lockGetReservationsByUser.RLock()
 	calls = mock.calls.GetReservationsByUser
 	mock.lockGetReservationsByUser.RUnlock()
+	return calls
+}
+
+// LinkGuestReservationsToUserByEmail calls LinkGuestReservationsToUserByEmailFunc.
+func (mock *ReservationRepositoryInterfaceMock) LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+	if mock.LinkGuestReservationsToUserByEmailFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.LinkGuestReservationsToUserByEmailFunc: method is nil but ReservationRepositoryInterface.LinkGuestReservationsToUserByEmail was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		GuestEmail string
+		UserID     pgtype.UUID
+	}{
+		Ctx:        ctx,
+		GuestEmail: guestEmail,
+		UserID:     userID,
+	}
+	mock.lockLinkGuestReservationsToUserByEmail.Lock()
+	mock.calls.LinkGuestReservationsToUserByEmail = append(mock.calls.LinkGuestReservationsToUserByEmail, callInfo)
+	mock.lockLinkGuestReservationsToUserByEmail.Unlock()
+	return mock.LinkGuestReservationsToUserByEmailFunc(ctx, guestEmail, userID)
+}
+
+// LinkGuestReservationsToUserByEmailCalls gets all the calls that were made to LinkGuestReservationsToUserByEmail.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.LinkGuestReservationsToUserByEmailCalls())
+func (mock *ReservationRepositoryInterfaceMock) LinkGuestReservationsToUserByEmailCalls() []struct {
+	Ctx        context.Context
+	GuestEmail string
+	UserID     pgtype.UUID
+} {
+	var calls []struct {
+		Ctx        context.Context
+		GuestEmail string
+		UserID     pgtype.UUID
+	}
+	mock.lockLinkGuestReservationsToUserByEmail.RLock()
+	calls = mock.calls.LinkGuestReservationsToUserByEmail
+	mock.lockLinkGuestReservationsToUserByEmail.RUnlock()
 	return calls
 }
 

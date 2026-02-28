@@ -1,0 +1,131 @@
+/**
+ * Public Wishlist — Warm Editorial Theme
+ *
+ * All rules are scoped to .wl-page (applied in layout.tsx).
+ * Custom properties are prefixed --wl- to avoid conflicts with shadcn.
+ */
+
+/**
+ * .wl-theme — CSS variables only.
+ * Applied to BOTH .wl-page (page wrapper) and the Sheet portal,
+ * which renders outside .wl-page in the DOM tree.
+ */
+.wl-page,
+.wl-theme {
+  /* ── Palette ──────────────────────────────────── */
+  --wl-bg: oklch(0.976 0.008 72);
+  --wl-card: oklch(1 0 0);
+  --wl-card-border: oklch(0.91 0.012 72);
+  --wl-accent: oklch(0.58 0.105 68); /* warm bronze-gold */
+  --wl-accent-hover: oklch(0.52 0.1 68);
+  --wl-accent-light: oklch(0.955 0.028 70);
+  --wl-text: oklch(0.155 0.006 60);
+  --wl-muted: oklch(0.5 0.012 68);
+  --wl-available: oklch(0.42 0.125 150); /* forest green */
+  --wl-reserved: oklch(0.56 0.09 72); /* warm amber */
+  --wl-purchased: oklch(0.46 0.14 28); /* deep crimson */
+
+  /* shadcn primary override */
+  --primary: oklch(0.58 0.105 68);
+  --primary-foreground: oklch(0.99 0 0);
+}
+
+.wl-page {
+  /* ── Base ─────────────────────────────────────── */
+  font-family: var(--font-body, ui-sans-serif, sans-serif);
+  background-color: var(--wl-bg);
+  color: var(--wl-text);
+  min-height: 100vh;
+}
+
+/* Sheet portal background — overrides shadcn's bg-background */
+.wl-theme {
+  background-color: var(--wl-bg) !important;
+  color: var(--wl-text);
+  font-family: var(--font-body, ui-sans-serif, sans-serif);
+}
+
+/* Serif display font utility */
+.wl-display {
+  font-family: var(--font-display, Georgia, serif);
+}
+
+/* ── Entrance animations ──────────────────────── */
+
+@keyframes wl-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wl-fade-up {
+  animation: wl-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.wl-delay-0 {
+  animation-delay: 0ms;
+}
+.wl-delay-1 {
+  animation-delay: 70ms;
+}
+.wl-delay-2 {
+  animation-delay: 140ms;
+}
+.wl-delay-3 {
+  animation-delay: 210ms;
+}
+.wl-delay-4 {
+  animation-delay: 280ms;
+}
+.wl-delay-5 {
+  animation-delay: 350ms;
+}
+.wl-delay-6 {
+  animation-delay: 420ms;
+}
+.wl-delay-7 {
+  animation-delay: 490ms;
+}
+.wl-delay-8 {
+  animation-delay: 560ms;
+}
+.wl-delay-9 {
+  animation-delay: 630ms;
+}
+
+/* Progress bar grow animation */
+@keyframes wl-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.wl-progress-bar {
+  transform-origin: left;
+  animation: wl-grow-x 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 500ms;
+}
+
+/* ── Card hover lift ─────────────────────────── */
+
+.wl-item-card {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.wl-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px oklch(0.15 0.006 60 / 0.08);
+  border-color: oklch(0.78 0.055 68);
+}

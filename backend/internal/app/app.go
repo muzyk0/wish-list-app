@@ -201,7 +201,7 @@ func (a *App) initDomains() {
 	// --- Services ---
 
 	emailService := jobs.NewEmailService()
-	userSvc := userservice.NewUserService(userRepo)
+	userSvc := userservice.NewUserService(userRepo, reservationRepo)
 	wishlistSvc := wishlistservice.NewWishListService(wishlistRepo, giftItemRepo, giftItemReservationRepo, giftItemPurchaseRepo, emailService, reservationRepo, a.redisCache)
 	itemSvc := itemservice.NewItemService(giftItemRepo, wishlistItemRepo)
 	wishlistItemSvc := wishlistitemservice.NewWishlistItemService(wishlistRepo, giftItemRepo, wishlistItemRepo)
@@ -222,6 +222,7 @@ func (a *App) initDomains() {
 		a.cfg.FacebookClientSecret,
 		a.cfg.OAuthRedirectURL,
 		a.cfg.OAuthHTTPTimeout,
+		reservationRepo,
 	)
 	a.wishlistHandler = wishlisthttp.NewHandler(wishlistSvc)
 	a.itemHandler = itemhttp.NewHandler(itemSvc)
@@ -243,6 +244,7 @@ func (a *App) initServer() {
 
 	// Auth middleware for protected routes
 	authMiddleware := auth.JWTMiddleware(a.tokenManager)
+	optionalAuthMiddleware := auth.OptionalJWTMiddleware(a.tokenManager)
 
 	// Register all domain routes
 	healthhttp.RegisterRoutes(e, a.healthHandler)
@@ -251,7 +253,7 @@ func (a *App) initServer() {
 	wishlisthttp.RegisterRoutes(e, a.wishlistHandler, authMiddleware)
 	itemhttp.RegisterRoutes(e, a.itemHandler, authMiddleware)
 	wishlistitemhttp.RegisterRoutes(e, a.wishlistItemHandler, authMiddleware)
-	reservationhttp.RegisterRoutes(e, a.reservationHandler, authMiddleware)
+	reservationhttp.RegisterRoutes(e, a.reservationHandler, optionalAuthMiddleware, authMiddleware)
 
 	if a.storageHandler != nil {
 		storagehttp.RegisterRoutes(e, a.storageHandler, a.tokenManager)

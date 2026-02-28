@@ -3,6 +3,7 @@ package http
 import (
 	"math"
 	nethttp "net/http"
+	"strings"
 
 	"wish-list/internal/domain/reservation/delivery/http/dto"
 	"wish-list/internal/domain/reservation/service"
@@ -29,19 +30,17 @@ func NewHandler(svc service.ReservationServiceInterface) *Handler {
 // CreateReservation godoc
 //
 //	@Summary		Create a reservation for a gift item
-//	@Description	Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
+//	@Description	Create a reservation for a gift item. Can be done by authenticated users or guests (with name, email optional).
 //	@Tags			Reservations
 //	@Accept			json
 //	@Produce		json
 //	@Param			wishlistId			path		string							true	"Wish List ID"
 //	@Param			itemId				path		string							true	"Gift Item ID"
-//	@Param			reservation_request	body		dto.CreateReservationRequest		false	"Reservation information (required for guests)"
+//	@Param			reservation_request	body		dto.CreateReservationRequest		false	"Reservation information (guest name required, email optional)"
 //	@Success		200					{object}	dto.CreateReservationResponse	"Reservation created successfully"
-//	@Failure		400					{object}	map[string]string				"Invalid request body or validation error"
-//	@Failure		401					{object}	map[string]string				"Unauthorized (guests need name and email)"
+//	@Failure		400					{object}	map[string]string				"Invalid request body or validation error (guests need name)"
 //	@Failure		500					{object}	map[string]string				"Internal server error"
-//	@Security		BearerAuth
-//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [post]
+//	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [post]
 func (h *Handler) CreateReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")
@@ -69,8 +68,8 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 		reservation, err = h.service.CreateReservation(ctx, req.ToServiceInput(wishListID, giftItemID, userID))
 	} else {
 		// Guest reservation
-		if req.GuestName == nil || req.GuestEmail == nil {
-			return apperrors.BadRequest("Guest name and email are required for unauthenticated reservations")
+		if req.GuestName == nil || strings.TrimSpace(*req.GuestName) == "" {
+			return apperrors.BadRequest("Guest name is required for unauthenticated reservations")
 		}
 
 		reservation, err = h.service.CreateReservation(ctx, req.ToServiceInput(wishListID, giftItemID, pgtype.UUID{Valid: false}))
@@ -97,8 +96,7 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 //	@Failure		400				{object}	map[string]string				"Invalid request body or validation error"
 //	@Failure		401				{object}	map[string]string				"Unauthorized (guests need reservation token)"
 //	@Failure		500				{object}	map[string]string				"Internal server error"
-//	@Security		BearerAuth
-//	@Router			/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
+//	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
 func (h *Handler) CancelReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
 	giftItemID := c.Param("itemId")

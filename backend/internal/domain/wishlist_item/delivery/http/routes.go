@@ -11,4 +11,5 @@ func RegisterRoutes(e *echo.Echo, h *Handler, authMiddleware echo.MiddlewareFunc
 	wishlists.POST("/:id/items", h.AttachItemToWishlist)
 	wishlists.POST("/:id/items/new", h.CreateItemInWishlist)
 	wishlists.DELETE("/:id/items/:itemId", h.DetachItemFromWishlist)
+	wishlists.PATCH("/:id/items/:itemId/mark-reserved", h.MarkManualReservation)
 }

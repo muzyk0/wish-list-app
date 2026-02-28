@@ -26,3 +26,19 @@ export type CreateReservationRequest =
 // Auth types (for mobile handoff)
 export type MobileHandoffResponse =
   components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.HandoffResponse'];
+
+// Guest reservation detail types
+export type ReservationDetailsResponse =
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse'];
+
+export type GiftItemSummary =
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary'];
+
+export type WishListSummary =
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'];
+
+export type CancelReservationRequest =
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest'];
+
+export type ReservationStatusResponse =
+  components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'];

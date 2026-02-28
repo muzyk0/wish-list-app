@@ -99,6 +99,9 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //			GetByIDFunc: func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByID method")
 //			},
+//			MarkManualReservationFunc: func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error) {
+//				panic("mock out the MarkManualReservation method")
+//			},
 //		}
 //
 //		// use mockedGiftItemRepositoryInterface in code that requires GiftItemRepositoryInterface
@@ -111,6 +114,9 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
+
+	// MarkManualReservationFunc mocks the MarkManualReservation method.
+	MarkManualReservationFunc func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -128,9 +134,21 @@ type GiftItemRepositoryInterfaceMock struct {
 			// ID is the id argument value.
 			ID pgtype.UUID
 		}
+		// MarkManualReservation holds details about calls to the MarkManualReservation method.
+		MarkManualReservation []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
+			// ReservedByName is the reservedByName argument value.
+			ReservedByName string
+			// Note is the note argument value.
+			Note *string
+		}
 	}
-	lockCreateWithOwner sync.RWMutex
-	lockGetByID         sync.RWMutex
+	lockCreateWithOwner       sync.RWMutex
+	lockGetByID               sync.RWMutex
+	lockMarkManualReservation sync.RWMutex
 }
 
 // CreateWithOwner calls CreateWithOwnerFunc.
@@ -202,5 +220,46 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByIDCalls() []struct {
 	mock.lockGetByID.RLock()
 	calls = mock.calls.GetByID
 	mock.lockGetByID.RUnlock()
+	return calls
+}
+
+// MarkManualReservation calls MarkManualReservationFunc.
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error) {
+	if mock.MarkManualReservationFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.MarkManualReservationFunc: method is nil but GiftItemRepositoryInterface.MarkManualReservation was just called")
+	}
+	callInfo := struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}{
+		Ctx:            ctx,
+		ItemID:         itemID,
+		ReservedByName: reservedByName,
+		Note:           note,
+	}
+	mock.lockMarkManualReservation.Lock()
+	mock.calls.MarkManualReservation = append(mock.calls.MarkManualReservation, callInfo)
+	mock.lockMarkManualReservation.Unlock()
+	return mock.MarkManualReservationFunc(ctx, itemID, reservedByName, note)
+}
+
+// MarkManualReservationCalls gets all the calls that were made to MarkManualReservation.
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservationCalls() []struct {
+	Ctx            context.Context
+	ItemID         pgtype.UUID
+	ReservedByName string
+	Note           *string
+} {
+	var calls []struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}
+	mock.lockMarkManualReservation.RLock()
+	calls = mock.calls.MarkManualReservation
+	mock.lockMarkManualReservation.RUnlock()
 	return calls
 }

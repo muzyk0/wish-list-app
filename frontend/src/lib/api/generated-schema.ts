@@ -1716,6 +1716,143 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/reservations/wishlist/{wishlistId}/item/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a reservation for a gift item
+         * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name, email optional).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Wish List ID */
+                    wishlistId: string;
+                    /** @description Gift Item ID */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Reservation information (guest name required, email optional) */
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"];
+                };
+            };
+            responses: {
+                /** @description Reservation created successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error (guests need name) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        /**
+         * Cancel a reservation for a gift item
+         * @description Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Wish List ID */
+                    wishlistId: string;
+                    /** @description Gift Item ID */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Cancellation information (required for guests) */
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"];
+                };
+            };
+            responses: {
+                /** @description Reservation canceled successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
+                    };
+                };
+                /** @description Invalid request body or validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized (guests need reservation token) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/wishlists/{slug}": {
         parameters: {
             query?: never;
@@ -1899,154 +2036,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reservations/wishlist/{wishlistId}/item/{itemId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a reservation for a gift item
-         * @description Create a reservation for a gift item. Can be done by authenticated users or guests (with name and email).
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                    /** @description Gift Item ID */
-                    itemId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Reservation information (required for guests) */
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest"];
-                };
-            };
-            responses: {
-                /** @description Reservation created successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized (guests need name and email) */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
-        /**
-         * Cancel a reservation for a gift item
-         * @description Cancel a reservation for a gift item. Can be done by authenticated users or guests (with reservation token).
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Wish List ID */
-                    wishlistId: string;
-                    /** @description Gift Item ID */
-                    itemId: string;
-                };
-                cookie?: never;
-            };
-            /** @description Cancellation information (required for guests) */
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest"];
-                };
-            };
-            responses: {
-                /** @description Reservation canceled successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
-                    };
-                };
-                /** @description Invalid request body or validation error */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized (guests need reservation token) */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
-                    };
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -2653,6 +2642,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/wishlists/{id}/items/{itemId}/mark-reserved": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mark item as manually reserved
+         * @description Owner marks a wishlist item as reserved by someone offline (e.g., a family member who said they'll buy it). This is separate from the public reservation flow.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Wishlist ID */
+                    id: string;
+                    /** @description Item ID */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Manual reservation details */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest"];
+                };
+            };
+            responses: {
+                /** @description Item updated with manual reservation */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"];
+                    };
+                };
+                /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Access denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Wishlist or item not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/wishlists/{id}/items/new": {
         parameters: {
             query?: never;
@@ -3051,6 +3144,7 @@ export interface components {
             description?: string;
             id: string;
             image_url?: string;
+            is_reserved?: boolean;
             link?: string;
             name: string;
             notes?: string;
@@ -3070,6 +3164,7 @@ export interface components {
             is_public?: boolean;
             occasion?: string;
             occasion_date?: string;
+            public_slug?: string;
             title?: string;
         };
         "wish-list_internal_domain_wishlist_delivery_http_dto.WishListResponse": {
@@ -3108,34 +3203,58 @@ export interface components {
             title: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse": {
-            /** @example 2024-01-01T12:00:00Z */
-            created_at?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T12:00:00Z
+             */
+            created_at: string;
             /** @example 256GB, Blue Titanium */
             description?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id?: string;
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            id: string;
             /** @example https://example.com/image.jpg */
             image_url?: string;
             /** @example false */
-            is_archived?: boolean;
+            is_archived: boolean;
             /** @example false */
-            is_purchased?: boolean;
+            is_manually_reserved: boolean;
             /** @example false */
-            is_reserved?: boolean;
+            is_purchased: boolean;
+            /** @example false */
+            is_reserved: boolean;
             /** @example https://apple.com/iphone-15-pro */
             link?: string;
+            /** @example Сказали что купят велосипед */
+            manual_reservation_note: string;
+            /** @example Бабушка и дедушка */
+            manual_reserved_by_name: string;
             /** @example Preferred color: Blue */
             notes?: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440001 */
-            owner_id?: string;
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440001
+             */
+            owner_id: string;
             /** @example 999.99 */
-            price?: number;
+            price: number;
             /** @example 3 */
-            priority?: number;
+            priority: number;
             /** @example iPhone 15 Pro */
-            title?: string;
-            /** @example 2024-01-01T12:00:00Z */
-            updated_at?: string;
+            title: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T12:00:00Z
+             */
+            updated_at: string;
+        };
+        "wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest": {
+            /** @example Сказали что купят велосипед */
+            note?: string;
+            /** @example Бабушка и дедушка */
+            reserved_by_name: string;
         };
         "wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse": {
             items?: components["schemas"]["wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse"][];
@@ -3198,6 +3317,7 @@ export type SchemaWishListInternalDomainWishlistDeliveryHttpDtoWishListResponse 
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoAttachItemRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.AttachItemRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoCreateItemRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.CreateItemRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.ItemResponse'];
+export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

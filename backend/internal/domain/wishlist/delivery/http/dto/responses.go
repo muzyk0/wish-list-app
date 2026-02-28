@@ -65,6 +65,7 @@ type GiftItemResponse struct {
 	Priority          int     `json:"priority"`
 	ReservedByUserID  string  `json:"reserved_by_user_id"`
 	ReservedAt        string  `json:"reserved_at"`
+	IsReserved        bool    `json:"is_reserved"`
 	PurchasedByUserID string  `json:"purchased_by_user_id"`
 	PurchasedAt       string  `json:"purchased_at"`
 	PurchasedPrice    float64 `json:"purchased_price"`
@@ -80,7 +81,7 @@ func FromGiftItemOutput(item *service.GiftItemOutput) *GiftItemResponse {
 	}
 	return &GiftItemResponse{
 		ID:                item.ID,
-		WishlistID:        item.OwnerID,
+		WishlistID:        item.WishlistID,
 		Name:              item.Name,
 		Description:       item.Description,
 		Link:              item.Link,
@@ -89,6 +90,7 @@ func FromGiftItemOutput(item *service.GiftItemOutput) *GiftItemResponse {
 		Priority:          item.Priority,
 		ReservedByUserID:  item.ReservedByUserID,
 		ReservedAt:        item.ReservedAt,
+		IsReserved:        item.IsReserved,
 		PurchasedByUserID: item.PurchasedByUserID,
 		PurchasedAt:       item.PurchasedAt,
 		PurchasedPrice:    item.PurchasedPrice,

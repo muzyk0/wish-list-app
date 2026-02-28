@@ -7,6 +7,7 @@ import (
 	"time"
 
 	itemmodels "wish-list/internal/domain/item/models"
+	itemrepository "wish-list/internal/domain/item/repository"
 	wishlistmodels "wish-list/internal/domain/wishlist/models"
 
 	"github.com/google/uuid"
@@ -1229,4 +1230,122 @@ func TestDetachItem_VerifiesCorrectIDsPassedToRepo(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, uuidToPg(t, wlID), capturedWLID)
 	assert.Equal(t, uuidToPg(t, itemID), capturedItemID)
+}
+
+func TestMarkManualReservation_Success_TrimmedValues(t *testing.T) {
+	ownerID := uuid.New()
+	wlID := uuid.New()
+	itemID := uuid.New()
+	wishlist := makeWishlistWI(t, wlID, ownerID, false)
+
+	updatedItem := makeGiftItemWI(t, itemID, ownerID)
+	updatedItem.ManualReservedByName = pgtype.Text{String: "Grandma", Valid: true}
+	updatedItem.ManualReservationNote = pgtype.Text{String: "Will buy next week", Valid: true}
+
+	wlRepo := &WishListRepositoryInterfaceMock{
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
+			return wishlist, nil
+		},
+	}
+	wiRepo := &WishlistItemRepositoryInterfaceMock{
+		IsAttachedFunc: func(_ context.Context, _, _ pgtype.UUID) (bool, error) {
+			return true, nil
+		},
+	}
+
+	var capturedName string
+	var capturedNote *string
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		MarkManualReservationFunc: func(_ context.Context, _ pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error) {
+			capturedName = reservedByName
+			capturedNote = note
+			return updatedItem, nil
+		},
+	}
+
+	svc := newTestService(wlRepo, itemRepo, wiRepo)
+	note := "  Will buy next week  "
+	result, err := svc.MarkManualReservation(context.Background(), wlID.String(), itemID.String(), ownerID.String(), "  Grandma  ", &note)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.Equal(t, "Grandma", capturedName)
+	require.NotNil(t, capturedNote)
+	assert.Equal(t, "Will buy next week", *capturedNote)
+	assert.True(t, result.IsManuallyReserved)
+	assert.Equal(t, "Grandma", result.ManualReservedByName)
+}
+
+func TestMarkManualReservation_EmptyName(t *testing.T) {
+	svc := newTestService(
+		&WishListRepositoryInterfaceMock{},
+		&GiftItemRepositoryInterfaceMock{},
+		&WishlistItemRepositoryInterfaceMock{},
+	)
+
+	result, err := svc.MarkManualReservation(context.Background(), uuid.New().String(), uuid.New().String(), uuid.New().String(), "   ", nil)
+
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.ErrorIs(t, err, ErrManualReservedNameEmpty)
+}
+
+func TestMarkManualReservation_ItemNotAvailable(t *testing.T) {
+	ownerID := uuid.New()
+	wlID := uuid.New()
+	itemID := uuid.New()
+	wishlist := makeWishlistWI(t, wlID, ownerID, false)
+
+	wlRepo := &WishListRepositoryInterfaceMock{
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
+			return wishlist, nil
+		},
+	}
+	wiRepo := &WishlistItemRepositoryInterfaceMock{
+		IsAttachedFunc: func(_ context.Context, _, _ pgtype.UUID) (bool, error) {
+			return true, nil
+		},
+	}
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		MarkManualReservationFunc: func(_ context.Context, _ pgtype.UUID, _ string, _ *string) (*itemmodels.GiftItem, error) {
+			return nil, itemrepository.ErrGiftItemNotAvailable
+		},
+	}
+
+	svc := newTestService(wlRepo, itemRepo, wiRepo)
+	result, err := svc.MarkManualReservation(context.Background(), wlID.String(), itemID.String(), ownerID.String(), "Grandma", nil)
+
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.ErrorIs(t, err, ErrItemNotAvailable)
+}
+
+func TestMarkManualReservation_ItemNotFoundMapping(t *testing.T) {
+	ownerID := uuid.New()
+	wlID := uuid.New()
+	itemID := uuid.New()
+	wishlist := makeWishlistWI(t, wlID, ownerID, false)
+
+	wlRepo := &WishListRepositoryInterfaceMock{
+		GetByIDFunc: func(_ context.Context, _ pgtype.UUID) (*wishlistmodels.WishList, error) {
+			return wishlist, nil
+		},
+	}
+	wiRepo := &WishlistItemRepositoryInterfaceMock{
+		IsAttachedFunc: func(_ context.Context, _, _ pgtype.UUID) (bool, error) {
+			return true, nil
+		},
+	}
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		MarkManualReservationFunc: func(_ context.Context, _ pgtype.UUID, _ string, _ *string) (*itemmodels.GiftItem, error) {
+			return nil, itemrepository.ErrGiftItemNotFound
+		},
+	}
+
+	svc := newTestService(wlRepo, itemRepo, wiRepo)
+	result, err := svc.MarkManualReservation(context.Background(), wlID.String(), itemID.String(), ownerID.String(), "Grandma", nil)
+
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.ErrorIs(t, err, ErrItemNotFound)
 }

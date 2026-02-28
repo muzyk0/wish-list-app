@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// slugPattern accepts only lowercase letters, digits, and hyphens.
+var slugPattern = regexp.MustCompile(`^[a-z0-9-]+$`)
 
 // Cross-domain interfaces - only methods actually used by WishListService
 
@@ -75,6 +79,8 @@ var (
 	ErrPositionOutOfRange      = errors.New("position value out of int32 range")
 	ErrGiftItemIDRequired      = errors.New("gift item ID is required")
 	ErrUserIDRequired          = errors.New("user ID is required")
+	ErrSlugTaken               = errors.New("public slug is already taken by another wishlist")
+	ErrSlugInvalid             = errors.New("public slug must contain only lowercase letters, digits, and hyphens")
 )
 
 // WishListServiceInterface defines the interface for wishlist-related operations
@@ -138,6 +144,7 @@ type UpdateWishListInput struct {
 	Occasion     *string
 	OccasionDate *string
 	IsPublic     *bool
+	PublicSlug   *string // nil = no change; empty string = clear slug; non-empty = set custom slug
 }
 
 type WishListOutput struct {
@@ -179,6 +186,7 @@ type UpdateGiftItemInput struct {
 
 type GiftItemOutput struct {
 	ID                string
+	WishlistID        string
 	OwnerID           string // Items now belong to users, not wishlists
 	Name              string
 	Description       string
@@ -188,6 +196,7 @@ type GiftItemOutput struct {
 	Priority          int
 	ReservedByUserID  string
 	ReservedAt        string
+	IsReserved        bool
 	PurchasedByUserID string
 	PurchasedAt       string
 	PurchasedPrice    float64
@@ -195,6 +204,18 @@ type GiftItemOutput struct {
 	Position          int
 	CreatedAt         string
 	UpdatedAt         string
+}
+
+func isGiftItemReserved(item *itemmodels.GiftItem) bool {
+	if item == nil {
+		return false
+	}
+
+	if item.PurchasedByUserID.Valid || item.PurchasedAt.Valid {
+		return false
+	}
+
+	return item.ReservedByUserID.Valid || item.ReservedAt.Valid || item.ManualReservedByName.Valid
 }
 
 func (s *WishListService) CreateWishList(ctx context.Context, userID string, input CreateWishListInput) (*WishListOutput, error) {
@@ -490,10 +511,31 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 		updatedWishList.OccasionDate = wishList.OccasionDate
 	}
 
-	// Generate public slug if making the list public and no slug exists
+	// Handle custom public slug provided by the user
+	if input.PublicSlug != nil {
+		customSlug := strings.TrimSpace(*input.PublicSlug)
+		if customSlug != "" {
+			// Validate format: lowercase letters, digits, hyphens only
+			if !slugPattern.MatchString(customSlug) {
+				return nil, ErrSlugInvalid
+			}
+			// Check uniqueness (exclude current wishlist)
+			taken, err := s.wishListRepo.IsSlugTaken(ctx, customSlug, id)
+			if err != nil {
+				return nil, fmt.Errorf("failed to check slug uniqueness: %w", err)
+			}
+			if taken {
+				return nil, ErrSlugTaken
+			}
+			updatedWishList.PublicSlug = pgtype.Text{String: customSlug, Valid: true}
+		}
+		// empty string → keep existing slug (do not clear it)
+	}
+
+	// Auto-generate slug if making the list public and it still has no slug
 	currentIsPublic := input.IsPublic != nil && *input.IsPublic
 	if currentIsPublic && !updatedWishList.PublicSlug.Valid {
-		titleToUse := updatedWishList.Title // Use the updated title
+		titleToUse := updatedWishList.Title
 		if input.Title != nil {
 			titleToUse = *input.Title
 		}
@@ -615,13 +657,22 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 		return nil, ErrInvalidWishListID
 	}
 
+	// Resolve wishlist owner; item owner must be a user ID.
+	wishList, err := s.wishListRepo.GetByID(ctx, listID)
+	if err != nil {
+		if errors.Is(err, repository.ErrWishListNotFound) {
+			return nil, ErrWishListNotFound
+		}
+		return nil, fmt.Errorf("failed to get wishlist: %w", err)
+	}
+
 	// Create price numeric
 	priceBig := new(big.Int)
 	priceBig.SetInt64(int64(input.Price * 100)) // Convert to cents
 
 	// Create gift item
 	giftItem := itemmodels.GiftItem{
-		OwnerID:     listID,
+		OwnerID:     wishList.OwnerID,
 		Name:        input.Name,
 		Description: pgtype.Text{String: input.Description, Valid: input.Description != ""},
 		Link:        pgtype.Text{String: input.Link, Valid: input.Link != ""},
@@ -647,12 +698,14 @@ func (s *WishListService) CreateGiftItem(ctx context.Context, wishListID string,
 	}
 
 	output := &GiftItemOutput{
-		ID:        createdGiftItem.ID.String(),
-		OwnerID:   createdGiftItem.OwnerID.String(),
-		Name:      createdGiftItem.Name,
-		Price:     price,
-		CreatedAt: createdGiftItem.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: createdGiftItem.UpdatedAt.Time.Format(time.RFC3339),
+		ID:         createdGiftItem.ID.String(),
+		WishlistID: wishListID,
+		OwnerID:    createdGiftItem.OwnerID.String(),
+		Name:       createdGiftItem.Name,
+		Price:      price,
+		IsReserved: isGiftItemReserved(createdGiftItem),
+		CreatedAt:  createdGiftItem.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  createdGiftItem.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -699,12 +752,14 @@ func (s *WishListService) GetGiftItem(ctx context.Context, giftItemID string) (*
 	}
 
 	output := &GiftItemOutput{
-		ID:        giftItem.ID.String(),
-		OwnerID:   giftItem.OwnerID.String(),
-		Name:      giftItem.Name,
-		Price:     price,
-		CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
+		ID:         giftItem.ID.String(),
+		WishlistID: "",
+		OwnerID:    giftItem.OwnerID.String(),
+		Name:       giftItem.Name,
+		Price:      price,
+		IsReserved: isGiftItemReserved(giftItem),
+		CreatedAt:  giftItem.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  giftItem.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -758,12 +813,14 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 		}
 
 		output := &GiftItemOutput{
-			ID:        giftItem.ID.String(),
-			OwnerID:   giftItem.OwnerID.String(),
-			Name:      giftItem.Name,
-			Price:     price,
-			CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
+			ID:         giftItem.ID.String(),
+			WishlistID: wishListID,
+			OwnerID:    giftItem.OwnerID.String(),
+			Name:       giftItem.Name,
+			Price:      price,
+			IsReserved: isGiftItemReserved(giftItem),
+			CreatedAt:  giftItem.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt:  giftItem.UpdatedAt.Time.Format(time.RFC3339),
 		}
 
 		// Handle nullable fields
@@ -785,6 +842,24 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 		if giftItem.Position.Valid {
 			output.Position = int(giftItem.Position.Int32)
 		}
+		if giftItem.ReservedByUserID.Valid {
+			output.ReservedByUserID = giftItem.ReservedByUserID.String()
+		}
+		if giftItem.ReservedAt.Valid {
+			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedByUserID.Valid {
+			output.PurchasedByUserID = giftItem.PurchasedByUserID.String()
+		}
+		if giftItem.PurchasedAt.Valid {
+			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedPrice.Valid {
+			purchasedPriceValue, err := giftItem.PurchasedPrice.Float64Value()
+			if err == nil && purchasedPriceValue.Valid {
+				output.PurchasedPrice = purchasedPriceValue.Float64
+			}
+		}
 
 		outputs = append(outputs, output)
 	}
@@ -793,6 +868,14 @@ func (s *WishListService) GetGiftItemsByWishList(ctx context.Context, wishListID
 }
 
 func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*GiftItemOutput, int, error) {
+	wishList, err := s.wishListRepo.GetByPublicSlug(ctx, publicSlug)
+	if err != nil {
+		if errors.Is(err, repository.ErrWishListNotFound) {
+			return nil, 0, ErrWishListNotFound
+		}
+		return nil, 0, fmt.Errorf("failed to get wishlist by public slug: %w", err)
+	}
+
 	giftItems, totalCount, err := s.giftItemRepo.GetPublicWishListGiftItemsPaginated(ctx, publicSlug, limit, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get gift items from repository: %w", err)
@@ -815,12 +898,14 @@ func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context,
 		}
 
 		output := &GiftItemOutput{
-			ID:        giftItem.ID.String(),
-			OwnerID:   giftItem.OwnerID.String(),
-			Name:      giftItem.Name,
-			Price:     price,
-			CreatedAt: giftItem.CreatedAt.Time.Format(time.RFC3339),
-			UpdatedAt: giftItem.UpdatedAt.Time.Format(time.RFC3339),
+			ID:         giftItem.ID.String(),
+			WishlistID: wishList.ID.String(),
+			OwnerID:    giftItem.OwnerID.String(),
+			Name:       giftItem.Name,
+			Price:      price,
+			IsReserved: isGiftItemReserved(giftItem),
+			CreatedAt:  giftItem.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt:  giftItem.UpdatedAt.Time.Format(time.RFC3339),
 		}
 
 		// Handle nullable fields
@@ -836,11 +921,20 @@ func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context,
 		if giftItem.Priority.Valid {
 			output.Priority = int(giftItem.Priority.Int32)
 		}
-		if giftItem.Notes.Valid {
-			output.Notes = giftItem.Notes.String
-		}
 		if giftItem.Position.Valid {
 			output.Position = int(giftItem.Position.Int32)
+		}
+		if giftItem.ReservedAt.Valid {
+			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedAt.Valid {
+			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedPrice.Valid {
+			purchasedPriceValue, err := giftItem.PurchasedPrice.Float64Value()
+			if err == nil && purchasedPriceValue.Valid {
+				output.PurchasedPrice = purchasedPriceValue.Float64
+			}
 		}
 
 		outputs = append(outputs, output)
@@ -907,13 +1001,7 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 	}
 
 	// Invalidate wishlist cache if cache is available
-	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, updated.OwnerID)
-		if err == nil && wishList.PublicSlug.Valid {
-			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
-			_ = s.cache.Delete(ctx, cacheKey)
-		}
-	}
+	s.invalidatePublicWishlistsCacheByOwner(ctx, updated.OwnerID)
 
 	// Convert price to float64
 	var price float64
@@ -925,12 +1013,14 @@ func (s *WishListService) UpdateGiftItem(ctx context.Context, giftItemID string,
 	}
 
 	output := &GiftItemOutput{
-		ID:        updated.ID.String(),
-		OwnerID:   updated.OwnerID.String(),
-		Name:      updated.Name,
-		Price:     price,
-		CreatedAt: updated.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: updated.UpdatedAt.Time.Format(time.RFC3339),
+		ID:         updated.ID.String(),
+		WishlistID: "",
+		OwnerID:    updated.OwnerID.String(),
+		Name:       updated.Name,
+		Price:      price,
+		IsReserved: isGiftItemReserved(updated),
+		CreatedAt:  updated.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:  updated.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -974,41 +1064,61 @@ func (s *WishListService) DeleteGiftItem(ctx context.Context, giftItemID string)
 		return fmt.Errorf("failed to delete gift item in repository: %w", err)
 	}
 
-	// Invalidate wishlist cache if cache is available
-	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.OwnerID)
-		if err == nil && wishList.PublicSlug.Valid {
-			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
-			_ = s.cache.Delete(ctx, cacheKey)
-		}
-	}
+	s.invalidatePublicWishlistsCacheByOwner(ctx, giftItemForCache.OwnerID)
 
 	// If there were active reservations, send notifications to the reservation holders
 	if len(activeReservations) > 0 {
-		// Get the wish list details using the gift item we fetched before deletion
-		wishList, err := s.wishListRepo.GetByID(ctx, giftItemForCache.OwnerID)
-		if err != nil {
-			// Log the error but continue with the notifications
-			logger.Warn("failed to get wish list details for notification", "error", err, "owner_id", giftItemForCache.OwnerID)
-		} else {
-			// Send notification emails to all reservation holders
-			for _, reservation := range activeReservations {
-				var recipientEmail string
-				if reservation.GuestEmail.Valid {
-					recipientEmail = reservation.GuestEmail.String
-				} else if reservation.ReservedByUserID.Valid {
-					// For authenticated users, we would need to fetch their email
-					// For now, we'll skip sending to authenticated users in this implementation
-					continue
-				}
+		wishlistTitles := make(map[string]string, len(activeReservations))
 
-				if recipientEmail != "" {
-					err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItemForCache.Name, wishList.Title)
+		// Send notification emails to all reservation holders
+		for _, reservation := range activeReservations {
+			var recipientEmail string
+			if reservation.GuestEmail.Valid {
+				recipientEmail = reservation.GuestEmail.String
+			} else if reservation.ReservedByUserID.Valid {
+				// For authenticated users, we would need to fetch their email
+				// For now, we'll skip sending to authenticated users in this implementation
+				continue
+			}
+
+			if recipientEmail == "" {
+				continue
+			}
+
+			wishlistTitle := ""
+			if reservation.WishlistID.Valid {
+				wishlistID := reservation.WishlistID.String()
+				if cachedTitle, ok := wishlistTitles[wishlistID]; ok {
+					wishlistTitle = cachedTitle
+				} else {
+					wishList, err := s.wishListRepo.GetByID(ctx, reservation.WishlistID)
 					if err != nil {
-						// Log the error but don't fail the deletion
-						logger.Warn("failed to send reservation removal notification", "error", err, "recipient_email", recipientEmail, "item_name", giftItemForCache.Name)
+						logger.Warn(
+							"failed to get wishlist details for reservation removal notification",
+							"error",
+							err,
+							"wishlist_id",
+							wishlistID,
+						)
+					} else {
+						wishlistTitle = wishList.Title
+						wishlistTitles[wishlistID] = wishlistTitle
 					}
 				}
+			}
+
+			err := s.emailService.SendReservationRemovedEmail(ctx, recipientEmail, giftItemForCache.Name, wishlistTitle)
+			if err != nil {
+				// Log the error but don't fail the deletion
+				logger.Warn(
+					"failed to send reservation removal notification",
+					"error",
+					err,
+					"reservation_id",
+					reservation.ID.String(),
+					"item_id",
+					id.String(),
+				)
 			}
 		}
 	}
@@ -1054,44 +1164,64 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 		// Check if there's an active reservation for this gift item
 		reservation, err := s.reservationRepo.GetActiveReservationForGiftItem(ctx, updatedGiftItem.ID)
 		if err == nil && reservation != nil {
-			// Get the wishlist details for the email
-			wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.OwnerID)
-			if err == nil {
-				var recipientEmail, guestName string
+			var recipientEmail, guestName string
+			if reservation.GuestEmail.Valid {
+				recipientEmail = reservation.GuestEmail.String
+			}
+			if reservation.GuestName.Valid {
+				guestName = reservation.GuestName.String
+			}
 
-				if reservation.GuestEmail.Valid {
-					recipientEmail = reservation.GuestEmail.String
-				}
-				if reservation.GuestName.Valid {
-					guestName = reservation.GuestName.String
-				}
-
-				if recipientEmail != "" {
-					err := s.emailService.SendGiftPurchasedConfirmationEmail(ctx, recipientEmail, updatedGiftItem.Name, wishList.Title, guestName)
+			if recipientEmail != "" {
+				wishlistTitle := ""
+				if reservation.WishlistID.Valid {
+					wishList, err := s.wishListRepo.GetByID(ctx, reservation.WishlistID)
 					if err != nil {
-						// Log the error but don't fail the purchase marking
-						logger.Warn("failed to send gift purchased notification", "error", err, "recipient_email", recipientEmail, "item_name", updatedGiftItem.Name)
+						logger.Warn(
+							"failed to get wishlist details for purchase confirmation notification",
+							"error",
+							err,
+							"wishlist_id",
+							reservation.WishlistID.String(),
+						)
+					} else {
+						wishlistTitle = wishList.Title
 					}
+				}
+
+				err := s.emailService.SendGiftPurchasedConfirmationEmail(
+					ctx,
+					recipientEmail,
+					updatedGiftItem.Name,
+					wishlistTitle,
+					guestName,
+				)
+				if err != nil {
+					// Log the error but don't fail the purchase marking
+					logger.Warn(
+						"failed to send gift purchased notification",
+						"error",
+						err,
+						"reservation_id",
+						reservation.ID.String(),
+						"item_id",
+						updatedGiftItem.ID.String(),
+					)
 				}
 			}
 		}
 	}
 
-	// Invalidate wishlist cache if cache is available
-	if s.cache != nil {
-		wishList, err := s.wishListRepo.GetByID(ctx, updatedGiftItem.OwnerID)
-		if err == nil && wishList.PublicSlug.Valid {
-			cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
-			_ = s.cache.Delete(ctx, cacheKey)
-		}
-	}
+	s.invalidatePublicWishlistsCacheByOwner(ctx, updatedGiftItem.OwnerID)
 
 	// Convert to output format
 	output := &GiftItemOutput{
 		ID:             updatedGiftItem.ID.String(),
+		WishlistID:     "",
 		OwnerID:        updatedGiftItem.OwnerID.String(),
 		Name:           updatedGiftItem.Name,
 		Price:          database.NumericToFloat64(updatedGiftItem.Price),
+		IsReserved:     isGiftItemReserved(updatedGiftItem),
 		PurchasedPrice: database.NumericToFloat64(updatedGiftItem.PurchasedPrice),
 		CreatedAt:      updatedGiftItem.CreatedAt.Time.Format(time.RFC3339),
 		UpdatedAt:      updatedGiftItem.UpdatedAt.Time.Format(time.RFC3339),
@@ -1130,6 +1260,29 @@ func (s *WishListService) MarkGiftItemAsPurchased(ctx context.Context, giftItemI
 	}
 
 	return output, nil
+}
+
+func (s *WishListService) invalidatePublicWishlistsCacheByOwner(ctx context.Context, ownerID pgtype.UUID) {
+	if s.cache == nil || !ownerID.Valid {
+		return
+	}
+
+	wishLists, err := s.wishListRepo.GetByOwner(ctx, ownerID)
+	if err != nil {
+		logger.Warn("failed to get wishlists for cache invalidation", "error", err, "owner_id", ownerID.String())
+		return
+	}
+
+	for _, wishList := range wishLists {
+		if wishList == nil || !wishList.PublicSlug.Valid || wishList.PublicSlug.String == "" {
+			continue
+		}
+
+		cacheKey := fmt.Sprintf("wishlist:public:%s", wishList.PublicSlug.String)
+		if err := s.cache.Delete(ctx, cacheKey); err != nil {
+			logger.Warn("failed to invalidate wishlist cache", "error", err, "cache_key", cacheKey)
+		}
+	}
 }
 
 // Helper function to generate a public slug from title

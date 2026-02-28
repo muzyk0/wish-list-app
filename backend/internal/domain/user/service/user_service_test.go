@@ -8,6 +8,7 @@ import (
 
 	"wish-list/internal/domain/user/models"
 	"wish-list/internal/domain/user/repository"
+	"wish-list/internal/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,6 +16,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func init() {
+	logger.Initialize("test")
+}
 
 // --- helpers ---
 
@@ -55,6 +60,30 @@ func makeDBUser(id pgtype.UUID, email, passwordHash, firstName, lastName, avatar
 		LastName:     pgText(lastName),
 		AvatarUrl:    pgText(avatarURL),
 	}
+}
+
+type guestReservationLinkerMock struct {
+	linkFunc func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
+	calls    []struct {
+		guestEmail string
+		userID     pgtype.UUID
+	}
+}
+
+func (m *guestReservationLinkerMock) LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+	m.calls = append(m.calls, struct {
+		guestEmail string
+		userID     pgtype.UUID
+	}{
+		guestEmail: guestEmail,
+		userID:     userID,
+	})
+
+	if m.linkFunc == nil {
+		return 0, nil
+	}
+
+	return m.linkFunc(ctx, guestEmail, userID)
 }
 
 // --- Register tests ---
@@ -185,6 +214,96 @@ func TestUserService_Register(t *testing.T) {
 
 		require.Error(t, err)
 		assert.Len(t, mockRepo.CreateCalls(), 1)
+	})
+
+	t.Run("links guest reservations by email only for verified user", func(t *testing.T) {
+		createdID := pgUUID(t, testUUID())
+		linker := &guestReservationLinkerMock{
+			linkFunc: func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+				return 2, nil
+			},
+		}
+
+		mockRepo := &UserRepositoryInterfaceMock{
+			GetByEmailFunc: func(ctx context.Context, email string) (*models.User, error) {
+				return nil, repository.ErrUserNotFound
+			},
+			CreateFunc: func(ctx context.Context, user models.User) (*models.User, error) {
+				created := makeDBUser(createdID, user.Email, user.PasswordHash.String, "John", "Doe", "")
+				created.IsVerified = pgtype.Bool{Bool: true, Valid: true}
+				return &created, nil
+			},
+		}
+		svc := NewUserService(mockRepo, linker)
+
+		output, err := svc.Register(context.Background(), RegisterUserInput{
+			Email:     "user@example.com",
+			Password:  "secret123",
+			FirstName: "John",
+			LastName:  "Doe",
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, output)
+		require.Len(t, linker.calls, 1)
+		assert.Equal(t, "user@example.com", linker.calls[0].guestEmail)
+		assert.Equal(t, createdID, linker.calls[0].userID)
+	})
+
+	t.Run("does not link guest reservations for unverified user", func(t *testing.T) {
+		createdID := pgUUID(t, testUUID())
+		linker := &guestReservationLinkerMock{}
+
+		mockRepo := &UserRepositoryInterfaceMock{
+			GetByEmailFunc: func(ctx context.Context, email string) (*models.User, error) {
+				return nil, repository.ErrUserNotFound
+			},
+			CreateFunc: func(ctx context.Context, user models.User) (*models.User, error) {
+				created := makeDBUser(createdID, user.Email, user.PasswordHash.String, "", "", "")
+				created.IsVerified = pgtype.Bool{Bool: false, Valid: true}
+				return &created, nil
+			},
+		}
+		svc := NewUserService(mockRepo, linker)
+
+		output, err := svc.Register(context.Background(), RegisterUserInput{
+			Email:    "user@example.com",
+			Password: "secret123",
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, output)
+		require.Len(t, linker.calls, 0)
+	})
+
+	t.Run("does not fail registration when guest reservation linking fails", func(t *testing.T) {
+		createdID := pgUUID(t, testUUID())
+		linker := &guestReservationLinkerMock{
+			linkFunc: func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+				return 0, errors.New("linking failed")
+			},
+		}
+
+		mockRepo := &UserRepositoryInterfaceMock{
+			GetByEmailFunc: func(ctx context.Context, email string) (*models.User, error) {
+				return nil, repository.ErrUserNotFound
+			},
+			CreateFunc: func(ctx context.Context, user models.User) (*models.User, error) {
+				created := makeDBUser(createdID, user.Email, user.PasswordHash.String, "", "", "")
+				created.IsVerified = pgtype.Bool{Bool: true, Valid: true}
+				return &created, nil
+			},
+		}
+		svc := NewUserService(mockRepo, linker)
+
+		output, err := svc.Register(context.Background(), RegisterUserInput{
+			Email:    "user@example.com",
+			Password: "secret123",
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, output)
+		require.Len(t, linker.calls, 1)
 	})
 
 	t.Run("empty optional fields produce invalid pgtype.Text", func(t *testing.T) {

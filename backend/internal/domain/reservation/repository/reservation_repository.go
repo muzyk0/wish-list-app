@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -34,6 +35,7 @@ type ReservationRepositoryInterface interface {
 	ListUserReservationsWithDetails(ctx context.Context, userID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	ListGuestReservationsWithDetails(ctx context.Context, token pgtype.UUID) ([]ReservationDetail, error)
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
+	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 }
 
 type ReservationDetail struct {
@@ -545,4 +547,113 @@ func (r *ReservationRepository) CountUserReservations(ctx context.Context, userI
 	}
 
 	return count, nil
+}
+
+// LinkGuestReservationsToUserByEmail attaches active guest reservations to a user account by email.
+// This supports post-registration linking so guest reservations become visible in authenticated flows.
+func (r *ReservationRepository) LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+	if !userID.Valid {
+		return 0, fmt.Errorf("invalid user id")
+	}
+
+	normalizedEmail := strings.ToLower(strings.TrimSpace(guestEmail))
+	if normalizedEmail == "" {
+		return 0, nil
+	}
+
+	// Fast path when encryption is disabled: match directly in SQL.
+	if !r.encryptionEnabled || r.encryptionSvc == nil {
+		query := `
+			UPDATE reservations
+			SET reserved_by_user_id = $1, updated_at = NOW()
+			WHERE reserved_by_user_id IS NULL
+			  AND status = 'active'
+			  AND guest_email IS NOT NULL
+			  AND LOWER(TRIM(guest_email)) = $2
+		`
+
+		result, err := r.db.ExecContext(ctx, query, userID, normalizedEmail)
+		if err != nil {
+			return 0, fmt.Errorf("failed to link guest reservations by email: %w", err)
+		}
+
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return 0, fmt.Errorf("failed to get affected rows for reservation linking: %w", err)
+		}
+
+		return int(affected), nil
+	}
+
+	// Encryption-enabled path: fetch candidate rows, decrypt, compare in app layer, then update matches.
+	type candidate struct {
+		ID                  pgtype.UUID `db:"id"`
+		GuestEmail          pgtype.Text `db:"guest_email"`
+		EncryptedGuestEmail pgtype.Text `db:"encrypted_guest_email"`
+	}
+
+	var candidates []candidate
+	selectQuery := `
+		SELECT id, guest_email, encrypted_guest_email
+		FROM reservations
+		WHERE reserved_by_user_id IS NULL
+		  AND status = 'active'
+		  AND (guest_email IS NOT NULL OR encrypted_guest_email IS NOT NULL)
+	`
+
+	if err := r.db.SelectContext(ctx, &candidates, selectQuery); err != nil {
+		return 0, fmt.Errorf("failed to load guest reservation candidates: %w", err)
+	}
+
+	var matchedIDs []pgtype.UUID
+	for _, c := range candidates {
+		var email string
+
+		switch {
+		case c.EncryptedGuestEmail.Valid:
+			decrypted, err := r.encryptionSvc.Decrypt(ctx, c.EncryptedGuestEmail.String)
+			if err != nil {
+				// Skip corrupted row to keep linking best-effort.
+				continue
+			}
+			email = decrypted
+		case c.GuestEmail.Valid:
+			email = c.GuestEmail.String
+		default:
+			continue
+		}
+
+		if strings.ToLower(strings.TrimSpace(email)) == normalizedEmail {
+			matchedIDs = append(matchedIDs, c.ID)
+		}
+	}
+
+	if len(matchedIDs) == 0 {
+		return 0, nil
+	}
+
+	updateQuery := `
+		UPDATE reservations
+		SET reserved_by_user_id = $1, updated_at = NOW()
+		WHERE id = $2
+		  AND reserved_by_user_id IS NULL
+		  AND status = 'active'
+	`
+
+	linkedCount := 0
+	for _, reservationID := range matchedIDs {
+		result, err := r.db.ExecContext(ctx, updateQuery, userID, reservationID)
+		if err != nil {
+			return 0, fmt.Errorf("failed to link reservation %s: %w", reservationID.String(), err)
+		}
+
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return 0, fmt.Errorf("failed to get affected rows for reservation %s: %w", reservationID.String(), err)
+		}
+
+		linkedCount += int(affected)
+	}
+
+	return linkedCount, nil
 }

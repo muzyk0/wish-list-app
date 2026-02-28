@@ -85,7 +85,7 @@
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
@@ -94,15 +94,6 @@
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
-
-### Constitution Requirements
-
-- **CR-001**: Code Quality - All code MUST meet high standards of quality, maintainability, and readability
-- **CR-002**: Test-First - Unit tests MUST be written for all business logic before implementation
-- **CR-003**: API Contracts - All API contracts MUST be explicitly defined using OpenAPI/Swagger specifications
-- **CR-004**: Data Privacy - No personally identifiable information (PII) MAY be stored without encryption
-- **CR-005**: Semantic Versioning - All releases MUST follow semantic versioning (MAJOR.MINOR.PATCH) standards
-- **CR-006**: Specification Checkpoints - Features MUST be fully specified before implementation begins
 
 ### Key Entities *(include if feature involves data)*
 

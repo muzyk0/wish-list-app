@@ -1111,6 +1111,115 @@ paths:
       summary: Get the reservation status for a gift item in a public wish list
       tags:
         - Reservations
+  "/public/reservations/wishlist/{wishlistId}/item/{itemId}":
+    delete:
+      description: Cancel a reservation for a gift item. Can be done by authenticated
+        users or guests (with reservation token).
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+        - description: Gift Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+                _dto.CancelReservationRequest"
+        description: Cancellation information (required for guests)
+      responses:
+        "200":
+          description: Reservation canceled successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+                  _dto.CreateReservationResponse"
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Unauthorized (guests need reservation token)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Cancel a reservation for a gift item
+      tags:
+        - Reservations
+    post:
+      description: Create a reservation for a gift item. Can be done by authenticated
+        users or guests (with name, email optional).
+      parameters:
+        - description: Wish List ID
+          in: path
+          name: wishlistId
+          required: true
+          schema:
+            type: string
+        - description: Gift Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+                _dto.CreateReservationRequest"
+        description: Reservation information (guest name required, email optional)
+      responses:
+        "200":
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
+                  _dto.CreateReservationResponse"
+        "400":
+          description: Invalid request body or validation error (guests need name)
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      summary: Create a reservation for a gift item
+      tags:
+        - Reservations
   "/public/wishlists/{slug}":
     get:
       description: Get a public wish list by its public slug. The wish list must be
@@ -1230,127 +1339,6 @@ paths:
       security:
         - BearerAuth: []
       summary: Get all reservations made by the authenticated user
-      tags:
-        - Reservations
-  "/reservations/wishlist/{wishlistId}/item/{itemId}":
-    delete:
-      description: Cancel a reservation for a gift item. Can be done by authenticated
-        users or guests (with reservation token).
-      parameters:
-        - description: Wish List ID
-          in: path
-          name: wishlistId
-          required: true
-          schema:
-            type: string
-        - description: Gift Item ID
-          in: path
-          name: itemId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
-                _dto.CancelReservationRequest"
-        description: Cancellation information (required for guests)
-      responses:
-        "200":
-          description: Reservation canceled successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
-                  _dto.CreateReservationResponse"
-        "400":
-          description: Invalid request body or validation error
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-        "401":
-          description: Unauthorized (guests need reservation token)
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-      security:
-        - BearerAuth: []
-      summary: Cancel a reservation for a gift item
-      tags:
-        - Reservations
-    post:
-      description: Create a reservation for a gift item. Can be done by authenticated
-        users or guests (with name and email).
-      parameters:
-        - description: Wish List ID
-          in: path
-          name: wishlistId
-          required: true
-          schema:
-            type: string
-        - description: Gift Item ID
-          in: path
-          name: itemId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
-                _dto.CreateReservationRequest"
-        description: Reservation information (required for guests)
-      responses:
-        "200":
-          description: Reservation created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/wish-list_internal_domain_reservation_delivery_http\
-                  _dto.CreateReservationResponse"
-        "400":
-          description: Invalid request body or validation error
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-        "401":
-          description: Unauthorized (guests need name and email)
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-      security:
-        - BearerAuth: []
-      summary: Create a reservation for a gift item
       tags:
         - Reservations
   /wishlists:
@@ -1783,6 +1771,85 @@ paths:
       security:
         - BearerAuth: []
       summary: Detach item from wishlist
+      tags:
+        - Wishlists
+  "/wishlists/{id}/items/{itemId}/mark-reserved":
+    patch:
+      description: Owner marks a wishlist item as reserved by someone offline (e.g., a
+        family member who said they'll buy it). This is separate from the public
+        reservation flow.
+      parameters:
+        - description: Wishlist ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - description: Item ID
+          in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_ht\
+                tp_dto.MarkManualReservationRequest"
+        description: Manual reservation details
+        required: true
+      responses:
+        "200":
+          description: Item updated with manual reservation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_domain_wishlist_item_delivery_ht\
+                  tp_dto.ItemResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "404":
+          description: Wishlist or item not found
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Mark item as manually reserved
       tags:
         - Wishlists
   "/wishlists/{id}/items/new":
@@ -2483,6 +2550,8 @@ components:
           type: string
         image_url:
           type: string
+        is_reserved:
+          type: boolean
         link:
           type: string
         name:
@@ -2525,6 +2594,9 @@ components:
         occasion:
           type: string
         occasion_date:
+          type: string
+        public_slug:
+          maxLength: 100
           type: string
         title:
           maxLength: 200
@@ -2610,17 +2682,22 @@ components:
       properties:
         created_at:
           example: 2024-01-01T12:00:00Z
+          format: date-time
           type: string
         description:
           example: 256GB, Blue Titanium
           type: string
         id:
           example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
           type: string
         image_url:
           example: https://example.com/image.jpg
           type: string
         is_archived:
+          example: false
+          type: boolean
+        is_manually_reserved:
           example: false
           type: boolean
         is_purchased:
@@ -2632,11 +2709,18 @@ components:
         link:
           example: https://apple.com/iphone-15-pro
           type: string
+        manual_reservation_note:
+          example: Сказали что купят велосипед
+          type: string
+        manual_reserved_by_name:
+          example: Бабушка и дедушка
+          type: string
         notes:
           example: "Preferred color: Blue"
           type: string
         owner_id:
           example: 550e8400-e29b-41d4-a716-446655440001
+          format: uuid
           type: string
         price:
           example: 999.99
@@ -2649,7 +2733,36 @@ components:
           type: string
         updated_at:
           example: 2024-01-01T12:00:00Z
+          format: date-time
           type: string
+      required:
+        - created_at
+        - id
+        - is_archived
+        - is_manually_reserved
+        - is_purchased
+        - is_reserved
+        - manual_reservation_note
+        - manual_reserved_by_name
+        - owner_id
+        - price
+        - priority
+        - title
+        - updated_at
+      type: object
+    wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest:
+      properties:
+        note:
+          example: Сказали что купят велосипед
+          maxLength: 1000
+          type: string
+        reserved_by_name:
+          example: Бабушка и дедушка
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+        - reserved_by_name
       type: object
     wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse:
       properties:

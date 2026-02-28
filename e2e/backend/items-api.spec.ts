@@ -13,6 +13,9 @@ let userId: string;
 let wishlistId: string;
 let itemId: string;
 
+// Stateful flow with shared IDs; keep execution deterministic.
+test.describe.configure({ mode: 'serial' });
+
 // Set up authentication before all tests in this worker
 test.beforeAll(async ({ request, browserName }) => {
   // Generate unique ID per browser worker to avoid conflicts
@@ -73,7 +76,7 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
         Authorization: `Bearer ${authToken}`,
       },
       data: {
-        name: 'Nintendo Switch',
+        title: 'Nintendo Switch',
         description: 'OLED Model',
         link: 'https://example.com/switch',
         price: 349.99,
@@ -85,11 +88,11 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
     const data = await response.json();
 
     itemId = data.id;
-    expect(data.name).toBe('Nintendo Switch');
+    expect(data.title).toBe('Nintendo Switch');
     expect(data.description).toBe('OLED Model');
     expect(data.price).toBe(349.99);
     expect(data.owner_id).toBe(userId);
-    expect(data.archived_at).toBeNull();
+    expect(data.is_archived).toBe(false);
   });
 
   test('GET /api/items - should get my items', async ({ request }) => {
@@ -103,9 +106,12 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
     const data = await response.json();
 
     expect(data).toHaveProperty('items');
-    expect(data).toHaveProperty('pagination');
+    expect(data).toHaveProperty('page');
+    expect(data).toHaveProperty('limit');
+    expect(data).toHaveProperty('total_count');
+    expect(data).toHaveProperty('total_pages');
     expect(data.items.length).toBeGreaterThan(0);
-    expect(data.items[0].name).toBe('Nintendo Switch');
+    expect(data.items[0].title).toBe('Nintendo Switch');
   });
 
   test('GET /api/items?unattached=true - should filter unattached items', async ({ request }) => {
@@ -133,7 +139,7 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
     const data = await response.json();
 
     expect(data.id).toBe(itemId);
-    expect(data.name).toBe('Nintendo Switch');
+    expect(data.title).toBe('Nintendo Switch');
   });
 
   test('PUT /api/items/:id - should update item', async ({ request }) => {
@@ -142,7 +148,7 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
         Authorization: `Bearer ${authToken}`,
       },
       data: {
-        name: 'Nintendo Switch OLED',
+        title: 'Nintendo Switch OLED',
         description: 'Updated description',
         price: 359.99,
       },
@@ -151,7 +157,7 @@ test.describe('Independent Items Endpoints (/api/items)', () => {
     expect(response.status()).toBe(200);
     const data = await response.json();
 
-    expect(data.name).toBe('Nintendo Switch OLED');
+    expect(data.title).toBe('Nintendo Switch OLED');
     expect(data.description).toBe('Updated description');
     expect(data.price).toBe(359.99);
   });
@@ -168,10 +174,7 @@ test.describe('Many-to-Many Relationships (/api/wishlists/:id/items)', () => {
       },
     });
 
-    expect(response.status()).toBe(200);
-    const data = await response.json();
-
-    expect(data.message).toContain('attached');
+    expect(response.status()).toBe(204);
   });
 
   test('GET /api/wishlists/:id/items - should get items in wishlist', async ({ request }) => {
@@ -187,7 +190,7 @@ test.describe('Many-to-Many Relationships (/api/wishlists/:id/items)', () => {
     expect(data).toHaveProperty('items');
     expect(data.items.length).toBe(1);
     expect(data.items[0].id).toBe(itemId);
-    expect(data.items[0].name).toBe('Nintendo Switch OLED');
+    expect(data.items[0].title).toBe('Nintendo Switch OLED');
   });
 
   test('GET /api/items?unattached=true - should not show attached item', async ({ request }) => {
@@ -211,17 +214,18 @@ test.describe('Many-to-Many Relationships (/api/wishlists/:id/items)', () => {
         Authorization: `Bearer ${authToken}`,
       },
       data: {
-        name: 'PlayStation 5',
+        title: 'PlayStation 5',
         description: 'Gaming console',
         price: 499.99,
         priority: 2,
+        notes: '',
       },
     });
 
     expect(response.status()).toBe(201);
     const data = await response.json();
 
-    expect(data.name).toBe('PlayStation 5');
+    expect(data.title).toBe('PlayStation 5');
     expect(data.owner_id).toBe(userId);
 
     // Verify it was automatically attached
@@ -242,10 +246,7 @@ test.describe('Many-to-Many Relationships (/api/wishlists/:id/items)', () => {
       },
     });
 
-    expect(response.status()).toBe(200);
-    const data = await response.json();
-
-    expect(data.message).toContain('detached');
+    expect(response.status()).toBe(204);
 
     // Verify item was detached
     const wishlistItems = await request.get(`${API_BASE}/wishlists/${wishlistId}/items`, {
@@ -313,18 +314,20 @@ test.describe('Soft Delete Functionality', () => {
     // Archived item should be in the list
     const archivedItem = data.items.find((item: any) => item.id === itemId);
     expect(archivedItem).toBeDefined();
-    expect(archivedItem.archived_at).not.toBeNull();
+    expect(archivedItem.is_archived).toBe(true);
   });
 
-  test('GET /api/items/:id - should return 404 for archived item', async ({ request }) => {
+  test('GET /api/items/:id - should return archived item for owner', async ({ request }) => {
     const response = await request.get(`${API_BASE}/items/${itemId}`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
     });
 
-    // Archived items should not be accessible
-    expect(response.status()).toBe(404);
+    expect(response.status()).toBe(200);
+    const data = await response.json();
+    expect(data.id).toBe(itemId);
+    expect(data.is_archived).toBe(true);
   });
 });
 
@@ -337,11 +340,12 @@ test.describe('Mark as Purchased Functionality', () => {
         Authorization: `Bearer ${authToken}`,
       },
       data: {
-        name: 'Test Purchase Item',
+        title: 'Test Purchase Item',
         price: 99.99,
       },
     });
 
+    expect(response.status()).toBe(201);
     const data = await response.json();
     purchaseItemId = data.id;
   });
@@ -359,9 +363,8 @@ test.describe('Mark as Purchased Functionality', () => {
     expect(response.status()).toBe(200);
     const data = await response.json();
 
-    expect(data.purchased_by_user_id).toBe(userId);
-    expect(data.purchased_at).not.toBeNull();
-    expect(data.purchased_price).toBe(89.99);
+    expect(data.id).toBe(purchaseItemId);
+    expect(data.is_purchased).toBe(true);
   });
 });
 
@@ -373,7 +376,7 @@ test.describe('Pagination and Filtering', () => {
           Authorization: `Bearer ${authToken}`,
         },
         data: {
-          name: `Test Item ${i}`,
+          title: `Test Item ${i}`,
           price: i * 10,
           priority: i,
         },
@@ -391,10 +394,10 @@ test.describe('Pagination and Filtering', () => {
     expect(response.status()).toBe(200);
     const data = await response.json();
 
-    expect(data.pagination.page).toBe(1);
-    expect(data.pagination.limit).toBe(3);
+    expect(data.page).toBe(1);
+    expect(data.limit).toBe(3);
     expect(data.items.length).toBeLessThanOrEqual(3);
-    expect(data.pagination.total).toBeGreaterThanOrEqual(5);
+    expect(data.total_count).toBeGreaterThanOrEqual(5);
   });
 
   test('GET /api/items?sort=price&order=desc - should sort by price descending', async ({ request }) => {
@@ -424,7 +427,7 @@ test.describe('Pagination and Filtering', () => {
     const data = await response.json();
 
     // Should find the PlayStation item we created earlier
-    const hasPS5 = data.items.some((item: any) => item.name.includes('PlayStation'));
+    const hasPS5 = data.items.some((item: any) => item.title.includes('PlayStation'));
     expect(hasPS5).toBe(true);
   });
 });
@@ -448,15 +451,17 @@ test.describe('Public Endpoints (Guest Access)', () => {
     publicWishlistSlug = data.public_slug;
 
     // Add an item to the public wishlist
-    await request.post(`${API_BASE}/wishlists/${data.id}/items/new`, {
+    const createPublicItemResponse = await request.post(`${API_BASE}/wishlists/${data.id}/items/new`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
       data: {
-        name: 'Public Item',
+        title: 'Public Item',
         price: 29.99,
+        notes: '',
       },
     });
+    expect(createPublicItemResponse.status()).toBe(201);
   });
 
   test('GET /api/public/wishlists/:slug - should access public wishlist without auth', async ({ request }) => {
@@ -494,7 +499,7 @@ test.describe('Error Handling', () => {
   test('POST /api/items - should return 401 without auth', async ({ request }) => {
     const response = await request.post(`${API_BASE}/items`, {
       data: {
-        name: 'Unauthorized Item',
+        title: 'Unauthorized Item',
       },
     });
 

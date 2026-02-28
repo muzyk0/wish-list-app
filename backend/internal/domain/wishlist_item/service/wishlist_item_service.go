@@ -6,9 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	itemmodels "wish-list/internal/domain/item/models"
+	itemrepository "wish-list/internal/domain/item/repository"
 	wishlistmodels "wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist_item/repository"
 
@@ -27,6 +29,8 @@ var (
 	ErrWishListForbidden         = errors.New("not authorized to access this wishlist")
 	ErrItemNotFound              = errors.New("item not found")
 	ErrItemForbidden             = errors.New("not authorized to access this item")
+	ErrManualReservedNameEmpty   = errors.New("reserved_by_name is required")
+	ErrItemNotAvailable          = errors.New("item is already reserved or purchased")
 )
 
 // WishListRepositoryInterface defines what the wishlist_item service needs from wishlist repository (cross-domain)
@@ -38,6 +42,7 @@ type WishListRepositoryInterface interface {
 type GiftItemRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 	CreateWithOwner(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
+	MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error)
 }
 
 // Input/Output types
@@ -55,20 +60,35 @@ type CreateItemInput struct {
 
 // ItemOutput represents an item in service responses
 type ItemOutput struct {
-	ID          string
-	OwnerID     string
-	Name        string
-	Description string
-	Link        string
-	ImageURL    string
-	Price       float64
-	Priority    int
-	Notes       string
-	IsPurchased bool
-	IsReserved  bool
-	IsArchived  bool
-	CreatedAt   string
-	UpdatedAt   string
+	ID                    string
+	OwnerID               string
+	Name                  string
+	Description           string
+	Link                  string
+	ImageURL              string
+	Price                 float64
+	Priority              int
+	Notes                 string
+	IsPurchased           bool
+	IsReserved            bool
+	IsManuallyReserved    bool
+	ManualReservedByName  string
+	ManualReservationNote string
+	IsArchived            bool
+	CreatedAt             string
+	UpdatedAt             string
+}
+
+func isItemReserved(item *itemmodels.GiftItem) bool {
+	if item == nil {
+		return false
+	}
+
+	if item.PurchasedByUserID.Valid || item.PurchasedAt.Valid {
+		return false
+	}
+
+	return item.ReservedByUserID.Valid || item.ReservedAt.Valid || item.ManualReservedByName.Valid
 }
 
 // PaginatedItemsOutput represents paginated list of items
@@ -86,6 +106,7 @@ type WishlistItemServiceInterface interface {
 	AttachItem(ctx context.Context, wishlistID string, itemID string, userID string) error
 	CreateItemInWishlist(ctx context.Context, wishlistID string, userID string, input CreateItemInput) (*ItemOutput, error)
 	DetachItem(ctx context.Context, wishlistID string, itemID string, userID string) error
+	MarkManualReservation(ctx context.Context, wishlistID string, itemID string, userID string, reservedByName string, note *string) (*ItemOutput, error)
 }
 
 // WishlistItemService implements WishlistItemServiceInterface
@@ -354,20 +375,21 @@ func (s *WishlistItemService) DetachItem(ctx context.Context, wishlistID, itemID
 // Helper to convert itemmodels.GiftItem to ItemOutput
 func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *ItemOutput {
 	output := &ItemOutput{
-		ID:          item.ID.String(),
-		OwnerID:     item.OwnerID.String(),
-		Name:        item.Name,
-		Description: "",
-		Link:        "",
-		ImageURL:    "",
-		Price:       0,
-		Priority:    0,
-		Notes:       "",
-		IsPurchased: item.PurchasedByUserID.Valid,
-		IsReserved:  item.ReservedByUserID.Valid,
-		IsArchived:  item.ArchivedAt.Valid,
-		CreatedAt:   item.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt:   item.UpdatedAt.Time.Format(time.RFC3339),
+		ID:                 item.ID.String(),
+		OwnerID:            item.OwnerID.String(),
+		Name:               item.Name,
+		Description:        "",
+		Link:               "",
+		ImageURL:           "",
+		Price:              0,
+		Priority:           0,
+		Notes:              "",
+		IsPurchased:        item.PurchasedByUserID.Valid,
+		IsReserved:         isItemReserved(item),
+		IsManuallyReserved: item.ManualReservedByName.Valid,
+		IsArchived:         item.ArchivedAt.Valid,
+		CreatedAt:          item.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:          item.UpdatedAt.Time.Format(time.RFC3339),
 	}
 
 	// Handle nullable fields
@@ -391,6 +413,72 @@ func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *It
 	if item.Notes.Valid {
 		output.Notes = item.Notes.String
 	}
+	if item.ManualReservedByName.Valid {
+		output.ManualReservedByName = item.ManualReservedByName.String
+	}
+	if item.ManualReservationNote.Valid {
+		output.ManualReservationNote = item.ManualReservationNote.String
+	}
 
 	return output
+}
+
+// MarkManualReservation marks an item as reserved by someone specified by the wishlist owner.
+// This is for offline reservations (e.g., "Grandma said she'll buy the bicycle").
+func (s *WishlistItemService) MarkManualReservation(ctx context.Context, wishlistID, itemID, userID string, reservedByName string, note *string) (*ItemOutput, error) {
+	reservedByName = strings.TrimSpace(reservedByName)
+	if reservedByName == "" {
+		return nil, ErrManualReservedNameEmpty
+	}
+	if note != nil {
+		trimmed := strings.TrimSpace(*note)
+		note = &trimmed
+	}
+
+	wlID := pgtype.UUID{}
+	if err := wlID.Scan(wishlistID); err != nil {
+		return nil, ErrInvalidWishlistItemWLID
+	}
+
+	itID := pgtype.UUID{}
+	if err := itID.Scan(itemID); err != nil {
+		return nil, ErrInvalidWishlistItemID
+	}
+
+	ownerID := pgtype.UUID{}
+	if err := ownerID.Scan(userID); err != nil {
+		return nil, ErrInvalidWishlistItemUser
+	}
+
+	// Verify wishlist exists and caller is owner
+	wishlist, err := s.wishlistRepo.GetByID(ctx, wlID)
+	if err != nil {
+		return nil, ErrWishListNotFound
+	}
+	if wishlist.OwnerID.Bytes != ownerID.Bytes {
+		return nil, ErrWishListForbidden
+	}
+
+	// Verify item belongs to this wishlist
+	attached, err := s.wishlistItemRepo.IsAttached(ctx, wlID, itID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check item attachment: %w", err)
+	}
+	if !attached {
+		return nil, ErrItemNotInWishlist
+	}
+
+	// Mark manual reservation
+	updated, err := s.itemRepo.MarkManualReservation(ctx, itID, reservedByName, note)
+	if err != nil {
+		if errors.Is(err, itemrepository.ErrGiftItemNotAvailable) {
+			return nil, ErrItemNotAvailable
+		}
+		if errors.Is(err, itemrepository.ErrGiftItemNotFound) {
+			return nil, ErrItemNotFound
+		}
+		return nil, fmt.Errorf("failed to mark manual reservation: %w", err)
+	}
+
+	return s.convertItemToOutput(updated), nil
 }

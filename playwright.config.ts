@@ -1,5 +1,7 @@
 import {defineConfig, devices} from '@playwright/test';
 
+const includeMobileWebServer = process.env.PW_INCLUDE_MOBILE_WEBSERVER === '1';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -88,12 +90,22 @@ export default defineConfig({
             stdout: 'ignore', // Ignore stdout for cleaner output
         },
         {
-            command: 'cd ./mobile && pnpm web 2>&1',
-            url: 'http://localhost:8081',
+            command: 'cd ./frontend && pnpm dev --port 3000',
+            url: 'http://localhost:3000',
             timeout: 120 * 1000,
             reuseExistingServer: !process.env.CI,
-            stderr: 'ignore', // Ignore stderr to avoid test failures from Expo warnings
-            stdout: 'ignore', // Ignore stdout for cleaner output
-        }
+            stderr: 'ignore',
+            stdout: 'ignore',
+        },
+        ...(includeMobileWebServer
+            ? [{
+                command: 'cd ./mobile && pnpm web 2>&1',
+                url: 'http://localhost:8081',
+                timeout: 120 * 1000,
+                reuseExistingServer: !process.env.CI,
+                stderr: 'ignore', // Ignore stderr to avoid test failures from Expo warnings
+                stdout: 'ignore', // Ignore stdout for cleaner output
+            }]
+            : [])
     ],
 });

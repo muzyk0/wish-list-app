@@ -6,6 +6,8 @@ End-to-end tests for Wish List application using Playwright.
 
 ```
 e2e/
+├── frontend/          # Frontend UX tests
+│   └── public-wishlist-responsive.spec.ts
 ├── backend/           # Backend API tests
 │   ├── items-api.spec.ts
 │   └── README.md
@@ -50,6 +52,15 @@ Located in `e2e/backend/`
 **Status:** ✅ Complete (30+ tests)
 
 See [backend/README.md](./backend/README.md) for details.
+
+## Frontend Tests
+
+Located in `e2e/frontend/`
+
+**Coverage:**
+- ✅ Responsive public wishlist layout across key breakpoints
+- ✅ No horizontal overflow on mobile widths
+- ✅ Reserved state is visible without exposing reserver identity
 
 ## Mobile Tests
 
