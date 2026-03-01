@@ -43,6 +43,8 @@ type GiftItemRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 	CreateWithOwner(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 	MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error)
+	GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error)
+	CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 }
 
 // Input/Output types
@@ -165,13 +167,13 @@ func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID, 
 	}
 
 	// Get items
-	items, err := s.wishlistItemRepo.GetByWishlist(ctx, wlID, page, limit)
+	items, err := s.itemRepo.GetByWishListPaginated(ctx, wlID, page, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get wishlist items: %w", err)
 	}
 
 	// Get total count
-	totalCount, err := s.wishlistItemRepo.GetByWishlistCount(ctx, wlID)
+	totalCount, err := s.itemRepo.CountByWishList(ctx, wlID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to count wishlist items: %w", err)
 	}

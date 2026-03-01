@@ -93,6 +93,8 @@ type GiftItemRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
 	GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters ItemFilters) (*PaginatedResult, error)
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error)
+	GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error)
+	CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*models.GiftItem, error)
 	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*models.GiftItem, int, error)
 	GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
@@ -319,6 +321,65 @@ func (r *GiftItemRepository) GetByWishList(ctx context.Context, wishlistID pgtyp
 	}
 
 	return giftItems, nil
+}
+
+// GetByWishListPaginated retrieves paginated gift items by wishlist ID.
+// Includes a LATERAL JOIN on reservations to surface guest reservations.
+func (r *GiftItemRepository) GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset := (page - 1) * limit
+
+	query := fmt.Sprintf(`
+		SELECT %s
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
+		WHERE wi.wishlist_id = $1
+		  AND gi.archived_at IS NULL
+		ORDER BY wi.added_at DESC, gi.created_at DESC
+		LIMIT $2 OFFSET $3
+	`, giftItemColumnsPublicAliased)
+
+	var giftItems []*models.GiftItem
+	if err := r.db.SelectContext(ctx, &giftItems, query, wishlistID, limit, offset); err != nil {
+		return nil, fmt.Errorf("failed to get paginated gift items by wishlist: %w", err)
+	}
+
+	return giftItems, nil
+}
+
+// CountByWishList returns the total count of active items in a wishlist.
+func (r *GiftItemRepository) CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM wishlist_items wi
+		INNER JOIN gift_items gi ON gi.id = wi.gift_item_id
+		WHERE wi.wishlist_id = $1
+		  AND gi.archived_at IS NULL
+	`
+
+	var count int64
+	if err := r.db.GetContext(ctx, &count, query, wishlistID); err != nil {
+		return 0, fmt.Errorf("failed to count gift items by wishlist: %w", err)
+	}
+
+	return count, nil
 }
 
 // GetPublicWishListGiftItems retrieves gift items for a public wishlist by slug

@@ -7,7 +7,6 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
-	"wish-list/internal/domain/item/models"
 )
 
 // Ensure, that WishlistItemRepositoryInterfaceMock does implement WishlistItemRepositoryInterface.
@@ -28,12 +27,6 @@ var _ WishlistItemRepositoryInterface = &WishlistItemRepositoryInterfaceMock{}
 //			},
 //			DetachAllFunc: func(ctx context.Context, itemID pgtype.UUID) error {
 //				panic("mock out the DetachAll method")
-//			},
-//			GetByWishlistFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
-//				panic("mock out the GetByWishlist method")
-//			},
-//			GetByWishlistCountFunc: func(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
-//				panic("mock out the GetByWishlistCount method")
 //			},
 //			GetWishlistsForItemFunc: func(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error) {
 //				panic("mock out the GetWishlistsForItem method")
@@ -56,12 +49,6 @@ type WishlistItemRepositoryInterfaceMock struct {
 
 	// DetachAllFunc mocks the DetachAll method.
 	DetachAllFunc func(ctx context.Context, itemID pgtype.UUID) error
-
-	// GetByWishlistFunc mocks the GetByWishlist method.
-	GetByWishlistFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error)
-
-	// GetByWishlistCountFunc mocks the GetByWishlistCount method.
-	GetByWishlistCountFunc func(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 
 	// GetWishlistsForItemFunc mocks the GetWishlistsForItem method.
 	GetWishlistsForItemFunc func(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
@@ -96,24 +83,6 @@ type WishlistItemRepositoryInterfaceMock struct {
 			// ItemID is the itemID argument value.
 			ItemID pgtype.UUID
 		}
-		// GetByWishlist holds details about calls to the GetByWishlist method.
-		GetByWishlist []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// WishlistID is the wishlistID argument value.
-			WishlistID pgtype.UUID
-			// Page is the page argument value.
-			Page int
-			// Limit is the limit argument value.
-			Limit int
-		}
-		// GetByWishlistCount holds details about calls to the GetByWishlistCount method.
-		GetByWishlistCount []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// WishlistID is the wishlistID argument value.
-			WishlistID pgtype.UUID
-		}
 		// GetWishlistsForItem holds details about calls to the GetWishlistsForItem method.
 		GetWishlistsForItem []struct {
 			// Ctx is the ctx argument value.
@@ -134,8 +103,6 @@ type WishlistItemRepositoryInterfaceMock struct {
 	lockAttach              sync.RWMutex
 	lockDetach              sync.RWMutex
 	lockDetachAll           sync.RWMutex
-	lockGetByWishlist       sync.RWMutex
-	lockGetByWishlistCount  sync.RWMutex
 	lockGetWishlistsForItem sync.RWMutex
 	lockIsAttached          sync.RWMutex
 }
@@ -253,86 +220,6 @@ func (mock *WishlistItemRepositoryInterfaceMock) DetachAllCalls() []struct {
 	mock.lockDetachAll.RLock()
 	calls = mock.calls.DetachAll
 	mock.lockDetachAll.RUnlock()
-	return calls
-}
-
-// GetByWishlist calls GetByWishlistFunc.
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
-	if mock.GetByWishlistFunc == nil {
-		panic("WishlistItemRepositoryInterfaceMock.GetByWishlistFunc: method is nil but WishlistItemRepositoryInterface.GetByWishlist was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		WishlistID pgtype.UUID
-		Page       int
-		Limit      int
-	}{
-		Ctx:        ctx,
-		WishlistID: wishlistID,
-		Page:       page,
-		Limit:      limit,
-	}
-	mock.lockGetByWishlist.Lock()
-	mock.calls.GetByWishlist = append(mock.calls.GetByWishlist, callInfo)
-	mock.lockGetByWishlist.Unlock()
-	return mock.GetByWishlistFunc(ctx, wishlistID, page, limit)
-}
-
-// GetByWishlistCalls gets all the calls that were made to GetByWishlist.
-// Check the length with:
-//
-//	len(mockedWishlistItemRepositoryInterface.GetByWishlistCalls())
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCalls() []struct {
-	Ctx        context.Context
-	WishlistID pgtype.UUID
-	Page       int
-	Limit      int
-} {
-	var calls []struct {
-		Ctx        context.Context
-		WishlistID pgtype.UUID
-		Page       int
-		Limit      int
-	}
-	mock.lockGetByWishlist.RLock()
-	calls = mock.calls.GetByWishlist
-	mock.lockGetByWishlist.RUnlock()
-	return calls
-}
-
-// GetByWishlistCount calls GetByWishlistCountFunc.
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
-	if mock.GetByWishlistCountFunc == nil {
-		panic("WishlistItemRepositoryInterfaceMock.GetByWishlistCountFunc: method is nil but WishlistItemRepositoryInterface.GetByWishlistCount was just called")
-	}
-	callInfo := struct {
-		Ctx        context.Context
-		WishlistID pgtype.UUID
-	}{
-		Ctx:        ctx,
-		WishlistID: wishlistID,
-	}
-	mock.lockGetByWishlistCount.Lock()
-	mock.calls.GetByWishlistCount = append(mock.calls.GetByWishlistCount, callInfo)
-	mock.lockGetByWishlistCount.Unlock()
-	return mock.GetByWishlistCountFunc(ctx, wishlistID)
-}
-
-// GetByWishlistCountCalls gets all the calls that were made to GetByWishlistCount.
-// Check the length with:
-//
-//	len(mockedWishlistItemRepositoryInterface.GetByWishlistCountCalls())
-func (mock *WishlistItemRepositoryInterfaceMock) GetByWishlistCountCalls() []struct {
-	Ctx        context.Context
-	WishlistID pgtype.UUID
-} {
-	var calls []struct {
-		Ctx        context.Context
-		WishlistID pgtype.UUID
-	}
-	mock.lockGetByWishlistCount.RLock()
-	calls = mock.calls.GetByWishlistCount
-	mock.lockGetByWishlistCount.RUnlock()
 	return calls
 }
 

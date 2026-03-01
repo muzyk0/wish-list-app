@@ -26,8 +26,6 @@ var (
 type WishlistItemRepositoryInterface interface {
 	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
 	Detach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
-	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error)
-	GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	IsAttached(ctx context.Context, wishlistID, itemID pgtype.UUID) (bool, error)
 	GetWishlistsForItem(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
 	DetachAll(ctx context.Context, itemID pgtype.UUID) error

@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"wish-list/internal/app/database"
-	itemmodels "wish-list/internal/domain/item/models"
 )
 
 // Sentinel errors for wishlist-item repository
@@ -19,12 +18,11 @@ var (
 	ErrItemNotInWishlist = errors.New("item not found in wishlist")
 )
 
-// WishlistItemRepositoryInterface defines the interface for wishlist-item association operations
+// WishlistItemRepositoryInterface defines the interface for wishlist-item association operations.
+// Querying items by wishlist (with pagination) is handled by GiftItemRepositoryInterface.GetByWishListPaginated.
 type WishlistItemRepositoryInterface interface {
 	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
 	Detach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
-	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error)
-	GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	IsAttached(ctx context.Context, wishlistID, itemID pgtype.UUID) (bool, error)
 	GetWishlistsForItem(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
 	DetachAll(ctx context.Context, itemID pgtype.UUID) error
@@ -80,71 +78,6 @@ func (r *WishlistItemRepository) Detach(ctx context.Context, wishlistID, itemID 
 	}
 
 	return nil
-}
-
-// GetByWishlist retrieves all items in a wishlist with pagination
-func (r *WishlistItemRepository) GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
-	if page < 1 {
-		page = 1
-	}
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
-
-	offset := (page - 1) * limit
-
-	query := `
-		SELECT
-			gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
-			gi.price, gi.priority,
-			COALESCE(gi.reserved_by_user_id, ar.reserved_by_user_id) AS reserved_by_user_id,
-			COALESCE(gi.reserved_at, ar.reserved_at) AS reserved_at,
-			gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
-			gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
-			gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at
-		FROM gift_items gi
-		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
-		LEFT JOIN LATERAL (
-			SELECT r.reserved_by_user_id, r.reserved_at
-			FROM reservations r
-			WHERE r.gift_item_id = gi.id
-			  AND r.status = 'active'
-			ORDER BY r.reserved_at DESC
-			LIMIT 1
-		) ar ON true
-		WHERE wi.wishlist_id = $1
-		  AND gi.archived_at IS NULL
-		ORDER BY wi.added_at DESC, gi.created_at DESC
-		LIMIT $2 OFFSET $3
-	`
-
-	var items []*itemmodels.GiftItem
-	if err := r.db.SelectContext(ctx, &items, query, wishlistID, limit, offset); err != nil {
-		return nil, fmt.Errorf("failed to get wishlist items: %w", err)
-	}
-
-	return items, nil
-}
-
-// GetByWishlistCount returns the count of items in a wishlist
-func (r *WishlistItemRepository) GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
-	query := `
-		SELECT COUNT(*)
-		FROM wishlist_items wi
-		INNER JOIN gift_items gi ON gi.id = wi.gift_item_id
-		WHERE wi.wishlist_id = $1
-		  AND gi.archived_at IS NULL
-	`
-
-	var count int64
-	if err := r.db.GetContext(ctx, &count, query, wishlistID); err != nil {
-		return 0, fmt.Errorf("failed to count wishlist items: %w", err)
-	}
-
-	return count, nil
 }
 
 // IsAttached checks if an item is attached to a wishlist
