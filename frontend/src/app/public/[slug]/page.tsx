@@ -1,8 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GuestReservationDialog } from '@/components/guest/GuestReservationDialog';
 import { GiftItemCard } from '@/components/public-wishlist/GiftItemCard';
@@ -16,8 +16,9 @@ import {
   DOMAIN_CONSTANTS,
   MOBILE_APP_REDIRECT_PATHS,
 } from '@/constants/domains';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { apiClient } from '@/lib/api/client';
-import type { GiftItem } from '@/lib/api/types';
 
 type StatusFilter = 'all' | 'available' | 'reserved' | 'purchased';
 type SortOption =
@@ -28,18 +29,7 @@ type SortOption =
   | 'price_desc'
   | 'priority_desc';
 
-const isItemReserved = (item: GiftItem) => {
-  const isManuallyReserved = (
-    item as GiftItem & { is_manually_reserved?: boolean }
-  ).is_manually_reserved;
-
-  return (
-    !!isManuallyReserved ||
-    (item.is_reserved ?? (!!item.reserved_by_user_id || !!item.reserved_at))
-  );
-};
-
-const isItemPurchased = (item: GiftItem) => !!item.purchased_by_user_id;
+const PAGE_SIZE = 12;
 
 export default function PublicWishListPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -47,6 +37,8 @@ export default function PublicWishListPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('position');
+
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
   const {
     data: wishList,
@@ -60,81 +52,68 @@ export default function PublicWishListPage() {
   });
 
   const {
-    data: giftItemsData,
+    data: itemsData,
     isLoading: isLoadingGiftItems,
     isError: isErrorGiftItems,
-  } = useQuery({
-    queryKey: ['public-gift-items', slug],
-    queryFn: () => apiClient.getPublicGiftItems(slug, 1, 100),
+    isFetching: isFetchingGiftItems,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['public-gift-items', slug, debouncedSearch, statusFilter, sortBy],
+    queryFn: ({ pageParam }) =>
+      apiClient.getPublicGiftItems(
+        slug,
+        pageParam,
+        PAGE_SIZE,
+        debouncedSearch || undefined,
+        statusFilter !== 'all' ? statusFilter : undefined,
+        sortBy !== 'position' ? sortBy : undefined,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
     enabled: !!slug && !!wishList,
     retry: 1,
+    // Keep previous results visible while new filter query loads — prevents flash
+    placeholderData: keepPreviousData,
   });
+
+  // True only when a filter/sort change is in flight (not initial load, not next-page load)
+  const isFilterTransition =
+    isFetchingGiftItems && !isLoadingGiftItems && !isFetchingNextPage;
 
   const isLoading = isLoadingWishList || isLoadingGiftItems;
   const isError = isErrorWishList || isErrorGiftItems;
-  const giftItems = giftItemsData?.items || [];
 
-  const filteredAndSortedItems = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    let items = [...giftItems];
+  const giftItems = itemsData?.pages.flatMap((p) => p.items ?? []) ?? [];
+  const totalItems = itemsData?.pages[0]?.total ?? 0;
 
-    if (query) {
-      items = items.filter((item) => {
-        const haystack = [item.name, item.description]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return haystack.includes(query);
-      });
-    }
-
-    if (statusFilter !== 'all') {
-      items = items.filter((item) => {
-        const isPurchased = isItemPurchased(item);
-        const isReserved = isItemReserved(item);
-
-        if (statusFilter === 'purchased') return isPurchased;
-        if (statusFilter === 'reserved') return !isPurchased && isReserved;
-        return !isPurchased && !isReserved;
-      });
-    }
-
-    items.sort((a, b) => {
-      switch (sortBy) {
-        case 'name_asc':
-          return a.name.localeCompare(b.name);
-        case 'name_desc':
-          return b.name.localeCompare(a.name);
-        case 'price_asc':
-          return (
-            (a.price ?? Number.POSITIVE_INFINITY) -
-            (b.price ?? Number.POSITIVE_INFINITY)
-          );
-        case 'price_desc':
-          return (
-            (b.price ?? Number.NEGATIVE_INFINITY) -
-            (a.price ?? Number.NEGATIVE_INFINITY)
-          );
-        case 'priority_desc':
-          return (b.priority ?? 0) - (a.priority ?? 0);
-        default:
-          return (a.position ?? 0) - (b.position ?? 0);
-      }
-    });
-
-    return items;
-  }, [giftItems, searchQuery, statusFilter, sortBy]);
-
+  // Count reserved items from loaded pages
   const reservedCount = giftItems.filter(
-    (item) => isItemReserved(item) || isItemPurchased(item),
+    (item) =>
+      item.reserved_by_user_id ||
+      item.reserved_at ||
+      item.purchased_by_user_id,
   ).length;
 
-  // Promo block appears after all items are done animating
-  const promoDelay = Math.min(filteredAndSortedItems.length, 9) + 3;
   const hasActiveFilters =
     searchQuery.trim() !== '' ||
     statusFilter !== 'all' ||
     sortBy !== 'position';
+
+  const promoDelay = Math.min(giftItems.length, 9) + 3;
+
+  const handleFetchNext = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const sentinelRef = useIntersectionObserver({
+    onIntersect: handleFetchNext,
+    enabled: !!hasNextPage && !isFetchingNextPage,
+  });
 
   // Loading state
   if (isLoading) {
@@ -168,7 +147,7 @@ export default function PublicWishListPage() {
       </div>
 
       {/* List controls */}
-      {giftItems.length > 0 && (
+      {totalItems > 0 && (
         <div
           className="wl-fade-up wl-delay-1 mb-6 rounded-2xl p-4 sm:p-5"
           style={{
@@ -284,22 +263,31 @@ export default function PublicWishListPage() {
       )}
 
       {/* Gift items */}
-      <div className="space-y-3">
-        {giftItems.length === 0 ? (
-          <WishlistEmptyState />
-        ) : filteredAndSortedItems.length === 0 ? (
-          <div
-            className="rounded-2xl px-5 py-8 text-center text-sm sm:text-base"
-            style={{
-              background: 'var(--wl-card)',
-              border: '1px solid var(--wl-card-border)',
-              color: 'var(--wl-muted)',
-            }}
-          >
-            {t('publicWishlist.filters.noResults')}
-          </div>
+      <div
+        className="space-y-3"
+        style={{
+          opacity: isFilterTransition ? 0.5 : 1,
+          transition: 'opacity 150ms ease',
+          pointerEvents: isFilterTransition ? 'none' : undefined,
+        }}
+      >
+        {giftItems.length === 0 && !isFetchingNextPage && !isFilterTransition ? (
+          hasActiveFilters ? (
+            <div
+              className="rounded-2xl px-5 py-8 text-center text-sm sm:text-base"
+              style={{
+                background: 'var(--wl-card)',
+                border: '1px solid var(--wl-card-border)',
+                color: 'var(--wl-muted)',
+              }}
+            >
+              {t('publicWishlist.filters.noResults')}
+            </div>
+          ) : (
+            <WishlistEmptyState />
+          )
         ) : (
-          filteredAndSortedItems.map((item, index) => (
+          giftItems.map((item, index) => (
             <div
               key={item.id}
               className={`wl-fade-up wl-delay-${Math.min(index + 2, 9)}`}
@@ -312,7 +300,9 @@ export default function PublicWishListPage() {
                     wishlistId={wishList.id}
                     itemId={item.id}
                     itemName={item.name}
-                    isReserved={isItemReserved(item)}
+                    isReserved={
+                      !!(item.reserved_by_user_id || item.reserved_at)
+                    }
                     isPurchased={!!item.purchased_by_user_id}
                   />
                 }
@@ -320,6 +310,16 @@ export default function PublicWishListPage() {
             </div>
           ))
         )}
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} aria-hidden="true" className="h-1" />
+
+        {/* Loading skeletons for next page */}
+        {isFetchingNextPage &&
+          Array.from({ length: 3 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton list
+            <GiftItemSkeleton key={i} />
+          ))}
       </div>
 
       {/* Mobile app promo */}

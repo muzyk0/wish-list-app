@@ -1,0 +1,33 @@
+get:
+  description: >-
+    Get aggregate counts of the authenticated user's gift items (total,
+    reserved, purchased)
+  responses:
+    '200':
+      description: Stats retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse.yaml
+    '401':
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  security:
+    - BearerAuth: []
+  summary: Get home screen stats
+  tags:
+    - Items

@@ -1401,6 +1401,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get home screen stats
+         * @description Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Stats retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/protected/account": {
         parameters: {
             query?: never;
@@ -1915,15 +1976,21 @@ export interface paths {
         };
         /**
          * Get gift items for a public wish list by slug
-         * @description Get all gift items for a public wish list by its public slug with pagination support.
+         * @description Get gift items for a public wish list by its public slug with pagination, search, status filter, and sort support.
          */
         get: {
             parameters: {
                 query?: {
                     /** @description Page number (default 1) */
                     page?: number;
-                    /** @description Items per page (default 10, max 100) */
+                    /** @description Items per page (default 12, max 100) */
                     limit?: number;
+                    /** @description Case-insensitive search on name and description */
+                    search?: string;
+                    /** @description Filter by status */
+                    status?: PathsPublicWishlistsSlugGiftItemsGetParametersQueryStatus;
+                    /** @description Sort order */
+                    sort_by?: PathsPublicWishlistsSlugGiftItemsGetParametersQuerySort_by;
                 };
                 header?: never;
                 path: {
@@ -2988,6 +3055,14 @@ export interface components {
             /** @example iPhone 15 Pro */
             title: string;
         };
+        "wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse": {
+            /** @example 1 */
+            purchased: number;
+            /** @example 3 */
+            reserved: number;
+            /** @example 12 */
+            total_items: number;
+        };
         "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
             /** @example 2024-01-01T12:00:00Z */
             created_at?: string;
@@ -3364,6 +3439,7 @@ export type SchemaWishListInternalDomainAuthDeliveryHttpDtoOAuthCodeRequest = co
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoRefreshResponse = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse'];
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoUserResponse = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.UserResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoCreateItemRequest = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest'];
+export type SchemaWishListInternalDomainItemDeliveryHttpDtoHomeStatsResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoItemResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.ItemResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoMarkPurchasedRequest = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse'];
@@ -3400,4 +3476,17 @@ export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse 
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'];
 export type $defs = Record<string, never>;
+export enum PathsPublicWishlistsSlugGiftItemsGetParametersQueryStatus {
+    available = "available",
+    reserved = "reserved",
+    purchased = "purchased"
+}
+export enum PathsPublicWishlistsSlugGiftItemsGetParametersQuerySort_by {
+    position = "position",
+    name_asc = "name_asc",
+    name_desc = "name_desc",
+    price_asc = "price_asc",
+    price_desc = "price_desc",
+    priority_desc = "priority_desc"
+}
 export type operations = Record<string, never>;

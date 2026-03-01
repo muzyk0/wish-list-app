@@ -52,6 +52,12 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			GetPublicWishListGiftItemsPaginatedFunc: func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error) {
 //				panic("mock out the GetPublicWishListGiftItemsPaginated method")
 //			},
+//			GetPublicWishListGiftItemsFilteredFunc: func(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error) {
+//				panic("mock out the GetPublicWishListGiftItemsFiltered method")
+//			},
+//			GetStatsFunc: func(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error) {
+//				panic("mock out the GetStats method")
+//			},
 //			GetUnattachedFunc: func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error) {
 //				panic("mock out the GetUnattached method")
 //			},
@@ -103,6 +109,12 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetPublicWishListGiftItemsPaginatedFunc mocks the GetPublicWishListGiftItemsPaginated method.
 	GetPublicWishListGiftItemsPaginatedFunc func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error)
+
+	// GetPublicWishListGiftItemsFilteredFunc mocks the GetPublicWishListGiftItemsFiltered method.
+	GetPublicWishListGiftItemsFilteredFunc func(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error)
+
+	// GetStatsFunc mocks the GetStats method.
+	GetStatsFunc func(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error)
 
 	// GetUnattachedFunc mocks the GetUnattached method.
 	GetUnattachedFunc func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
@@ -203,6 +215,22 @@ type GiftItemRepositoryInterfaceMock struct {
 			// Offset is the offset argument value.
 			Offset int
 		}
+		// GetPublicWishListGiftItemsFiltered holds details about calls to the GetPublicWishListGiftItemsFiltered method.
+		GetPublicWishListGiftItemsFiltered []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// PublicSlug is the publicSlug argument value.
+			PublicSlug string
+			// Filters is the filters argument value.
+			Filters repository.PublicItemFilters
+		}
+		// GetStats holds details about calls to the GetStats method.
+		GetStats []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// OwnerID is the ownerID argument value.
+			OwnerID pgtype.UUID
+		}
 		// GetUnattached holds details about calls to the GetUnattached method.
 		GetUnattached []struct {
 			// Ctx is the ctx argument value.
@@ -253,6 +281,8 @@ type GiftItemRepositoryInterfaceMock struct {
 	lockGetByWishListPaginated              sync.RWMutex
 	lockGetPublicWishListGiftItems          sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
+	lockGetPublicWishListGiftItemsFiltered  sync.RWMutex
+	lockGetStats                            sync.RWMutex
 	lockGetUnattached                       sync.RWMutex
 	lockMarkManualReservation               sync.RWMutex
 	lockSoftDelete                          sync.RWMutex
@@ -641,6 +671,82 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsPaginated
 	mock.lockGetPublicWishListGiftItemsPaginated.RLock()
 	calls = mock.calls.GetPublicWishListGiftItemsPaginated
 	mock.lockGetPublicWishListGiftItemsPaginated.RUnlock()
+	return calls
+}
+
+// GetPublicWishListGiftItemsFiltered calls GetPublicWishListGiftItemsFilteredFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error) {
+	if mock.GetPublicWishListGiftItemsFilteredFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFilteredFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItemsFiltered was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    repository.PublicItemFilters
+	}{
+		Ctx:        ctx,
+		PublicSlug: publicSlug,
+		Filters:    filters,
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.Lock()
+	mock.calls.GetPublicWishListGiftItemsFiltered = append(mock.calls.GetPublicWishListGiftItemsFiltered, callInfo)
+	mock.lockGetPublicWishListGiftItemsFiltered.Unlock()
+	return mock.GetPublicWishListGiftItemsFilteredFunc(ctx, publicSlug, filters)
+}
+
+// GetPublicWishListGiftItemsFilteredCalls gets all the calls that were made to GetPublicWishListGiftItemsFiltered.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetPublicWishListGiftItemsFilteredCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFilteredCalls() []struct {
+	Ctx        context.Context
+	PublicSlug string
+	Filters    repository.PublicItemFilters
+} {
+	var calls []struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    repository.PublicItemFilters
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.RLock()
+	calls = mock.calls.GetPublicWishListGiftItemsFiltered
+	mock.lockGetPublicWishListGiftItemsFiltered.RUnlock()
+	return calls
+}
+
+// GetStats calls GetStatsFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetStats(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error) {
+	if mock.GetStatsFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetStatsFunc: method is nil but GiftItemRepositoryInterface.GetStats was just called")
+	}
+	callInfo := struct {
+		Ctx     context.Context
+		OwnerID pgtype.UUID
+	}{
+		Ctx:     ctx,
+		OwnerID: ownerID,
+	}
+	mock.lockGetStats.Lock()
+	mock.calls.GetStats = append(mock.calls.GetStats, callInfo)
+	mock.lockGetStats.Unlock()
+	return mock.GetStatsFunc(ctx, ownerID)
+}
+
+// GetStatsCalls gets all the calls that were made to GetStats.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetStatsCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetStatsCalls() []struct {
+	Ctx     context.Context
+	OwnerID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx     context.Context
+		OwnerID pgtype.UUID
+	}
+	mock.lockGetStats.RLock()
+	calls = mock.calls.GetStats
+	mock.lockGetStats.RUnlock()
 	return calls
 }
 

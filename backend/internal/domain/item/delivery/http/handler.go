@@ -24,6 +24,33 @@ func NewHandler(svc service.ItemServiceInterface) *Handler {
 	}
 }
 
+// GetHomeStats godoc
+//
+//	@Summary		Get home screen stats
+//	@Description	Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)
+//	@Tags			Items
+//	@Produce		json
+//	@Success		200	{object}	dto.HomeStatsResponse	"Stats retrieved successfully"
+//	@Failure		401	{object}	map[string]string		"Not authenticated"
+//	@Failure		500	{object}	map[string]string		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/items/stats [get]
+func (h *Handler) GetHomeStats(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+	ctx := c.Request().Context()
+
+	stats, err := h.service.GetHomeStats(ctx, userID)
+	if err != nil {
+		return mapItemServiceError(err)
+	}
+
+	return c.JSON(nethttp.StatusOK, dto.HomeStatsResponse{
+		TotalItems: stats.TotalItems,
+		Reserved:   stats.Reserved,
+		Purchased:  stats.Purchased,
+	})
+}
+
 // GetMyItems godoc
 //
 //	@Summary		Get my gift items

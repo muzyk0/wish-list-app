@@ -15,6 +15,7 @@ import (
 
 	"wish-list/internal/app/database"
 	itemmodels "wish-list/internal/domain/item/models"
+	itemrepository "wish-list/internal/domain/item/repository"
 	reservationmodels "wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/wishlist/models"
 	"wish-list/internal/domain/wishlist/repository"
@@ -34,6 +35,7 @@ type GiftItemRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
 	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*itemmodels.GiftItem, int, error)
+	GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters itemrepository.PublicItemFilters) ([]*itemmodels.GiftItem, int, error)
 	Update(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 }
 
@@ -95,6 +97,7 @@ type WishListServiceInterface interface {
 	GetGiftItem(ctx context.Context, giftItemID string) (*GiftItemOutput, error)
 	GetGiftItemsByWishList(ctx context.Context, wishListID string) ([]*GiftItemOutput, error)
 	GetGiftItemsByPublicSlugPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*GiftItemOutput, int, error)
+	GetGiftItemsByPublicSlugFiltered(ctx context.Context, publicSlug string, filters PublicItemFiltersInput) ([]*GiftItemOutput, int, error)
 	UpdateGiftItem(ctx context.Context, giftItemID string, input UpdateGiftItemInput) (*GiftItemOutput, error)
 	DeleteGiftItem(ctx context.Context, giftItemID string) error
 	MarkGiftItemAsPurchased(ctx context.Context, giftItemID, userID string, purchasedPrice float64) (*GiftItemOutput, error)
@@ -160,6 +163,15 @@ type WishListOutput struct {
 	ItemCount    int64 // Number of gift items in this wishlist
 	CreatedAt    string
 	UpdatedAt    string
+}
+
+// PublicItemFiltersInput contains filter and pagination parameters for server-side filtered public item queries
+type PublicItemFiltersInput struct {
+	Limit  int
+	Offset int
+	Search string
+	Status string
+	SortBy string
 }
 
 type CreateGiftItemInput struct {
@@ -926,6 +938,97 @@ func (s *WishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Context,
 		}
 		if giftItem.ReservedAt.Valid {
 			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedAt.Valid {
+			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedPrice.Valid {
+			purchasedPriceValue, err := giftItem.PurchasedPrice.Float64Value()
+			if err == nil && purchasedPriceValue.Valid {
+				output.PurchasedPrice = purchasedPriceValue.Float64
+			}
+		}
+
+		outputs = append(outputs, output)
+	}
+
+	return outputs, totalCount, nil
+}
+
+func (s *WishListService) GetGiftItemsByPublicSlugFiltered(ctx context.Context, publicSlug string, filters PublicItemFiltersInput) ([]*GiftItemOutput, int, error) {
+	wishList, err := s.wishListRepo.GetByPublicSlug(ctx, publicSlug)
+	if err != nil {
+		if errors.Is(err, repository.ErrWishListNotFound) {
+			return nil, 0, ErrWishListNotFound
+		}
+		return nil, 0, fmt.Errorf("failed to get wishlist by public slug: %w", err)
+	}
+
+	repoFilters := itemrepository.PublicItemFilters{
+		Limit:  filters.Limit,
+		Offset: filters.Offset,
+		Search: filters.Search,
+		Status: filters.Status,
+		SortBy: filters.SortBy,
+	}
+
+	giftItems, totalCount, err := s.giftItemRepo.GetPublicWishListGiftItemsFiltered(ctx, publicSlug, repoFilters)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get gift items from repository: %w", err)
+	}
+
+	var outputs []*GiftItemOutput
+
+	for _, giftItem := range giftItems {
+		if giftItem == nil {
+			continue
+		}
+
+		var price float64
+		if giftItem.Price.Valid {
+			priceValue, err := giftItem.Price.Float64Value()
+			if err == nil && priceValue.Valid {
+				price = priceValue.Float64
+			}
+		}
+
+		output := &GiftItemOutput{
+			ID:         giftItem.ID.String(),
+			WishlistID: wishList.ID.String(),
+			OwnerID:    giftItem.OwnerID.String(),
+			Name:       giftItem.Name,
+			Price:      price,
+			IsReserved: isGiftItemReserved(giftItem),
+			CreatedAt:  giftItem.CreatedAt.Time.Format(time.RFC3339),
+			UpdatedAt:  giftItem.UpdatedAt.Time.Format(time.RFC3339),
+		}
+
+		if giftItem.Description.Valid {
+			output.Description = giftItem.Description.String
+		}
+		if giftItem.Link.Valid {
+			output.Link = giftItem.Link.String
+		}
+		if giftItem.ImageUrl.Valid {
+			output.ImageURL = giftItem.ImageUrl.String
+		}
+		if giftItem.Priority.Valid {
+			output.Priority = int(giftItem.Priority.Int32)
+		}
+		if giftItem.Notes.Valid {
+			output.Notes = giftItem.Notes.String
+		}
+		if giftItem.Position.Valid {
+			output.Position = int(giftItem.Position.Int32)
+		}
+		if giftItem.ReservedByUserID.Valid {
+			output.ReservedByUserID = giftItem.ReservedByUserID.String()
+		}
+		if giftItem.ReservedAt.Valid {
+			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
+		}
+		if giftItem.PurchasedByUserID.Valid {
+			output.PurchasedByUserID = giftItem.PurchasedByUserID.String()
 		}
 		if giftItem.PurchasedAt.Valid {
 			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)

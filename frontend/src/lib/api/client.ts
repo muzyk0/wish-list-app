@@ -143,19 +143,27 @@ class ApiClient {
 
   /**
    * Get gift items for a public wishlist by slug
-   * Used for viewing gift items in shared wishlists with pagination
+   * Supports pagination, search, status filter, and sort order.
    */
   async getPublicGiftItems(
     slug: string,
     page = 1,
-    limit = 10,
+    limit = 12,
+    search?: string,
+    status?: string,
+    sortBy?: string,
   ): Promise<GetGiftItemsResponse> {
+    const query: Record<string, string | number> = { page, limit };
+    if (search) query.search = search;
+    if (status && status !== 'all') query.status = status;
+    if (sortBy && sortBy !== 'position') query.sort_by = sortBy;
+
     const { data, error } = await this.client.GET(
       '/public/wishlists/{slug}/gift-items',
       {
         params: {
           path: { slug },
-          query: { page, limit },
+          query,
         },
       },
     );

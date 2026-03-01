@@ -1054,6 +1054,58 @@
                 }
             }
         },
+        "/items/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)",
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get home screen stats",
+                "responses": {
+                    "200": {
+                        "description": "Stats retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/items/{id}": {
             "get": {
                 "security": [
@@ -1943,7 +1995,7 @@
         },
         "/public/wishlists/{slug}/gift-items": {
             "get": {
-                "description": "Get all gift items for a public wish list by its public slug with pagination support.",
+                "description": "Get gift items for a public wish list by its public slug with pagination, search, status filter, and sort support.",
                 "tags": [
                     "Gift Items"
                 ],
@@ -1967,11 +2019,48 @@
                         }
                     },
                     {
-                        "description": "Items per page (default 10, max 100)",
+                        "description": "Items per page (default 12, max 100)",
                         "name": "limit",
                         "in": "query",
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Case-insensitive search on name and description",
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "available",
+                                "reserved",
+                                "purchased"
+                            ]
+                        }
+                    },
+                    {
+                        "description": "Sort order",
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "position",
+                                "name_asc",
+                                "name_desc",
+                                "price_asc",
+                                "price_desc",
+                                "priority_desc"
+                            ]
                         }
                     }
                 ],
@@ -3316,6 +3405,28 @@
                         "maxLength": 255,
                         "minLength": 1,
                         "example": "iPhone 15 Pro"
+                    }
+                }
+            },
+            "wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse": {
+                "type": "object",
+                "required": [
+                    "purchased",
+                    "reserved",
+                    "total_items"
+                ],
+                "properties": {
+                    "purchased": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "reserved": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "total_items": {
+                        "type": "integer",
+                        "example": 12
                     }
                 }
             },

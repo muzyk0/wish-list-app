@@ -13,6 +13,7 @@ import type {
   CreateReservationRequest,
   CreateWishListRequest,
   GiftItem,
+  HomeStats,
   LoginResponse,
   MarkManualReservationRequest,
   PaginatedGiftItems,
@@ -258,6 +259,21 @@ class ApiClient {
 
     if (!data) {
       throw new Error('No data received from password change');
+    }
+
+    return data;
+  }
+
+  // Home stats
+  async getHomeStats(): Promise<HomeStats> {
+    const { data, error } = await this.client.GET('/items/stats', {});
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from home stats');
     }
 
     return data;

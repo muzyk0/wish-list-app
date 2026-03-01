@@ -921,6 +921,39 @@ paths:
       summary: Mark gift item as purchased
       tags:
         - Items
+  /items/stats:
+    get:
+      description: Get aggregate counts of the authenticated user's gift items (total,
+        reserved, purchased)
+      responses:
+        "200":
+          description: Stats retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.Ho\
+                  meStatsResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Get home screen stats
+      tags:
+        - Items
   /protected/account:
     delete:
       description: Delete the authenticated user's account and all associated data.
@@ -1252,8 +1285,8 @@ paths:
         - Wish Lists
   "/public/wishlists/{slug}/gift-items":
     get:
-      description: Get all gift items for a public wish list by its public slug with
-        pagination support.
+      description: Get gift items for a public wish list by its public slug with
+        pagination, search, status filter, and sort support.
       parameters:
         - description: Public Slug
           in: path
@@ -1266,11 +1299,37 @@ paths:
           name: page
           schema:
             type: integer
-        - description: Items per page (default 10, max 100)
+        - description: Items per page (default 12, max 100)
           in: query
           name: limit
           schema:
             type: integer
+        - description: Case-insensitive search on name and description
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: Filter by status
+          in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - available
+              - reserved
+              - purchased
+        - description: Sort order
+          in: query
+          name: sort_by
+          schema:
+            type: string
+            enum:
+              - position
+              - name_asc
+              - name_desc
+              - price_asc
+              - price_desc
+              - priority_desc
       responses:
         "200":
           description: Gift items retrieved successfully
@@ -2138,6 +2197,22 @@ components:
           type: string
       required:
         - title
+      type: object
+    wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse:
+      properties:
+        purchased:
+          example: 1
+          type: integer
+        reserved:
+          example: 3
+          type: integer
+        total_items:
+          example: 12
+          type: integer
+      required:
+        - purchased
+        - reserved
+        - total_items
       type: object
     wish-list_internal_domain_item_delivery_http_dto.ItemResponse:
       properties:

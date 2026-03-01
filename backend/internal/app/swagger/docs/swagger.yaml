@@ -158,6 +158,22 @@ definitions:
     required:
     - title
     type: object
+  wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse:
+    properties:
+      purchased:
+        example: 1
+        type: integer
+      reserved:
+        example: 3
+        type: integer
+      total_items:
+        example: 12
+        type: integer
+    required:
+    - purchased
+    - reserved
+    - total_items
+    type: object
   wish-list_internal_domain_item_delivery_http_dto.ItemResponse:
     properties:
       created_at:
@@ -1660,6 +1676,34 @@ paths:
       summary: Mark gift item as purchased
       tags:
       - Items
+  /items/stats:
+    get:
+      description: Get aggregate counts of the authenticated user's gift items (total,
+        reserved, purchased)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Stats retrieved successfully
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse'
+        "401":
+          description: Not authenticated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get home screen stats
+      tags:
+      - Items
   /protected/account:
     delete:
       consumes:
@@ -1948,8 +1992,8 @@ paths:
       - Wish Lists
   /public/wishlists/{slug}/gift-items:
     get:
-      description: Get all gift items for a public wish list by its public slug with
-        pagination support.
+      description: Get gift items for a public wish list by its public slug with pagination,
+        search, status filter, and sort support.
       parameters:
       - description: Public Slug
         in: path
@@ -1960,10 +2004,33 @@ paths:
         in: query
         name: page
         type: integer
-      - description: Items per page (default 10, max 100)
+      - description: Items per page (default 12, max 100)
         in: query
         name: limit
         type: integer
+      - description: Case-insensitive search on name and description
+        in: query
+        name: search
+        type: string
+      - description: Filter by status
+        enum:
+        - available
+        - reserved
+        - purchased
+        in: query
+        name: status
+        type: string
+      - description: Sort order
+        enum:
+        - position
+        - name_asc
+        - name_desc
+        - price_asc
+        - price_desc
+        - priority_desc
+        in: query
+        name: sort_by
+        type: string
       produces:
       - application/json
       responses:

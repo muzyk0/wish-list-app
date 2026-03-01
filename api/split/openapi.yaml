@@ -46,6 +46,8 @@ paths:
     $ref: paths/items_{id}.yaml
   /items/{id}/mark-purchased:
     $ref: paths/items_{id}_mark-purchased.yaml
+  /items/stats:
+    $ref: paths/items_stats.yaml
   /protected/account:
     $ref: paths/protected_account.yaml
   /protected/export-data:

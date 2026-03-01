@@ -1,6 +1,9 @@
 /**
  * Semantic type aliases for the generated OpenAPI schema.
- * Imports from auto-generated SchemaXxx names in schema.ts and re-exports with clean names.
+ * Imports from auto-generated SchemaXxx names in generated-schema.ts and re-exports with clean names.
+ *
+ * ⚠️ Do NOT manually edit generated-schema.ts — it is auto-generated.
+ * To update it, run `make docs` from the project root.
  */
 
 import type {
@@ -11,6 +14,7 @@ import type {
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoCreateItemRequest as CreateWishlistItemRequest,
   SchemaWishListInternalDomainWishlistDeliveryHttpDtoGetGiftItemsResponse as GetGiftItemsResponse,
   SchemaWishListInternalDomainItemDeliveryHttpDtoItemResponse as GiftItem,
+  SchemaWishListInternalDomainItemDeliveryHttpDtoHomeStatsResponse as HomeStats,
   SchemaWishListInternalDomainAuthDeliveryHttpDtoAuthResponse as LoginResponse,
   SchemaWishListInternalDomainItemDeliveryHttpDtoPaginatedItemsResponse as PaginatedGiftItems,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoPaginatedItemsResponse as PaginatedWishlistItems,
@@ -40,6 +44,7 @@ export type {
   CreateWishlistItemRequest,
   GiftItem,
   GetGiftItemsResponse,
+  HomeStats,
   LoginResponse,
   PaginatedGiftItems,
   PaginatedWishlistItems,

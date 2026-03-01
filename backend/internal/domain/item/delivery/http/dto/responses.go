@@ -46,6 +46,13 @@ func ItemResponseFromService(item *service.ItemOutput) ItemResponse {
 	}
 }
 
+// HomeStatsResponse represents aggregate item counts for the home screen
+type HomeStatsResponse struct {
+	TotalItems int64 `json:"total_items" example:"12" validate:"required"`
+	Reserved   int64 `json:"reserved" example:"3" validate:"required"`
+	Purchased  int64 `json:"purchased" example:"1" validate:"required"`
+}
+
 // PaginatedItemsResponse represents paginated list of items
 type PaginatedItemsResponse struct {
 	Items      []ItemResponse `json:"items"`

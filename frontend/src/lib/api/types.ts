@@ -1,6 +1,9 @@
 /**
- * Type exports from generated OpenAPI schema
- * Frontend uses only public/guest operations - all authenticated CRUD is in Mobile
+ * Type exports from generated OpenAPI schema.
+ * Frontend uses only public/guest operations - all authenticated CRUD is in Mobile.
+ *
+ * ⚠️ Do NOT manually edit generated-schema.ts — it is auto-generated.
+ * To update it, run `make docs` from the project root.
  */
 
 import type { components } from './generated-schema';
