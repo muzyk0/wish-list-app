@@ -576,8 +576,7 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 			w.title as wishlist_title
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
-		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
-		JOIN wishlists w ON wi.wishlist_id = w.id
+		JOIN wishlists w ON r.wishlist_id = w.id
 		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
@@ -598,8 +597,7 @@ func (r *ReservationRepository) CountWishlistOwnerReservations(ctx context.Conte
 		SELECT COUNT(*)
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
-		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
-		JOIN wishlists w ON wi.wishlist_id = w.id
+		JOIN wishlists w ON r.wishlist_id = w.id
 		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
 	`
 

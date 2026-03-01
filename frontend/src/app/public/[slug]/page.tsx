@@ -301,6 +301,7 @@ export default function PublicWishListPage() {
                     itemId={item.id}
                     itemName={item.name}
                     isReserved={
+                      item.is_reserved ??
                       !!(item.reserved_by_user_id || item.reserved_at)
                     }
                     isPurchased={!!item.purchased_by_user_id}
