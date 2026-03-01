@@ -170,17 +170,27 @@ type UserReservationsResponse struct {
 // that have been reserved. The identity of the reserver is intentionally hidden — only the
 // fact that the item is reserved (and its status) is shown.
 type WishlistOwnerReservationResponse struct {
-	ID         string          `json:"id" validate:"required"`
+	ID         string          `json:"id" validate:"required" format:"uuid"`
 	GiftItem   GiftItemSummary `json:"gift_item" validate:"required"`
 	Wishlist   WishListSummary `json:"wishlist" validate:"required"`
 	Status     string          `json:"status" validate:"required"`
-	ReservedAt string          `json:"reserved_at" validate:"required"`
-	ExpiresAt  *string         `json:"expires_at"`
+	ReservedAt string          `json:"reserved_at" validate:"required" format:"date-time"`
+	ExpiresAt  *string         `json:"expires_at" format:"date-time"`
 }
 
 type WishlistOwnerReservationsResponse struct {
 	Data       []WishlistOwnerReservationResponse `json:"data" validate:"required"`
 	Pagination any                                `json:"pagination" validate:"required"`
+}
+
+// WishlistOwnerReservationsUnauthorizedResponse documents 401 response shape for owner reservations endpoint.
+type WishlistOwnerReservationsUnauthorizedResponse struct {
+	Error string `json:"error" validate:"required" example:"Unauthorized"`
+}
+
+// WishlistOwnerReservationsInternalResponse documents 500 response shape for owner reservations endpoint.
+type WishlistOwnerReservationsInternalResponse struct {
+	Error string `json:"error" validate:"required" example:"Failed to get wishlist owner reservations"`
 }
 
 func FromWishlistOwnerReservationDetail(res repository.ReservationDetail) WishlistOwnerReservationResponse {

@@ -2148,9 +2148,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -2159,9 +2157,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse"];
                     };
                 };
             };
@@ -3173,16 +3169,27 @@ export interface components {
             title: string;
         };
         "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse": {
+            /** Format: date-time */
             expires_at?: string;
             gift_item: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"];
+            /** Format: uuid */
             id: string;
+            /** Format: date-time */
             reserved_at: string;
             status: string;
             wishlist: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"];
         };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse": {
+            /** @example Failed to get wishlist owner reservations */
+            error: string;
+        };
         "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse": {
             data: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"][];
             pagination: unknown;
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse": {
+            /** @example Unauthorized */
+            error: string;
         };
         "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
             /** @example https://s3.amazonaws.com/bucket/images/uuid.jpg */
@@ -3453,7 +3460,9 @@ export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationSta
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoUserReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishListSummary = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsInternalResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsUnauthorizedResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse'];
 export type SchemaWishListInternalDomainStorageDeliveryHttpDtoUploadImageResponse = components['schemas']['wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoAuthResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.AuthResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'];

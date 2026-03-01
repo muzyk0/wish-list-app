@@ -1,0 +1,7 @@
+properties:
+  error:
+    example: Unauthorized
+    type: string
+required:
+  - error
+type: object

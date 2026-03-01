@@ -562,10 +562,6 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 			r.id,
 			r.gift_item_id,
 			r.reserved_by_user_id,
-			r.guest_name,
-			r.encrypted_guest_name,
-			r.guest_email,
-			r.encrypted_guest_email,
 			r.reservation_token,
 			r.status,
 			r.reserved_at,
@@ -577,14 +573,11 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 			gi.image_url as gift_item_image_url,
 			gi.price as gift_item_price,
 			w.id as wishlist_id,
-			w.title as wishlist_title,
-			reserver.first_name as reserver_first_name,
-			reserver.last_name as reserver_last_name
+			w.title as wishlist_title
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
 		JOIN wishlist_items wi ON wi.gift_item_id = gi.id
 		JOIN wishlists w ON wi.wishlist_id = w.id
-		LEFT JOIN users reserver ON r.reserved_by_user_id = reserver.id
 		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
@@ -594,12 +587,6 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 	err := r.db.SelectContext(ctx, &reservations, query, ownerUserID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list wishlist owner reservations: %w", err)
-	}
-
-	for i := range reservations {
-		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
-			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
-		}
 	}
 
 	return reservations, nil

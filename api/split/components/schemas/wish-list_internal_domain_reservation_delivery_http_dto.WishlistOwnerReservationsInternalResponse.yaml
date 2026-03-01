@@ -1,0 +1,7 @@
+properties:
+  error:
+    example: Failed to get wishlist owner reservations
+    type: string
+required:
+  - error
+type: object

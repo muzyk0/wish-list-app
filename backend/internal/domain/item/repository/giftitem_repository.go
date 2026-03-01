@@ -60,8 +60,8 @@ const giftItemColumnsAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.
 // public API reservation status accurate without exposing guest identity.
 const giftItemColumnsPublicAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
 	gi.price, gi.priority,
-	COALESCE(gi.reserved_by_user_id, ar.reserved_by_user_id) AS reserved_by_user_id,
-	COALESCE(gi.reserved_at, ar.reserved_at) AS reserved_at,
+	COALESCE(ar.reserved_by_user_id, gi.reserved_by_user_id) AS reserved_by_user_id,
+	COALESCE(ar.reserved_at, gi.reserved_at) AS reserved_at,
 	gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
 	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
 	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`

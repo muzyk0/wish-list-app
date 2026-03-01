@@ -398,12 +398,15 @@ definitions:
   wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse:
     properties:
       expires_at:
+        format: date-time
         type: string
       gift_item:
         $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary'
       id:
+        format: uuid
         type: string
       reserved_at:
+        format: date-time
         type: string
       status:
         type: string
@@ -416,6 +419,14 @@ definitions:
     - status
     - wishlist
     type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse:
+    properties:
+      error:
+        example: Failed to get wishlist owner reservations
+        type: string
+    required:
+    - error
+    type: object
   wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse:
     properties:
       data:
@@ -426,6 +437,14 @@ definitions:
     required:
     - data
     - pagination
+    type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+    required:
+    - error
     type: object
   wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse:
     properties:
@@ -2113,15 +2132,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse'
       security:
       - BearerAuth: []
       summary: Get reservations on items in the authenticated user's wishlists

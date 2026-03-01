@@ -170,10 +170,21 @@ export default function ImageUpload({
     }
   };
 
-  const isValidUrl = (s: string) =>
-    s.startsWith('http://') || s.startsWith('https://');
+  const isValidUrl = (s: string) => {
+    try {
+      const url = new URL(s);
+      return (
+        (url.protocol === 'http:' || url.protocol === 'https:') &&
+        Boolean(url.hostname)
+      );
+    } catch {
+      return false;
+    }
+  };
 
   const applyUrl = () => {
+    if (disabled || uploading) return;
+
     const trimmed = urlInput.trim();
     if (!isValidUrl(trimmed)) {
       dialog.error(
@@ -311,9 +322,15 @@ export default function ImageUpload({
             autoCorrect={false}
             keyboardType="url"
             returnKeyType="go"
+            editable={!disabled && !uploading}
             onSubmitEditing={applyUrl}
           />
-          <Button mode="contained" onPress={applyUrl} style={styles.urlApply}>
+          <Button
+            mode="contained"
+            onPress={applyUrl}
+            style={styles.urlApply}
+            disabled={disabled || uploading}
+          >
             Apply
           </Button>
         </View>

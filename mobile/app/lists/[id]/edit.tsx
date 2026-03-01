@@ -39,7 +39,7 @@ const updateWishListSchema = z.object({
 
 type UpdateWishListFormData = z.infer<typeof updateWishListSchema>;
 
-const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'lk.9art.ru';
 
 // ─── Slug field sub-component ─────────────────────────────────────────
 function SlugField({

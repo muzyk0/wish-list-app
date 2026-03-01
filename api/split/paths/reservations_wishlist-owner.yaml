@@ -27,17 +27,15 @@ get:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse.yaml
   security:
     - BearerAuth: []
   summary: Get reservations on items in the authenticated user's wishlists

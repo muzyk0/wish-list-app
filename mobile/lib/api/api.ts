@@ -612,10 +612,20 @@ class ApiClient {
     return data as unknown as Reservation[];
   }
 
-  async getWishlistOwnerReservations(): Promise<WishlistOwnerReservation[]> {
+  async getWishlistOwnerReservations(options?: {
+    page?: number;
+    limit?: number;
+  }): Promise<WishlistOwnerReservation[]> {
     const { data, error } = await this.client.GET(
       '/reservations/wishlist-owner',
-      {},
+      {
+        params: {
+          query: {
+            page: options?.page,
+            limit: options?.limit,
+          },
+        },
+      },
     );
 
     if (error) {

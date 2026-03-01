@@ -1,12 +1,15 @@
 properties:
   expires_at:
+    format: date-time
     type: string
   gift_item:
     $ref: >-
       ./wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary.yaml
   id:
+    format: uuid
     type: string
   reserved_at:
+    format: date-time
     type: string
   status:
     type: string

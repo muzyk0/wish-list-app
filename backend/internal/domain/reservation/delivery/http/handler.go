@@ -247,8 +247,8 @@ func (h *Handler) GetGuestReservations(c echo.Context) error {
 //	@Param			page	query		int									false	"Page number (default 1)"
 //	@Param			limit	query		int									false	"Items per page (default 10, max 100)"
 //	@Success		200		{object}	dto.WishlistOwnerReservationsResponse	"List of reservations on owner's items"
-//	@Failure		401		{object}	map[string]string					"Unauthorized"
-//	@Failure		500		{object}	map[string]string					"Internal server error"
+//	@Failure		401		{object}	dto.WishlistOwnerReservationsUnauthorizedResponse	"Unauthorized"
+//	@Failure		500		{object}	dto.WishlistOwnerReservationsInternalResponse	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/reservations/wishlist-owner [get]
 func (h *Handler) GetWishlistOwnerReservations(c echo.Context) error {
