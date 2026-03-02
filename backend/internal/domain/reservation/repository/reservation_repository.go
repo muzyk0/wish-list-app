@@ -595,6 +595,13 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 		return nil, fmt.Errorf("failed to list wishlist owner reservations: %w", err)
 	}
 
+	// Decrypt guest PII so the owner sees the actual name
+	for i := range reservations {
+		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
+			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
+		}
+	}
+
 	return reservations, nil
 }
 
