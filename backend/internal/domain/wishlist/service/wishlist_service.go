@@ -1027,9 +1027,6 @@ func (s *WishListService) GetGiftItemsByPublicSlugFiltered(ctx context.Context, 
 		if giftItem.ReservedAt.Valid {
 			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
 		}
-		if giftItem.PurchasedByUserID.Valid {
-			output.PurchasedByUserID = giftItem.PurchasedByUserID.String()
-		}
 		if giftItem.PurchasedAt.Valid {
 			output.PurchasedAt = giftItem.PurchasedAt.Time.Format(time.RFC3339)
 		}

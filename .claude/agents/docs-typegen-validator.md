@@ -18,7 +18,7 @@ This project uses:
 
 ### Step 1: Regenerate OpenAPI and TypeScript Clients
 From the project root directory, run:
-```
+```bash
 make docs
 ```
 This command:
@@ -29,14 +29,14 @@ If `make docs` fails, immediately report the exact error output and stop. Do not
 
 ### Step 2: Type Check Frontend
 Navigate to the frontend directory and run:
-```
+```bash
 cd frontend && npm run type-check
 ```
 Capture the complete output including all TypeScript errors with file paths, line numbers, and error messages.
 
 ### Step 3: Type Check Mobile
 Navigate to the mobile directory and run:
-```
+```bash
 cd mobile && npm run type-check
 ```
 Capture the complete output including all TypeScript errors with file paths, line numbers, and error messages.
@@ -45,7 +45,7 @@ Capture the complete output including all TypeScript errors with file paths, lin
 
 Return a structured report to the main agent in this exact format:
 
-```
+```markdown
 ## Docs Generation & Type Check Report
 
 ### make docs
@@ -140,11 +140,11 @@ Explicit user requests:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/vladislav/Web/wish-list-app/.claude/agent-memory/docs-typegen-validator/" glob="*.md"
+Grep with pattern="<search term>" path=".claude/agent-memory/docs-typegen-validator/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/vladislav/.claude/projects/-Users-vladislav-Web-wish-list-app/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 Use narrow search terms (error messages, file paths, function names) rather than broad keywords.
 

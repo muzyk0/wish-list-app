@@ -1,6 +1,10 @@
 'use client';
 
-import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +64,13 @@ export default function PublicWishListPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['public-gift-items', slug, debouncedSearch, statusFilter, sortBy],
+    queryKey: [
+      'public-gift-items',
+      slug,
+      debouncedSearch,
+      statusFilter,
+      sortBy,
+    ],
     queryFn: ({ pageParam }) =>
       apiClient.getPublicGiftItems(
         slug,
@@ -90,12 +100,7 @@ export default function PublicWishListPage() {
   const totalItems = itemsData?.pages[0]?.total ?? 0;
 
   // Count reserved items from loaded pages
-  const reservedCount = giftItems.filter(
-    (item) =>
-      item.reserved_by_user_id ||
-      item.reserved_at ||
-      item.purchased_by_user_id,
-  ).length;
+  const reservedCount = giftItems.filter((item) => item.is_reserved).length;
 
   const hasActiveFilters =
     searchQuery.trim() !== '' ||
@@ -271,7 +276,9 @@ export default function PublicWishListPage() {
           pointerEvents: isFilterTransition ? 'none' : undefined,
         }}
       >
-        {giftItems.length === 0 && !isFetchingNextPage && !isFilterTransition ? (
+        {giftItems.length === 0 &&
+        !isFetchingNextPage &&
+        !isFilterTransition ? (
           hasActiveFilters ? (
             <div
               className="rounded-2xl px-5 py-8 text-center text-sm sm:text-base"

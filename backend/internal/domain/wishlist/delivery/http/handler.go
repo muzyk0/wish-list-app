@@ -209,6 +209,7 @@ func (h *Handler) GetWishListByPublicSlug(c echo.Context) error {
 //	@Param			status	query		string						false	"Filter by status"					Enums(available, reserved, purchased)
 //	@Param			sort_by	query		string						false	"Sort order"						Enums(position, name_asc, name_desc, price_asc, price_desc, priority_desc)
 //	@Success		200		{object}	dto.GetGiftItemsResponse	"Gift items retrieved successfully"
+//	@Failure		400		{object}	map[string]string			"Invalid query parameter value"
 //	@Failure		404		{object}	map[string]string			"Wish list not found or not public"
 //	@Failure		500		{object}	map[string]string			"Internal server error"
 //	@Router			/public/wishlists/{slug}/gift-items [get]
@@ -220,14 +221,13 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 	status := c.QueryParam("status")
 	sortBy := c.QueryParam("sort_by")
 
-	// Silently reset invalid enum values to empty string (no error to caller)
 	validStatuses := map[string]bool{"available": true, "reserved": true, "purchased": true}
-	if !validStatuses[status] {
-		status = ""
+	if status != "" && !validStatuses[status] {
+		return apperrors.BadRequest("invalid status value, must be one of: available, reserved, purchased")
 	}
 	validSortBys := map[string]bool{"position": true, "name_asc": true, "name_desc": true, "price_asc": true, "price_desc": true, "priority_desc": true}
-	if !validSortBys[sortBy] {
-		sortBy = ""
+	if sortBy != "" && !validSortBys[sortBy] {
+		return apperrors.BadRequest("invalid sort_by value, must be one of: position, name_asc, name_desc, price_asc, price_desc, priority_desc")
 	}
 
 	ctx := c.Request().Context()

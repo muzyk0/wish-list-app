@@ -116,12 +116,12 @@ type GiftItemRepositoryInterfaceMock struct {
 			GiftItem itemmodels.GiftItem
 		}
 	}
-	lockCreateWithOwner                    sync.RWMutex
-	lockGetByID                            sync.RWMutex
-	lockGetByWishList                      sync.RWMutex
+	lockCreateWithOwner                     sync.RWMutex
+	lockGetByID                             sync.RWMutex
+	lockGetByWishList                       sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
-	lockGetPublicWishListGiftItemsFiltered sync.RWMutex
-	lockUpdate                             sync.RWMutex
+	lockGetPublicWishListGiftItemsFiltered  sync.RWMutex
+	lockUpdate                              sync.RWMutex
 }
 
 // CreateWithOwner calls CreateWithOwnerFunc.

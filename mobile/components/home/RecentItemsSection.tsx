@@ -43,8 +43,8 @@ export function RecentItemsSection({
     return 'Standalone';
   };
 
-  const getListId = (item: GiftItem): string => {
-    return item.wishlist_ids?.[0] ?? '';
+  const getListId = (item: GiftItem): string | null => {
+    return item.wishlist_ids?.[0] ?? null;
   };
 
   return (
@@ -69,7 +69,10 @@ export function RecentItemsSection({
               key={item.id}
               item={item}
               listTitle={getListTitle(item)}
-              onPress={() => onItemPress(getListId(item))}
+              onPress={() => {
+                const listId = getListId(item);
+                if (listId) onItemPress(listId);
+              }}
               index={index}
             />
           ))}

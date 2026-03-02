@@ -76,7 +76,7 @@ Examples of what to record:
 
 # Persistent Agent Memory
 
-You have a persistent Persistent Agent Memory directory at `/Users/vladislav/Web/wish-list-app/.claude/agent-memory/backend-mock-generator/`. Its contents persist across conversations.
+You have a persistent Persistent Agent Memory directory at `.claude/agent-memory/backend-mock-generator/` (relative to the project root). Its contents persist across conversations.
 
 As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
 
@@ -109,11 +109,11 @@ Explicit user requests:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/vladislav/Web/wish-list-app/.claude/agent-memory/backend-mock-generator/" glob="*.md"
+Grep with pattern="<search term>" path=".claude/agent-memory/backend-mock-generator/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/vladislav/.claude/projects/-Users-vladislav-Web-wish-list-app/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 Use narrow search terms (error messages, file paths, function names) rather than broad keywords.
 

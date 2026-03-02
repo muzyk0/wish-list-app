@@ -7,6 +7,11 @@ import (
 	"wish-list/internal/domain/reservation/service"
 )
 
+// ErrorResponse represents a standard error API response.
+type ErrorResponse struct {
+	Error string `json:"error" validate:"required" example:"error message"`
+}
+
 type CreateReservationResponse struct {
 	ID               string  `json:"id" validate:"required"`
 	GiftItemID       string  `json:"gift_item_id" validate:"required"`
@@ -161,9 +166,17 @@ func FromReservationStatusOutput(s *service.ReservationStatusOutput) *Reservatio
 	return resp
 }
 
+// PaginationResponse is the standard pagination envelope returned by paginated endpoints.
+type PaginationResponse struct {
+	Page       int `json:"page" validate:"required" example:"1"`
+	Limit      int `json:"limit" validate:"required" example:"10"`
+	Total      int `json:"total" validate:"required" example:"42"`
+	TotalPages int `json:"total_pages" validate:"required" example:"5"`
+}
+
 type UserReservationsResponse struct {
 	Data       []ReservationDetailsResponse `json:"data" validate:"required"`
-	Pagination any                          `json:"pagination" validate:"required"`
+	Pagination PaginationResponse           `json:"pagination" validate:"required"`
 }
 
 // WishlistOwnerReservationResponse is the "My Wishes" view: items from the owner's wishlists
@@ -180,7 +193,7 @@ type WishlistOwnerReservationResponse struct {
 
 type WishlistOwnerReservationsResponse struct {
 	Data       []WishlistOwnerReservationResponse `json:"data" validate:"required"`
-	Pagination any                                `json:"pagination" validate:"required"`
+	Pagination PaginationResponse                 `json:"pagination" validate:"required"`
 }
 
 // WishlistOwnerReservationsUnauthorizedResponse documents 401 response shape for owner reservations endpoint.

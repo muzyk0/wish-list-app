@@ -7,34 +7,56 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { WishlistOwnerReservation } from '@/lib/api/types';
 
+const PAGE_LIMIT = 20;
+
 export function MyWishesReserved() {
   const [reservations, setReservations] = useState<WishlistOwnerReservation[]>(
     [],
   );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchReservations = async () => {
+  const fetchReservations = async (pageNum: number, replace: boolean) => {
     try {
-      setLoading(true);
-      const data = await apiClient.getWishlistOwnerReservations();
-      setReservations(data);
+      if (replace) setLoading(true);
+      else setLoadingMore(true);
+
+      const data = await apiClient.getWishlistOwnerReservations({
+        page: pageNum,
+        limit: PAGE_LIMIT,
+      });
+
+      setReservations((prev) => (replace ? data : [...prev, ...data]));
+      setHasMore(data.length === PAGE_LIMIT);
     } catch (error) {
       console.error('Failed to load wish reservations:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMore(false);
     }
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Execute once
   useEffect(() => {
-    void fetchReservations();
+    void fetchReservations(1, true);
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchReservations();
+    setPage(1);
+    setHasMore(true);
+    fetchReservations(1, true);
+  };
+
+  const onEndReached = () => {
+    if (loadingMore || !hasMore) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    void fetchReservations(nextPage, false);
   };
 
   const renderItem = ({ item }: { item: WishlistOwnerReservation }) => {
@@ -183,6 +205,17 @@ export function MyWishesReserved() {
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator
+              size="small"
+              color="#FFD700"
+              style={styles.footerLoader}
+            />
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -309,6 +342,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.7)',
     marginTop: 16,
+  },
+  footerLoader: {
+    paddingVertical: 16,
   },
   emptyCard: {
     borderRadius: 24,

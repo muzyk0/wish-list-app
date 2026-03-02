@@ -34,6 +34,9 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, 8080, cfg.ServerPort)
 	assert.Equal(t, 24, cfg.JWTExpiryHours)
 	assert.Equal(t, []string{
+		"https://9art.ru",
+		"https://www.9art.ru",
+		"https://lk.9art.ru",
 		"http://localhost:3000",
 		"http://localhost:19006",
 		"http://localhost:19000",

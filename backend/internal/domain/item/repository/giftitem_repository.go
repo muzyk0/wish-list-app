@@ -326,7 +326,7 @@ func (r *GiftItemRepository) GetStats(ctx context.Context, ownerID pgtype.UUID) 
 		SELECT
 			COUNT(*) FILTER (WHERE archived_at IS NULL) AS total_items,
 			COUNT(*) FILTER (
-				WHERE archived_at IS NULL AND (
+				WHERE archived_at IS NULL AND purchased_at IS NULL AND (
 					reserved_at IS NOT NULL
 					OR manual_reserved_at IS NOT NULL
 					OR EXISTS (
@@ -526,6 +526,7 @@ func (r *GiftItemRepository) GetPublicWishListGiftItemsFiltered(ctx context.Cont
 	case "available":
 		whereConditions = append(whereConditions,
 			"gi.purchased_by_user_id IS NULL",
+			"gi.purchased_at IS NULL",
 			"gi.reserved_by_user_id IS NULL",
 			"gi.reserved_at IS NULL",
 			"gi.manual_reserved_by_name IS NULL",
@@ -534,6 +535,7 @@ func (r *GiftItemRepository) GetPublicWishListGiftItemsFiltered(ctx context.Cont
 	case "reserved":
 		whereConditions = append(whereConditions,
 			"gi.purchased_by_user_id IS NULL",
+			"gi.purchased_at IS NULL",
 			fmt.Sprintf("(gi.reserved_by_user_id IS NOT NULL OR gi.reserved_at IS NOT NULL OR gi.manual_reserved_by_name IS NOT NULL OR EXISTS (SELECT 1 FROM reservations r WHERE r.gift_item_id = gi.id AND r.status = 'active'))"),
 		)
 	case "purchased":

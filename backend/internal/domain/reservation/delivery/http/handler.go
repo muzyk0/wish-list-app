@@ -38,8 +38,8 @@ func NewHandler(svc service.ReservationServiceInterface) *Handler {
 //	@Param			itemId				path		string							true	"Gift Item ID"
 //	@Param			reservation_request	body		dto.CreateReservationRequest		false	"Reservation information (guest name required, email optional)"
 //	@Success		200					{object}	dto.CreateReservationResponse	"Reservation created successfully"
-//	@Failure		400					{object}	map[string]string				"Invalid request body or validation error (guests need name)"
-//	@Failure		500					{object}	map[string]string				"Internal server error"
+//	@Failure		400					{object}	dto.ErrorResponse				"Invalid request body or validation error (guests need name)"
+//	@Failure		500					{object}	dto.ErrorResponse				"Internal server error"
 //	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [post]
 func (h *Handler) CreateReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
@@ -93,9 +93,9 @@ func (h *Handler) CreateReservation(c echo.Context) error {
 //	@Param			itemId			path		string							true	"Gift Item ID"
 //	@Param			cancel_request	body		dto.CancelReservationRequest		false	"Cancellation information (required for guests)"
 //	@Success		200				{object}	dto.CreateReservationResponse	"Reservation canceled successfully"
-//	@Failure		400				{object}	map[string]string				"Invalid request body or validation error"
-//	@Failure		401				{object}	map[string]string				"Unauthorized (guests need reservation token)"
-//	@Failure		500				{object}	map[string]string				"Internal server error"
+//	@Failure		400				{object}	dto.ErrorResponse				"Invalid request body or validation error"
+//	@Failure		401				{object}	dto.ErrorResponse				"Unauthorized (guests need reservation token)"
+//	@Failure		500				{object}	dto.ErrorResponse				"Internal server error"
 //	@Router			/public/reservations/wishlist/{wishlistId}/item/{itemId} [delete]
 func (h *Handler) CancelReservation(c echo.Context) error {
 	wishListID := c.Param("wishlistId")
@@ -159,11 +159,11 @@ func (h *Handler) CancelReservation(c echo.Context) error {
 //	@Description	Get all reservations made by the authenticated user with pagination.
 //	@Tags			Reservations
 //	@Produce		json
-//	@Param			page	query		int								false	"Page number (default 1)"
-//	@Param			limit	query		int								false	"Items per page (default 10, max 100)"
+//	@Param			page	query		int								false	"Page number"		minimum(1)	default(1)
+//	@Param			limit	query		int								false	"Items per page"	minimum(1)	maximum(100)	default(10)
 //	@Success		200		{object}	dto.UserReservationsResponse		"List of user reservations retrieved successfully"
-//	@Failure		401		{object}	map[string]string				"Unauthorized"
-//	@Failure		500		{object}	map[string]string				"Internal server error"
+//	@Failure		401		{object}	dto.ErrorResponse				"Unauthorized"
+//	@Failure		500		{object}	dto.ErrorResponse				"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/reservations/user [get]
 func (h *Handler) GetUserReservations(c echo.Context) error {
@@ -196,11 +196,11 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 
 	response := dto.UserReservationsResponse{
 		Data: dto.FromReservationDetails(reservations),
-		Pagination: map[string]any{
-			"page":       pagination.Page,
-			"limit":      pagination.Limit,
-			"total":      totalCount,
-			"totalPages": totalPages,
+		Pagination: dto.PaginationResponse{
+			Page:       pagination.Page,
+			Limit:      pagination.Limit,
+			Total:      totalCount,
+			TotalPages: totalPages,
 		},
 	}
 
@@ -215,8 +215,8 @@ func (h *Handler) GetUserReservations(c echo.Context) error {
 //	@Produce		json
 //	@Param			token	query		string								true	"Reservation token"
 //	@Success		200		{array}		dto.ReservationDetailsResponse		"List of guest reservations retrieved successfully"
-//	@Failure		400		{object}	map[string]string					"Invalid request parameters"
-//	@Failure		500		{object}	map[string]string					"Internal server error"
+//	@Failure		400		{object}	dto.ErrorResponse					"Invalid request parameters"
+//	@Failure		500		{object}	dto.ErrorResponse					"Internal server error"
 //	@Router			/guest/reservations [get]
 func (h *Handler) GetGuestReservations(c echo.Context) error {
 	tokenStr := c.QueryParam("token")
@@ -244,8 +244,8 @@ func (h *Handler) GetGuestReservations(c echo.Context) error {
 //	@Description	Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.
 //	@Tags			Reservations
 //	@Produce		json
-//	@Param			page	query		int									false	"Page number (default 1)"
-//	@Param			limit	query		int									false	"Items per page (default 10, max 100)"
+//	@Param			page	query		int									false	"Page number"		minimum(1)	default(1)
+//	@Param			limit	query		int									false	"Items per page"	minimum(1)	maximum(100)	default(10)
 //	@Success		200		{object}	dto.WishlistOwnerReservationsResponse	"List of reservations on owner's items"
 //	@Failure		401		{object}	dto.WishlistOwnerReservationsUnauthorizedResponse	"Unauthorized"
 //	@Failure		500		{object}	dto.WishlistOwnerReservationsInternalResponse	"Internal server error"
@@ -279,11 +279,11 @@ func (h *Handler) GetWishlistOwnerReservations(c echo.Context) error {
 
 	response := dto.WishlistOwnerReservationsResponse{
 		Data: dto.FromWishlistOwnerReservationDetails(reservations),
-		Pagination: map[string]any{
-			"page":       pagination.Page,
-			"limit":      pagination.Limit,
-			"total":      totalCount,
-			"totalPages": totalPages,
+		Pagination: dto.PaginationResponse{
+			Page:       pagination.Page,
+			Limit:      pagination.Limit,
+			Total:      totalCount,
+			TotalPages: totalPages,
 		},
 	}
 
@@ -299,7 +299,7 @@ func (h *Handler) GetWishlistOwnerReservations(c echo.Context) error {
 //	@Param			slug	path		string							true	"Public wish list slug"
 //	@Param			itemId	path		string							true	"Gift Item ID"
 //	@Success		200		{object}	dto.ReservationStatusResponse	"Reservation status retrieved successfully"
-//	@Failure		500		{object}	map[string]string				"Internal server error"
+//	@Failure		500		{object}	dto.ErrorResponse				"Internal server error"
 //	@Router			/public/reservations/list/{slug}/item/{itemId} [get]
 func (h *Handler) GetReservationStatus(c echo.Context) error {
 	publicSlug := c.Param("slug")
