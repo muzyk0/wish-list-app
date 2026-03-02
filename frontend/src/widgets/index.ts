@@ -1,6 +1,4 @@
-// Widgets Layer - Public API
+// Widgets Layer - Public API (reusable page-level compositions)
 
 export * from './footer';
 export * from './header';
-export * from './my-reservations';
-export * from './public-wishlist';

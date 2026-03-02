@@ -23,6 +23,7 @@
       "@/entities/*": ["./src/entities/*"],
       "@/features/*": ["./src/features/*"],
       "@/widgets/*": ["./src/widgets/*"],
+      "@/screens/*": ["./src/screens/*"],
       "@/app/*": ["./src/app/*"],
       "@/*": ["./src/*"]
     }

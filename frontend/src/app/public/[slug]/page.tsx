@@ -1,6 +1,6 @@
 'use client';
 
-import { PublicWishlistPage } from '@/widgets/public-wishlist';
+import { PublicWishlistPage } from '@/screens/public-wishlist';
 
 export default function Page() {
   return <PublicWishlistPage />;
