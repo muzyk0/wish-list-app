@@ -51,9 +51,10 @@ export function MyReservationsList() {
       const stored = getStoredReservations();
       // Filter out any invalid tokens (belt and suspenders with lib filtering)
       const validStored = stored.filter(
-        (s) => s.reservationToken &&
-               s.reservationToken !== '' &&
-               s.reservationToken !== NIL_UUID
+        (s) =>
+          s.reservationToken &&
+          s.reservationToken !== '' &&
+          s.reservationToken !== NIL_UUID,
       );
       if (validStored.length === 0) return [];
 

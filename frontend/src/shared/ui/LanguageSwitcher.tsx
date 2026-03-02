@@ -40,7 +40,8 @@ export function LanguageSwitcher() {
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
 
@@ -49,7 +50,9 @@ export function LanguageSwitcher() {
     setIsOpen(false);
   };
 
-  const currentLangLabel = LANGUAGES.find((lang) => lang.code === currentLanguage);
+  const currentLangLabel = LANGUAGES.find(
+    (lang) => lang.code === currentLanguage,
+  );
 
   return (
     <div ref={ref} className="relative">

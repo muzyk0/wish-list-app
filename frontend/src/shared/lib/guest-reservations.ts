@@ -47,9 +47,10 @@ export function getStoredReservations(): StoredReservation[] {
   const NIL_UUID = '00000000-0000-0000-0000-000000000000';
   const all = readFromStorage();
   const valid = all.filter(
-    (r) => r.reservationToken &&
-           r.reservationToken !== '' &&
-           r.reservationToken !== NIL_UUID
+    (r) =>
+      r.reservationToken &&
+      r.reservationToken !== '' &&
+      r.reservationToken !== NIL_UUID,
   );
   // Auto-clean stale entries if any were filtered out
   if (valid.length !== all.length) {
