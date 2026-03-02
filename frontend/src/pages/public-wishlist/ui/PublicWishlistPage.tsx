@@ -36,7 +36,7 @@ type SortOption =
 const PAGE_SIZE = 12;
 
 export function PublicWishlistPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams<{ slug: string }>()!;
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
