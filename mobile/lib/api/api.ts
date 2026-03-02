@@ -647,6 +647,27 @@ class ApiClient {
       throw error;
     }
   }
+
+  async cancelOwnerReservation(reservationId: string): Promise<void> {
+    const token = await getAccessToken();
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/wishlist-owner/${reservationId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(
+        (body as { error?: string }).error ?? 'Failed to cancel reservation',
+      );
+    }
+  }
 }
 
 export const apiClient = new ApiClient();

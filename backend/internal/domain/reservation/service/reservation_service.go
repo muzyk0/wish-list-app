@@ -51,6 +51,7 @@ type ReservationServiceInterface interface {
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
 	GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error)
 	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+	CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*ReservationOutput, error)
 }
 
 type ReservationService struct {
@@ -302,6 +303,20 @@ func (s *ReservationService) GetWishlistOwnerReservations(ctx context.Context, o
 
 func (s *ReservationService) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
 	return s.repo.CountWishlistOwnerReservations(ctx, ownerUserID)
+}
+
+// CancelReservationByOwner allows a wishlist owner to cancel any active reservation on their items.
+func (s *ReservationService) CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*ReservationOutput, error) {
+	reservation, err := s.repo.CancelReservationByOwner(ctx, ownerUserID, reservationID)
+	if err != nil {
+		if errors.Is(err, repository.ErrReservationNotFound) {
+			return nil, ErrReservationNotFound
+		}
+		return nil, fmt.Errorf("failed to cancel reservation by owner: %w", err)
+	}
+
+	logger.Info("reservation canceled by owner", "reservation_id", reservationID.String(), "owner_id", ownerUserID.String())
+	return s.mapToOutput(reservation), nil
 }
 
 // CreateGuestReservation handles guest reservation with token-based authentication

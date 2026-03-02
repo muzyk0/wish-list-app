@@ -37,6 +37,7 @@ type ReservationRepositoryInterface interface {
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
 	ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+	CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error)
 	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 }
 
@@ -53,15 +54,15 @@ type ReservationDetail struct {
 	ReservedAt          pgtype.Timestamptz `db:"reserved_at"`
 	ExpiresAt           pgtype.Timestamptz `db:"expires_at"`
 	CanceledAt          pgtype.Timestamptz `db:"canceled_at"`
-	CancelReason        pgtype.Text `db:"cancel_reason"`
-	NotificationSent    pgtype.Bool `db:"notification_sent"`
-	GiftItemName        pgtype.Text `db:"gift_item_name"`
-	GiftItemImageURL    pgtype.Text `db:"gift_item_image_url"`
-	GiftItemPrice       pgtype.Numeric `db:"gift_item_price"`
-	WishlistID          pgtype.UUID `db:"wishlist_id"`
-	WishlistTitle       pgtype.Text `db:"wishlist_title"`
-	OwnerFirstName      pgtype.Text `db:"owner_first_name"`
-	OwnerLastName       pgtype.Text `db:"owner_last_name"`
+	CancelReason        pgtype.Text        `db:"cancel_reason"`
+	NotificationSent    pgtype.Bool        `db:"notification_sent"`
+	GiftItemName        pgtype.Text        `db:"gift_item_name"`
+	GiftItemImageURL    pgtype.Text        `db:"gift_item_image_url"`
+	GiftItemPrice       pgtype.Numeric     `db:"gift_item_price"`
+	WishlistID          pgtype.UUID        `db:"wishlist_id"`
+	WishlistTitle       pgtype.Text        `db:"wishlist_title"`
+	OwnerFirstName      pgtype.Text        `db:"owner_first_name"`
+	OwnerLastName       pgtype.Text        `db:"owner_last_name"`
 	// Reserved for future use; intentionally not populated in ListWishlistOwnerReservations
 	// to preserve reserver privacy (the owner sees that an item is reserved, not who reserved it).
 	ReserverFirstName pgtype.Text `db:"reserver_first_name"`
@@ -570,14 +571,19 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 			r.canceled_at,
 			r.cancel_reason,
 			r.notification_sent,
+			r.guest_name,
+			r.encrypted_guest_name,
 			gi.name as gift_item_name,
 			gi.image_url as gift_item_image_url,
 			gi.price as gift_item_price,
 			w.id as wishlist_id,
-			w.title as wishlist_title
+			w.title as wishlist_title,
+			reservers.first_name as reserver_first_name,
+			reservers.last_name as reserver_last_name
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
 		JOIN wishlists w ON r.wishlist_id = w.id
+		LEFT JOIN users reservers ON r.reserved_by_user_id = reservers.id
 		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
@@ -609,6 +615,40 @@ func (r *ReservationRepository) CountWishlistOwnerReservations(ctx context.Conte
 	}
 
 	return count, nil
+}
+
+// CancelReservationByOwner cancels an active reservation on behalf of the wishlist owner.
+// The owner can cancel any reservation on items that belong to their wishlists.
+func (r *ReservationRepository) CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error) {
+	query := `
+		UPDATE reservations r
+		SET
+			status = 'canceled',
+			canceled_at = NOW(),
+			cancel_reason = 'Canceled by wishlist owner',
+			updated_at = NOW()
+		FROM wishlists w
+		WHERE r.id = $1
+		  AND r.wishlist_id = w.id
+		  AND w.owner_id = $2
+		  AND r.status = 'active'
+		RETURNING
+			r.id, r.wishlist_id, r.gift_item_id, r.reserved_by_user_id,
+			r.guest_name, r.encrypted_guest_name, r.guest_email, r.encrypted_guest_email,
+			r.reservation_token, r.status, r.reserved_at, r.expires_at,
+			r.canceled_at, r.cancel_reason, r.notification_sent, r.updated_at
+	`
+
+	var reservation models.Reservation
+	err := r.db.QueryRowxContext(ctx, query, reservationID, ownerUserID).StructScan(&reservation)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrReservationNotFound
+		}
+		return nil, fmt.Errorf("failed to cancel reservation by owner: %w", err)
+	}
+
+	return &reservation, nil
 }
 
 // LinkGuestReservationsToUserByEmail attaches active guest reservations to a user account by email.

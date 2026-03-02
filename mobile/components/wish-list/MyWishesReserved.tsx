@@ -2,9 +2,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
+import { dialog } from '@/stores/dialogStore';
 import type { WishlistOwnerReservation } from '@/lib/api/types';
 
 const PAGE_LIMIT = 20;
@@ -57,6 +64,22 @@ export function MyWishesReserved() {
     const nextPage = page + 1;
     setPage(nextPage);
     void fetchReservations(nextPage, false);
+  };
+
+  const handleCancelByOwner = (reservationId: string, itemName: string) => {
+    dialog.confirm({
+      title: 'Cancel Reservation',
+      message: `Cancel the reservation for "${itemName}"? The person who reserved it will no longer have it reserved.`,
+      onConfirm: async () => {
+        try {
+          await apiClient.cancelOwnerReservation(reservationId);
+          dialog.success('Reservation canceled successfully');
+          onRefresh();
+        } catch {
+          dialog.error('Failed to cancel reservation. Please try again.');
+        }
+      },
+    });
   };
 
   const renderItem = ({ item }: { item: WishlistOwnerReservation }) => {
@@ -137,20 +160,52 @@ export function MyWishesReserved() {
             </Text>
           </View>
 
-          {/* Date */}
+          {/* Reserved by */}
+          {item.reserved_by_name && (
+            <View style={styles.infoRow}>
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={16}
+                color="rgba(255, 255, 255, 0.5)"
+              />
+              <Text style={styles.infoText} numberOfLines={1}>
+                {item.reserved_by_name}
+              </Text>
+            </View>
+          )}
+
+          {/* Date + Cancel row */}
           <View style={styles.dateRow}>
-            <MaterialCommunityIcons
-              name="calendar-check"
-              size={14}
-              color="rgba(255, 255, 255, 0.4)"
-            />
-            <Text style={styles.dateText}>
-              {new Date(item.reserved_at).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </Text>
+            <View style={styles.dateInfo}>
+              <MaterialCommunityIcons
+                name="calendar-check"
+                size={14}
+                color="rgba(255, 255, 255, 0.4)"
+              />
+              <Text style={styles.dateText}>
+                {new Date(item.reserved_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </Text>
+            </View>
+
+            {item.status === 'active' && (
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() =>
+                  handleCancelByOwner(item.id, item.gift_item.name)
+                }
+              >
+                <MaterialCommunityIcons
+                  name="close-circle-outline"
+                  size={14}
+                  color="#FF6B6B"
+                />
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </Pressable>
+            )}
           </View>
         </View>
       </BlurView>
@@ -332,11 +387,32 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
   dateText: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.5)',
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  cancelButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FF6B6B',
   },
   loadingText: {
     fontSize: 16,

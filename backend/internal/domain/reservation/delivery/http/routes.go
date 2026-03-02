@@ -20,6 +20,7 @@ func RegisterRoutes(
 	authenticated := e.Group("/api/reservations", authMiddleware)
 	authenticated.GET("/user", h.GetUserReservations)
 	authenticated.GET("/wishlist-owner", h.GetWishlistOwnerReservations)
+	authenticated.DELETE("/wishlist-owner/:reservationId", h.CancelReservationByOwner)
 
 	// Guest reservation routes — no auth required, token-based.
 	guest := e.Group("/api/guest")

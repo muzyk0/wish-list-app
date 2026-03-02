@@ -2,6 +2,7 @@ package dto
 
 import (
 	"fmt"
+	"strings"
 
 	"wish-list/internal/domain/reservation/repository"
 	"wish-list/internal/domain/reservation/service"
@@ -180,15 +181,15 @@ type UserReservationsResponse struct {
 }
 
 // WishlistOwnerReservationResponse is the "My Wishes" view: items from the owner's wishlists
-// that have been reserved. The identity of the reserver is intentionally hidden — only the
-// fact that the item is reserved (and its status) is shown.
+// that have been reserved. Shows the reserver's display name (guest name or registered user name).
 type WishlistOwnerReservationResponse struct {
-	ID         string          `json:"id" validate:"required" format:"uuid"`
-	GiftItem   GiftItemSummary `json:"gift_item" validate:"required"`
-	Wishlist   WishListSummary `json:"wishlist" validate:"required"`
-	Status     string          `json:"status" validate:"required"`
-	ReservedAt string          `json:"reserved_at" validate:"required" format:"date-time"`
-	ExpiresAt  *string         `json:"expires_at" format:"date-time"`
+	ID             string          `json:"id" validate:"required" format:"uuid"`
+	GiftItem       GiftItemSummary `json:"gift_item" validate:"required"`
+	Wishlist       WishListSummary `json:"wishlist" validate:"required"`
+	Status         string          `json:"status" validate:"required"`
+	ReservedAt     string          `json:"reserved_at" validate:"required" format:"date-time"`
+	ExpiresAt      *string         `json:"expires_at" format:"date-time"`
+	ReservedByName *string         `json:"reserved_by_name"`
 }
 
 type WishlistOwnerReservationsResponse struct {
@@ -238,6 +239,25 @@ func FromWishlistOwnerReservationDetail(res repository.ReservationDetail) Wishli
 	if res.ExpiresAt.Valid {
 		expiresAtStr := res.ExpiresAt.Time.Format("2006-01-02T15:04:05Z07:00")
 		detail.ExpiresAt = &expiresAtStr
+	}
+
+	// Populate reserver display name: prefer registered user name, fall back to guest name.
+	var displayName string
+	if res.ReserverFirstName.Valid || res.ReserverLastName.Valid {
+		first := ""
+		if res.ReserverFirstName.Valid {
+			first = res.ReserverFirstName.String
+		}
+		last := ""
+		if res.ReserverLastName.Valid {
+			last = res.ReserverLastName.String
+		}
+		displayName = strings.TrimSpace(first + " " + last)
+	} else if res.GuestName.Valid && res.GuestName.String != "" {
+		displayName = res.GuestName.String
+	}
+	if displayName != "" {
+		detail.ReservedByName = &displayName
 	}
 
 	return detail

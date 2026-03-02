@@ -290,6 +290,43 @@ func (h *Handler) GetWishlistOwnerReservations(c echo.Context) error {
 	return c.JSON(nethttp.StatusOK, response)
 }
 
+// CancelReservationByOwner godoc
+//
+//	@Summary		Cancel a reservation as the wishlist owner
+//	@Description	Allows the authenticated wishlist owner to cancel any active reservation on their items.
+//	@Tags			Reservations
+//	@Produce		json
+//	@Param			reservationId	path		string						true	"Reservation ID"	format(uuid)
+//	@Success		200				{object}	dto.CreateReservationResponse	"Reservation canceled"
+//	@Failure		400				{object}	dto.ErrorResponse				"Invalid reservation ID"
+//	@Failure		401				{object}	dto.ErrorResponse				"Unauthorized"
+//	@Failure		404				{object}	dto.ErrorResponse				"Reservation not found or not owned by caller"
+//	@Security		BearerAuth
+//	@Router			/reservations/wishlist-owner/{reservationId} [delete]
+func (h *Handler) CancelReservationByOwner(c echo.Context) error {
+	userIDStr := auth.MustGetUserID(c)
+	reservationIDStr := c.Param("reservationId")
+
+	userID, err := helpers.ParseUUID(c, userIDStr)
+	if err != nil {
+		return err
+	}
+
+	reservationID, err := helpers.ParseUUID(c, reservationIDStr)
+	if err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	reservation, err := h.service.CancelReservationByOwner(ctx, userID, reservationID)
+	if err != nil {
+		return mapReservationServiceError(err)
+	}
+
+	return c.JSON(nethttp.StatusOK, dto.FromReservationOutput(reservation))
+}
+
 // GetReservationStatus godoc
 //
 //	@Summary		Get the reservation status for a gift item in a public wish list
