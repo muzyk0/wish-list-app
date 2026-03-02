@@ -59,18 +59,28 @@ func Load() *Config {
 	}
 
 	return &Config{
-		ServerHost:           getEnvOrDefault("SERVER_HOST", "localhost"),
-		ServerPort:           getIntEnvOrDefault("SERVER_PORT", 8080),
-		ServerEnv:            serverEnv,
-		DatabaseURL:          getEnvOrDefault("DATABASE_URL", "postgres://user:password@localhost:5432/wishlist_db?sslmode=disable"),
-		DatabaseMaxConns:     getIntEnvOrDefault("DATABASE_MAX_CONNECTIONS", 20),
-		JWTSecret:            jwtSecret,
-		JWTExpiryHours:       getIntEnvOrDefault("JWT_EXPIRY_HOURS", 24),
-		AWSRegion:            getEnvOrDefault("AWS_REGION", "us-east-1"),
-		AWSAccessKeyID:       getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),
-		AWSSecretAccessKey:   getEnvOrDefault("AWS_SECRET_ACCESS_KEY", ""),
-		AWSS3BucketName:      getEnvOrDefault("AWS_S3_BUCKET_NAME", ""),
-		CorsAllowedOrigins:   getSliceEnvOrDefault("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://localhost:19006"}),
+		ServerHost:         getEnvOrDefault("SERVER_HOST", "localhost"),
+		ServerPort:         getIntEnvOrDefault("SERVER_PORT", 8080),
+		ServerEnv:          serverEnv,
+		DatabaseURL:        getEnvOrDefault("DATABASE_URL", "postgres://user:password@localhost:5432/wishlist_db?sslmode=disable"),
+		DatabaseMaxConns:   getIntEnvOrDefault("DATABASE_MAX_CONNECTIONS", 20),
+		JWTSecret:          jwtSecret,
+		JWTExpiryHours:     getIntEnvOrDefault("JWT_EXPIRY_HOURS", 24),
+		AWSRegion:          getEnvOrDefault("AWS_REGION", "us-east-1"),
+		AWSAccessKeyID:     getEnvOrDefault("AWS_ACCESS_KEY_ID", ""),
+		AWSSecretAccessKey: getEnvOrDefault("AWS_SECRET_ACCESS_KEY", ""),
+		AWSS3BucketName:    getEnvOrDefault("AWS_S3_BUCKET_NAME", ""),
+		CorsAllowedOrigins: getSliceEnvOrDefault("CORS_ALLOWED_ORIGINS", []string{
+			"https://9art.ru",        // Production frontend
+			"https://www.9art.ru",    // Production frontend (www)
+			"https://lk.9art.ru",     // Personal office (mobile)
+			"http://localhost:3000",  // Frontend (dev)
+			"http://localhost:19006", // Expo (dev)
+			"http://localhost:19000", // Expo (dev)
+			"http://localhost:8081",  // React Native Metro (dev)
+			"http://127.0.0.1:19006", // Expo alternative (dev)
+			"http://127.0.0.1:8081",  // React Native Metro alternative (dev)
+		}),
 		RedisAddr:            getEnvOrDefault("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:        getEnvOrDefault("REDIS_PASSWORD", ""),
 		RedisDB:              getIntEnvOrDefault("REDIS_DB", 0),

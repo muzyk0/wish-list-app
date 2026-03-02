@@ -60,8 +60,8 @@ const giftItemColumnsAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.
 // public API reservation status accurate without exposing guest identity.
 const giftItemColumnsPublicAliased = `gi.id, gi.owner_id, gi.name, gi.description, gi.link, gi.image_url,
 	gi.price, gi.priority,
-	COALESCE(gi.reserved_by_user_id, ar.reserved_by_user_id) AS reserved_by_user_id,
-	COALESCE(gi.reserved_at, ar.reserved_at) AS reserved_at,
+	COALESCE(ar.reserved_by_user_id, gi.reserved_by_user_id) AS reserved_by_user_id,
+	COALESCE(ar.reserved_at, gi.reserved_at) AS reserved_at,
 	gi.purchased_by_user_id, gi.purchased_at, gi.purchased_price,
 	gi.notes, gi.position, gi.manual_reserved_by_name, gi.manual_reservation_note,
 	gi.manual_reserved_at, gi.archived_at, gi.created_at, gi.updated_at`
@@ -85,6 +85,32 @@ type PaginatedResult struct {
 	WishlistIDsMap map[string][]string // item_id -> []wishlist_id, populated by GetByOwnerPaginated
 }
 
+// ItemStats contains aggregate counts of a user's gift items
+type ItemStats struct {
+	TotalItems int64 `db:"total_items"`
+	Reserved   int64 `db:"reserved"`
+	Purchased  int64 `db:"purchased"`
+}
+
+// PublicItemFilters contains filter and pagination parameters for public wishlist item queries
+type PublicItemFilters struct {
+	Limit  int
+	Offset int
+	Search string // "" = no filter
+	Status string // "" | "available" | "reserved" | "purchased"
+	SortBy string // "" | "position" | "name_asc" | "name_desc" | "price_asc" | "price_desc" | "priority_desc"
+}
+
+// publicSortClauses maps sort keys to safe ORDER BY clauses (whitelist to prevent SQL injection)
+var publicSortClauses = map[string]string{
+	"position":      "gi.position ASC",
+	"name_asc":      "gi.name ASC",
+	"name_desc":     "gi.name DESC",
+	"price_asc":     "gi.price ASC NULLS LAST",
+	"price_desc":    "gi.price DESC NULLS LAST",
+	"priority_desc": "gi.priority DESC NULLS LAST",
+}
+
 // GiftItemRepositoryInterface defines the interface for gift item CRUD operations.
 // For reservation operations, use GiftItemReservationRepository.
 // For purchase operations, use GiftItemPurchaseRepository.
@@ -92,9 +118,13 @@ type GiftItemRepositoryInterface interface {
 	CreateWithOwner(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	GetByID(ctx context.Context, id pgtype.UUID) (*models.GiftItem, error)
 	GetByOwnerPaginated(ctx context.Context, ownerID pgtype.UUID, filters ItemFilters) (*PaginatedResult, error)
+	GetStats(ctx context.Context, ownerID pgtype.UUID) (*ItemStats, error)
 	GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error)
+	GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error)
+	CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*models.GiftItem, error)
 	GetPublicWishListGiftItemsPaginated(ctx context.Context, publicSlug string, limit, offset int) ([]*models.GiftItem, int, error)
+	GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters PublicItemFilters) ([]*models.GiftItem, int, error)
 	GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
 	Update(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 	UpdateWithNewSchema(ctx context.Context, giftItem *models.GiftItem) (*models.GiftItem, error)
@@ -290,17 +320,55 @@ func (r *GiftItemRepository) GetByOwnerPaginated(ctx context.Context, ownerID pg
 	}, nil
 }
 
-// GetByWishList retrieves gift items by wishlist ID via the wishlist_items junction table
+// GetStats returns aggregate counts (total, reserved, purchased) for a user's gift items.
+func (r *GiftItemRepository) GetStats(ctx context.Context, ownerID pgtype.UUID) (*ItemStats, error) {
+	query := `
+		SELECT
+			COUNT(*) FILTER (WHERE archived_at IS NULL) AS total_items,
+			COUNT(*) FILTER (
+				WHERE archived_at IS NULL AND purchased_at IS NULL AND (
+					reserved_at IS NOT NULL
+					OR manual_reserved_at IS NOT NULL
+					OR EXISTS (
+						SELECT 1 FROM reservations rv
+						WHERE rv.gift_item_id = gift_items.id AND rv.status = 'active'
+					)
+				)
+			) AS reserved,
+			COUNT(*) FILTER (WHERE archived_at IS NULL AND purchased_at IS NOT NULL) AS purchased
+		FROM gift_items
+		WHERE owner_id = $1
+	`
+
+	var stats ItemStats
+	if err := r.db.GetContext(ctx, &stats, query, ownerID); err != nil {
+		return nil, fmt.Errorf("failed to get item stats: %w", err)
+	}
+
+	return &stats, nil
+}
+
+// GetByWishList retrieves gift items by wishlist ID via the wishlist_items junction table.
+// Includes a LATERAL JOIN on reservations to surface guest reservations (where gift_items.reserved_*
+// fields are not set) so the wishlist owner sees correct reservation status.
 func (r *GiftItemRepository) GetByWishList(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM gift_items gi
 		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
 		WHERE wi.wishlist_id = $1
 		  AND gi.archived_at IS NULL
 		ORDER BY gi.position ASC
 		LIMIT 100
-	`, giftItemColumnsAliased)
+	`, giftItemColumnsPublicAliased)
 
 	var giftItems []*models.GiftItem
 	err := r.db.SelectContext(ctx, &giftItems, query, wishlistID)
@@ -309,6 +377,65 @@ func (r *GiftItemRepository) GetByWishList(ctx context.Context, wishlistID pgtyp
 	}
 
 	return giftItems, nil
+}
+
+// GetByWishListPaginated retrieves paginated gift items by wishlist ID.
+// Includes a LATERAL JOIN on reservations to surface guest reservations.
+func (r *GiftItemRepository) GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset := (page - 1) * limit
+
+	query := fmt.Sprintf(`
+		SELECT %s
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
+		WHERE wi.wishlist_id = $1
+		  AND gi.archived_at IS NULL
+		ORDER BY wi.added_at DESC, gi.created_at DESC
+		LIMIT $2 OFFSET $3
+	`, giftItemColumnsPublicAliased)
+
+	var giftItems []*models.GiftItem
+	if err := r.db.SelectContext(ctx, &giftItems, query, wishlistID, limit, offset); err != nil {
+		return nil, fmt.Errorf("failed to get paginated gift items by wishlist: %w", err)
+	}
+
+	return giftItems, nil
+}
+
+// CountByWishList returns the total count of active items in a wishlist.
+func (r *GiftItemRepository) CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM wishlist_items wi
+		INNER JOIN gift_items gi ON gi.id = wi.gift_item_id
+		WHERE wi.wishlist_id = $1
+		  AND gi.archived_at IS NULL
+	`
+
+	var count int64
+	if err := r.db.GetContext(ctx, &count, query, wishlistID); err != nil {
+		return 0, fmt.Errorf("failed to count gift items by wishlist: %w", err)
+	}
+
+	return count, nil
 }
 
 // GetPublicWishListGiftItems retrieves gift items for a public wishlist by slug
@@ -380,6 +507,97 @@ func (r *GiftItemRepository) GetPublicWishListGiftItemsPaginated(ctx context.Con
 
 	var giftItems []*models.GiftItem
 	if err := r.db.SelectContext(ctx, &giftItems, query, publicSlug, limit, offset); err != nil {
+		return nil, 0, fmt.Errorf("failed to get public wishlist gift items: %w", err)
+	}
+
+	return giftItems, totalCount, nil
+}
+
+// GetPublicWishListGiftItemsFiltered retrieves paginated gift items for a public wishlist by slug
+// with optional search, status filter, and sort order. Returns items, total count, and any error.
+func (r *GiftItemRepository) GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters PublicItemFilters) ([]*models.GiftItem, int, error) {
+	// Base WHERE conditions; $1 is always the slug
+	whereConditions := []string{"w.public_slug = $1", "w.is_public = true", "gi.archived_at IS NULL"}
+	args := []any{publicSlug}
+	argIndex := 2
+
+	// Status filter using correlated EXISTS
+	switch filters.Status {
+	case "available":
+		whereConditions = append(whereConditions,
+			"gi.purchased_by_user_id IS NULL",
+			"gi.purchased_at IS NULL",
+			"gi.reserved_by_user_id IS NULL",
+			"gi.reserved_at IS NULL",
+			"gi.manual_reserved_by_name IS NULL",
+			fmt.Sprintf("NOT EXISTS (SELECT 1 FROM reservations r WHERE r.gift_item_id = gi.id AND r.status = 'active')"),
+		)
+	case "reserved":
+		whereConditions = append(whereConditions,
+			"gi.purchased_by_user_id IS NULL",
+			"gi.purchased_at IS NULL",
+			fmt.Sprintf("(gi.reserved_by_user_id IS NOT NULL OR gi.reserved_at IS NOT NULL OR gi.manual_reserved_by_name IS NOT NULL OR EXISTS (SELECT 1 FROM reservations r WHERE r.gift_item_id = gi.id AND r.status = 'active'))"),
+		)
+	case "purchased":
+		whereConditions = append(whereConditions,
+			"(gi.purchased_by_user_id IS NOT NULL OR gi.purchased_at IS NOT NULL)",
+		)
+	}
+
+	// Search filter
+	if filters.Search != "" {
+		whereConditions = append(whereConditions,
+			fmt.Sprintf("(gi.name ILIKE $%d OR gi.description ILIKE $%d)", argIndex, argIndex),
+		)
+		args = append(args, "%"+filters.Search+"%")
+		argIndex++
+	}
+
+	whereClause := strings.Join(whereConditions, " AND ")
+
+	// Resolve ORDER BY from whitelist
+	orderClause, ok := publicSortClauses[filters.SortBy]
+	if !ok {
+		orderClause = "gi.position ASC"
+	}
+
+	// Count query (no LATERAL join needed for count)
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		WHERE %s
+	`, whereClause)
+
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, countQuery, args...); err != nil {
+		return nil, 0, fmt.Errorf("failed to count public wishlist gift items: %w", err)
+	}
+
+	// Data query with LATERAL join for guest reservation fallback
+	dataQuery := fmt.Sprintf(`
+		SELECT %s
+		FROM gift_items gi
+		INNER JOIN wishlist_items wi ON wi.gift_item_id = gi.id
+		INNER JOIN wishlists w ON wi.wishlist_id = w.id
+		LEFT JOIN LATERAL (
+			SELECT r.reserved_by_user_id, r.reserved_at
+			FROM reservations r
+			WHERE r.gift_item_id = gi.id
+			  AND r.status = 'active'
+			ORDER BY r.reserved_at DESC
+			LIMIT 1
+		) ar ON true
+		WHERE %s
+		ORDER BY %s
+		LIMIT $%d OFFSET $%d
+	`, giftItemColumnsPublicAliased, whereClause, orderClause, argIndex, argIndex+1)
+
+	args = append(args, filters.Limit, filters.Offset)
+
+	var giftItems []*models.GiftItem
+	if err := r.db.SelectContext(ctx, &giftItems, dataQuery, args...); err != nil {
 		return nil, 0, fmt.Errorf("failed to get public wishlist gift items: %w", err)
 	}
 

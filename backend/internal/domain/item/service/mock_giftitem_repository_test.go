@@ -22,6 +22,9 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //
 //		// make and configure a mocked repository.GiftItemRepositoryInterface
 //		mockedGiftItemRepositoryInterface := &GiftItemRepositoryInterfaceMock{
+//			CountByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
+//				panic("mock out the CountByWishList method")
+//			},
 //			CreateWithOwnerFunc: func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error) {
 //				panic("mock out the CreateWithOwner method")
 //			},
@@ -40,14 +43,26 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error) {
 //				panic("mock out the GetByWishList method")
 //			},
+//			GetByWishListPaginatedFunc: func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
+//				panic("mock out the GetByWishListPaginated method")
+//			},
 //			GetPublicWishListGiftItemsFunc: func(ctx context.Context, publicSlug string) ([]*models.GiftItem, error) {
 //				panic("mock out the GetPublicWishListGiftItems method")
 //			},
 //			GetPublicWishListGiftItemsPaginatedFunc: func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error) {
 //				panic("mock out the GetPublicWishListGiftItemsPaginated method")
 //			},
+//			GetPublicWishListGiftItemsFilteredFunc: func(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error) {
+//				panic("mock out the GetPublicWishListGiftItemsFiltered method")
+//			},
+//			GetStatsFunc: func(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error) {
+//				panic("mock out the GetStats method")
+//			},
 //			GetUnattachedFunc: func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error) {
 //				panic("mock out the GetUnattached method")
+//			},
+//			MarkManualReservationFunc: func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
+//				panic("mock out the MarkManualReservation method")
 //			},
 //			SoftDeleteFunc: func(ctx context.Context, id pgtype.UUID) error {
 //				panic("mock out the SoftDelete method")
@@ -65,6 +80,9 @@ var _ repository.GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{
 //
 //	}
 type GiftItemRepositoryInterfaceMock struct {
+	// CountByWishListFunc mocks the CountByWishList method.
+	CountByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
+
 	// CreateWithOwnerFunc mocks the CreateWithOwner method.
 	CreateWithOwnerFunc func(ctx context.Context, giftItem models.GiftItem) (*models.GiftItem, error)
 
@@ -83,14 +101,26 @@ type GiftItemRepositoryInterfaceMock struct {
 	// GetByWishListFunc mocks the GetByWishList method.
 	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*models.GiftItem, error)
 
+	// GetByWishListPaginatedFunc mocks the GetByWishListPaginated method.
+	GetByWishListPaginatedFunc func(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error)
+
 	// GetPublicWishListGiftItemsFunc mocks the GetPublicWishListGiftItems method.
 	GetPublicWishListGiftItemsFunc func(ctx context.Context, publicSlug string) ([]*models.GiftItem, error)
 
 	// GetPublicWishListGiftItemsPaginatedFunc mocks the GetPublicWishListGiftItemsPaginated method.
 	GetPublicWishListGiftItemsPaginatedFunc func(ctx context.Context, publicSlug string, limit int, offset int) ([]*models.GiftItem, int, error)
 
+	// GetPublicWishListGiftItemsFilteredFunc mocks the GetPublicWishListGiftItemsFiltered method.
+	GetPublicWishListGiftItemsFilteredFunc func(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error)
+
+	// GetStatsFunc mocks the GetStats method.
+	GetStatsFunc func(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error)
+
 	// GetUnattachedFunc mocks the GetUnattached method.
 	GetUnattachedFunc func(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error)
+
+	// MarkManualReservationFunc mocks the MarkManualReservation method.
+	MarkManualReservationFunc func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error)
 
 	// SoftDeleteFunc mocks the SoftDelete method.
 	SoftDeleteFunc func(ctx context.Context, id pgtype.UUID) error
@@ -101,11 +131,15 @@ type GiftItemRepositoryInterfaceMock struct {
 	// UpdateWithNewSchemaFunc mocks the UpdateWithNewSchema method.
 	UpdateWithNewSchemaFunc func(ctx context.Context, giftItem *models.GiftItem) (*models.GiftItem, error)
 
-	// MarkManualReservationFunc mocks the MarkManualReservation method.
-	MarkManualReservationFunc func(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
+		// CountByWishList holds details about calls to the CountByWishList method.
+		CountByWishList []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
+			WishlistID pgtype.UUID
+		}
 		// CreateWithOwner holds details about calls to the CreateWithOwner method.
 		CreateWithOwner []struct {
 			// Ctx is the ctx argument value.
@@ -152,6 +186,17 @@ type GiftItemRepositoryInterfaceMock struct {
 			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
 		}
+		// GetByWishListPaginated holds details about calls to the GetByWishListPaginated method.
+		GetByWishListPaginated []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// WishlistID is the wishlistID argument value.
+			WishlistID pgtype.UUID
+			// Page is the page argument value.
+			Page int
+			// Limit is the limit argument value.
+			Limit int
+		}
 		// GetPublicWishListGiftItems holds details about calls to the GetPublicWishListGiftItems method.
 		GetPublicWishListGiftItems []struct {
 			// Ctx is the ctx argument value.
@@ -170,12 +215,39 @@ type GiftItemRepositoryInterfaceMock struct {
 			// Offset is the offset argument value.
 			Offset int
 		}
+		// GetPublicWishListGiftItemsFiltered holds details about calls to the GetPublicWishListGiftItemsFiltered method.
+		GetPublicWishListGiftItemsFiltered []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// PublicSlug is the publicSlug argument value.
+			PublicSlug string
+			// Filters is the filters argument value.
+			Filters repository.PublicItemFilters
+		}
+		// GetStats holds details about calls to the GetStats method.
+		GetStats []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// OwnerID is the ownerID argument value.
+			OwnerID pgtype.UUID
+		}
 		// GetUnattached holds details about calls to the GetUnattached method.
 		GetUnattached []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// OwnerID is the ownerID argument value.
 			OwnerID pgtype.UUID
+		}
+		// MarkManualReservation holds details about calls to the MarkManualReservation method.
+		MarkManualReservation []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ItemID is the itemID argument value.
+			ItemID pgtype.UUID
+			// ReservedByName is the reservedByName argument value.
+			ReservedByName string
+			// Note is the note argument value.
+			Note *string
 		}
 		// SoftDelete holds details about calls to the SoftDelete method.
 		SoftDelete []struct {
@@ -198,31 +270,60 @@ type GiftItemRepositoryInterfaceMock struct {
 			// GiftItem is the giftItem argument value.
 			GiftItem *models.GiftItem
 		}
-		// MarkManualReservation holds details about calls to the MarkManualReservation method.
-		MarkManualReservation []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// ItemID is the itemID argument value.
-			ItemID pgtype.UUID
-			// ReservedByName is the reservedByName argument value.
-			ReservedByName string
-			// Note is the note argument value.
-			Note *string
-		}
 	}
+	lockCountByWishList                     sync.RWMutex
 	lockCreateWithOwner                     sync.RWMutex
 	lockDelete                              sync.RWMutex
 	lockDeleteWithExecutor                  sync.RWMutex
 	lockGetByID                             sync.RWMutex
 	lockGetByOwnerPaginated                 sync.RWMutex
 	lockGetByWishList                       sync.RWMutex
+	lockGetByWishListPaginated              sync.RWMutex
 	lockGetPublicWishListGiftItems          sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
+	lockGetPublicWishListGiftItemsFiltered  sync.RWMutex
+	lockGetStats                            sync.RWMutex
 	lockGetUnattached                       sync.RWMutex
+	lockMarkManualReservation               sync.RWMutex
 	lockSoftDelete                          sync.RWMutex
 	lockUpdate                              sync.RWMutex
 	lockUpdateWithNewSchema                 sync.RWMutex
-	lockMarkManualReservation               sync.RWMutex
+}
+
+// CountByWishList calls CountByWishListFunc.
+func (mock *GiftItemRepositoryInterfaceMock) CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error) {
+	if mock.CountByWishListFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.CountByWishListFunc: method is nil but GiftItemRepositoryInterface.CountByWishList was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+	}
+	mock.lockCountByWishList.Lock()
+	mock.calls.CountByWishList = append(mock.calls.CountByWishList, callInfo)
+	mock.lockCountByWishList.Unlock()
+	return mock.CountByWishListFunc(ctx, wishlistID)
+}
+
+// CountByWishListCalls gets all the calls that were made to CountByWishList.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.CountByWishListCalls())
+func (mock *GiftItemRepositoryInterfaceMock) CountByWishListCalls() []struct {
+	Ctx        context.Context
+	WishlistID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+	}
+	mock.lockCountByWishList.RLock()
+	calls = mock.calls.CountByWishList
+	mock.lockCountByWishList.RUnlock()
+	return calls
 }
 
 // CreateWithOwner calls CreateWithOwnerFunc.
@@ -449,6 +550,50 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 	return calls
 }
 
+// GetByWishListPaginated calls GetByWishListPaginatedFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page int, limit int) ([]*models.GiftItem, error) {
+	if mock.GetByWishListPaginatedFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetByWishListPaginatedFunc: method is nil but GiftItemRepositoryInterface.GetByWishListPaginated was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		Page       int
+		Limit      int
+	}{
+		Ctx:        ctx,
+		WishlistID: wishlistID,
+		Page:       page,
+		Limit:      limit,
+	}
+	mock.lockGetByWishListPaginated.Lock()
+	mock.calls.GetByWishListPaginated = append(mock.calls.GetByWishListPaginated, callInfo)
+	mock.lockGetByWishListPaginated.Unlock()
+	return mock.GetByWishListPaginatedFunc(ctx, wishlistID, page, limit)
+}
+
+// GetByWishListPaginatedCalls gets all the calls that were made to GetByWishListPaginated.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetByWishListPaginatedCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetByWishListPaginatedCalls() []struct {
+	Ctx        context.Context
+	WishlistID pgtype.UUID
+	Page       int
+	Limit      int
+} {
+	var calls []struct {
+		Ctx        context.Context
+		WishlistID pgtype.UUID
+		Page       int
+		Limit      int
+	}
+	mock.lockGetByWishListPaginated.RLock()
+	calls = mock.calls.GetByWishListPaginated
+	mock.lockGetByWishListPaginated.RUnlock()
+	return calls
+}
+
 // GetPublicWishListGiftItems calls GetPublicWishListGiftItemsFunc.
 func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItems(ctx context.Context, publicSlug string) ([]*models.GiftItem, error) {
 	if mock.GetPublicWishListGiftItemsFunc == nil {
@@ -529,6 +674,82 @@ func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsPaginated
 	return calls
 }
 
+// GetPublicWishListGiftItemsFiltered calls GetPublicWishListGiftItemsFilteredFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters repository.PublicItemFilters) ([]*models.GiftItem, int, error) {
+	if mock.GetPublicWishListGiftItemsFilteredFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFilteredFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItemsFiltered was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    repository.PublicItemFilters
+	}{
+		Ctx:        ctx,
+		PublicSlug: publicSlug,
+		Filters:    filters,
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.Lock()
+	mock.calls.GetPublicWishListGiftItemsFiltered = append(mock.calls.GetPublicWishListGiftItemsFiltered, callInfo)
+	mock.lockGetPublicWishListGiftItemsFiltered.Unlock()
+	return mock.GetPublicWishListGiftItemsFilteredFunc(ctx, publicSlug, filters)
+}
+
+// GetPublicWishListGiftItemsFilteredCalls gets all the calls that were made to GetPublicWishListGiftItemsFiltered.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetPublicWishListGiftItemsFilteredCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFilteredCalls() []struct {
+	Ctx        context.Context
+	PublicSlug string
+	Filters    repository.PublicItemFilters
+} {
+	var calls []struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    repository.PublicItemFilters
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.RLock()
+	calls = mock.calls.GetPublicWishListGiftItemsFiltered
+	mock.lockGetPublicWishListGiftItemsFiltered.RUnlock()
+	return calls
+}
+
+// GetStats calls GetStatsFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetStats(ctx context.Context, ownerID pgtype.UUID) (*repository.ItemStats, error) {
+	if mock.GetStatsFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetStatsFunc: method is nil but GiftItemRepositoryInterface.GetStats was just called")
+	}
+	callInfo := struct {
+		Ctx     context.Context
+		OwnerID pgtype.UUID
+	}{
+		Ctx:     ctx,
+		OwnerID: ownerID,
+	}
+	mock.lockGetStats.Lock()
+	mock.calls.GetStats = append(mock.calls.GetStats, callInfo)
+	mock.lockGetStats.Unlock()
+	return mock.GetStatsFunc(ctx, ownerID)
+}
+
+// GetStatsCalls gets all the calls that were made to GetStats.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetStatsCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetStatsCalls() []struct {
+	Ctx     context.Context
+	OwnerID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx     context.Context
+		OwnerID pgtype.UUID
+	}
+	mock.lockGetStats.RLock()
+	calls = mock.calls.GetStats
+	mock.lockGetStats.RUnlock()
+	return calls
+}
+
 // GetUnattached calls GetUnattachedFunc.
 func (mock *GiftItemRepositoryInterfaceMock) GetUnattached(ctx context.Context, ownerID pgtype.UUID) ([]*models.GiftItem, error) {
 	if mock.GetUnattachedFunc == nil {
@@ -562,6 +783,50 @@ func (mock *GiftItemRepositoryInterfaceMock) GetUnattachedCalls() []struct {
 	mock.lockGetUnattached.RLock()
 	calls = mock.calls.GetUnattached
 	mock.lockGetUnattached.RUnlock()
+	return calls
+}
+
+// MarkManualReservation calls MarkManualReservationFunc.
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
+	if mock.MarkManualReservationFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.MarkManualReservationFunc: method is nil but GiftItemRepositoryInterface.MarkManualReservation was just called")
+	}
+	callInfo := struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}{
+		Ctx:            ctx,
+		ItemID:         itemID,
+		ReservedByName: reservedByName,
+		Note:           note,
+	}
+	mock.lockMarkManualReservation.Lock()
+	mock.calls.MarkManualReservation = append(mock.calls.MarkManualReservation, callInfo)
+	mock.lockMarkManualReservation.Unlock()
+	return mock.MarkManualReservationFunc(ctx, itemID, reservedByName, note)
+}
+
+// MarkManualReservationCalls gets all the calls that were made to MarkManualReservation.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.MarkManualReservationCalls())
+func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservationCalls() []struct {
+	Ctx            context.Context
+	ItemID         pgtype.UUID
+	ReservedByName string
+	Note           *string
+} {
+	var calls []struct {
+		Ctx            context.Context
+		ItemID         pgtype.UUID
+		ReservedByName string
+		Note           *string
+	}
+	mock.lockMarkManualReservation.RLock()
+	calls = mock.calls.MarkManualReservation
+	mock.lockMarkManualReservation.RUnlock()
 	return calls
 }
 
@@ -670,46 +935,5 @@ func (mock *GiftItemRepositoryInterfaceMock) UpdateWithNewSchemaCalls() []struct
 	mock.lockUpdateWithNewSchema.RLock()
 	calls = mock.calls.UpdateWithNewSchema
 	mock.lockUpdateWithNewSchema.RUnlock()
-	return calls
-}
-
-// MarkManualReservation calls MarkManualReservationFunc.
-func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*models.GiftItem, error) {
-	if mock.MarkManualReservationFunc == nil {
-		panic("GiftItemRepositoryInterfaceMock.MarkManualReservationFunc: method is nil but GiftItemRepositoryInterface.MarkManualReservation was just called")
-	}
-	callInfo := struct {
-		Ctx            context.Context
-		ItemID         pgtype.UUID
-		ReservedByName string
-		Note           *string
-	}{
-		Ctx:            ctx,
-		ItemID:         itemID,
-		ReservedByName: reservedByName,
-		Note:           note,
-	}
-	mock.lockMarkManualReservation.Lock()
-	mock.calls.MarkManualReservation = append(mock.calls.MarkManualReservation, callInfo)
-	mock.lockMarkManualReservation.Unlock()
-	return mock.MarkManualReservationFunc(ctx, itemID, reservedByName, note)
-}
-
-// MarkManualReservationCalls gets all the calls that were made to MarkManualReservation.
-func (mock *GiftItemRepositoryInterfaceMock) MarkManualReservationCalls() []struct {
-	Ctx            context.Context
-	ItemID         pgtype.UUID
-	ReservedByName string
-	Note           *string
-} {
-	var calls []struct {
-		Ctx            context.Context
-		ItemID         pgtype.UUID
-		ReservedByName string
-		Note           *string
-	}
-	mock.lockMarkManualReservation.RLock()
-	calls = mock.calls.MarkManualReservation
-	mock.lockMarkManualReservation.RUnlock()
 	return calls
 }

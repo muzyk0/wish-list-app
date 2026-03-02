@@ -1,0 +1,43 @@
+get:
+  description: >-
+    Returns all reservations (by guests or authenticated users) on gift items
+    belonging to the calling user's wishlists. The reserver identity is
+    intentionally hidden.
+  parameters:
+    - description: Page number (default 1)
+      in: query
+      name: page
+      schema:
+        type: integer
+    - description: Items per page (default 10, max 100)
+      in: query
+      name: limit
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: List of reservations on owner's items
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse.yaml
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse.yaml
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse.yaml
+  security:
+    - BearerAuth: []
+  summary: Get reservations on items in the authenticated user's wishlists
+  tags:
+    - Reservations

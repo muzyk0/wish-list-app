@@ -24,6 +24,33 @@ func NewHandler(svc service.ItemServiceInterface) *Handler {
 	}
 }
 
+// GetHomeStats godoc
+//
+//	@Summary		Get home screen stats
+//	@Description	Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)
+//	@Tags			Items
+//	@Produce		json
+//	@Success		200	{object}	dto.HomeStatsResponse	"Stats retrieved successfully"
+//	@Failure		401	{object}	dto.ErrorResponse		"Not authenticated"
+//	@Failure		500	{object}	dto.ErrorResponse		"Internal server error"
+//	@Security		BearerAuth
+//	@Router			/items/stats [get]
+func (h *Handler) GetHomeStats(c echo.Context) error {
+	userID := auth.MustGetUserID(c)
+	ctx := c.Request().Context()
+
+	stats, err := h.service.GetHomeStats(ctx, userID)
+	if err != nil {
+		return mapItemServiceError(err)
+	}
+
+	return c.JSON(nethttp.StatusOK, dto.HomeStatsResponse{
+		TotalItems: stats.TotalItems,
+		Reserved:   stats.Reserved,
+		Purchased:  stats.Purchased,
+	})
+}
+
 // GetMyItems godoc
 //
 //	@Summary		Get my gift items
@@ -39,9 +66,9 @@ func NewHandler(svc service.ItemServiceInterface) *Handler {
 //	@Param			include_archived	query		bool						false	"Include archived items (default false)"
 //	@Param			search			query		string						false	"Search in title and description"
 //	@Success		200				{object}	dto.PaginatedItemsResponse	"List of items retrieved successfully"
-//	@Failure		400				{object}	map[string]string			"Invalid query parameters"
-//	@Failure		401				{object}	map[string]string			"Not authenticated"
-//	@Failure		500				{object}	map[string]string			"Internal server error"
+//	@Failure		400				{object}	dto.ErrorResponse			"Invalid query parameters"
+//	@Failure		401				{object}	dto.ErrorResponse			"Not authenticated"
+//	@Failure		500				{object}	dto.ErrorResponse			"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/items [get]
 func (h *Handler) GetMyItems(c echo.Context) error {
@@ -80,9 +107,9 @@ func (h *Handler) GetMyItems(c echo.Context) error {
 //	@Produce		json
 //	@Param			item	body		dto.CreateItemRequest	true	"Item data"
 //	@Success		201		{object}	dto.ItemResponse		"Item created successfully"
-//	@Failure		400		{object}	map[string]string		"Invalid request body"
-//	@Failure		401		{object}	map[string]string		"Not authenticated"
-//	@Failure		500		{object}	map[string]string		"Internal server error"
+//	@Failure		400		{object}	dto.ErrorResponse		"Invalid request body"
+//	@Failure		401		{object}	dto.ErrorResponse		"Not authenticated"
+//	@Failure		500		{object}	dto.ErrorResponse		"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/items [post]
 func (h *Handler) CreateItem(c echo.Context) error {
@@ -112,9 +139,9 @@ func (h *Handler) CreateItem(c echo.Context) error {
 //	@Produce		json
 //	@Param			id	path		string				true	"Item ID"
 //	@Success		200	{object}	dto.ItemResponse	"Item retrieved successfully"
-//	@Failure		401	{object}	map[string]string	"Not authenticated"
-//	@Failure		403	{object}	map[string]string	"Access denied"
-//	@Failure		404	{object}	map[string]string	"Item not found"
+//	@Failure		401	{object}	dto.ErrorResponse	"Not authenticated"
+//	@Failure		403	{object}	dto.ErrorResponse	"Access denied"
+//	@Failure		404	{object}	dto.ErrorResponse	"Item not found"
 //	@Security		BearerAuth
 //	@Router			/items/{id} [get]
 func (h *Handler) GetItem(c echo.Context) error {
@@ -142,11 +169,11 @@ func (h *Handler) GetItem(c echo.Context) error {
 //	@Param			id		path		string				true	"Item ID"
 //	@Param			item	body		dto.UpdateItemRequest	true	"Updated item data"
 //	@Success		200		{object}	dto.ItemResponse	"Item updated successfully"
-//	@Failure		400		{object}	map[string]string	"Invalid request body"
-//	@Failure		401		{object}	map[string]string	"Not authenticated"
-//	@Failure		403		{object}	map[string]string	"Access denied"
-//	@Failure		404		{object}	map[string]string	"Item not found"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Failure		400		{object}	dto.ErrorResponse	"Invalid request body"
+//	@Failure		401		{object}	dto.ErrorResponse	"Not authenticated"
+//	@Failure		403		{object}	dto.ErrorResponse	"Access denied"
+//	@Failure		404		{object}	dto.ErrorResponse	"Item not found"
+//	@Failure		500		{object}	dto.ErrorResponse	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/items/{id} [put]
 func (h *Handler) UpdateItem(c echo.Context) error {
@@ -178,10 +205,10 @@ func (h *Handler) UpdateItem(c echo.Context) error {
 //	@Produce		json
 //	@Param			id	path		string				true	"Item ID"
 //	@Success		204	{object}	nil					"Item archived successfully"
-//	@Failure		401	{object}	map[string]string	"Not authenticated"
-//	@Failure		403	{object}	map[string]string	"Access denied"
-//	@Failure		404	{object}	map[string]string	"Item not found"
-//	@Failure		500	{object}	map[string]string	"Internal server error"
+//	@Failure		401	{object}	dto.ErrorResponse	"Not authenticated"
+//	@Failure		403	{object}	dto.ErrorResponse	"Access denied"
+//	@Failure		404	{object}	dto.ErrorResponse	"Item not found"
+//	@Failure		500	{object}	dto.ErrorResponse	"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/items/{id} [delete]
 func (h *Handler) DeleteItem(c echo.Context) error {
@@ -209,11 +236,11 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 //	@Param			id		path		string					true	"Item ID"
 //	@Param			purchase body	dto.MarkPurchasedRequest	true	"Purchase details"
 //	@Success		200		{object}	dto.ItemResponse		"Item marked as purchased"
-//	@Failure		400		{object}	map[string]string		"Invalid request body"
-//	@Failure		401		{object}	map[string]string		"Not authenticated"
-//	@Failure		403		{object}	map[string]string		"Access denied"
-//	@Failure		404		{object}	map[string]string		"Item not found"
-//	@Failure		500		{object}	map[string]string		"Internal server error"
+//	@Failure		400		{object}	dto.ErrorResponse		"Invalid request body"
+//	@Failure		401		{object}	dto.ErrorResponse		"Not authenticated"
+//	@Failure		403		{object}	dto.ErrorResponse		"Access denied"
+//	@Failure		404		{object}	dto.ErrorResponse		"Item not found"
+//	@Failure		500		{object}	dto.ErrorResponse		"Internal server error"
 //	@Security		BearerAuth
 //	@Router			/items/{id}/mark-purchased [post]
 func (h *Handler) MarkItemAsPurchased(c echo.Context) error {

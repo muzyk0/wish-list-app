@@ -1,0 +1,15 @@
+properties:
+  purchased:
+    example: 1
+    type: integer
+  reserved:
+    example: 3
+    type: integer
+  total_items:
+    example: 12
+    type: integer
+required:
+  - purchased
+  - reserved
+  - total_items
+type: object

@@ -13,6 +13,7 @@ import type {
   CreateReservationRequest,
   CreateWishListRequest,
   GiftItem,
+  HomeStats,
   LoginResponse,
   MarkManualReservationRequest,
   PaginatedGiftItems,
@@ -24,6 +25,7 @@ import type {
   UserRegistration,
   WishList,
   WishlistItem,
+  WishlistOwnerReservation,
 } from './types';
 
 // Routes that don't require authentication
@@ -257,6 +259,21 @@ class ApiClient {
 
     if (!data) {
       throw new Error('No data received from password change');
+    }
+
+    return data;
+  }
+
+  // Home stats
+  async getHomeStats(): Promise<HomeStats> {
+    const { data, error } = await this.client.GET('/items/stats', {});
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from home stats');
     }
 
     return data;
@@ -593,6 +610,29 @@ class ApiClient {
 
     // Fallback if response is direct array
     return data as unknown as Reservation[];
+  }
+
+  async getWishlistOwnerReservations(options?: {
+    page?: number;
+    limit?: number;
+  }): Promise<WishlistOwnerReservation[]> {
+    const { data, error } = await this.client.GET(
+      '/reservations/wishlist-owner',
+      {
+        params: {
+          query: {
+            page: options?.page,
+            limit: options?.limit,
+          },
+        },
+      },
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data?.data ?? [];
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {

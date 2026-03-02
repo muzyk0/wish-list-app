@@ -46,6 +46,8 @@ paths:
     $ref: paths/items_{id}.yaml
   /items/{id}/mark-purchased:
     $ref: paths/items_{id}_mark-purchased.yaml
+  /items/stats:
+    $ref: paths/items_stats.yaml
   /protected/account:
     $ref: paths/protected_account.yaml
   /protected/export-data:
@@ -62,6 +64,8 @@ paths:
     $ref: paths/public_wishlists_{slug}_gift-items.yaml
   /reservations/user:
     $ref: paths/reservations_user.yaml
+  /reservations/wishlist-owner:
+    $ref: paths/reservations_wishlist-owner.yaml
   /wishlists:
     $ref: paths/wishlists.yaml
   /wishlists/{id}:

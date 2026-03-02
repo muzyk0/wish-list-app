@@ -100,6 +100,12 @@ type ReservationRepositoryInterfaceMock struct {
 	// UpdateStatusByTokenFunc mocks the UpdateStatusByToken method.
 	UpdateStatusByTokenFunc func(ctx context.Context, token pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error)
 
+	// ListWishlistOwnerReservationsFunc mocks the ListWishlistOwnerReservations method.
+	ListWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error)
+
+	// CountWishlistOwnerReservationsFunc mocks the CountWishlistOwnerReservations method.
+	CountWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// CountUserReservations holds details about calls to the CountUserReservations method.
@@ -208,6 +214,18 @@ type ReservationRepositoryInterfaceMock struct {
 			// CancelReason is the cancelReason argument value.
 			CancelReason pgtype.Text
 		}
+		// ListWishlistOwnerReservations holds details about calls to the ListWishlistOwnerReservations method.
+		ListWishlistOwnerReservations []struct {
+			Ctx         context.Context
+			OwnerUserID pgtype.UUID
+			Limit       int
+			Offset      int
+		}
+		// CountWishlistOwnerReservations holds details about calls to the CountWishlistOwnerReservations method.
+		CountWishlistOwnerReservations []struct {
+			Ctx         context.Context
+			OwnerUserID pgtype.UUID
+		}
 	}
 	lockCountUserReservations              sync.RWMutex
 	lockCreate                             sync.RWMutex
@@ -221,6 +239,8 @@ type ReservationRepositoryInterfaceMock struct {
 	lockListUserReservationsWithDetails    sync.RWMutex
 	lockUpdateStatus                       sync.RWMutex
 	lockUpdateStatusByToken                sync.RWMutex
+	lockListWishlistOwnerReservations      sync.RWMutex
+	lockCountWishlistOwnerReservations     sync.RWMutex
 }
 
 // CountUserReservations calls CountUserReservationsFunc.
@@ -697,4 +717,36 @@ func (mock *ReservationRepositoryInterfaceMock) UpdateStatusByTokenCalls() []str
 	calls = mock.calls.UpdateStatusByToken
 	mock.lockUpdateStatusByToken.RUnlock()
 	return calls
+}
+
+// ListWishlistOwnerReservations calls ListWishlistOwnerReservationsFunc.
+func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+	if mock.ListWishlistOwnerReservationsFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.ListWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.ListWishlistOwnerReservations was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+		Limit       int
+		Offset      int
+	}{Ctx: ctx, OwnerUserID: ownerUserID, Limit: limit, Offset: offset}
+	mock.lockListWishlistOwnerReservations.Lock()
+	mock.calls.ListWishlistOwnerReservations = append(mock.calls.ListWishlistOwnerReservations, callInfo)
+	mock.lockListWishlistOwnerReservations.Unlock()
+	return mock.ListWishlistOwnerReservationsFunc(ctx, ownerUserID, limit, offset)
+}
+
+// CountWishlistOwnerReservations calls CountWishlistOwnerReservationsFunc.
+func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	if mock.CountWishlistOwnerReservationsFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.CountWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.CountWishlistOwnerReservations was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+	}{Ctx: ctx, OwnerUserID: ownerUserID}
+	mock.lockCountWishlistOwnerReservations.Lock()
+	mock.calls.CountWishlistOwnerReservations = append(mock.calls.CountWishlistOwnerReservations, callInfo)
+	mock.lockCountWishlistOwnerReservations.Unlock()
+	return mock.CountWishlistOwnerReservationsFunc(ctx, ownerUserID)
 }

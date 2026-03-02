@@ -49,6 +49,8 @@ type ReservationServiceInterface interface {
 	GetGuestReservations(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error)
 	GetReservationStatus(ctx context.Context, publicSlug, giftItemID string) (*ReservationStatusOutput, error)
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
+	GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error)
+	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
 }
 
 type ReservationService struct {
@@ -292,6 +294,14 @@ func (s *ReservationService) GetGuestReservations(ctx context.Context, token pgt
 
 func (s *ReservationService) CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error) {
 	return s.repo.CountUserReservations(ctx, userID)
+}
+
+func (s *ReservationService) GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error) {
+	return s.repo.ListWishlistOwnerReservations(ctx, ownerUserID, limit, offset)
+}
+
+func (s *ReservationService) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	return s.repo.CountWishlistOwnerReservations(ctx, ownerUserID)
 }
 
 // CreateGuestReservation handles guest reservation with token-based authentication

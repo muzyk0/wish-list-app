@@ -4,32 +4,19 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-
-interface HomeStats {
-  totalItems: number;
-  reserved: number;
-  purchased: number;
-}
+import { apiClient } from '@/lib/api';
+import type { HomeStats } from '@/lib/api/types';
 
 export function StatsRow() {
-  // TODO: Add real endpoint to fetch home stats
-  // Backend should calculate counts, not send all items
-  const { data: stats = { totalItems: 0, reserved: 0, purchased: 0 } } =
-    useQuery<HomeStats>({
-      queryKey: ['home-stats'],
-      queryFn: async () => {
-        // Mock: return empty stats
-        // TODO: Replace with: apiClient.getHomeStats()
-        return {
-          totalItems: 0,
-          reserved: 0,
-          purchased: 0,
-        };
-      },
-      retry: 2,
-    });
+  const { data: stats } = useQuery<HomeStats>({
+    queryKey: ['home-stats'],
+    queryFn: () => apiClient.getHomeStats(),
+    retry: 2,
+  });
 
-  const { totalItems, reserved, purchased } = stats;
+  const totalItems = stats?.total_items ?? 0;
+  const reserved = stats?.reserved ?? 0;
+  const purchased = stats?.purchased ?? 0;
   return (
     <View style={styles.statsRow}>
       <BlurView intensity={20} style={styles.statCard}>

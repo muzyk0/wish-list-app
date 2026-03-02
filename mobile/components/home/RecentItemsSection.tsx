@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
+import { apiClient } from '@/lib/api';
+import type { GiftItem, WishList } from '@/lib/api/types';
 import { GiftItemCard } from './GiftItemCard';
 
 interface RecentItemsSectionProps {
@@ -14,17 +16,37 @@ export function RecentItemsSection({
   onSeeAll,
   onItemPress,
 }: RecentItemsSectionProps) {
-  // TODO: Add real endpoint to fetch recent items (last 8)
-  // Backend should return only recent items, not all
-  const { data: items = [], isLoading } = useQuery<any[]>({
+  const { data: paginatedItems, isLoading } = useQuery({
     queryKey: ['recent-items'],
-    queryFn: async () => {
-      // Mock: return empty array
-      // TODO: Replace with: apiClient.getRecentItems()
-      return [];
-    },
+    queryFn: () =>
+      apiClient.getUserGiftItems({
+        limit: 8,
+        sort: 'created_at',
+        order: 'desc',
+      }),
     retry: 2,
   });
+
+  // Reuse cached wishlists to resolve list titles (no extra network request)
+  const { data: wishlists = [] } = useQuery<WishList[]>({
+    queryKey: ['wishlists'],
+    queryFn: () => apiClient.getWishLists(),
+    retry: 2,
+  });
+
+  const wishlistMap = new Map(wishlists.map((wl) => [wl.id, wl.title]));
+  const items: GiftItem[] = paginatedItems?.items ?? [];
+
+  const getListTitle = (item: GiftItem): string => {
+    const firstId = item.wishlist_ids?.[0];
+    if (firstId) return wishlistMap.get(firstId) ?? 'My wishlist';
+    return 'Standalone';
+  };
+
+  const getListId = (item: GiftItem): string | null => {
+    return item.wishlist_ids?.[0] ?? null;
+  };
+
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -46,8 +68,11 @@ export function RecentItemsSection({
             <GiftItemCard
               key={item.id}
               item={item}
-              listTitle={item.listTitle}
-              onPress={() => onItemPress(item.listId)}
+              listTitle={getListTitle(item)}
+              onPress={() => {
+                const listId = getListId(item);
+                if (listId) onItemPress(listId);
+              }}
               index={index}
             />
           ))}

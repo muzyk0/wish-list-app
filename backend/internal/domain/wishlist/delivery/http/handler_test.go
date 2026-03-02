@@ -162,6 +162,14 @@ func (m *MockWishListService) GetGiftItemsByPublicSlugPaginated(ctx context.Cont
 	return args.Get(0).([]*service.GiftItemOutput), args.Int(1), args.Error(2)
 }
 
+func (m *MockWishListService) GetGiftItemsByPublicSlugFiltered(ctx context.Context, publicSlug string, filters service.PublicItemFiltersInput) ([]*service.GiftItemOutput, int, error) {
+	args := m.Called(ctx, publicSlug, filters)
+	if args.Get(0) == nil {
+		return nil, args.Int(1), args.Error(2)
+	}
+	return args.Get(0).([]*service.GiftItemOutput), args.Int(1), args.Error(2)
+}
+
 func (m *MockWishListService) UpdateGiftItem(ctx context.Context, giftItemID string, input service.UpdateGiftItemInput) (*service.GiftItemOutput, error) {
 	args := m.Called(ctx, giftItemID, input)
 	if args.Get(0) == nil {
