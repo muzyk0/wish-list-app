@@ -160,20 +160,6 @@ export function MyWishesReserved() {
             </Text>
           </View>
 
-          {/* Reserved by */}
-          {item.reserved_by_name && (
-            <View style={styles.infoRow}>
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={16}
-                color="rgba(255, 255, 255, 0.5)"
-              />
-              <Text style={styles.infoText} numberOfLines={1}>
-                {item.reserved_by_name}
-              </Text>
-            </View>
-          )}
-
           {/* Date + Cancel row */}
           <View style={styles.dateRow}>
             <View style={styles.dateInfo}>

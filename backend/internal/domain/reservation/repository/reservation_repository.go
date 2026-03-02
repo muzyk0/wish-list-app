@@ -571,19 +571,14 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 			r.canceled_at,
 			r.cancel_reason,
 			r.notification_sent,
-			r.guest_name,
-			r.encrypted_guest_name,
 			gi.name as gift_item_name,
 			gi.image_url as gift_item_image_url,
 			gi.price as gift_item_price,
 			w.id as wishlist_id,
-			w.title as wishlist_title,
-			reservers.first_name as reserver_first_name,
-			reservers.last_name as reserver_last_name
+			w.title as wishlist_title
 		FROM reservations r
 		JOIN gift_items gi ON r.gift_item_id = gi.id
 		JOIN wishlists w ON r.wishlist_id = w.id
-		LEFT JOIN users reservers ON r.reserved_by_user_id = reservers.id
 		WHERE w.owner_id = $1 AND r.status IN ('active', 'canceled')
 		ORDER BY r.reserved_at DESC
 		LIMIT $2 OFFSET $3
@@ -593,13 +588,6 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 	err := r.db.SelectContext(ctx, &reservations, query, ownerUserID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list wishlist owner reservations: %w", err)
-	}
-
-	// Decrypt guest PII so the owner sees the actual name
-	for i := range reservations {
-		if err := r.decryptReservationDetailPII(ctx, &reservations[i]); err != nil {
-			return nil, fmt.Errorf("failed to decrypt reservation detail PII: %w", err)
-		}
 	}
 
 	return reservations, nil

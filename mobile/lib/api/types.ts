@@ -32,7 +32,7 @@ import type {
   SchemaWishListInternalDomainWishlistDeliveryHttpDtoWishListResponse as WishList,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse as WishlistItem,
   SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest as MarkManualReservationRequest,
-  SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse as WishlistOwnerReservationBase,
+  SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse as WishlistOwnerReservation,
   SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsResponse as WishlistOwnerReservationsResponse,
 } from './generated-schema';
 
@@ -62,10 +62,6 @@ export type {
   WishList,
   WishlistItem,
   MarkManualReservationRequest,
+  WishlistOwnerReservation,
   WishlistOwnerReservationsResponse,
-};
-
-// Extended locally until `make docs` regenerates the schema with reserved_by_name.
-export type WishlistOwnerReservation = WishlistOwnerReservationBase & {
-  reserved_by_name?: string | null;
 };
