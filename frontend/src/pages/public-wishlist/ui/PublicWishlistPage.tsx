@@ -145,14 +145,14 @@ export function PublicWishlistPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="max-w-3xl mx-auto px-4 py-12 pt-24">
       {/* Wishlist header with staggered entrance */}
       <div className="wl-fade-up wl-delay-0">
         <WishlistHeader wishlist={wishList} reservedCount={reservedCount} />
       </div>
 
-      {/* List controls */}
-      {totalItems > 0 && (
+      {/* List controls - show if wishlist has any items, even if filtered results are empty */}
+      {wishList && (
         <WishlistFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}

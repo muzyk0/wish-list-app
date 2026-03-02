@@ -42,26 +42,26 @@ type ReservationRepositoryInterface interface {
 
 type ReservationDetail struct {
 	ID                  pgtype.UUID
-	GiftItemID          pgtype.UUID
-	ReservedByUserID    pgtype.UUID
-	GuestName           pgtype.Text
+	GiftItemID          pgtype.UUID `db:"gift_item_id"`
+	ReservedByUserID    pgtype.UUID `db:"reserved_by_user_id"`
+	GuestName           pgtype.Text `db:"guest_name"`
 	EncryptedGuestName  pgtype.Text `db:"encrypted_guest_name"` // PII encrypted
-	GuestEmail          pgtype.Text
+	GuestEmail          pgtype.Text `db:"guest_email"`
 	EncryptedGuestEmail pgtype.Text `db:"encrypted_guest_email"` // PII encrypted
-	ReservationToken    pgtype.UUID
+	ReservationToken    pgtype.UUID `db:"reservation_token"`
 	Status              string
-	ReservedAt          pgtype.Timestamptz
-	ExpiresAt           pgtype.Timestamptz
-	CanceledAt          pgtype.Timestamptz
-	CancelReason        pgtype.Text
-	NotificationSent    pgtype.Bool
-	GiftItemName        pgtype.Text
-	GiftItemImageURL    pgtype.Text
-	GiftItemPrice       pgtype.Numeric
-	WishlistID          pgtype.UUID
-	WishlistTitle       pgtype.Text
-	OwnerFirstName      pgtype.Text
-	OwnerLastName       pgtype.Text
+	ReservedAt          pgtype.Timestamptz `db:"reserved_at"`
+	ExpiresAt           pgtype.Timestamptz `db:"expires_at"`
+	CanceledAt          pgtype.Timestamptz `db:"canceled_at"`
+	CancelReason        pgtype.Text `db:"cancel_reason"`
+	NotificationSent    pgtype.Bool `db:"notification_sent"`
+	GiftItemName        pgtype.Text `db:"gift_item_name"`
+	GiftItemImageURL    pgtype.Text `db:"gift_item_image_url"`
+	GiftItemPrice       pgtype.Numeric `db:"gift_item_price"`
+	WishlistID          pgtype.UUID `db:"wishlist_id"`
+	WishlistTitle       pgtype.Text `db:"wishlist_title"`
+	OwnerFirstName      pgtype.Text `db:"owner_first_name"`
+	OwnerLastName       pgtype.Text `db:"owner_last_name"`
 	// Reserved for future use; intentionally not populated in ListWishlistOwnerReservations
 	// to preserve reserver privacy (the owner sees that an item is reserved, not who reserved it).
 	ReserverFirstName pgtype.Text `db:"reserver_first_name"`

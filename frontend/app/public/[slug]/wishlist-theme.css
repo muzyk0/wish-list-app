@@ -30,6 +30,27 @@
   --primary-foreground: oklch(0.99 0 0);
 }
 
+/* ── Dark Theme Variant ────────────────────────── */
+.dark .wl-page,
+.dark .wl-theme {
+  /* ── Dark Palette ──────────────────────────────── */
+  --wl-bg:           oklch(0.14 0.008 60);   /* deep warm near-black */
+  --wl-card:         oklch(0.19 0.009 63);   /* elevated dark card */
+  --wl-card-border:  oklch(0.27 0.012 65);   /* subtle warm border */
+  --wl-accent:       oklch(0.70 0.11 68);    /* brighter gold for dark bg */
+  --wl-accent-hover: oklch(0.75 0.11 68);
+  --wl-accent-light: oklch(0.21 0.025 65);   /* dark warm tint */
+  --wl-text:         oklch(0.935 0.008 72);  /* warm off-white */
+  --wl-muted:        oklch(0.60 0.014 68);   /* medium warm muted */
+  --wl-available:    oklch(0.55 0.125 150);  /* lighter green */
+  --wl-reserved:     oklch(0.68 0.09 72);    /* lighter amber */
+  --wl-purchased:    oklch(0.60 0.14 28);    /* lighter crimson */
+
+  /* shadcn primary override */
+  --primary:            oklch(0.70 0.11 68);
+  --primary-foreground: oklch(0.10 0 0);     /* dark text on gold button */
+}
+
 .wl-page {
   /* ── Base ─────────────────────────────────────── */
   font-family: var(--font-body, ui-sans-serif, sans-serif);
@@ -128,4 +149,9 @@
   transform: translateY(-2px);
   box-shadow: 0 10px 32px oklch(0.15 0.006 60 / 0.08);
   border-color: oklch(0.78 0.055 68);
+}
+
+.dark .wl-item-card:hover {
+  box-shadow: 0 10px 32px oklch(0.05 0.006 60 / 0.5);
+  border-color: oklch(0.42 0.055 68);
 }

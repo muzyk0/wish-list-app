@@ -35,10 +35,10 @@ export function Header() {
         </Link>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href="/my/reservations"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md"
+            className="flex items-center gap-1.5 text-sm text-foreground/70 hover:text-foreground transition-colors px-2.5 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
           >
             <BookmarkIcon className="size-4" />
             <span className="hidden sm:inline">

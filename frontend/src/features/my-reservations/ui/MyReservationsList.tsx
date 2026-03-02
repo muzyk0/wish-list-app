@@ -47,11 +47,18 @@ export function MyReservationsList() {
   } = useQuery({
     queryKey: ['guest-reservations'],
     queryFn: async (): Promise<ReservationWithToken[]> => {
+      const NIL_UUID = '00000000-0000-0000-0000-000000000000';
       const stored = getStoredReservations();
-      if (stored.length === 0) return [];
+      // Filter out any invalid tokens (belt and suspenders with lib filtering)
+      const validStored = stored.filter(
+        (s) => s.reservationToken &&
+               s.reservationToken !== '' &&
+               s.reservationToken !== NIL_UUID
+      );
+      if (validStored.length === 0) return [];
 
       const results = await Promise.allSettled(
-        stored.map(async (s) => {
+        validStored.map(async (s) => {
           const details = await apiClient.getGuestReservations(
             s.reservationToken,
           );

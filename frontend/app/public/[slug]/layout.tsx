@@ -1,5 +1,8 @@
+'use client';
+
 import { DM_Sans, Playfair_Display } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { Header } from '@/widgets';
 import './wishlist-theme.css';
 
 const playfairDisplay = Playfair_Display({
@@ -23,6 +26,7 @@ export default function PublicWishlistLayout({
 }: PublicWishlistLayoutProps) {
   return (
     <div className={`${playfairDisplay.variable} ${dmSans.variable} wl-page`}>
+      <Header />
       {children}
     </div>
   );

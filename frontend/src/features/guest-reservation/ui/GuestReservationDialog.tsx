@@ -93,7 +93,14 @@ export function GuestReservationDialog({
       }) as Promise<ReservationResponse>;
     },
     onSuccess: (data) => {
+      const NIL_UUID = '00000000-0000-0000-0000-000000000000';
       const { guestName } = getValues();
+
+      // Guard: only store if token is valid (non-empty, non-nil UUID)
+      if (!data.reservation_token || data.reservation_token === NIL_UUID) {
+        toast.error(t('reservation.error.invalidToken'));
+        return;
+      }
 
       toast.success(t('reservation.success.title'), {
         description: t('reservation.success.description', {

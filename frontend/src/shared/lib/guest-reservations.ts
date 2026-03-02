@@ -42,9 +42,20 @@ function writeToStorage(reservations: StoredReservation[]): void {
   }
 }
 
-/** Returns all stored guest reservations */
+/** Returns all stored guest reservations, filtering out invalid tokens */
 export function getStoredReservations(): StoredReservation[] {
-  return readFromStorage();
+  const NIL_UUID = '00000000-0000-0000-0000-000000000000';
+  const all = readFromStorage();
+  const valid = all.filter(
+    (r) => r.reservationToken &&
+           r.reservationToken !== '' &&
+           r.reservationToken !== NIL_UUID
+  );
+  // Auto-clean stale entries if any were filtered out
+  if (valid.length !== all.length) {
+    writeToStorage(valid);
+  }
+  return valid;
 }
 
 /** Returns all reservation tokens (for bulk API queries) */
