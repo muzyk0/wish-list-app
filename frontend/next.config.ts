@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import IMAGE_DOMAINS from './config/image-domains';
 
 const path = require('node:path');
 
@@ -10,10 +11,7 @@ const nextConfig: NextConfig = {
   //   root: path.join(__dirname),
   // },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: '*.amazonaws.com' },
-      { protocol: 'http', hostname: 'localhost' },
-    ],
+    remotePatterns: IMAGE_DOMAINS,
   },
 };
 
