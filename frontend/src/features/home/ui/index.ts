@@ -5,4 +5,3 @@ export {
   FeaturedListsSection,
 } from './FeaturedListsSection';
 export { HeroSection } from './HeroSection';
-export { ThemeToggle } from './ThemeToggle';

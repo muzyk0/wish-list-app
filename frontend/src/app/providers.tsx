@@ -8,7 +8,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
-import { I18nProvider } from '@/i18n/I18nProvider';
+import { I18nProvider } from '@/shared/i18n';
 
 function makeQueryClient() {
   return new QueryClient({

@@ -1,14 +1,14 @@
 'use client';
 
 import {
-  DOMAIN_CONSTANTS,
-  MOBILE_APP_REDIRECT_PATHS,
-} from '@/constants/domains';
-import {
   AnnouncementBlock,
   FeaturedListsSection,
   HeroSection,
 } from '@/features/home';
+import {
+  DOMAIN_CONSTANTS,
+  MOBILE_APP_REDIRECT_PATHS,
+} from '@/shared/config/domains';
 import { Footer, Header } from '@/widgets';
 
 export default function Home() {

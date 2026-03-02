@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import MobileRedirect from '@/components/common/MobileRedirect';
-import { Button } from '@/components/ui/button';
+import { MobileRedirect } from '@/features/mobile-redirect';
+import {
+  MOBILE_APP_REDIRECT_PATHS,
+  MOBILE_APP_URLS,
+} from '@/shared/config/domains';
+import { Button } from '@/shared/ui/button';
 import {
   Card,
   CardContent,
@@ -10,11 +14,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import {
-  MOBILE_APP_REDIRECT_PATHS,
-  MOBILE_APP_URLS,
-} from '@/constants/domains';
+} from '@/shared/ui/card';
 
 export default function RegisterPage() {
   return (
