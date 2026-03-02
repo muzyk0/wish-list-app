@@ -1,10 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
 import type { GiftItem, WishList } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 import { GiftItemCard } from './GiftItemCard';
 
 interface RecentItemsSectionProps {
@@ -16,7 +18,11 @@ export function RecentItemsSection({
   onSeeAll,
   onItemPress,
 }: RecentItemsSectionProps) {
-  const { data: paginatedItems, isLoading } = useQuery({
+  const {
+    data: paginatedItems,
+    isLoading,
+    error: recentItemsError,
+  } = useQuery({
     queryKey: ['recent-items'],
     queryFn: () =>
       apiClient.getUserGiftItems({
@@ -28,11 +34,29 @@ export function RecentItemsSection({
   });
 
   // Reuse cached wishlists to resolve list titles (no extra network request)
-  const { data: wishlists = [] } = useQuery<WishList[]>({
+  const { data: wishlists = [], error: wishlistsError } = useQuery<WishList[]>({
     queryKey: ['wishlists'],
     queryFn: () => apiClient.getWishLists(),
     retry: 2,
   });
+
+  useEffect(() => {
+    if (!recentItemsError) return;
+    const message =
+      recentItemsError instanceof Error
+        ? recentItemsError.message
+        : 'Failed to load recent items. Please try again.';
+    dialog.error(message);
+  }, [recentItemsError]);
+
+  useEffect(() => {
+    if (!wishlistsError) return;
+    const message =
+      wishlistsError instanceof Error
+        ? wishlistsError.message
+        : 'Failed to load wishlists. Please try again.';
+    dialog.error(message);
+  }, [wishlistsError]);
 
   const wishlistMap = new Map(wishlists.map((wl) => [wl.id, wl.title]));
   const items: GiftItem[] = paginatedItems?.items ?? [];

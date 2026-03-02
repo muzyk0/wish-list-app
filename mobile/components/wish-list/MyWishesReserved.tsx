@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { apiClient } from '@/lib/api';
-import { dialog } from '@/stores/dialogStore';
 import type { WishlistOwnerReservation } from '@/lib/api/types';
+import { dialog } from '@/stores/dialogStore';
 
 const PAGE_LIMIT = 20;
 
@@ -25,11 +25,15 @@ export function MyWishesReserved() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const loadingMoreRef = useRef(false);
 
   const fetchReservations = async (pageNum: number, replace: boolean) => {
     try {
       if (replace) setLoading(true);
-      else setLoadingMore(true);
+      else {
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      }
 
       const data = await apiClient.getWishlistOwnerReservations({
         page: pageNum,
@@ -44,6 +48,7 @@ export function MyWishesReserved() {
       setLoading(false);
       setRefreshing(false);
       setLoadingMore(false);
+      loadingMoreRef.current = false;
     }
   };
 
@@ -56,11 +61,11 @@ export function MyWishesReserved() {
     setRefreshing(true);
     setPage(1);
     setHasMore(true);
-    fetchReservations(1, true);
+    void fetchReservations(1, true);
   };
 
   const onEndReached = () => {
-    if (loadingMore || !hasMore) return;
+    if (loadingMoreRef.current || loadingMore || !hasMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
     void fetchReservations(nextPage, false);

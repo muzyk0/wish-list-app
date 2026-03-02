@@ -1015,9 +1015,6 @@ func (s *WishListService) GetGiftItemsByPublicSlugFiltered(ctx context.Context, 
 		if giftItem.Priority.Valid {
 			output.Priority = int(giftItem.Priority.Int32)
 		}
-		if giftItem.Notes.Valid {
-			output.Notes = giftItem.Notes.String
-		}
 		if giftItem.Position.Valid {
 			output.Position = int(giftItem.Position.Int32)
 		}

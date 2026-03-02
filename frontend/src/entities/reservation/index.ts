@@ -1,2 +1,1 @@
-// Reservation Entity - Public API
-export * from './lib/guest-reservations';
+// Reservation entity exports are intentionally empty.

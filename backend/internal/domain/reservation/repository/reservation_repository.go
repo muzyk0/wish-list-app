@@ -36,9 +36,12 @@ type ReservationRepositoryInterface interface {
 	ListGuestReservationsWithDetails(ctx context.Context, token pgtype.UUID) ([]ReservationDetail, error)
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
 	ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
+	ListWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+	CountWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error)
 	CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error)
 	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
+	LinkGuestReservationsToUserByEmailWithExecutor(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error)
 }
 
 type ReservationDetail struct {
@@ -559,6 +562,11 @@ func (r *ReservationRepository) CountUserReservations(ctx context.Context, userI
 // ListWishlistOwnerReservations retrieves all reservations on items belonging to the specified user's wishlists.
 // This is the "owner view": who reserved my wishlist items (includes both guest and authenticated reservations).
 func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error) {
+	return r.ListWishlistOwnerReservationsWithExecutor(ctx, r.db, ownerUserID, limit, offset)
+}
+
+// ListWishlistOwnerReservationsWithExecutor retrieves wishlist owner reservations using the provided executor.
+func (r *ReservationRepository) ListWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error) {
 	query := `
 		SELECT
 			r.id,
@@ -585,7 +593,7 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 	`
 
 	var reservations []ReservationDetail
-	err := r.db.SelectContext(ctx, &reservations, query, ownerUserID, limit, offset)
+	err := executor.SelectContext(ctx, &reservations, query, ownerUserID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list wishlist owner reservations: %w", err)
 	}
@@ -595,6 +603,11 @@ func (r *ReservationRepository) ListWishlistOwnerReservations(ctx context.Contex
 
 // CountWishlistOwnerReservations counts all reservations on items belonging to the specified user's wishlists.
 func (r *ReservationRepository) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	return r.CountWishlistOwnerReservationsWithExecutor(ctx, r.db, ownerUserID)
+}
+
+// CountWishlistOwnerReservationsWithExecutor counts owner reservations using the provided executor.
+func (r *ReservationRepository) CountWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error) {
 	query := `
 		SELECT COUNT(*)
 		FROM reservations r
@@ -604,7 +617,7 @@ func (r *ReservationRepository) CountWishlistOwnerReservations(ctx context.Conte
 	`
 
 	var count int
-	err := r.db.GetContext(ctx, &count, query, ownerUserID)
+	err := executor.GetContext(ctx, &count, query, ownerUserID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to count wishlist owner reservations: %w", err)
 	}
@@ -649,6 +662,11 @@ func (r *ReservationRepository) CancelReservationByOwner(ctx context.Context, ow
 // LinkGuestReservationsToUserByEmail attaches active guest reservations to a user account by email.
 // This supports post-registration linking so guest reservations become visible in authenticated flows.
 func (r *ReservationRepository) LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
+	return r.LinkGuestReservationsToUserByEmailWithExecutor(ctx, r.db, guestEmail, userID)
+}
+
+// LinkGuestReservationsToUserByEmailWithExecutor attaches guest reservations using the provided executor.
+func (r *ReservationRepository) LinkGuestReservationsToUserByEmailWithExecutor(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error) {
 	if !userID.Valid {
 		return 0, fmt.Errorf("invalid user id")
 	}
@@ -669,7 +687,7 @@ func (r *ReservationRepository) LinkGuestReservationsToUserByEmail(ctx context.C
 			  AND LOWER(TRIM(guest_email)) = $2
 		`
 
-		result, err := r.db.ExecContext(ctx, query, userID, normalizedEmail)
+		result, err := executor.ExecContext(ctx, query, userID, normalizedEmail)
 		if err != nil {
 			return 0, fmt.Errorf("failed to link guest reservations by email: %w", err)
 		}
@@ -698,7 +716,7 @@ func (r *ReservationRepository) LinkGuestReservationsToUserByEmail(ctx context.C
 		  AND (guest_email IS NOT NULL OR encrypted_guest_email IS NOT NULL)
 	`
 
-	if err := r.db.SelectContext(ctx, &candidates, selectQuery); err != nil {
+	if err := executor.SelectContext(ctx, &candidates, selectQuery); err != nil {
 		return 0, fmt.Errorf("failed to load guest reservation candidates: %w", err)
 	}
 
@@ -739,7 +757,7 @@ func (r *ReservationRepository) LinkGuestReservationsToUserByEmail(ctx context.C
 
 	linkedCount := 0
 	for _, reservationID := range matchedIDs {
-		result, err := r.db.ExecContext(ctx, updateQuery, userID, reservationID)
+		result, err := executor.ExecContext(ctx, updateQuery, userID, reservationID)
 		if err != nil {
 			return 0, fmt.Errorf("failed to link reservation %s: %w", reservationID.String(), err)
 		}

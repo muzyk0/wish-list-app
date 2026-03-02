@@ -36,7 +36,8 @@ type SortOption =
 const PAGE_SIZE = 12;
 
 export function PublicWishlistPage() {
-  const { slug } = useParams<{ slug: string }>()!;
+  const params = useParams<{ slug?: string }>();
+  const slug = params?.slug ?? '';
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -89,6 +90,22 @@ export function PublicWishlistPage() {
     placeholderData: keepPreviousData,
   });
 
+  const { data: reservedCountData } = useQuery({
+    queryKey: ['public-gift-items-reserved-total', slug],
+    queryFn: async () => {
+      const response = await apiClient.getPublicGiftItems(
+        slug,
+        1,
+        1,
+        undefined,
+        'reserved',
+      );
+      return response.total;
+    },
+    enabled: !!slug && !!wishList,
+    retry: 1,
+  });
+
   // True only when a filter/sort change is in flight (not initial load, not next-page load)
   const isFilterTransition =
     isFetchingGiftItems && !isLoadingGiftItems && !isFetchingNextPage;
@@ -97,10 +114,10 @@ export function PublicWishlistPage() {
   const isError = isErrorWishList || isErrorGiftItems;
 
   const giftItems = itemsData?.pages.flatMap((p) => p.items ?? []) ?? [];
-  const totalItems = itemsData?.pages[0]?.total ?? 0;
 
-  // Count reserved items from loaded pages
-  const reservedCount = giftItems.filter((item) => item.is_reserved).length;
+  // Prefer server aggregate to avoid undercount while infinite-scroll pages are still loading.
+  const reservedCount =
+    reservedCountData ?? giftItems.filter((item) => item.is_reserved).length;
 
   const hasActiveFilters =
     searchQuery.trim() !== '' ||

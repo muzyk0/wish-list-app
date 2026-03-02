@@ -8,12 +8,17 @@ interface RemotePattern {
   hostname: string;
 }
 
+const DEVELOPMENT_IMAGE_DOMAINS: RemotePattern[] =
+  process.env.NODE_ENV === 'development'
+    ? [{ protocol: 'http', hostname: 'localhost' }]
+    : [];
+
 const IMAGE_DOMAINS: RemotePattern[] = [
   // AWS S3 (our own uploads)
   { protocol: 'https', hostname: '*.amazonaws.com' },
 
   // Local development
-  { protocol: 'http', hostname: 'localhost' },
+  ...DEVELOPMENT_IMAGE_DOMAINS,
 
   // E-commerce & Product Sources
   // Apple

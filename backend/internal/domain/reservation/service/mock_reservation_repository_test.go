@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
+	"wish-list/internal/app/database"
 	"wish-list/internal/domain/reservation/models"
 	"wish-list/internal/domain/reservation/repository"
 )
@@ -21,8 +22,17 @@ var _ repository.ReservationRepositoryInterface = &ReservationRepositoryInterfac
 //
 //		// make and configure a mocked repository.ReservationRepositoryInterface
 //		mockedReservationRepositoryInterface := &ReservationRepositoryInterfaceMock{
+//			CancelReservationByOwnerFunc: func(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error) {
+//				panic("mock out the CancelReservationByOwner method")
+//			},
 //			CountUserReservationsFunc: func(ctx context.Context, userID pgtype.UUID) (int, error) {
 //				panic("mock out the CountUserReservations method")
+//			},
+//			CountWishlistOwnerReservationsFunc: func(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+//				panic("mock out the CountWishlistOwnerReservations method")
+//			},
+//			CountWishlistOwnerReservationsWithExecutorFunc: func(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error) {
+//				panic("mock out the CountWishlistOwnerReservationsWithExecutor method")
 //			},
 //			CreateFunc: func(ctx context.Context, reservation models.Reservation) (*models.Reservation, error) {
 //				panic("mock out the Create method")
@@ -45,11 +55,20 @@ var _ repository.ReservationRepositoryInterface = &ReservationRepositoryInterfac
 //			LinkGuestReservationsToUserByEmailFunc: func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error) {
 //				panic("mock out the LinkGuestReservationsToUserByEmail method")
 //			},
+//			LinkGuestReservationsToUserByEmailWithExecutorFunc: func(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error) {
+//				panic("mock out the LinkGuestReservationsToUserByEmailWithExecutor method")
+//			},
 //			ListGuestReservationsWithDetailsFunc: func(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error) {
 //				panic("mock out the ListGuestReservationsWithDetails method")
 //			},
 //			ListUserReservationsWithDetailsFunc: func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
 //				panic("mock out the ListUserReservationsWithDetails method")
+//			},
+//			ListWishlistOwnerReservationsFunc: func(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+//				panic("mock out the ListWishlistOwnerReservations method")
+//			},
+//			ListWishlistOwnerReservationsWithExecutorFunc: func(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+//				panic("mock out the ListWishlistOwnerReservationsWithExecutor method")
 //			},
 //			UpdateStatusFunc: func(ctx context.Context, reservationID pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error) {
 //				panic("mock out the UpdateStatus method")
@@ -64,8 +83,17 @@ var _ repository.ReservationRepositoryInterface = &ReservationRepositoryInterfac
 //
 //	}
 type ReservationRepositoryInterfaceMock struct {
+	// CancelReservationByOwnerFunc mocks the CancelReservationByOwner method.
+	CancelReservationByOwnerFunc func(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error)
+
 	// CountUserReservationsFunc mocks the CountUserReservations method.
 	CountUserReservationsFunc func(ctx context.Context, userID pgtype.UUID) (int, error)
+
+	// CountWishlistOwnerReservationsFunc mocks the CountWishlistOwnerReservations method.
+	CountWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+
+	// CountWishlistOwnerReservationsWithExecutorFunc mocks the CountWishlistOwnerReservationsWithExecutor method.
+	CountWishlistOwnerReservationsWithExecutorFunc func(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error)
 
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, reservation models.Reservation) (*models.Reservation, error)
@@ -88,11 +116,20 @@ type ReservationRepositoryInterfaceMock struct {
 	// LinkGuestReservationsToUserByEmailFunc mocks the LinkGuestReservationsToUserByEmail method.
 	LinkGuestReservationsToUserByEmailFunc func(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 
+	// LinkGuestReservationsToUserByEmailWithExecutorFunc mocks the LinkGuestReservationsToUserByEmailWithExecutor method.
+	LinkGuestReservationsToUserByEmailWithExecutorFunc func(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error)
+
 	// ListGuestReservationsWithDetailsFunc mocks the ListGuestReservationsWithDetails method.
 	ListGuestReservationsWithDetailsFunc func(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error)
 
 	// ListUserReservationsWithDetailsFunc mocks the ListUserReservationsWithDetails method.
 	ListUserReservationsWithDetailsFunc func(ctx context.Context, userID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error)
+
+	// ListWishlistOwnerReservationsFunc mocks the ListWishlistOwnerReservations method.
+	ListWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error)
+
+	// ListWishlistOwnerReservationsWithExecutorFunc mocks the ListWishlistOwnerReservationsWithExecutor method.
+	ListWishlistOwnerReservationsWithExecutorFunc func(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error)
 
 	// UpdateStatusFunc mocks the UpdateStatus method.
 	UpdateStatusFunc func(ctx context.Context, reservationID pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error)
@@ -100,20 +137,39 @@ type ReservationRepositoryInterfaceMock struct {
 	// UpdateStatusByTokenFunc mocks the UpdateStatusByToken method.
 	UpdateStatusByTokenFunc func(ctx context.Context, token pgtype.UUID, status string, canceledAt pgtype.Timestamptz, cancelReason pgtype.Text) (*models.Reservation, error)
 
-	// ListWishlistOwnerReservationsFunc mocks the ListWishlistOwnerReservations method.
-	ListWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error)
-
-	// CountWishlistOwnerReservationsFunc mocks the CountWishlistOwnerReservations method.
-	CountWishlistOwnerReservationsFunc func(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
+		// CancelReservationByOwner holds details about calls to the CancelReservationByOwner method.
+		CancelReservationByOwner []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// OwnerUserID is the ownerUserID argument value.
+			OwnerUserID pgtype.UUID
+			// ReservationID is the reservationID argument value.
+			ReservationID pgtype.UUID
+		}
 		// CountUserReservations holds details about calls to the CountUserReservations method.
 		CountUserReservations []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// UserID is the userID argument value.
 			UserID pgtype.UUID
+		}
+		// CountWishlistOwnerReservations holds details about calls to the CountWishlistOwnerReservations method.
+		CountWishlistOwnerReservations []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// OwnerUserID is the ownerUserID argument value.
+			OwnerUserID pgtype.UUID
+		}
+		// CountWishlistOwnerReservationsWithExecutor holds details about calls to the CountWishlistOwnerReservationsWithExecutor method.
+		CountWishlistOwnerReservationsWithExecutor []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Executor is the executor argument value.
+			Executor database.Executor
+			// OwnerUserID is the ownerUserID argument value.
+			OwnerUserID pgtype.UUID
 		}
 		// Create holds details about calls to the Create method.
 		Create []struct {
@@ -170,6 +226,17 @@ type ReservationRepositoryInterfaceMock struct {
 			// UserID is the userID argument value.
 			UserID pgtype.UUID
 		}
+		// LinkGuestReservationsToUserByEmailWithExecutor holds details about calls to the LinkGuestReservationsToUserByEmailWithExecutor method.
+		LinkGuestReservationsToUserByEmailWithExecutor []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Executor is the executor argument value.
+			Executor database.Executor
+			// GuestEmail is the guestEmail argument value.
+			GuestEmail string
+			// UserID is the userID argument value.
+			UserID pgtype.UUID
+		}
 		// ListGuestReservationsWithDetails holds details about calls to the ListGuestReservationsWithDetails method.
 		ListGuestReservationsWithDetails []struct {
 			// Ctx is the ctx argument value.
@@ -183,6 +250,30 @@ type ReservationRepositoryInterfaceMock struct {
 			Ctx context.Context
 			// UserID is the userID argument value.
 			UserID pgtype.UUID
+			// Limit is the limit argument value.
+			Limit int
+			// Offset is the offset argument value.
+			Offset int
+		}
+		// ListWishlistOwnerReservations holds details about calls to the ListWishlistOwnerReservations method.
+		ListWishlistOwnerReservations []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// OwnerUserID is the ownerUserID argument value.
+			OwnerUserID pgtype.UUID
+			// Limit is the limit argument value.
+			Limit int
+			// Offset is the offset argument value.
+			Offset int
+		}
+		// ListWishlistOwnerReservationsWithExecutor holds details about calls to the ListWishlistOwnerReservationsWithExecutor method.
+		ListWishlistOwnerReservationsWithExecutor []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Executor is the executor argument value.
+			Executor database.Executor
+			// OwnerUserID is the ownerUserID argument value.
+			OwnerUserID pgtype.UUID
 			// Limit is the limit argument value.
 			Limit int
 			// Offset is the offset argument value.
@@ -214,33 +305,65 @@ type ReservationRepositoryInterfaceMock struct {
 			// CancelReason is the cancelReason argument value.
 			CancelReason pgtype.Text
 		}
-		// ListWishlistOwnerReservations holds details about calls to the ListWishlistOwnerReservations method.
-		ListWishlistOwnerReservations []struct {
-			Ctx         context.Context
-			OwnerUserID pgtype.UUID
-			Limit       int
-			Offset      int
-		}
-		// CountWishlistOwnerReservations holds details about calls to the CountWishlistOwnerReservations method.
-		CountWishlistOwnerReservations []struct {
-			Ctx         context.Context
-			OwnerUserID pgtype.UUID
-		}
 	}
-	lockCountUserReservations              sync.RWMutex
-	lockCreate                             sync.RWMutex
-	lockGetActiveReservationForGiftItem    sync.RWMutex
-	lockGetByGiftItem                      sync.RWMutex
-	lockGetByID                            sync.RWMutex
-	lockGetByToken                         sync.RWMutex
-	lockGetReservationsByUser              sync.RWMutex
-	lockLinkGuestReservationsToUserByEmail sync.RWMutex
-	lockListGuestReservationsWithDetails   sync.RWMutex
-	lockListUserReservationsWithDetails    sync.RWMutex
-	lockUpdateStatus                       sync.RWMutex
-	lockUpdateStatusByToken                sync.RWMutex
-	lockListWishlistOwnerReservations      sync.RWMutex
-	lockCountWishlistOwnerReservations     sync.RWMutex
+	lockCancelReservationByOwner                       sync.RWMutex
+	lockCountUserReservations                          sync.RWMutex
+	lockCountWishlistOwnerReservations                 sync.RWMutex
+	lockCountWishlistOwnerReservationsWithExecutor     sync.RWMutex
+	lockCreate                                         sync.RWMutex
+	lockGetActiveReservationForGiftItem                sync.RWMutex
+	lockGetByGiftItem                                  sync.RWMutex
+	lockGetByID                                        sync.RWMutex
+	lockGetByToken                                     sync.RWMutex
+	lockGetReservationsByUser                          sync.RWMutex
+	lockLinkGuestReservationsToUserByEmail             sync.RWMutex
+	lockLinkGuestReservationsToUserByEmailWithExecutor sync.RWMutex
+	lockListGuestReservationsWithDetails               sync.RWMutex
+	lockListUserReservationsWithDetails                sync.RWMutex
+	lockListWishlistOwnerReservations                  sync.RWMutex
+	lockListWishlistOwnerReservationsWithExecutor      sync.RWMutex
+	lockUpdateStatus                                   sync.RWMutex
+	lockUpdateStatusByToken                            sync.RWMutex
+}
+
+// CancelReservationByOwner calls CancelReservationByOwnerFunc.
+func (mock *ReservationRepositoryInterfaceMock) CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error) {
+	if mock.CancelReservationByOwnerFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.CancelReservationByOwnerFunc: method is nil but ReservationRepositoryInterface.CancelReservationByOwner was just called")
+	}
+	callInfo := struct {
+		Ctx           context.Context
+		OwnerUserID   pgtype.UUID
+		ReservationID pgtype.UUID
+	}{
+		Ctx:           ctx,
+		OwnerUserID:   ownerUserID,
+		ReservationID: reservationID,
+	}
+	mock.lockCancelReservationByOwner.Lock()
+	mock.calls.CancelReservationByOwner = append(mock.calls.CancelReservationByOwner, callInfo)
+	mock.lockCancelReservationByOwner.Unlock()
+	return mock.CancelReservationByOwnerFunc(ctx, ownerUserID, reservationID)
+}
+
+// CancelReservationByOwnerCalls gets all the calls that were made to CancelReservationByOwner.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.CancelReservationByOwnerCalls())
+func (mock *ReservationRepositoryInterfaceMock) CancelReservationByOwnerCalls() []struct {
+	Ctx           context.Context
+	OwnerUserID   pgtype.UUID
+	ReservationID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx           context.Context
+		OwnerUserID   pgtype.UUID
+		ReservationID pgtype.UUID
+	}
+	mock.lockCancelReservationByOwner.RLock()
+	calls = mock.calls.CancelReservationByOwner
+	mock.lockCancelReservationByOwner.RUnlock()
+	return calls
 }
 
 // CountUserReservations calls CountUserReservationsFunc.
@@ -276,6 +399,82 @@ func (mock *ReservationRepositoryInterfaceMock) CountUserReservationsCalls() []s
 	mock.lockCountUserReservations.RLock()
 	calls = mock.calls.CountUserReservations
 	mock.lockCountUserReservations.RUnlock()
+	return calls
+}
+
+// CountWishlistOwnerReservations calls CountWishlistOwnerReservationsFunc.
+func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	if mock.CountWishlistOwnerReservationsFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.CountWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.CountWishlistOwnerReservations was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+	}{
+		Ctx:         ctx,
+		OwnerUserID: ownerUserID,
+	}
+	mock.lockCountWishlistOwnerReservations.Lock()
+	mock.calls.CountWishlistOwnerReservations = append(mock.calls.CountWishlistOwnerReservations, callInfo)
+	mock.lockCountWishlistOwnerReservations.Unlock()
+	return mock.CountWishlistOwnerReservationsFunc(ctx, ownerUserID)
+}
+
+// CountWishlistOwnerReservationsCalls gets all the calls that were made to CountWishlistOwnerReservations.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.CountWishlistOwnerReservationsCalls())
+func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservationsCalls() []struct {
+	Ctx         context.Context
+	OwnerUserID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+	}
+	mock.lockCountWishlistOwnerReservations.RLock()
+	calls = mock.calls.CountWishlistOwnerReservations
+	mock.lockCountWishlistOwnerReservations.RUnlock()
+	return calls
+}
+
+// CountWishlistOwnerReservationsWithExecutor calls CountWishlistOwnerReservationsWithExecutorFunc.
+func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error) {
+	if mock.CountWishlistOwnerReservationsWithExecutorFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.CountWishlistOwnerReservationsWithExecutorFunc: method is nil but ReservationRepositoryInterface.CountWishlistOwnerReservationsWithExecutor was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Executor    database.Executor
+		OwnerUserID pgtype.UUID
+	}{
+		Ctx:         ctx,
+		Executor:    executor,
+		OwnerUserID: ownerUserID,
+	}
+	mock.lockCountWishlistOwnerReservationsWithExecutor.Lock()
+	mock.calls.CountWishlistOwnerReservationsWithExecutor = append(mock.calls.CountWishlistOwnerReservationsWithExecutor, callInfo)
+	mock.lockCountWishlistOwnerReservationsWithExecutor.Unlock()
+	return mock.CountWishlistOwnerReservationsWithExecutorFunc(ctx, executor, ownerUserID)
+}
+
+// CountWishlistOwnerReservationsWithExecutorCalls gets all the calls that were made to CountWishlistOwnerReservationsWithExecutor.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.CountWishlistOwnerReservationsWithExecutorCalls())
+func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservationsWithExecutorCalls() []struct {
+	Ctx         context.Context
+	Executor    database.Executor
+	OwnerUserID pgtype.UUID
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Executor    database.Executor
+		OwnerUserID pgtype.UUID
+	}
+	mock.lockCountWishlistOwnerReservationsWithExecutor.RLock()
+	calls = mock.calls.CountWishlistOwnerReservationsWithExecutor
+	mock.lockCountWishlistOwnerReservationsWithExecutor.RUnlock()
 	return calls
 }
 
@@ -543,6 +742,50 @@ func (mock *ReservationRepositoryInterfaceMock) LinkGuestReservationsToUserByEma
 	return calls
 }
 
+// LinkGuestReservationsToUserByEmailWithExecutor calls LinkGuestReservationsToUserByEmailWithExecutorFunc.
+func (mock *ReservationRepositoryInterfaceMock) LinkGuestReservationsToUserByEmailWithExecutor(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error) {
+	if mock.LinkGuestReservationsToUserByEmailWithExecutorFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.LinkGuestReservationsToUserByEmailWithExecutorFunc: method is nil but ReservationRepositoryInterface.LinkGuestReservationsToUserByEmailWithExecutor was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		Executor   database.Executor
+		GuestEmail string
+		UserID     pgtype.UUID
+	}{
+		Ctx:        ctx,
+		Executor:   executor,
+		GuestEmail: guestEmail,
+		UserID:     userID,
+	}
+	mock.lockLinkGuestReservationsToUserByEmailWithExecutor.Lock()
+	mock.calls.LinkGuestReservationsToUserByEmailWithExecutor = append(mock.calls.LinkGuestReservationsToUserByEmailWithExecutor, callInfo)
+	mock.lockLinkGuestReservationsToUserByEmailWithExecutor.Unlock()
+	return mock.LinkGuestReservationsToUserByEmailWithExecutorFunc(ctx, executor, guestEmail, userID)
+}
+
+// LinkGuestReservationsToUserByEmailWithExecutorCalls gets all the calls that were made to LinkGuestReservationsToUserByEmailWithExecutor.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.LinkGuestReservationsToUserByEmailWithExecutorCalls())
+func (mock *ReservationRepositoryInterfaceMock) LinkGuestReservationsToUserByEmailWithExecutorCalls() []struct {
+	Ctx        context.Context
+	Executor   database.Executor
+	GuestEmail string
+	UserID     pgtype.UUID
+} {
+	var calls []struct {
+		Ctx        context.Context
+		Executor   database.Executor
+		GuestEmail string
+		UserID     pgtype.UUID
+	}
+	mock.lockLinkGuestReservationsToUserByEmailWithExecutor.RLock()
+	calls = mock.calls.LinkGuestReservationsToUserByEmailWithExecutor
+	mock.lockLinkGuestReservationsToUserByEmailWithExecutor.RUnlock()
+	return calls
+}
+
 // ListGuestReservationsWithDetails calls ListGuestReservationsWithDetailsFunc.
 func (mock *ReservationRepositoryInterfaceMock) ListGuestReservationsWithDetails(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error) {
 	if mock.ListGuestReservationsWithDetailsFunc == nil {
@@ -620,6 +863,98 @@ func (mock *ReservationRepositoryInterfaceMock) ListUserReservationsWithDetailsC
 	mock.lockListUserReservationsWithDetails.RLock()
 	calls = mock.calls.ListUserReservationsWithDetails
 	mock.lockListUserReservationsWithDetails.RUnlock()
+	return calls
+}
+
+// ListWishlistOwnerReservations calls ListWishlistOwnerReservationsFunc.
+func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+	if mock.ListWishlistOwnerReservationsFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.ListWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.ListWishlistOwnerReservations was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+		Limit       int
+		Offset      int
+	}{
+		Ctx:         ctx,
+		OwnerUserID: ownerUserID,
+		Limit:       limit,
+		Offset:      offset,
+	}
+	mock.lockListWishlistOwnerReservations.Lock()
+	mock.calls.ListWishlistOwnerReservations = append(mock.calls.ListWishlistOwnerReservations, callInfo)
+	mock.lockListWishlistOwnerReservations.Unlock()
+	return mock.ListWishlistOwnerReservationsFunc(ctx, ownerUserID, limit, offset)
+}
+
+// ListWishlistOwnerReservationsCalls gets all the calls that were made to ListWishlistOwnerReservations.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.ListWishlistOwnerReservationsCalls())
+func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservationsCalls() []struct {
+	Ctx         context.Context
+	OwnerUserID pgtype.UUID
+	Limit       int
+	Offset      int
+} {
+	var calls []struct {
+		Ctx         context.Context
+		OwnerUserID pgtype.UUID
+		Limit       int
+		Offset      int
+	}
+	mock.lockListWishlistOwnerReservations.RLock()
+	calls = mock.calls.ListWishlistOwnerReservations
+	mock.lockListWishlistOwnerReservations.RUnlock()
+	return calls
+}
+
+// ListWishlistOwnerReservationsWithExecutor calls ListWishlistOwnerReservationsWithExecutorFunc.
+func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
+	if mock.ListWishlistOwnerReservationsWithExecutorFunc == nil {
+		panic("ReservationRepositoryInterfaceMock.ListWishlistOwnerReservationsWithExecutorFunc: method is nil but ReservationRepositoryInterface.ListWishlistOwnerReservationsWithExecutor was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Executor    database.Executor
+		OwnerUserID pgtype.UUID
+		Limit       int
+		Offset      int
+	}{
+		Ctx:         ctx,
+		Executor:    executor,
+		OwnerUserID: ownerUserID,
+		Limit:       limit,
+		Offset:      offset,
+	}
+	mock.lockListWishlistOwnerReservationsWithExecutor.Lock()
+	mock.calls.ListWishlistOwnerReservationsWithExecutor = append(mock.calls.ListWishlistOwnerReservationsWithExecutor, callInfo)
+	mock.lockListWishlistOwnerReservationsWithExecutor.Unlock()
+	return mock.ListWishlistOwnerReservationsWithExecutorFunc(ctx, executor, ownerUserID, limit, offset)
+}
+
+// ListWishlistOwnerReservationsWithExecutorCalls gets all the calls that were made to ListWishlistOwnerReservationsWithExecutor.
+// Check the length with:
+//
+//	len(mockedReservationRepositoryInterface.ListWishlistOwnerReservationsWithExecutorCalls())
+func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservationsWithExecutorCalls() []struct {
+	Ctx         context.Context
+	Executor    database.Executor
+	OwnerUserID pgtype.UUID
+	Limit       int
+	Offset      int
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Executor    database.Executor
+		OwnerUserID pgtype.UUID
+		Limit       int
+		Offset      int
+	}
+	mock.lockListWishlistOwnerReservationsWithExecutor.RLock()
+	calls = mock.calls.ListWishlistOwnerReservationsWithExecutor
+	mock.lockListWishlistOwnerReservationsWithExecutor.RUnlock()
 	return calls
 }
 
@@ -717,36 +1052,4 @@ func (mock *ReservationRepositoryInterfaceMock) UpdateStatusByTokenCalls() []str
 	calls = mock.calls.UpdateStatusByToken
 	mock.lockUpdateStatusByToken.RUnlock()
 	return calls
-}
-
-// ListWishlistOwnerReservations calls ListWishlistOwnerReservationsFunc.
-func (mock *ReservationRepositoryInterfaceMock) ListWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit int, offset int) ([]repository.ReservationDetail, error) {
-	if mock.ListWishlistOwnerReservationsFunc == nil {
-		panic("ReservationRepositoryInterfaceMock.ListWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.ListWishlistOwnerReservations was just called")
-	}
-	callInfo := struct {
-		Ctx         context.Context
-		OwnerUserID pgtype.UUID
-		Limit       int
-		Offset      int
-	}{Ctx: ctx, OwnerUserID: ownerUserID, Limit: limit, Offset: offset}
-	mock.lockListWishlistOwnerReservations.Lock()
-	mock.calls.ListWishlistOwnerReservations = append(mock.calls.ListWishlistOwnerReservations, callInfo)
-	mock.lockListWishlistOwnerReservations.Unlock()
-	return mock.ListWishlistOwnerReservationsFunc(ctx, ownerUserID, limit, offset)
-}
-
-// CountWishlistOwnerReservations calls CountWishlistOwnerReservationsFunc.
-func (mock *ReservationRepositoryInterfaceMock) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
-	if mock.CountWishlistOwnerReservationsFunc == nil {
-		panic("ReservationRepositoryInterfaceMock.CountWishlistOwnerReservationsFunc: method is nil but ReservationRepositoryInterface.CountWishlistOwnerReservations was just called")
-	}
-	callInfo := struct {
-		Ctx         context.Context
-		OwnerUserID pgtype.UUID
-	}{Ctx: ctx, OwnerUserID: ownerUserID}
-	mock.lockCountWishlistOwnerReservations.Lock()
-	mock.calls.CountWishlistOwnerReservations = append(mock.calls.CountWishlistOwnerReservations, callInfo)
-	mock.lockCountWishlistOwnerReservations.Unlock()
-	return mock.CountWishlistOwnerReservationsFunc(ctx, ownerUserID)
 }
