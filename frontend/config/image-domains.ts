@@ -10,7 +10,7 @@ interface RemotePattern {
 
 const DEVELOPMENT_IMAGE_DOMAINS: RemotePattern[] =
   process.env.NODE_ENV === 'development'
-    ? [{ protocol: 'http', hostname: 'localhost' }]
+    ? [{ protocol: 'http', hostname: 'localhost', port: '3000' }]
     : [];
 
 const IMAGE_DOMAINS: RemotePattern[] = [
