@@ -4,7 +4,26 @@ properties:
       $ref: >-
         ./wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse.yaml
     type: array
-  pagination: {}
+  pagination:
+    type: object
+    properties:
+      page:
+        type: integer
+        example: 1
+      limit:
+        type: integer
+        example: 10
+      total:
+        type: integer
+        example: 42
+      total_pages:
+        type: integer
+        example: 5
+    required:
+      - page
+      - limit
+      - total
+      - total_pages
 required:
   - data
   - pagination

@@ -108,11 +108,11 @@ Explicit user requests:
 
 When looking for past context:
 1. Search topic files in your memory directory:
-```
+```bash
 Grep with pattern="<search term>" path=".claude/agent-memory/backend-mock-generator/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
-```
+```bash
 Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 Use narrow search terms (error messages, file paths, function names) rather than broad keywords.

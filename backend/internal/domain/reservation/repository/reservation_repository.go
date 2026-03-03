@@ -66,8 +66,8 @@ type ReservationDetail struct {
 	WishlistTitle       pgtype.Text        `db:"wishlist_title"`
 	OwnerFirstName      pgtype.Text        `db:"owner_first_name"`
 	OwnerLastName       pgtype.Text        `db:"owner_last_name"`
-	// Reserved for future use; intentionally not populated in ListWishlistOwnerReservations
-	// to preserve reserver privacy (the owner sees that an item is reserved, not who reserved it).
+	// Not populated: reserver identity is intentionally hidden from wishlist owner
+	// to preserve the surprise (the owner knows an item is reserved, but not by whom).
 	ReserverFirstName pgtype.Text `db:"reserver_first_name"`
 	ReserverLastName  pgtype.Text `db:"reserver_last_name"`
 }

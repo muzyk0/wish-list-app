@@ -335,7 +335,7 @@ func (r *GiftItemRepository) GetStats(ctx context.Context, ownerID pgtype.UUID) 
 					)
 				)
 			) AS reserved,
-			COUNT(*) FILTER (WHERE archived_at IS NULL AND purchased_at IS NOT NULL) AS purchased
+			COUNT(*) FILTER (WHERE archived_at IS NULL AND (purchased_at IS NOT NULL OR purchased_by_user_id IS NOT NULL)) AS purchased
 		FROM gift_items
 		WHERE owner_id = $1
 	`

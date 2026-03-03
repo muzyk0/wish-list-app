@@ -2192,7 +2192,9 @@
                         "name": "page",
                         "in": "query",
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1
                         }
                     },
                     {
@@ -2200,7 +2202,10 @@
                         "name": "limit",
                         "in": "query",
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 10
                         }
                     }
                 ],
@@ -3717,7 +3722,33 @@
                             "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"
                         }
                     },
-                    "pagination": {}
+                    "pagination": {
+                        "type": "object",
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "example": 10
+                            },
+                            "total": {
+                                "type": "integer",
+                                "example": 42
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            }
+                        },
+                        "required": [
+                            "page",
+                            "limit",
+                            "total",
+                            "total_pages"
+                        ]
+                    }
                 }
             },
             "wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary": {
@@ -3799,7 +3830,33 @@
                             "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"
                         }
                     },
-                    "pagination": {}
+                    "pagination": {
+                        "type": "object",
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "example": 10
+                            },
+                            "total": {
+                                "type": "integer",
+                                "example": 42
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            }
+                        },
+                        "required": [
+                            "page",
+                            "limit",
+                            "total",
+                            "total_pages"
+                        ]
+                    }
                 }
             },
             "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse": {

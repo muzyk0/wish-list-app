@@ -1018,9 +1018,6 @@ func (s *WishListService) GetGiftItemsByPublicSlugFiltered(ctx context.Context, 
 		if giftItem.Position.Valid {
 			output.Position = int(giftItem.Position.Int32)
 		}
-		if giftItem.ReservedByUserID.Valid {
-			output.ReservedByUserID = giftItem.ReservedByUserID.String()
-		}
 		if giftItem.ReservedAt.Valid {
 			output.ReservedAt = giftItem.ReservedAt.Time.Format(time.RFC3339)
 		}
