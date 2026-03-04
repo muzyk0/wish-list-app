@@ -35,13 +35,13 @@ export function MyWishesReserved() {
         setLoadingMore(true);
       }
 
-      const data = await apiClient.getWishlistOwnerReservations({
+      const result = await apiClient.getWishlistOwnerReservations({
         page: pageNum,
         limit: PAGE_LIMIT,
       });
 
-      setReservations((prev) => (replace ? data : [...prev, ...data]));
-      setHasMore(data.length === PAGE_LIMIT);
+      setReservations((prev) => (replace ? result.data : [...prev, ...result.data]));
+      setHasMore(pageNum < result.totalPages);
     } catch (error) {
       console.error('Failed to load wish reservations:', error);
     } finally {

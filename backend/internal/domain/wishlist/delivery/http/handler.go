@@ -247,7 +247,7 @@ func (h *Handler) GetGiftItemsByPublicSlug(c echo.Context) error {
 		SortBy: sortBy,
 	})
 	if err != nil {
-		return apperrors.Internal("Failed to get gift items").Wrap(err)
+		return mapWishlistServiceError(err)
 	}
 
 	if giftItems == nil {

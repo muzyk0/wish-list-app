@@ -615,7 +615,7 @@ class ApiClient {
   async getWishlistOwnerReservations(options?: {
     page?: number;
     limit?: number;
-  }): Promise<WishlistOwnerReservation[]> {
+  }): Promise<{ data: WishlistOwnerReservation[]; totalPages: number }> {
     const { data, error } = await this.client.GET(
       '/reservations/wishlist-owner',
       {
@@ -632,7 +632,11 @@ class ApiClient {
       throw error;
     }
 
-    return data?.data ?? [];
+    const pagination = data?.pagination as { total_pages?: number } | undefined;
+    return {
+      data: data?.data ?? [],
+      totalPages: pagination?.total_pages ?? 1,
+    };
   }
 
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
