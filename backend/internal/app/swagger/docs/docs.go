@@ -624,19 +624,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request parameters",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -807,28 +801,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid query parameters",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -871,28 +856,56 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get home screen stats",
+                "responses": {
+                    "200": {
+                        "description": "Stats retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -932,28 +945,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Access denied",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Item not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1003,46 +1007,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Access denied",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Item not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1077,37 +1066,25 @@ const docTemplate = `{
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Access denied",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Item not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1159,46 +1136,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Not authenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Access denied",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Item not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1451,10 +1413,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1507,19 +1466,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body or validation error (guests need name)",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1570,28 +1523,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body or validation error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized (guests need reservation token)",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1637,7 +1581,7 @@ const docTemplate = `{
         },
         "/public/wishlists/{slug}/gift-items": {
             "get": {
-                "description": "Get all gift items for a public wish list by its public slug with pagination support.",
+                "description": "Get gift items for a public wish list by its public slug with pagination, search, status filter, and sort support.",
                 "produces": [
                     "application/json"
                 ],
@@ -1661,8 +1605,39 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Items per page (default 10, max 100)",
+                        "description": "Items per page (default 12, max 100)",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Case-insensitive search on name and description",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "available",
+                            "reserved",
+                            "purchased"
+                        ],
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "position",
+                            "name_asc",
+                            "name_desc",
+                            "price_asc",
+                            "price_desc",
+                            "priority_desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order",
+                        "name": "sort_by",
                         "in": "query"
                     }
                 ],
@@ -1671,6 +1646,15 @@ const docTemplate = `{
                         "description": "Gift items retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameter value",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
@@ -1711,14 +1695,19 @@ const docTemplate = `{
                 "summary": "Get all reservations made by the authenticated user",
                 "parameters": [
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Page number (default 1)",
+                        "default": 1,
+                        "description": "Page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
+                        "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Items per page (default 10, max 100)",
+                        "default": 10,
+                        "description": "Items per page",
                         "name": "limit",
                         "in": "query"
                     }
@@ -1733,19 +1722,122 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/wishlist-owner": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Get reservations on items in the authenticated user's wishlists",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of reservations on owner's items",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/wishlist-owner/{reservationId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows the authenticated wishlist owner to cancel any active reservation on their items.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Cancel a reservation as the wishlist owner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Reservation ID",
+                        "name": "reservationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation canceled",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid reservation ID",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Reservation not found or not owned by caller",
+                        "schema": {
+                            "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2730,6 +2822,40 @@ const docTemplate = `{
                 }
             }
         },
+        "wish-list_internal_domain_item_delivery_http_dto.ErrorResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        },
+        "wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse": {
+            "type": "object",
+            "required": [
+                "purchased",
+                "reserved",
+                "total_items"
+            ],
+            "properties": {
+                "purchased": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "reserved": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "total_items": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
         "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
             "type": "object",
             "properties": {
@@ -2938,6 +3064,18 @@ const docTemplate = `{
                 }
             }
         },
+        "wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        },
         "wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary": {
             "type": "object",
             "required": [
@@ -2956,6 +3094,33 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "string"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse": {
+            "type": "object",
+            "required": [
+                "limit",
+                "page",
+                "total",
+                "total_pages"
+            ],
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 5
                 }
             }
         },
@@ -3023,7 +3188,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"
                     }
                 },
-                "pagination": {}
+                "pagination": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"
+                }
             }
         },
         "wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary": {
@@ -3044,6 +3211,81 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse": {
+            "type": "object",
+            "required": [
+                "gift_item",
+                "id",
+                "reserved_at",
+                "status",
+                "wishlist"
+            ],
+            "properties": {
+                "expires_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "gift_item": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"
+                },
+                "id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "reserved_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "wishlist": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Failed to get wishlist owner reservations"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "pagination"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"
+                }
+            }
+        },
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse": {
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
                 }
             }
         },

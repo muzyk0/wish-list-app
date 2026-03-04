@@ -1,0 +1,19 @@
+properties:
+  limit:
+    example: 10
+    type: integer
+  page:
+    example: 1
+    type: integer
+  total:
+    example: 42
+    type: integer
+  total_pages:
+    example: 5
+    type: integer
+required:
+  - limit
+  - page
+  - total
+  - total_pages
+type: object

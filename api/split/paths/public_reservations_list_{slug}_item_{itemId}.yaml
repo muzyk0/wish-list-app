@@ -26,9 +26,8 @@ get:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
   summary: Get the reservation status for a gift item in a public wish list
   tags:
     - Reservations

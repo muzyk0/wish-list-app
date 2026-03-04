@@ -83,16 +83,16 @@ func TestGetWishlistItems_Success_Owner(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
 			return items, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 1, nil
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	result, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 1, 10)
 
@@ -118,16 +118,16 @@ func TestGetWishlistItems_Success_PublicWishlist_NonOwner(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
 			return []*itemmodels.GiftItem{}, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	result, err := svc.GetWishlistItems(context.Background(), wlID.String(), otherUserID.String(), 0, 0)
 
@@ -149,18 +149,18 @@ func TestGetWishlistItems_DefaultPagination(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error) {
 			capturedPage = page
 			capturedLimit = limit
 			return []*itemmodels.GiftItem{}, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	// page=0 and limit=0 should default to page=1, limit=10
 	_, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 0, 0)
@@ -181,17 +181,17 @@ func TestGetWishlistItems_LimitCappedAt100(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, limit int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, _, limit int) ([]*itemmodels.GiftItem, error) {
 			capturedLimit = limit
 			return []*itemmodels.GiftItem{}, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, nil
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	_, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 1, 500)
 
@@ -275,13 +275,13 @@ func TestGetWishlistItems_RepoGetByWishlistError(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
 			return nil, errors.New("db error")
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	result, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 1, 10)
 
@@ -300,16 +300,16 @@ func TestGetWishlistItems_RepoGetByWishlistCountError(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
 			return []*itemmodels.GiftItem{}, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 0, errors.New("count error")
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	result, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 1, 10)
 
@@ -328,16 +328,16 @@ func TestGetWishlistItems_TotalPagesCalculation(t *testing.T) {
 			return wishlist, nil
 		},
 	}
-	wiRepo := &WishlistItemRepositoryInterfaceMock{
-		GetByWishlistFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
+	itemRepo := &GiftItemRepositoryInterfaceMock{
+		GetByWishListPaginatedFunc: func(_ context.Context, _ pgtype.UUID, _, _ int) ([]*itemmodels.GiftItem, error) {
 			return []*itemmodels.GiftItem{}, nil
 		},
-		GetByWishlistCountFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
+		CountByWishListFunc: func(_ context.Context, _ pgtype.UUID) (int64, error) {
 			return 25, nil
 		},
 	}
 
-	svc := newTestService(wlRepo, &GiftItemRepositoryInterfaceMock{}, wiRepo)
+	svc := newTestService(wlRepo, itemRepo, &WishlistItemRepositoryInterfaceMock{})
 
 	result, err := svc.GetWishlistItems(context.Background(), wlID.String(), ownerID.String(), 1, 10)
 

@@ -1,0 +1,46 @@
+delete:
+  description: >-
+    Allows the authenticated wishlist owner to cancel any active reservation on
+    their items.
+  parameters:
+    - description: Reservation ID
+      in: path
+      name: reservationId
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: Reservation canceled
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse.yaml
+    '400':
+      description: Invalid reservation ID
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
+    '404':
+      description: Reservation not found or not owned by caller
+      content:
+        application/json:
+          schema:
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
+  security:
+    - BearerAuth: []
+  summary: Cancel a reservation as the wishlist owner
+  tags:
+    - Reservations

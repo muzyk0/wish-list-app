@@ -1,16 +1,21 @@
 get:
   description: Get all reservations made by the authenticated user with pagination.
   parameters:
-    - description: Page number (default 1)
+    - description: Page number
       in: query
       name: page
       schema:
         type: integer
-    - description: Items per page (default 10, max 100)
+        minimum: 1
+        default: 1
+    - description: Items per page
       in: query
       name: limit
       schema:
         type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   responses:
     '200':
       description: List of user reservations retrieved successfully
@@ -24,17 +29,15 @@ get:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Get all reservations made by the authenticated user

@@ -13,6 +13,7 @@ import type {
   CreateReservationRequest,
   CreateWishListRequest,
   GiftItem,
+  HomeStats,
   LoginResponse,
   MarkManualReservationRequest,
   PaginatedGiftItems,
@@ -24,6 +25,7 @@ import type {
   UserRegistration,
   WishList,
   WishlistItem,
+  WishlistOwnerReservation,
 } from './types';
 
 // Routes that don't require authentication
@@ -257,6 +259,21 @@ class ApiClient {
 
     if (!data) {
       throw new Error('No data received from password change');
+    }
+
+    return data;
+  }
+
+  // Home stats
+  async getHomeStats(): Promise<HomeStats> {
+    const { data, error } = await this.client.GET('/items/stats', {});
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data received from home stats');
     }
 
     return data;
@@ -595,6 +612,33 @@ class ApiClient {
     return data as unknown as Reservation[];
   }
 
+  async getWishlistOwnerReservations(options?: {
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: WishlistOwnerReservation[]; totalPages: number }> {
+    const { data, error } = await this.client.GET(
+      '/reservations/wishlist-owner',
+      {
+        params: {
+          query: {
+            page: options?.page,
+            limit: options?.limit,
+          },
+        },
+      },
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    const pagination = data?.pagination as { total_pages?: number } | undefined;
+    return {
+      data: data?.data ?? [],
+      totalPages: pagination?.total_pages ?? 1,
+    };
+  }
+
   async cancelReservation(wishlistId: string, itemId: string): Promise<void> {
     const { error } = await this.client.DELETE(
       '/public/reservations/wishlist/{wishlistId}/item/{itemId}',
@@ -605,6 +649,27 @@ class ApiClient {
 
     if (error) {
       throw error;
+    }
+  }
+
+  async cancelOwnerReservation(reservationId: string): Promise<void> {
+    const token = await getAccessToken();
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/wishlist-owner/${reservationId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(
+        (body as { error?: string }).error ?? 'Failed to cancel reservation',
+      );
     }
   }
 }

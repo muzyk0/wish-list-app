@@ -43,6 +43,8 @@ type GiftItemRepositoryInterface interface {
 	GetByID(ctx context.Context, id pgtype.UUID) (*itemmodels.GiftItem, error)
 	CreateWithOwner(ctx context.Context, giftItem itemmodels.GiftItem) (*itemmodels.GiftItem, error)
 	MarkManualReservation(ctx context.Context, itemID pgtype.UUID, reservedByName string, note *string) (*itemmodels.GiftItem, error)
+	GetByWishListPaginated(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*itemmodels.GiftItem, error)
+	CountByWishList(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 }
 
 // Input/Output types
@@ -106,7 +108,7 @@ type WishlistItemServiceInterface interface {
 	AttachItem(ctx context.Context, wishlistID string, itemID string, userID string) error
 	CreateItemInWishlist(ctx context.Context, wishlistID string, userID string, input CreateItemInput) (*ItemOutput, error)
 	DetachItem(ctx context.Context, wishlistID string, itemID string, userID string) error
-	MarkManualReservation(ctx context.Context, wishlistID string, itemID string, userID string, reservedByName string, note *string) (*ItemOutput, error)
+	MarkManualReservation(ctx context.Context, wishlistID, itemID, userID, reservedByName string, note *string) (*ItemOutput, error)
 }
 
 // WishlistItemService implements WishlistItemServiceInterface
@@ -165,13 +167,13 @@ func (s *WishlistItemService) GetWishlistItems(ctx context.Context, wishlistID, 
 	}
 
 	// Get items
-	items, err := s.wishlistItemRepo.GetByWishlist(ctx, wlID, page, limit)
+	items, err := s.itemRepo.GetByWishListPaginated(ctx, wlID, page, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get wishlist items: %w", err)
 	}
 
 	// Get total count
-	totalCount, err := s.wishlistItemRepo.GetByWishlistCount(ctx, wlID)
+	totalCount, err := s.itemRepo.CountByWishList(ctx, wlID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to count wishlist items: %w", err)
 	}
@@ -425,7 +427,7 @@ func (s *WishlistItemService) convertItemToOutput(item *itemmodels.GiftItem) *It
 
 // MarkManualReservation marks an item as reserved by someone specified by the wishlist owner.
 // This is for offline reservations (e.g., "Grandma said she'll buy the bicycle").
-func (s *WishlistItemService) MarkManualReservation(ctx context.Context, wishlistID, itemID, userID string, reservedByName string, note *string) (*ItemOutput, error) {
+func (s *WishlistItemService) MarkManualReservation(ctx context.Context, wishlistID, itemID, userID, reservedByName string, note *string) (*ItemOutput, error) {
 	reservedByName = strings.TrimSpace(reservedByName)
 	if reservedByName == "" {
 		return nil, ErrManualReservedNameEmpty

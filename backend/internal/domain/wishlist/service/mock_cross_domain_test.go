@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"sync"
 	itemmodels "wish-list/internal/domain/item/models"
+	itemrepository "wish-list/internal/domain/item/repository"
 	reservationmodels "wish-list/internal/domain/reservation/models"
 )
 
@@ -30,6 +31,9 @@ var _ GiftItemRepositoryInterface = &GiftItemRepositoryInterfaceMock{}
 //			GetByWishListFunc: func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error) {
 //				panic("mock out the GetByWishList method")
 //			},
+//			GetPublicWishListGiftItemsFilteredFunc: func(ctx context.Context, publicSlug string, filters itemrepository.PublicItemFilters) ([]*itemmodels.GiftItem, int, error) {
+//				panic("mock out the GetPublicWishListGiftItemsFiltered method")
+//			},
 //			GetPublicWishListGiftItemsPaginatedFunc: func(ctx context.Context, publicSlug string, limit int, offset int) ([]*itemmodels.GiftItem, int, error) {
 //				panic("mock out the GetPublicWishListGiftItemsPaginated method")
 //			},
@@ -51,6 +55,9 @@ type GiftItemRepositoryInterfaceMock struct {
 
 	// GetByWishListFunc mocks the GetByWishList method.
 	GetByWishListFunc func(ctx context.Context, wishlistID pgtype.UUID) ([]*itemmodels.GiftItem, error)
+
+	// GetPublicWishListGiftItemsFilteredFunc mocks the GetPublicWishListGiftItemsFiltered method.
+	GetPublicWishListGiftItemsFilteredFunc func(ctx context.Context, publicSlug string, filters itemrepository.PublicItemFilters) ([]*itemmodels.GiftItem, int, error)
 
 	// GetPublicWishListGiftItemsPaginatedFunc mocks the GetPublicWishListGiftItemsPaginated method.
 	GetPublicWishListGiftItemsPaginatedFunc func(ctx context.Context, publicSlug string, limit int, offset int) ([]*itemmodels.GiftItem, int, error)
@@ -81,6 +88,15 @@ type GiftItemRepositoryInterfaceMock struct {
 			// WishlistID is the wishlistID argument value.
 			WishlistID pgtype.UUID
 		}
+		// GetPublicWishListGiftItemsFiltered holds details about calls to the GetPublicWishListGiftItemsFiltered method.
+		GetPublicWishListGiftItemsFiltered []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// PublicSlug is the publicSlug argument value.
+			PublicSlug string
+			// Filters is the filters argument value.
+			Filters itemrepository.PublicItemFilters
+		}
 		// GetPublicWishListGiftItemsPaginated holds details about calls to the GetPublicWishListGiftItemsPaginated method.
 		GetPublicWishListGiftItemsPaginated []struct {
 			// Ctx is the ctx argument value.
@@ -103,6 +119,7 @@ type GiftItemRepositoryInterfaceMock struct {
 	lockCreateWithOwner                     sync.RWMutex
 	lockGetByID                             sync.RWMutex
 	lockGetByWishList                       sync.RWMutex
+	lockGetPublicWishListGiftItemsFiltered  sync.RWMutex
 	lockGetPublicWishListGiftItemsPaginated sync.RWMutex
 	lockUpdate                              sync.RWMutex
 }
@@ -212,6 +229,46 @@ func (mock *GiftItemRepositoryInterfaceMock) GetByWishListCalls() []struct {
 	mock.lockGetByWishList.RLock()
 	calls = mock.calls.GetByWishList
 	mock.lockGetByWishList.RUnlock()
+	return calls
+}
+
+// GetPublicWishListGiftItemsFiltered calls GetPublicWishListGiftItemsFilteredFunc.
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFiltered(ctx context.Context, publicSlug string, filters itemrepository.PublicItemFilters) ([]*itemmodels.GiftItem, int, error) {
+	if mock.GetPublicWishListGiftItemsFilteredFunc == nil {
+		panic("GiftItemRepositoryInterfaceMock.GetPublicWishListGiftItemsFilteredFunc: method is nil but GiftItemRepositoryInterface.GetPublicWishListGiftItemsFiltered was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    itemrepository.PublicItemFilters
+	}{
+		Ctx:        ctx,
+		PublicSlug: publicSlug,
+		Filters:    filters,
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.Lock()
+	mock.calls.GetPublicWishListGiftItemsFiltered = append(mock.calls.GetPublicWishListGiftItemsFiltered, callInfo)
+	mock.lockGetPublicWishListGiftItemsFiltered.Unlock()
+	return mock.GetPublicWishListGiftItemsFilteredFunc(ctx, publicSlug, filters)
+}
+
+// GetPublicWishListGiftItemsFilteredCalls gets all the calls that were made to GetPublicWishListGiftItemsFiltered.
+// Check the length with:
+//
+//	len(mockedGiftItemRepositoryInterface.GetPublicWishListGiftItemsFilteredCalls())
+func (mock *GiftItemRepositoryInterfaceMock) GetPublicWishListGiftItemsFilteredCalls() []struct {
+	Ctx        context.Context
+	PublicSlug string
+	Filters    itemrepository.PublicItemFilters
+} {
+	var calls []struct {
+		Ctx        context.Context
+		PublicSlug string
+		Filters    itemrepository.PublicItemFilters
+	}
+	mock.lockGetPublicWishListGiftItemsFiltered.RLock()
+	calls = mock.calls.GetPublicWishListGiftItemsFiltered
+	mock.lockGetPublicWishListGiftItemsFiltered.RUnlock()
 	return calls
 }
 

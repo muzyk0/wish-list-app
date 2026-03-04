@@ -764,9 +764,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -775,9 +773,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -972,9 +968,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -983,9 +977,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -994,9 +986,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1035,9 +1025,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -1046,9 +1034,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1057,9 +1043,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1108,9 +1092,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -1119,9 +1101,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Item not found */
@@ -1130,9 +1110,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1173,9 +1151,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -1184,9 +1160,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -1195,9 +1169,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Item not found */
@@ -1206,9 +1178,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1217,9 +1187,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1254,9 +1222,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -1265,9 +1231,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Item not found */
@@ -1276,9 +1240,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1287,9 +1249,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1344,9 +1304,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Not authenticated */
@@ -1355,9 +1313,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Access denied */
@@ -1366,9 +1322,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Item not found */
@@ -1377,9 +1331,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1388,13 +1340,68 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get home screen stats
+         * @description Get aggregate counts of the authenticated user's gift items (total, reserved, purchased)
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Stats retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1701,9 +1708,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1763,9 +1768,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1774,9 +1777,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1819,9 +1820,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized (guests need reservation token) */
@@ -1830,9 +1829,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1841,9 +1838,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -1915,15 +1910,21 @@ export interface paths {
         };
         /**
          * Get gift items for a public wish list by slug
-         * @description Get all gift items for a public wish list by its public slug with pagination support.
+         * @description Get gift items for a public wish list by its public slug with pagination, search, status filter, and sort support.
          */
         get: {
             parameters: {
                 query?: {
                     /** @description Page number (default 1) */
                     page?: number;
-                    /** @description Items per page (default 10, max 100) */
+                    /** @description Items per page (default 12, max 100) */
                     limit?: number;
+                    /** @description Case-insensitive search on name and description */
+                    search?: string;
+                    /** @description Filter by status */
+                    status?: PathsPublicWishlistsSlugGiftItemsGetParametersQueryStatus;
+                    /** @description Sort order */
+                    sort_by?: PathsPublicWishlistsSlugGiftItemsGetParametersQuerySort_by;
                 };
                 header?: never;
                 path: {
@@ -1941,6 +1942,17 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse"];
+                    };
+                };
+                /** @description Invalid query parameter value */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
                     };
                 };
                 /** @description Wish list not found or not public */
@@ -1989,9 +2001,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Page number (default 1) */
+                    /** @description Page number */
                     page?: number;
-                    /** @description Items per page (default 10, max 100) */
+                    /** @description Items per page */
                     limit?: number;
                 };
                 header?: never;
@@ -2015,9 +2027,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -2026,9 +2036,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": {
-                            [key: string]: string;
-                        };
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
                     };
                 };
             };
@@ -2036,6 +2044,137 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reservations/wishlist-owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get reservations on items in the authenticated user's wishlists
+         * @description Returns all reservations (by guests or authenticated users) on gift items belonging to the calling user's wishlists. The reserver identity is intentionally hidden.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number */
+                    page?: number;
+                    /** @description Items per page */
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description List of reservations on owner's items */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reservations/wishlist-owner/{reservationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Cancel a reservation as the wishlist owner
+         * @description Allows the authenticated wishlist owner to cancel any active reservation on their items.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Reservation ID */
+                    reservationId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Reservation canceled */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"];
+                    };
+                };
+                /** @description Invalid reservation ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
+                    };
+                };
+                /** @description Reservation not found or not owned by caller */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -2922,6 +3061,18 @@ export interface components {
             /** @example iPhone 15 Pro */
             title: string;
         };
+        "wish-list_internal_domain_item_delivery_http_dto.ErrorResponse": {
+            /** @example error message */
+            error: string;
+        };
+        "wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse": {
+            /** @example 1 */
+            purchased: number;
+            /** @example 3 */
+            reserved: number;
+            /** @example 12 */
+            total_items: number;
+        };
         "wish-list_internal_domain_item_delivery_http_dto.ItemResponse": {
             /** @example 2024-01-01T12:00:00Z */
             created_at?: string;
@@ -3001,11 +3152,25 @@ export interface components {
             reserved_by_user_id?: string;
             status: string;
         };
+        "wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse": {
+            /** @example error message */
+            error: string;
+        };
         "wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary": {
             id: string;
             image_url?: string;
             name: string;
             price?: string;
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse": {
+            /** @example 10 */
+            limit: number;
+            /** @example 1 */
+            page: number;
+            /** @example 42 */
+            total: number;
+            /** @example 5 */
+            total_pages: number;
         };
         "wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse": {
             expires_at?: string;
@@ -3023,13 +3188,36 @@ export interface components {
         };
         "wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse": {
             data: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse"][];
-            pagination: unknown;
+            pagination: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"];
         };
         "wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary": {
             id: string;
             owner_first_name?: string;
             owner_last_name?: string;
             title: string;
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse": {
+            /** Format: date-time */
+            expires_at?: string;
+            gift_item: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary"];
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            reserved_at: string;
+            status: string;
+            wishlist: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary"];
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse": {
+            /** @example Failed to get wishlist owner reservations */
+            error: string;
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse": {
+            data: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse"][];
+            pagination: components["schemas"]["wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"];
+        };
+        "wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse": {
+            /** @example Unauthorized */
+            error: string;
         };
         "wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse": {
             /** @example https://s3.amazonaws.com/bucket/images/uuid.jpg */
@@ -3286,6 +3474,8 @@ export type SchemaWishListInternalDomainAuthDeliveryHttpDtoOAuthCodeRequest = co
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoRefreshResponse = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.RefreshResponse'];
 export type SchemaWishListInternalDomainAuthDeliveryHttpDtoUserResponse = components['schemas']['wish-list_internal_domain_auth_delivery_http_dto.UserResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoCreateItemRequest = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.CreateItemRequest'];
+export type SchemaWishListInternalDomainItemDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'];
+export type SchemaWishListInternalDomainItemDeliveryHttpDtoHomeStatsResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoItemResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.ItemResponse'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoMarkPurchasedRequest = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.MarkPurchasedRequest'];
 export type SchemaWishListInternalDomainItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_item_delivery_http_dto.PaginatedItemsResponse'];
@@ -3293,11 +3483,17 @@ export type SchemaWishListInternalDomainItemDeliveryHttpDtoUpdateItemRequest = c
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoCancelReservationRequest = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CancelReservationRequest'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoCreateReservationRequest = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationRequest'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoCreateReservationResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoGiftItemSummary = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoPaginationResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationDetailsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoReservationStatusResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.ReservationStatusResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoUserReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.UserReservationsResponse'];
 export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishListSummary = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishListSummary'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsInternalResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsResponse'];
+export type SchemaWishListInternalDomainReservationDeliveryHttpDtoWishlistOwnerReservationsUnauthorizedResponse = components['schemas']['wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsUnauthorizedResponse'];
 export type SchemaWishListInternalDomainStorageDeliveryHttpDtoUploadImageResponse = components['schemas']['wish-list_internal_domain_storage_delivery_http_dto.UploadImageResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoAuthResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.AuthResponse'];
 export type SchemaWishListInternalDomainUserDeliveryHttpDtoErrorResponse = components['schemas']['wish-list_internal_domain_user_delivery_http_dto.ErrorResponse'];
@@ -3320,4 +3516,17 @@ export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoItemResponse 
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoMarkManualReservationRequest = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.MarkManualReservationRequest'];
 export type SchemaWishListInternalDomainWishlistItemDeliveryHttpDtoPaginatedItemsResponse = components['schemas']['wish-list_internal_domain_wishlist_item_delivery_http_dto.PaginatedItemsResponse'];
 export type $defs = Record<string, never>;
+export enum PathsPublicWishlistsSlugGiftItemsGetParametersQueryStatus {
+    available = "available",
+    reserved = "reserved",
+    purchased = "purchased"
+}
+export enum PathsPublicWishlistsSlugGiftItemsGetParametersQuerySort_by {
+    position = "position",
+    name_asc = "name_asc",
+    name_desc = "name_desc",
+    price_asc = "price_asc",
+    price_desc = "price_desc",
+    priority_desc = "priority_desc"
+}
 export type operations = Record<string, never>;

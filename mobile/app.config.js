@@ -1,7 +1,7 @@
 // mobile/app.config.js
 // Expo configuration with environment variable support
 
-const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN || 'wishlist.com';
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN || 'lk.9art.ru';
 const WWW_DOMAIN = process.env.EXPO_PUBLIC_WWW_DOMAIN || `www.${WEB_DOMAIN}`;
 
 module.exports = {

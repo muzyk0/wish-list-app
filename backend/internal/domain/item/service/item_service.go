@@ -26,16 +26,22 @@ var (
 type WishlistItemRepositoryInterface interface {
 	Attach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
 	Detach(ctx context.Context, wishlistID, itemID pgtype.UUID) error
-	GetByWishlist(ctx context.Context, wishlistID pgtype.UUID, page, limit int) ([]*models.GiftItem, error)
-	GetByWishlistCount(ctx context.Context, wishlistID pgtype.UUID) (int64, error)
 	IsAttached(ctx context.Context, wishlistID, itemID pgtype.UUID) (bool, error)
 	GetWishlistsForItem(ctx context.Context, itemID pgtype.UUID) ([]pgtype.UUID, error)
 	DetachAll(ctx context.Context, itemID pgtype.UUID) error
 }
 
+// HomeStatsOutput represents aggregate item statistics for the home screen
+type HomeStatsOutput struct {
+	TotalItems int64
+	Reserved   int64
+	Purchased  int64
+}
+
 // ItemServiceInterface defines the interface for item-related operations
 type ItemServiceInterface interface {
 	GetMyItems(ctx context.Context, userID string, filters repository.ItemFilters) (*PaginatedItemsOutput, error)
+	GetHomeStats(ctx context.Context, userID string) (*HomeStatsOutput, error)
 	CreateItem(ctx context.Context, userID string, input CreateItemInput) (*ItemOutput, error)
 	GetItem(ctx context.Context, itemID string, userID string) (*ItemOutput, error)
 	UpdateItem(ctx context.Context, itemID string, userID string, input UpdateItemInput) (*ItemOutput, error)
@@ -160,6 +166,25 @@ func (s *ItemService) GetMyItems(ctx context.Context, userID string, filters rep
 		Page:       filters.Page,
 		Limit:      filters.Limit,
 		TotalPages: totalPages,
+	}, nil
+}
+
+// GetHomeStats returns aggregate item counts for the authenticated user's home screen
+func (s *ItemService) GetHomeStats(ctx context.Context, userID string) (*HomeStatsOutput, error) {
+	ownerID := pgtype.UUID{}
+	if err := ownerID.Scan(userID); err != nil {
+		return nil, ErrInvalidItemUser
+	}
+
+	stats, err := s.itemRepo.GetStats(ctx, ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get home stats: %w", err)
+	}
+
+	return &HomeStatsOutput{
+		TotalItems: stats.TotalItems,
+		Reserved:   stats.Reserved,
+		Purchased:  stats.Purchased,
 	}, nil
 }
 

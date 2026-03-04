@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	"os"
 	"testing"
 
 	usermodels "wish-list/internal/domain/user/models"
@@ -15,8 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func init() {
+func TestMain(m *testing.M) {
 	logger.Initialize("test")
+	os.Exit(m.Run())
 }
 
 type userRepoMock struct {
@@ -234,5 +236,5 @@ func TestOAuthHandler_findOrCreateUser_DoesNotLinkWhenEmailNotVerified(t *testin
 
 	require.NoError(t, err)
 	require.NotNil(t, user)
-	require.Len(t, linker.calls, 0)
+	require.Empty(t, linker.calls)
 }

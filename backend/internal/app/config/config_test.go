@@ -33,7 +33,17 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, "localhost", cfg.ServerHost)
 	assert.Equal(t, 8080, cfg.ServerPort)
 	assert.Equal(t, 24, cfg.JWTExpiryHours)
-	assert.Equal(t, []string{"http://localhost:3000", "http://localhost:19006"}, cfg.CorsAllowedOrigins)
+	assert.Equal(t, []string{
+		"https://9art.ru",
+		"https://www.9art.ru",
+		"https://lk.9art.ru",
+		"http://localhost:3000",
+		"http://localhost:19006",
+		"http://localhost:19000",
+		"http://localhost:8081",
+		"http://127.0.0.1:19006",
+		"http://127.0.0.1:8081",
+	}, cfg.CorsAllowedOrigins)
 
 	// Test custom values
 	_ = os.Setenv("SERVER_HOST", "production-host")

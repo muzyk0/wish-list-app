@@ -17,33 +17,29 @@ delete:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '403':
       description: Access denied
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '404':
       description: Item not found
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Delete gift item (soft delete)
@@ -71,25 +67,22 @@ get:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '403':
       description: Access denied
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '404':
       description: Item not found
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Get gift item
@@ -125,41 +118,36 @@ put:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '401':
       description: Not authenticated
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '403':
       description: Access denied
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '404':
       description: Item not found
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Update gift item

@@ -110,6 +110,10 @@ For detailed implementation, see `/docs/plans/00-cross-domain-architecture-plan.
 - **API clients**: Generated from OpenAPI specifications in `/contracts/`
 - **Type checking**: Run `npm run type-check` to verify TypeScript correctness
 - **Linting & formatting**: Use `make format` for consistent code style across all components
+- **⚠️ NEVER manually edit generated schema files** — they are auto-generated and will be overwritten:
+  - `mobile/lib/api/generated-schema.ts` — generated from OpenAPI spec
+  - `frontend/src/lib/api/schema.ts` — generated from OpenAPI spec
+- **Regenerate schemas**: Run `make docs` from the project root after any backend handler or Swagger annotation changes. This runs the full pipeline: Go annotations → Swagger 2.0 → OpenAPI 3.0 → TypeScript client schemas for frontend and mobile.
 
 ### Mobile Development
 - **Navigation**: Uses Expo Router with file-based routing in `/mobile/app/`

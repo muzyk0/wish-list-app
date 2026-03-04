@@ -49,6 +49,9 @@ type ReservationServiceInterface interface {
 	GetGuestReservations(ctx context.Context, token pgtype.UUID) ([]repository.ReservationDetail, error)
 	GetReservationStatus(ctx context.Context, publicSlug, giftItemID string) (*ReservationStatusOutput, error)
 	CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error)
+	GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error)
+	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
+	CancelReservationByOwner(ctx context.Context, ownerUserID, reservationID pgtype.UUID) (*ReservationOutput, error)
 }
 
 type ReservationService struct {
@@ -292,6 +295,28 @@ func (s *ReservationService) GetGuestReservations(ctx context.Context, token pgt
 
 func (s *ReservationService) CountUserReservations(ctx context.Context, userID pgtype.UUID) (int, error) {
 	return s.repo.CountUserReservations(ctx, userID)
+}
+
+func (s *ReservationService) GetWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID, limit, offset int) ([]repository.ReservationDetail, error) {
+	return s.repo.ListWishlistOwnerReservations(ctx, ownerUserID, limit, offset)
+}
+
+func (s *ReservationService) CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error) {
+	return s.repo.CountWishlistOwnerReservations(ctx, ownerUserID)
+}
+
+// CancelReservationByOwner allows a wishlist owner to cancel any active reservation on their items.
+func (s *ReservationService) CancelReservationByOwner(ctx context.Context, ownerUserID, reservationID pgtype.UUID) (*ReservationOutput, error) {
+	reservation, err := s.repo.CancelReservationByOwner(ctx, ownerUserID, reservationID)
+	if err != nil {
+		if errors.Is(err, repository.ErrReservationNotFound) {
+			return nil, ErrReservationNotFound
+		}
+		return nil, fmt.Errorf("failed to cancel reservation by owner: %w", err)
+	}
+
+	logger.Info("reservation canceled by owner", "reservation_id", reservationID.String(), "owner_id", ownerUserID.String())
+	return s.mapToOutput(reservation), nil
 }
 
 // CreateGuestReservation handles guest reservation with token-based authentication

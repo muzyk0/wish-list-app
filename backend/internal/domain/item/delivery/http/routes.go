@@ -10,6 +10,7 @@ func RegisterRoutes(e *echo.Echo, h *Handler, authMiddleware echo.MiddlewareFunc
 	items := e.Group("/api/items", authMiddleware)
 	items.GET("", h.GetMyItems)
 	items.POST("", h.CreateItem)
+	items.GET("/stats", h.GetHomeStats)
 	items.GET("/:id", h.GetItem)
 	items.PUT("/:id", h.UpdateItem)
 	items.DELETE("/:id", h.DeleteItem)

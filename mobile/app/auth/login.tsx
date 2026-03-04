@@ -300,9 +300,9 @@ function OnboardingOverlay({ onDone }: { onDone: () => void }) {
               index * width,
               (index + 1) * width,
             ];
-            const dotWidth = scrollX.interpolate({
+            const dotScale = scrollX.interpolate({
               inputRange,
-              outputRange: [8, 32, 8],
+              outputRange: [1, 4, 1],
               extrapolate: 'clamp',
             });
             const dotOpacity = scrollX.interpolate({
@@ -316,7 +316,7 @@ function OnboardingOverlay({ onDone }: { onDone: () => void }) {
                 style={[
                   onboardingStyles.dot,
                   {
-                    width: dotWidth,
+                    transform: [{ scaleX: dotScale }],
                     opacity: dotOpacity,
                     backgroundColor:
                       index === currentIndex

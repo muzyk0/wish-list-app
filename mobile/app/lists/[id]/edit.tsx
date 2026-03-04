@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
+import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import {
@@ -14,10 +15,8 @@ import {
   TextInput,
 } from 'react-native-paper';
 import { z } from 'zod';
-
 import { apiClient } from '@/lib/api';
 import { dialog } from '@/stores/dialogStore';
-import type { Control, FieldErrors } from 'react-hook-form';
 
 const slugRegex = /^[a-z0-9-]*$/;
 
@@ -39,7 +38,7 @@ const updateWishListSchema = z.object({
 
 type UpdateWishListFormData = z.infer<typeof updateWishListSchema>;
 
-const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'lk.9art.ru';
 
 // ─── Slug field sub-component ─────────────────────────────────────────
 function SlugField({
@@ -140,6 +139,7 @@ const slugStyles = StyleSheet.create({
 export default function EditWishListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -189,6 +189,8 @@ export default function EditWishListScreen() {
         public_slug: data.public_slug?.trim() || undefined,
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist', id] });
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
       dialog.message({
         title: 'Success',
         message: 'Wishlist updated successfully!',

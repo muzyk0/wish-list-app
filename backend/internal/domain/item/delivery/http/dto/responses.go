@@ -4,6 +4,11 @@ import (
 	"wish-list/internal/domain/item/service"
 )
 
+// ErrorResponse represents a standard error API response.
+type ErrorResponse struct {
+	Error string `json:"error" validate:"required" example:"error message"`
+}
+
 // ItemResponse represents a gift item in API responses
 type ItemResponse struct {
 	ID          string   `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
@@ -44,6 +49,13 @@ func ItemResponseFromService(item *service.ItemOutput) ItemResponse {
 		CreatedAt:   item.CreatedAt,
 		UpdatedAt:   item.UpdatedAt,
 	}
+}
+
+// HomeStatsResponse represents aggregate item counts for the home screen
+type HomeStatsResponse struct {
+	TotalItems int64 `json:"total_items" example:"12" validate:"required"`
+	Reserved   int64 `json:"reserved" example:"3" validate:"required"`
+	Purchased  int64 `json:"purchased" example:"1" validate:"required"`
 }
 
 // PaginatedItemsResponse represents paginated list of items

@@ -134,7 +134,6 @@ func (r *WishListRepository) GetByOwner(ctx context.Context, ownerID pgtype.UUID
 	return wishLists, nil
 }
 
-// Update modifies an existing wishlist
 // IsSlugTaken reports whether the given public slug is already used by another wishlist.
 // excludeID is the wishlist being updated so its own slug does not count as a conflict.
 func (r *WishListRepository) IsSlugTaken(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {

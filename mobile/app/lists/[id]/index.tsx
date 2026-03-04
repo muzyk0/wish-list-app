@@ -22,7 +22,7 @@ import { apiClient } from '@/lib/api';
 import type { WishlistItem } from '@/lib/api/types';
 import { dialog } from '@/stores/dialogStore';
 
-const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'wishlist.com';
+const WEB_DOMAIN = process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'lk.9art.ru';
 
 // ─── Color tokens ────────────────────────────────────────────────────
 const C = {
@@ -790,7 +790,6 @@ const card = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
-    backdropFilter: 'blur(4px)',
   },
   priorityChipText: {
     fontSize: 11,

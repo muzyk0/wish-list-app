@@ -43,11 +43,11 @@ var _ repository.WishListRepositoryInterface = &WishListRepositoryInterfaceMock{
 //			GetByPublicSlugFunc: func(ctx context.Context, publicSlug string) (*models.WishList, error) {
 //				panic("mock out the GetByPublicSlug method")
 //			},
-//			IsSlugTakenFunc: func(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {
-//				panic("mock out the IsSlugTaken method")
-//			},
 //			IncrementViewCountFunc: func(ctx context.Context, id pgtype.UUID) error {
 //				panic("mock out the IncrementViewCount method")
+//			},
+//			IsSlugTakenFunc: func(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {
+//				panic("mock out the IsSlugTaken method")
 //			},
 //			UpdateFunc: func(ctx context.Context, wishList models.WishList) (*models.WishList, error) {
 //				panic("mock out the Update method")
@@ -80,11 +80,11 @@ type WishListRepositoryInterfaceMock struct {
 	// GetByPublicSlugFunc mocks the GetByPublicSlug method.
 	GetByPublicSlugFunc func(ctx context.Context, publicSlug string) (*models.WishList, error)
 
-	// IsSlugTakenFunc mocks the IsSlugTaken method.
-	IsSlugTakenFunc func(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error)
-
 	// IncrementViewCountFunc mocks the IncrementViewCount method.
 	IncrementViewCountFunc func(ctx context.Context, id pgtype.UUID) error
+
+	// IsSlugTakenFunc mocks the IsSlugTaken method.
+	IsSlugTakenFunc func(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, wishList models.WishList) (*models.WishList, error)
@@ -142,6 +142,13 @@ type WishListRepositoryInterfaceMock struct {
 			// PublicSlug is the publicSlug argument value.
 			PublicSlug string
 		}
+		// IncrementViewCount holds details about calls to the IncrementViewCount method.
+		IncrementViewCount []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ID is the id argument value.
+			ID pgtype.UUID
+		}
 		// IsSlugTaken holds details about calls to the IsSlugTaken method.
 		IsSlugTaken []struct {
 			// Ctx is the ctx argument value.
@@ -150,13 +157,6 @@ type WishListRepositoryInterfaceMock struct {
 			Slug string
 			// ExcludeID is the excludeID argument value.
 			ExcludeID pgtype.UUID
-		}
-		// IncrementViewCount holds details about calls to the IncrementViewCount method.
-		IncrementViewCount []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// ID is the id argument value.
-			ID pgtype.UUID
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -173,8 +173,8 @@ type WishListRepositoryInterfaceMock struct {
 	lockGetByOwner              sync.RWMutex
 	lockGetByOwnerWithItemCount sync.RWMutex
 	lockGetByPublicSlug         sync.RWMutex
-	lockIsSlugTaken             sync.RWMutex
 	lockIncrementViewCount      sync.RWMutex
+	lockIsSlugTaken             sync.RWMutex
 	lockUpdate                  sync.RWMutex
 }
 
@@ -434,6 +434,42 @@ func (mock *WishListRepositoryInterfaceMock) GetByPublicSlugCalls() []struct {
 	return calls
 }
 
+// IncrementViewCount calls IncrementViewCountFunc.
+func (mock *WishListRepositoryInterfaceMock) IncrementViewCount(ctx context.Context, id pgtype.UUID) error {
+	if mock.IncrementViewCountFunc == nil {
+		panic("WishListRepositoryInterfaceMock.IncrementViewCountFunc: method is nil but WishListRepositoryInterface.IncrementViewCount was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		ID  pgtype.UUID
+	}{
+		Ctx: ctx,
+		ID:  id,
+	}
+	mock.lockIncrementViewCount.Lock()
+	mock.calls.IncrementViewCount = append(mock.calls.IncrementViewCount, callInfo)
+	mock.lockIncrementViewCount.Unlock()
+	return mock.IncrementViewCountFunc(ctx, id)
+}
+
+// IncrementViewCountCalls gets all the calls that were made to IncrementViewCount.
+// Check the length with:
+//
+//	len(mockedWishListRepositoryInterface.IncrementViewCountCalls())
+func (mock *WishListRepositoryInterfaceMock) IncrementViewCountCalls() []struct {
+	Ctx context.Context
+	ID  pgtype.UUID
+} {
+	var calls []struct {
+		Ctx context.Context
+		ID  pgtype.UUID
+	}
+	mock.lockIncrementViewCount.RLock()
+	calls = mock.calls.IncrementViewCount
+	mock.lockIncrementViewCount.RUnlock()
+	return calls
+}
+
 // IsSlugTaken calls IsSlugTakenFunc.
 func (mock *WishListRepositoryInterfaceMock) IsSlugTaken(ctx context.Context, slug string, excludeID pgtype.UUID) (bool, error) {
 	if mock.IsSlugTakenFunc == nil {
@@ -471,42 +507,6 @@ func (mock *WishListRepositoryInterfaceMock) IsSlugTakenCalls() []struct {
 	mock.lockIsSlugTaken.RLock()
 	calls = mock.calls.IsSlugTaken
 	mock.lockIsSlugTaken.RUnlock()
-	return calls
-}
-
-// IncrementViewCount calls IncrementViewCountFunc.
-func (mock *WishListRepositoryInterfaceMock) IncrementViewCount(ctx context.Context, id pgtype.UUID) error {
-	if mock.IncrementViewCountFunc == nil {
-		panic("WishListRepositoryInterfaceMock.IncrementViewCountFunc: method is nil but WishListRepositoryInterface.IncrementViewCount was just called")
-	}
-	callInfo := struct {
-		Ctx context.Context
-		ID  pgtype.UUID
-	}{
-		Ctx: ctx,
-		ID:  id,
-	}
-	mock.lockIncrementViewCount.Lock()
-	mock.calls.IncrementViewCount = append(mock.calls.IncrementViewCount, callInfo)
-	mock.lockIncrementViewCount.Unlock()
-	return mock.IncrementViewCountFunc(ctx, id)
-}
-
-// IncrementViewCountCalls gets all the calls that were made to IncrementViewCount.
-// Check the length with:
-//
-//	len(mockedWishListRepositoryInterface.IncrementViewCountCalls())
-func (mock *WishListRepositoryInterfaceMock) IncrementViewCountCalls() []struct {
-	Ctx context.Context
-	ID  pgtype.UUID
-} {
-	var calls []struct {
-		Ctx context.Context
-		ID  pgtype.UUID
-	}
-	mock.lockIncrementViewCount.RLock()
-	calls = mock.calls.IncrementViewCount
-	mock.lockIncrementViewCount.RUnlock()
 	return calls
 }
 
