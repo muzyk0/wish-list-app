@@ -709,10 +709,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -722,10 +719,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -943,10 +937,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -956,10 +947,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -969,10 +957,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1017,10 +1002,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1030,10 +1012,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1043,10 +1022,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1082,10 +1058,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1095,10 +1068,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1145,10 +1115,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1158,10 +1125,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1171,10 +1135,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1230,10 +1191,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1243,10 +1201,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1256,10 +1211,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1269,10 +1221,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1282,10 +1231,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1323,10 +1269,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1336,10 +1279,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1349,10 +1289,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1362,10 +1299,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1423,10 +1357,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1436,10 +1367,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1449,10 +1377,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1462,10 +1387,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1475,10 +1397,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1772,10 +1691,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1836,10 +1752,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1849,10 +1762,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1911,10 +1821,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1924,10 +1831,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -1937,10 +1841,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -2075,6 +1976,19 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid query parameter value",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Wish list not found or not public",
                         "content": {
@@ -2118,19 +2032,24 @@
                 "summary": "Get all reservations made by the authenticated user",
                 "parameters": [
                     {
-                        "description": "Page number (default 1)",
+                        "description": "Page number",
                         "name": "page",
                         "in": "query",
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1
                         }
                     },
                     {
-                        "description": "Items per page (default 10, max 100)",
+                        "description": "Items per page",
                         "name": "limit",
                         "in": "query",
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 10
                         }
                     }
                 ],
@@ -2150,10 +2069,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -2163,10 +2079,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -2188,7 +2101,7 @@
                 "summary": "Get reservations on items in the authenticated user's wishlists",
                 "parameters": [
                     {
-                        "description": "Page number (default 1)",
+                        "description": "Page number",
                         "name": "page",
                         "in": "query",
                         "schema": {
@@ -2198,7 +2111,7 @@
                         }
                     },
                     {
-                        "description": "Items per page (default 10, max 100)",
+                        "description": "Items per page",
                         "name": "limit",
                         "in": "query",
                         "schema": {
@@ -2236,6 +2149,74 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationsInternalResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/wishlist-owner/{reservationId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows the authenticated wishlist owner to cancel any active reservation on their items.",
+                "tags": [
+                    "Reservations"
+                ],
+                "summary": "Cancel a reservation as the wishlist owner",
+                "parameters": [
+                    {
+                        "description": "Reservation ID",
+                        "name": "reservationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation canceled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid reservation ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reservation not found or not owned by caller",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse"
                                 }
                             }
                         }
@@ -3407,6 +3388,18 @@
                     }
                 }
             },
+            "wish-list_internal_domain_item_delivery_http_dto.ErrorResponse": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "error message"
+                    }
+                }
+            },
             "wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse": {
                 "type": "object",
                 "required": [
@@ -3637,6 +3630,18 @@
                     }
                 }
             },
+            "wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "error message"
+                    }
+                }
+            },
             "wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary": {
                 "type": "object",
                 "required": [
@@ -3655,6 +3660,33 @@
                     },
                     "price": {
                         "type": "string"
+                    }
+                }
+            },
+            "wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse": {
+                "type": "object",
+                "required": [
+                    "limit",
+                    "page",
+                    "total",
+                    "total_pages"
+                ],
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 5
                     }
                 }
             },
@@ -3723,31 +3755,7 @@
                         }
                     },
                     "pagination": {
-                        "type": "object",
-                        "properties": {
-                            "page": {
-                                "type": "integer",
-                                "example": 1
-                            },
-                            "limit": {
-                                "type": "integer",
-                                "example": 10
-                            },
-                            "total": {
-                                "type": "integer",
-                                "example": 42
-                            },
-                            "total_pages": {
-                                "type": "integer",
-                                "example": 5
-                            }
-                        },
-                        "required": [
-                            "page",
-                            "limit",
-                            "total",
-                            "total_pages"
-                        ]
+                        "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"
                     }
                 }
             },
@@ -3831,31 +3839,7 @@
                         }
                     },
                     "pagination": {
-                        "type": "object",
-                        "properties": {
-                            "page": {
-                                "type": "integer",
-                                "example": 1
-                            },
-                            "limit": {
-                                "type": "integer",
-                                "example": 10
-                            },
-                            "total": {
-                                "type": "integer",
-                                "example": 42
-                            },
-                            "total_pages": {
-                                "type": "integer",
-                                "example": 5
-                            }
-                        },
-                        "required": [
-                            "page",
-                            "limit",
-                            "total",
-                            "total_pages"
-                        ]
+                        "$ref": "#/components/schemas/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse"
                     }
                 }
             },

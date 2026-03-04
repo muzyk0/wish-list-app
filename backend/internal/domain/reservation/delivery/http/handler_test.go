@@ -131,7 +131,7 @@ func (m *MockReservationService) CountWishlistOwnerReservations(ctx context.Cont
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockReservationService) CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*service.ReservationOutput, error) {
+func (m *MockReservationService) CancelReservationByOwner(ctx context.Context, ownerUserID, reservationID pgtype.UUID) (*service.ReservationOutput, error) {
 	args := m.Called(ctx, ownerUserID, reservationID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

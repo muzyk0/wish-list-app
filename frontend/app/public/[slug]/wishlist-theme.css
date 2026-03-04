@@ -61,7 +61,7 @@
 
 /* Sheet portal background — overrides shadcn's bg-background */
 .wl-theme {
-  background-color: var(--wl-bg) !important;
+  background-color: var(--wl-bg);
   color: var(--wl-text);
   font-family: var(--font-body, ui-sans-serif, sans-serif);
 }

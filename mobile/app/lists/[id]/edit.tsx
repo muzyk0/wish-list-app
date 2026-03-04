@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
+import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import {
@@ -14,10 +15,8 @@ import {
   TextInput,
 } from 'react-native-paper';
 import { z } from 'zod';
-
 import { apiClient } from '@/lib/api';
 import { dialog } from '@/stores/dialogStore';
-import type { Control, FieldErrors } from 'react-hook-form';
 
 const slugRegex = /^[a-z0-9-]*$/;
 

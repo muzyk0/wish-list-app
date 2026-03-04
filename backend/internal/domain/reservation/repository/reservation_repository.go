@@ -39,7 +39,7 @@ type ReservationRepositoryInterface interface {
 	ListWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID, limit, offset int) ([]ReservationDetail, error)
 	CountWishlistOwnerReservations(ctx context.Context, ownerUserID pgtype.UUID) (int, error)
 	CountWishlistOwnerReservationsWithExecutor(ctx context.Context, executor database.Executor, ownerUserID pgtype.UUID) (int, error)
-	CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error)
+	CancelReservationByOwner(ctx context.Context, ownerUserID, reservationID pgtype.UUID) (*models.Reservation, error)
 	LinkGuestReservationsToUserByEmail(ctx context.Context, guestEmail string, userID pgtype.UUID) (int, error)
 	LinkGuestReservationsToUserByEmailWithExecutor(ctx context.Context, executor database.Executor, guestEmail string, userID pgtype.UUID) (int, error)
 }
@@ -631,7 +631,7 @@ func (r *ReservationRepository) CountWishlistOwnerReservationsWithExecutor(ctx c
 
 // CancelReservationByOwner cancels an active reservation on behalf of the wishlist owner.
 // The owner can cancel any reservation on items that belong to their wishlists.
-func (r *ReservationRepository) CancelReservationByOwner(ctx context.Context, ownerUserID pgtype.UUID, reservationID pgtype.UUID) (*models.Reservation, error) {
+func (r *ReservationRepository) CancelReservationByOwner(ctx context.Context, ownerUserID, reservationID pgtype.UUID) (*models.Reservation, error) {
 	query := `
 		UPDATE reservations r
 		SET

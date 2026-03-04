@@ -40,7 +40,9 @@ export function MyWishesReserved() {
         limit: PAGE_LIMIT,
       });
 
-      setReservations((prev) => (replace ? result.data : [...prev, ...result.data]));
+      setReservations((prev) =>
+        replace ? result.data : [...prev, ...result.data],
+      );
       setHasMore(pageNum < result.totalPages);
     } catch (error) {
       console.error('Failed to load wish reservations:', error);

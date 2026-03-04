@@ -488,22 +488,19 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 
 	if input.Description != nil {
 		updatedWishList.Description = pgtype.Text{String: *input.Description, Valid: *input.Description != ""}
-	} else if input.Description == nil {
-		// Keep the original description if not provided
+	} else {
 		updatedWishList.Description = wishList.Description
 	}
 
 	if input.Occasion != nil {
 		updatedWishList.Occasion = pgtype.Text{String: *input.Occasion, Valid: *input.Occasion != ""}
-	} else if input.Occasion == nil {
-		// Keep the original occasion if not provided
+	} else {
 		updatedWishList.Occasion = wishList.Occasion
 	}
 
 	if input.IsPublic != nil {
 		updatedWishList.IsPublic = pgtype.Bool{Bool: *input.IsPublic, Valid: true}
-	} else if input.IsPublic == nil {
-		// Keep the original is_public value if not provided
+	} else {
 		updatedWishList.IsPublic = wishList.IsPublic
 	}
 
@@ -518,8 +515,7 @@ func (s *WishListService) UpdateWishList(ctx context.Context, wishListID, userID
 			// If parsing fails, keep the original date
 			updatedWishList.OccasionDate = wishList.OccasionDate
 		}
-	} else if input.OccasionDate == nil {
-		// Keep the original occasion date if not provided
+	} else {
 		updatedWishList.OccasionDate = wishList.OccasionDate
 	}
 

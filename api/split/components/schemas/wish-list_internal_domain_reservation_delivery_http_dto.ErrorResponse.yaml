@@ -1,0 +1,7 @@
+properties:
+  error:
+    example: error message
+    type: string
+required:
+  - error
+type: object

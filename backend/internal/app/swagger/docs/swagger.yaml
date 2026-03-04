@@ -158,6 +158,14 @@ definitions:
     required:
     - title
     type: object
+  wish-list_internal_domain_item_delivery_http_dto.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    required:
+    - error
+    type: object
   wish-list_internal_domain_item_delivery_http_dto.HomeStatsResponse:
     properties:
       purchased:
@@ -321,6 +329,14 @@ definitions:
     - reserved_at
     - status
     type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    required:
+    - error
+    type: object
   wish-list_internal_domain_reservation_delivery_http_dto.GiftItemSummary:
     properties:
       id:
@@ -334,6 +350,26 @@ definitions:
     required:
     - id
     - name
+    type: object
+  wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 42
+        type: integer
+      total_pages:
+        example: 5
+        type: integer
+    required:
+    - limit
+    - page
+    - total
+    - total_pages
     type: object
   wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse:
     properties:
@@ -376,7 +412,8 @@ definitions:
         items:
           $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ReservationDetailsResponse'
         type: array
-      pagination: {}
+      pagination:
+        $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse'
     required:
     - data
     - pagination
@@ -433,7 +470,8 @@ definitions:
         items:
           $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.WishlistOwnerReservationResponse'
         type: array
-      pagination: {}
+      pagination:
+        $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.PaginationResponse'
     required:
     - data
     - pagination
@@ -1316,15 +1354,11 @@ paths:
         "400":
           description: Invalid request parameters
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
       summary: Get reservations made by a guest using a token
       tags:
       - Reservations
@@ -1434,21 +1468,15 @@ paths:
         "400":
           description: Invalid query parameters
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get my gift items
@@ -1475,21 +1503,15 @@ paths:
         "400":
           description: Invalid request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create gift item
@@ -1513,27 +1535,19 @@ paths:
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "403":
           description: Access denied
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "404":
           description: Item not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete gift item (soft delete)
@@ -1557,21 +1571,15 @@ paths:
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "403":
           description: Access denied
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "404":
           description: Item not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get gift item
@@ -1603,33 +1611,23 @@ paths:
         "400":
           description: Invalid request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "403":
           description: Access denied
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "404":
           description: Item not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update gift item
@@ -1663,33 +1661,23 @@ paths:
         "400":
           description: Invalid request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "403":
           description: Access denied
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "404":
           description: Item not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Mark gift item as purchased
@@ -1709,15 +1697,11 @@ paths:
         "401":
           description: Not authenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get home screen stats
@@ -1884,9 +1868,7 @@ paths:
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
       summary: Get the reservation status for a gift item in a public wish list
       tags:
       - Reservations
@@ -1922,21 +1904,15 @@ paths:
         "400":
           description: Invalid request body or validation error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
         "401":
           description: Unauthorized (guests need reservation token)
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
       summary: Cancel a reservation for a gift item
       tags:
       - Reservations
@@ -1971,15 +1947,11 @@ paths:
         "400":
           description: Invalid request body or validation error (guests need name)
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
       summary: Create a reservation for a gift item
       tags:
       - Reservations
@@ -2057,6 +2029,12 @@ paths:
           description: Gift items retrieved successfully
           schema:
             $ref: '#/definitions/wish-list_internal_domain_wishlist_delivery_http_dto.GetGiftItemsResponse'
+        "400":
+          description: Invalid query parameter value
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Wish list not found or not public
           schema:
@@ -2076,12 +2054,17 @@ paths:
     get:
       description: Get all reservations made by the authenticated user with pagination.
       parameters:
-      - description: Page number (default 1)
+      - default: 1
+        description: Page number
         in: query
+        minimum: 1
         name: page
         type: integer
-      - description: Items per page (default 10, max 100)
+      - default: 10
+        description: Items per page
         in: query
+        maximum: 100
+        minimum: 1
         name: limit
         type: integer
       produces:
@@ -2094,15 +2077,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get all reservations made by the authenticated user
@@ -2114,12 +2093,17 @@ paths:
         gift items belonging to the calling user's wishlists. The reserver identity
         is intentionally hidden.
       parameters:
-      - description: Page number (default 1)
+      - default: 1
+        description: Page number
         in: query
+        minimum: 1
         name: page
         type: integer
-      - description: Items per page (default 10, max 100)
+      - default: 10
+        description: Items per page
         in: query
+        maximum: 100
+        minimum: 1
         name: limit
         type: integer
       produces:
@@ -2140,6 +2124,41 @@ paths:
       security:
       - BearerAuth: []
       summary: Get reservations on items in the authenticated user's wishlists
+      tags:
+      - Reservations
+  /reservations/wishlist-owner/{reservationId}:
+    delete:
+      description: Allows the authenticated wishlist owner to cancel any active reservation
+        on their items.
+      parameters:
+      - description: Reservation ID
+        format: uuid
+        in: path
+        name: reservationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation canceled
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.CreateReservationResponse'
+        "400":
+          description: Invalid reservation ID
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
+        "404":
+          description: Reservation not found or not owned by caller
+          schema:
+            $ref: '#/definitions/wish-list_internal_domain_reservation_delivery_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel a reservation as the wishlist owner
       tags:
       - Reservations
   /wishlists:

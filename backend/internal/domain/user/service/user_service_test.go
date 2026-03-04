@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	"wish-list/internal/domain/user/models"
@@ -17,8 +18,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func init() {
+func TestMain(m *testing.M) {
 	logger.Initialize("test")
+	os.Exit(m.Run())
 }
 
 // --- helpers ---
@@ -273,7 +275,7 @@ func TestUserService_Register(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, output)
-		require.Len(t, linker.calls, 0)
+		require.Empty(t, linker.calls)
 	})
 
 	t.Run("does not fail registration when guest reservation linking fails", func(t *testing.T) {

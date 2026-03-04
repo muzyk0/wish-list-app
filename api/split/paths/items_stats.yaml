@@ -15,17 +15,15 @@ get:
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
     '500':
       description: Internal server error
       content:
         application/json:
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: >-
+              ../components/schemas/wish-list_internal_domain_item_delivery_http_dto.ErrorResponse.yaml
   security:
     - BearerAuth: []
   summary: Get home screen stats

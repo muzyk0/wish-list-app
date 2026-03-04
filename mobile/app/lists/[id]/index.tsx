@@ -790,7 +790,6 @@ const card = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
-    backdropFilter: 'blur(4px)',
   },
   priorityChipText: {
     fontSize: 11,

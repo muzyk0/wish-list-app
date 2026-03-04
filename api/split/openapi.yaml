@@ -66,6 +66,8 @@ paths:
     $ref: paths/reservations_user.yaml
   /reservations/wishlist-owner:
     $ref: paths/reservations_wishlist-owner.yaml
+  /reservations/wishlist-owner/{reservationId}:
+    $ref: paths/reservations_wishlist-owner_{reservationId}.yaml
   /wishlists:
     $ref: paths/wishlists.yaml
   /wishlists/{id}:
